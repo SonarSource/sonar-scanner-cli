@@ -10,6 +10,7 @@
       <useProjectArtifact>true</useProjectArtifact>
       <outputDirectory>lib</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <fileMode>0644</fileMode>
     </dependencySet>
   </dependencySets>
   <fileSets>
@@ -33,6 +34,7 @@
     <fileSet>
       <directory>src/conf</directory>
       <outputDirectory>conf</outputDirectory>
+      <fileMode>0644</fileMode>
     </fileSet>
   </fileSets>
 </assembly>
