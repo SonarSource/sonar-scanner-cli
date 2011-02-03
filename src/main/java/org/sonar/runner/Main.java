@@ -30,29 +30,41 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class Main {
 
-  private String[] args;
+  private static boolean debug = false;
 
   private File workDir;
-
-  private Properties properties;
-
+  private Properties properties = new Properties();
   private Bootstrapper bootstrapper;
 
-  public static void main(String[] args) throws Exception {
-    new Main(args).execute();
+  public static void main(String[] args) {
+    log("Sonar Standalone Runner version: " + getRunnerVersion());
+    Map<String, String> cmdProps = parseArguments(args);
+    new Main().execute(cmdProps);
   }
 
-  public Main(String[] args) {
-    this.args = args;
+  public void execute(Map<String, String> cmdProps) {
     String home = System.getProperty("runner.home");
-    properties = new Properties();
+    // Load global configuration
     loadProperties(new File(home + "/conf/sonar-runner.properties"));
+    // Load project configuration
     loadProperties(new File(getProjectDir(), "sonar-project.properties"));
-    // TODO load properties from command-line
+    // Load properties from command-line
+    for (Map.Entry<String, String> entry : cmdProps.entrySet()) {
+      properties.setProperty(entry.getKey(), entry.getValue());
+    }
+
+    String serverUrl = properties.getProperty("sonar.host.url", "http://localhost:9000");
+    log("Sonar server: " + serverUrl);
+    log("Sonar work directory: " + getWorkDir().getAbsolutePath());
+    bootstrapper = new Bootstrapper(serverUrl, getWorkDir());
+    checkSonarVersion();
+    delegateExecution(createClassLoader());
   }
 
   /**
@@ -79,12 +91,16 @@ public class Main {
     return properties;
   }
 
+  public boolean isDebugEnabled() {
+    return debug;
+  }
+
   /**
    * Loads {@link Launcher} from specified {@link BootstrapClassLoader} and passes control to it.
    * 
    * @see Launcher#execute()
    */
-  private void delegateExecution(BootstrapClassLoader sonarClassLoader) throws Exception {
+  private void delegateExecution(BootstrapClassLoader sonarClassLoader) {
     ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
@@ -119,16 +135,6 @@ public class Main {
     } finally {
       BootstrapperIOUtils.closeQuietly(in);
     }
-  }
-
-  public void execute() throws Exception {
-    String serverUrl = properties.getProperty("sonar.host.url", "http://localhost:9000");
-    log("Sonar Standalone Runner version: " + getRunnerVersion());
-    log("Sonar server: " + serverUrl);
-    log("Sonar work directory: " + getWorkDir().getAbsolutePath());
-    bootstrapper = new Bootstrapper(serverUrl, getWorkDir());
-    checkSonarVersion();
-    delegateExecution(createClassLoader());
   }
 
   private void checkSonarVersion() {
@@ -176,7 +182,55 @@ public class Main {
     }
   }
 
-  private void log(String message) {
-    System.out.println(message);
+  private static Map<String, String> parseArguments(String[] args) {
+    HashMap<String, String> cmdProps = new HashMap<String, String>();
+    for (int i = 0; i < args.length; i++) {
+      String arg = args[i];
+      if ("-h".equals(arg) || "--help".equals(arg)) {
+        printUsage();
+      } else if ("-X".equals(arg) || "--debug".equals(arg)) {
+        debug = true;
+      } else if ("-D".equals(arg) || "--define".equals(arg)) {
+        i++;
+        if (i >= args.length) {
+          printError("Missing argument for option --define");
+        }
+        arg = args[i];
+        final String key, value;
+        int j = arg.indexOf('=');
+        if (j == -1) {
+          key = arg;
+          value = "true";
+        } else {
+          key = arg.substring(0, j);
+          value = arg.substring(j + 1);
+        }
+        cmdProps.put(key, value);
+      } else {
+        printError("Unrecognized option: " + arg);
+      }
+    }
+    return cmdProps;
+  }
+
+  private static void printUsage() {
+    log("");
+    log("usage: sonar-runner [options]");
+    log("");
+    log("Options:");
+    log(" -h,--help             Display help information");
+    log(" -X,--debug            Produce execution debug output");
+    log(" -D,--define <arg>     Define property");
+    System.exit(0); // NOSONAR
+  }
+
+  private static void printError(String message) {
+    log("");
+    log(message);
+    printUsage();
+  }
+
+  private static void log(String message) {
+    System.out.println(message); // NOSONAR
   }
 }

@@ -25,6 +25,7 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import org.apache.commons.configuration.*;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.platform.Environment;
 import org.sonar.api.utils.SonarException;
@@ -65,8 +66,7 @@ public class Launcher {
     jc.setContext(context);
     context.reset();
     InputStream input = Batch.class.getResourceAsStream("/org/sonar/batch/logback.xml");
-    // System.setProperty("ROOT_LOGGER_LEVEL", getLog().isDebugEnabled() ? "DEBUG" : "INFO");
-    System.setProperty("ROOT_LOGGER_LEVEL", "INFO");
+    System.setProperty("ROOT_LOGGER_LEVEL", task.isDebugEnabled() ? "DEBUG" : "INFO");
     try {
       jc.doConfigure(input);
 
@@ -82,12 +82,23 @@ public class Launcher {
     File baseDir = task.getProjectDir();
     Properties properties = task.getProperties();
     ProjectDefinition definition = new ProjectDefinition(baseDir, task.getWorkDir(), properties);
-    // TODO for some reason it can't be relative
-    definition.addSourceDir(new File(baseDir, "src").getAbsolutePath()); // TODO hard-coded value
-    // TODO definition.addTestDir(path);
-    // TODO definition.addBinaryDir(path);
-    // TODO definition.addLibrary(path);
+    for (String dir : getList(properties, "sources")) {
+      definition.addSourceDir(dir);
+    }
+    for (String dir : getList(properties, "tests")) {
+      definition.addTestDir(dir);
+    }
+    for (String dir : getList(properties, "binaries")) {
+      definition.addBinaryDir(dir);
+    }
+    for (String file : getList(properties, "libraries")) {
+      definition.addLibrary(file);
+    }
     return definition;
+  }
+
+  private String[] getList(Properties properties, String key) {
+    return StringUtils.split(properties.getProperty(key, ""), ',');
   }
 
   private Configuration getInitialConfiguration(ProjectDefinition project) {

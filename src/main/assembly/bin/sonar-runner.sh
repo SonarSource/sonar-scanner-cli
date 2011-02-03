@@ -17,9 +17,9 @@ JAVACMD="`which java`"
 JAVACLASSPATH="${SONAR_RUNNER_HOME}"/lib/sonar-runner.jar
 JAVACLASSPATH=$JAVACLASSPATH:"${SONAR_RUNNER_HOME}"/lib/sonar-batch-bootstrapper.jar
 
-echo "Info: Using sonar-runner at $SONAR_RUNNER_HOME"
-echo "Info: Using java at $JAVACMD"
-echo "Info: Using classpath $JAVACLASSPATH"
+#echo "Info: Using sonar-runner at $SONAR_RUNNER_HOME"
+#echo "Info: Using java at $JAVACMD"
+#echo "Info: Using classpath $JAVACLASSPATH"
 
 exec "$JAVACMD" \
   -classpath $JAVACLASSPATH \
