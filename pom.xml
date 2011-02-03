@@ -104,9 +104,8 @@
             </goals>
             <configuration>
               <appendAssemblyId>false</appendAssemblyId>
-              <finalName>sonar-runner-${project.version}</finalName>
               <descriptors>
-                <descriptor>assembly.xml</descriptor>
+                <descriptor>${basedir}/src/main/assembly/assembly.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>

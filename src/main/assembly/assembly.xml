@@ -5,7 +5,6 @@
     <format>zip</format>
   </formats>
   <includeBaseDirectory>true</includeBaseDirectory>
-
   <dependencySets>
     <dependencySet>
       <useProjectArtifact>true</useProjectArtifact>
@@ -15,10 +14,25 @@
   </dependencySets>
   <fileSets>
     <fileSet>
-      <directory>${basedir}/src/main/assembly</directory>
-      <outputDirectory>/</outputDirectory>
+      <directory>src/bin</directory>
+      <outputDirectory>bin</outputDirectory>
+      <includes>
+        <include>sonar-runner.bat</include>
+      </includes>
+      <lineEnding>dos</lineEnding>
+    </fileSet>
+    <fileSet>
+      <directory>src/bin</directory>
+      <outputDirectory>bin</outputDirectory>
+      <includes>
+        <include>sonar-runner</include>
+      </includes>
+      <lineEnding>unix</lineEnding>
       <fileMode>0755</fileMode>
-      <directoryMode>0755</directoryMode>
+    </fileSet>
+    <fileSet>
+      <directory>src/conf</directory>
+      <outputDirectory>conf</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>
