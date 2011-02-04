@@ -20,6 +20,10 @@
 
 package org.sonar.runner;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.Properties;
+
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
@@ -27,15 +31,11 @@ import org.apache.commons.configuration.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.platform.Environment;
 import org.sonar.api.utils.SonarException;
 import org.sonar.batch.Batch;
+import org.sonar.batch.bootstrapper.EnvironmentInformation;
 import org.sonar.batch.bootstrapper.ProjectDefinition;
 import org.sonar.batch.bootstrapper.Reactor;
-
-import java.io.File;
-import java.io.InputStream;
-import java.util.Properties;
 
 public class Launcher {
 
@@ -56,7 +56,7 @@ public class Launcher {
   private void executeBatch() {
     ProjectDefinition project = defineProject();
     Reactor reactor = new Reactor(project);
-    Batch batch = new Batch(getInitialConfiguration(project), Environment.ANT, reactor); // TODO environment
+    Batch batch = new Batch(getInitialConfiguration(project), new EnvironmentInformation("Runner", Main.getRunnerVersion()), reactor);
     batch.execute();
   }
 
