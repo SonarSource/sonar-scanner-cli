@@ -10,9 +10,8 @@
 
   <artifactId>sonar-runner</artifactId>
   <version>0.1-SNAPSHOT</version>
-
   <name>Sonar Standalone Runner</name>
-  <description></description>
+  
   <url>http://docs.codehaus.org/display/SONAR/Sonar+Standalone+Runner</url>
   <inceptionYear>2011</inceptionYear>
   <organization>
@@ -41,8 +40,8 @@
   </developers>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/sonar-plugins/trunk/sonar-cli</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/sonar-plugins/trunk/sonar-cli</developerConnection>
+    <connection>scm:svn:http://svn.codehaus.org/sonar-plugins/trunk/sonar-runner</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/sonar-plugins/trunk/sonar-runner</developerConnection>
     <url>http://svn.sonar-plugins.codehaus.org</url>
   </scm>
   <issueManagement>
@@ -51,7 +50,7 @@
   </ciManagement>
 
   <properties>
-    <sonar.version>2.6-SNAPSHOT</sonar.version>
+    <sonar.buildVersion>2.6-SNAPSHOT</sonar.buildVersion>
   </properties>
 
   <dependencies>
@@ -59,7 +58,7 @@
     <dependency>
       <groupId>org.codehaus.sonar</groupId>
       <artifactId>sonar-batch-bootstrapper</artifactId>
-      <version>${sonar.version}</version>
+      <version>${sonar.buildVersion}</version>
     </dependency>
     <!-- Would be available after bootstrapping -->
     <dependency>
@@ -71,14 +70,14 @@
     <dependency>
       <groupId>org.codehaus.sonar</groupId>
       <artifactId>sonar-batch</artifactId>
-      <version>${sonar.version}</version>
+      <version>${sonar.buildVersion}</version>
       <scope>provided</scope>
     </dependency>
     <!-- Unit tests -->
     <dependency>
       <groupId>org.codehaus.sonar</groupId>
       <artifactId>sonar-testing-harness</artifactId>
-      <version>${sonar.version}</version>
+      <version>${sonar.buildVersion}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
