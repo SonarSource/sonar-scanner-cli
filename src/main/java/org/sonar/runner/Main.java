@@ -20,11 +20,6 @@
 
 package org.sonar.runner;
 
-import org.sonar.batch.bootstrapper.BootstrapClassLoader;
-import org.sonar.batch.bootstrapper.BootstrapException;
-import org.sonar.batch.bootstrapper.Bootstrapper;
-import org.sonar.batch.bootstrapper.BootstrapperIOUtils;
-
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +28,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import org.sonar.batch.bootstrapper.BootstrapClassLoader;
+import org.sonar.batch.bootstrapper.BootstrapException;
+import org.sonar.batch.bootstrapper.Bootstrapper;
+import org.sonar.batch.bootstrapper.BootstrapperIOUtils;
 
 public class Main {
 
@@ -62,7 +62,7 @@ public class Main {
     String serverUrl = properties.getProperty("sonar.host.url", "http://localhost:9000");
     log("Sonar server: " + serverUrl);
     log("Sonar work directory: " + getWorkDir().getAbsolutePath());
-    bootstrapper = new Bootstrapper(serverUrl, getWorkDir());
+    bootstrapper = new Bootstrapper("SonarRunner/" + getRunnerVersion(), serverUrl, getWorkDir());
     checkSonarVersion();
     delegateExecution(createClassLoader());
   }
