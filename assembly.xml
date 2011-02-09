@@ -15,7 +15,7 @@
   </dependencySets>
   <fileSets>
     <fileSet>
-      <directory>src/bin</directory>
+      <directory>src/main/assembly/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <includes>
         <include>sonar-runner.bat</include>
@@ -23,7 +23,7 @@
       <lineEnding>dos</lineEnding>
     </fileSet>
     <fileSet>
-      <directory>src/bin</directory>
+      <directory>src/main/assembly/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <includes>
         <include>sonar-runner</include>
@@ -32,7 +32,7 @@
       <fileMode>0755</fileMode>
     </fileSet>
     <fileSet>
-      <directory>src/conf</directory>
+      <directory>src/main/assembly/conf</directory>
       <outputDirectory>conf</outputDirectory>
       <fileMode>0644</fileMode>
     </fileSet>

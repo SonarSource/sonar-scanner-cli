@@ -104,7 +104,7 @@
             <configuration>
               <appendAssemblyId>false</appendAssemblyId>
               <descriptors>
-                <descriptor>${basedir}/src/main/assembly/assembly.xml</descriptor>
+                <descriptor>${basedir}/assembly.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
