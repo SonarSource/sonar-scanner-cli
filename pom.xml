@@ -50,7 +50,7 @@
   </ciManagement>
 
   <properties>
-    <sonar.buildVersion>2.6-SNAPSHOT</sonar.buildVersion>
+    <sonar.buildVersion>2.6-RC1</sonar.buildVersion>
   </properties>
 
   <dependencies>
