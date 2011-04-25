@@ -2,6 +2,9 @@
 #
 # Sonar Runner Startup Script for Unix
 #
+# Optional ENV vars:
+#   SONAR_RUNNER_HOME - location of runner's installed home dir
+#   SONAR_RUNNER_OPTS - parameters passed to the Java VM when running Sonar
 
 if [ -z "$SONAR_RUNNER_HOME" ] ; then
   PRG="$0"
@@ -20,6 +23,7 @@ JAVA_CLASSPATH="${SONAR_RUNNER_HOME}"/lib/sonar-runner.jar:"${SONAR_RUNNER_HOME}
 #echo "Info: Using classpath $JAVACLASSPATH"
 
 exec "$JAVA_CMD" \
+  $SONAR_RUNNER_OPTS \
   -classpath $JAVA_CLASSPATH \
   "-Drunner.home=${SONAR_RUNNER_HOME}" \
   org.sonar.runner.Main "$@"
