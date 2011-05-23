@@ -150,8 +150,7 @@ public class Main {
     URL url = Main.class.getProtectionDomain().getCodeSource().getLocation();
     return bootstrapper.createClassLoader(
         new URL[] { url }, // Add JAR with Sonar Runner - it's a Jar which contains this class
-        getClass().getClassLoader(),
-        "org.apache.tools.ant", "org.sonar.ant");
+        getClass().getClassLoader());
   }
 
   static boolean isVersionPriorTo2Dot6(String version) {
