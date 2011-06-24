@@ -20,175 +20,106 @@
 
 package org.sonar.runner;
 
-import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import org.sonar.batch.bootstrapper.BootstrapClassLoader;
 import org.sonar.batch.bootstrapper.BootstrapException;
-import org.sonar.batch.bootstrapper.Bootstrapper;
 import org.sonar.batch.bootstrapper.BootstrapperIOUtils;
 
-public class Main {
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
 
-  private static boolean debug = false;
-
-  private File workDir;
-  private Properties properties = new Properties();
-  private Bootstrapper bootstrapper;
+/**
+ * Arguments :
+ * <ul>
+ *   <li>runner.home: optional path to runner home (root directory with sub-directories bin, lib and conf)</li>
+ *   <li>runner.settings: optional path to runner global settings, usually ${runner.home}/conf/sonar-runner.properties. This property is used only if ${runner.home} is not defined</li>
+ *   <li>project.home: path to project root directory. If not set, then it's supposed to be the directory where the runner is executed</li>
+ *   <li>project.settings: optional path to project settings. Default value is ${project.home}/sonar-project.properties.</li>
+ * </ul>
+ *
+ * @since 1.0
+ */
+public final class Main {
 
   public static void main(String[] args) {
-    log("Sonar Standalone Runner version: " + getRunnerVersion());
-    Map<String, String> cmdProps = parseArguments(args);
-    new Main().execute(cmdProps);
+    Properties props = loadProperties(args);
+    Runner runner = Runner.create(props);
+    log("Runner version: " + runner.getRunnerVersion());
+    log("Server: " + runner.getServerURl());
+    log("Work directory: " + runner.getWorkDir().getAbsolutePath());
+    runner.execute();
   }
 
-  public void execute(Map<String, String> cmdProps) {
-    String home = System.getProperty("runner.home");
-    // Load global configuration
-    loadProperties(new File(home + "/conf/sonar-runner.properties"));
-    // Load project configuration
-    loadProperties(new File(getProjectDir(), "sonar-project.properties"));
-    // Load properties from command-line
-    for (Map.Entry<String, String> entry : cmdProps.entrySet()) {
-      properties.setProperty(entry.getKey(), entry.getValue());
+  static Properties loadProperties(String[] args) {
+    Properties props = new Properties();
+    Properties commandLineProps = parseArguments(args);
+    props.putAll(loadRunnerProperties(commandLineProps));
+    props.putAll(loadProjectProperties(commandLineProps));
+    props.putAll(commandLineProps);
+    return props;
+  }
+
+  static Properties loadRunnerProperties(Properties props) {
+    File settingsFile = locatePropertiesFile(props, "runner.home", "conf/sonar-runner.properties", "runner.settings");
+    if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
+      log("Runner settings: " + settingsFile.getAbsolutePath());
+      return toProperties(settingsFile);
+    }
+    return new Properties();
+  }
+
+  static Properties loadProjectProperties(Properties props) {
+    File settingsFile = locatePropertiesFile(props, "project.home", "sonar-project.properties", "project.settings");
+    if (settingsFile.isFile() && settingsFile.exists()) {
+      log("Project settings: " + settingsFile.getAbsolutePath());
+      return toProperties(settingsFile);
+    }
+    return new Properties();
+  }
+
+  private static File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
+    File settingsFile = null;
+    String runnerHome = props.getProperty(homeKey);
+    if (runnerHome != null && !runnerHome.equals("")) {
+      settingsFile = new File(runnerHome, relativePathFromHome);
     }
 
-    String serverUrl = properties.getProperty("sonar.host.url", "http://localhost:9000");
-    log("Sonar server: " + serverUrl);
-    log("Sonar work directory: " + getWorkDir().getAbsolutePath());
-    bootstrapper = new Bootstrapper("SonarRunner/" + getRunnerVersion(), serverUrl, getWorkDir());
-    checkSonarVersion();
-    delegateExecution(createClassLoader());
-  }
-
-  /**
-   * @return project directory (current directory)
-   */
-  public File getProjectDir() {
-    return new File(".").getAbsoluteFile();
-  }
-
-  /**
-   * @return work directory, default is ".sonar" in project directory
-   */
-  public File getWorkDir() {
-    if (workDir == null) {
-      workDir = new File(getProjectDir(), ".sonar");
+    if (settingsFile == null || !settingsFile.exists()) {
+      String settingsPath = props.getProperty(settingsKey);
+      if (settingsPath != null && !settingsPath.equals("")) {
+        settingsFile = new File(settingsPath);
+      }
     }
-    return workDir;
+    return settingsFile;
   }
 
-  /**
-   * @return global properties, project properties and command-line properties
-   */
-  public Properties getProperties() {
-    return properties;
-  }
 
-  public boolean isDebugEnabled() {
-    return debug;
-  }
-
-  /**
-   * Loads {@link Launcher} from specified {@link BootstrapClassLoader} and passes control to it.
-   * 
-   * @see Launcher#execute()
-   */
-  private void delegateExecution(BootstrapClassLoader sonarClassLoader) {
-    ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
-    try {
-      Thread.currentThread().setContextClassLoader(sonarClassLoader);
-      Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.Launcher");
-      Constructor<?> constructor = launcherClass.getConstructor(Main.class);
-      Object launcher = constructor.newInstance(this);
-      Method method = launcherClass.getMethod("execute");
-      method.invoke(launcher);
-    } catch (InvocationTargetException e) {
-      // Unwrap original exception
-      throw new BootstrapException(e.getTargetException());
-    } catch (Exception e) {
-      // Catch all other exceptions, which relates to reflection
-      throw new BootstrapException(e);
-    } finally {
-      Thread.currentThread().setContextClassLoader(oldContextClassLoader);
-    }
-  }
-
-  /**
-   * Loads properties from specified file.
-   */
-  private void loadProperties(File file) {
+  private static Properties toProperties(File file) {
     InputStream in = null;
+    Properties properties = new Properties();
     try {
       in = new FileInputStream(file);
       properties.load(in);
-    } catch (FileNotFoundException e) {
+      return properties;
+
+    } catch (Exception e) {
       throw new BootstrapException(e);
-    } catch (IOException e) {
-      throw new BootstrapException(e);
+
     } finally {
       BootstrapperIOUtils.closeQuietly(in);
     }
   }
 
-  private void checkSonarVersion() {
-    String serverVersion = bootstrapper.getServerVersion();
-    log("Sonar version: " + serverVersion);
-    if (isVersionPriorTo2Dot6(serverVersion)) {
-      throw new BootstrapException("Sonar " + serverVersion
-          + " does not support Standalone Runner. Please upgrade Sonar to version 2.6 or more.");
-    }
-  }
-
-  private BootstrapClassLoader createClassLoader() {
-    URL url = Main.class.getProtectionDomain().getCodeSource().getLocation();
-    return bootstrapper.createClassLoader(
-        new URL[] { url }, // Add JAR with Sonar Runner - it's a Jar which contains this class
-        getClass().getClassLoader());
-  }
-
-  static boolean isVersionPriorTo2Dot6(String version) {
-    return isVersion(version, "1")
-        || isVersion(version, "2.0")
-        || isVersion(version, "2.1")
-        || isVersion(version, "2.2")
-        || isVersion(version, "2.3")
-        || isVersion(version, "2.4")
-        || isVersion(version, "2.5");
-  }
-
-  private static boolean isVersion(String version, String prefix) {
-    return version.startsWith(prefix + ".") || version.equals(prefix);
-  }
-
-  public static String getRunnerVersion() {
-    InputStream in = null;
-    try {
-      in = Main.class.getResourceAsStream("/org/sonar/runner/version.txt");
-      Properties props = new Properties();
-      props.load(in);
-      return props.getProperty("version");
-    } catch (IOException e) {
-      throw new BootstrapException("Could not load the version information for Sonar Standalone Runner", e);
-    } finally {
-      BootstrapperIOUtils.closeQuietly(in);
-    }
-  }
-
-  private static Map<String, String> parseArguments(String[] args) {
-    HashMap<String, String> cmdProps = new HashMap<String, String>();
+  static Properties parseArguments(String[] args) {
+    Properties props = new Properties();
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
       if ("-h".equals(arg) || "--help".equals(arg)) {
         printUsage();
+
       } else if ("-X".equals(arg) || "--debug".equals(arg)) {
-        debug = true;
+        props.setProperty(Runner.DEBUG_MODE, "true");
+
       } else if ("-D".equals(arg) || "--define".equals(arg)) {
         i++;
         if (i >= args.length) {
@@ -204,12 +135,12 @@ public class Main {
           key = arg.substring(0, j);
           value = arg.substring(j + 1);
         }
-        cmdProps.put(key, value);
+        props.setProperty(key, value);
       } else {
         printError("Unrecognized option: " + arg);
       }
     }
-    return cmdProps;
+    return props;
   }
 
   private static void printUsage() {

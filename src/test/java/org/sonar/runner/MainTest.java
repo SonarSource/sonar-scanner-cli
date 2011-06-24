@@ -22,31 +22,81 @@ package org.sonar.runner;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.containsString;
+import java.io.File;
+import java.util.Properties;
+
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 public class MainTest {
 
   @Test
-  public void shouldCheckVersion() {
-    assertThat(Main.isVersionPriorTo2Dot6("1.0"), is(true));
-    assertThat(Main.isVersionPriorTo2Dot6("2.0"), is(true));
-    assertThat(Main.isVersionPriorTo2Dot6("2.1"), is(true));
-    assertThat(Main.isVersionPriorTo2Dot6("2.2"), is(true));
-    assertThat(Main.isVersionPriorTo2Dot6("2.3"), is(true));
-    assertThat(Main.isVersionPriorTo2Dot6("2.4"), is(true));
-    assertThat(Main.isVersionPriorTo2Dot6("2.4.1"), is(true));
-    assertThat(Main.isVersionPriorTo2Dot6("2.5"), is(true));
-    assertThat(Main.isVersionPriorTo2Dot6("2.6"), is(false));
+  public void shouldParseEmptyArguments() {
+    Properties props = Main.parseArguments(new String[]{});
+    assertThat(props.isEmpty(), is(true));
   }
 
   @Test
-  public void shouldGetVersion() {
-    String version = Main.getRunnerVersion();
-    assertThat(version, containsString("."));
-    assertThat(version, not(containsString("$")));
+  public void shouldParseArguments() {
+    Properties props = Main.parseArguments(new String[]{"-D", "foo=bar", "--define", "hello=world"});
+    assertThat(props.size(), is(2));
+    assertThat(props.getProperty("foo"), is("bar"));
+    assertThat(props.getProperty("hello"), is("world"));
   }
 
+  @Test
+  public void shouldEnableDebugMode() {
+    Properties props = Main.parseArguments(new String[]{"-X"});
+    assertThat(props.getProperty(Runner.DEBUG_MODE), is("true"));
+  }
+
+  @Test
+  public void shouldDisableDebugModeByDefault() {
+    Properties props = Main.parseArguments(new String[]{});
+    assertThat(props.getProperty(Runner.DEBUG_MODE), nullValue());
+  }
+
+  @Test
+  public void shouldLoadRunnerSettingsByHome() throws Exception {
+    File home = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadRunnerSettingsByHome/").toURI());
+    Properties args = new Properties();
+    args.setProperty("runner.home", home.getCanonicalPath());
+
+    Properties props = Main.loadRunnerProperties(args);
+
+    assertThat(props.getProperty("sonar.host.url"), is("http://moon/sonar"));
+  }
+
+  @Test
+  public void shouldNotFailIfNoHome() throws Exception {
+    Properties args = new Properties();
+    Properties props = Main.loadRunnerProperties(args);
+
+    assertThat(props.isEmpty(), is(true));
+  }
+
+  @Test
+  public void shouldLoadRunnerSettingsByDirectPath() throws Exception {
+    File settings = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
+    Properties args = new Properties();
+    args.setProperty("runner.settings", settings.getCanonicalPath());
+    Properties props = Main.loadRunnerProperties(args);
+
+    assertThat(props.getProperty("sonar.host.url"), is("http://other/sonar"));
+  }
+
+  @Test
+  public void shouldLoadCompleteConfiguration() throws Exception {
+    File runnerHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/runner").toURI());
+    File projectHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/project").toURI());
+    Properties props = Main.loadProperties(new String[]{
+        "-D", "runner.home=" + runnerHome.getCanonicalPath(),
+        "-D", "project.home=" + projectHome.getCanonicalPath()
+    });
+
+    assertThat(props.getProperty("project.key"), is("foo"));
+    assertThat(props.getProperty("sonar.host.url"), is("http://overridden/sonar"));
+    assertThat(props.getProperty("sonar.jdbc.url"), is("jdbc:mysql:localhost/sonar"));
+  }
 }

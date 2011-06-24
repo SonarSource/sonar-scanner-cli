@@ -39,14 +39,14 @@ import org.sonar.batch.bootstrapper.Reactor;
 
 public class Launcher {
 
-  private Main task;
+  private Runner runner;
 
-  public Launcher(Main launcher) {
-    this.task = launcher;
+  public Launcher(Runner runner) {
+    this.runner = runner;
   }
 
   /**
-   * This method invoked from {@link Main}.
+   * This method invoked from {@link Main}. Do not rename it.
    */
   public void execute() {
     initLogging();
@@ -56,7 +56,7 @@ public class Launcher {
   private void executeBatch() {
     ProjectDefinition project = defineProject();
     Reactor reactor = new Reactor(project);
-    Batch batch = new Batch(getInitialConfiguration(project), new EnvironmentInformation("Runner", Main.getRunnerVersion()), reactor);
+    Batch batch = new Batch(getInitialConfiguration(project), new EnvironmentInformation("Runner", runner.getRunnerVersion()), reactor);
     batch.execute();
   }
 
@@ -66,7 +66,7 @@ public class Launcher {
     jc.setContext(context);
     context.reset();
     InputStream input = Batch.class.getResourceAsStream("/org/sonar/batch/logback.xml");
-    System.setProperty("ROOT_LOGGER_LEVEL", task.isDebugEnabled() ? "DEBUG" : "INFO");
+    System.setProperty("ROOT_LOGGER_LEVEL", runner.isDebug() ? "DEBUG" : "INFO");
     try {
       jc.doConfigure(input);
 
@@ -79,9 +79,9 @@ public class Launcher {
   }
 
   private ProjectDefinition defineProject() {
-    File baseDir = task.getProjectDir();
-    Properties properties = task.getProperties();
-    ProjectDefinition definition = new ProjectDefinition(baseDir, task.getWorkDir(), properties);
+    File baseDir = runner.getProjectDir();
+    Properties properties = runner.getProperties();
+    ProjectDefinition definition = new ProjectDefinition(baseDir, runner.getWorkDir(), properties);
     for (String dir : getList(properties, "sources")) {
       definition.addSourceDir(dir);
     }
