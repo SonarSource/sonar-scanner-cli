@@ -14,4 +14,7 @@ set SONAR_RUNNER_HOME=%~dp0..
 
 :run
 echo %SONAR_RUNNER_HOME%
-"%JAVA_HOME%\bin\java.exe" %SONAR_RUNNER_OPTS% -classpath "%SONAR_RUNNER_HOME%\lib\sonar-runner.jar";"%SONAR_RUNNER_HOME%\lib\sonar-batch-bootstrapper.jar" "-Drunner.home=%SONAR_RUNNER_HOME%" org.sonar.runner.Main %*
+
+set PROJECT_HOME=%CD%
+
+"%JAVA_HOME%\bin\java.exe" %SONAR_RUNNER_OPTS% -classpath "%SONAR_RUNNER_HOME%\lib\sonar-runner.jar";"%SONAR_RUNNER_HOME%\lib\sonar-batch-bootstrapper.jar" "-Drunner.home=%SONAR_RUNNER_HOME%" "-Dproject.home=%PROJECT_HOME%" org.sonar.runner.Main %*

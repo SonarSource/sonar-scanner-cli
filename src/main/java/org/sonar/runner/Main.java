@@ -51,11 +51,10 @@ public final class Main {
   }
 
   static Properties loadProperties(String[] args) {
-    Properties props = new Properties();
-    Properties commandLineProps = parseArguments(args);
-    props.putAll(loadRunnerProperties(commandLineProps));
-    props.putAll(loadProjectProperties(commandLineProps));
-    props.putAll(commandLineProps);
+    Properties props = parseArguments(args);
+    props.putAll(System.getProperties());
+    props.putAll(loadRunnerProperties(props));
+    props.putAll(loadProjectProperties(props));
     return props;
   }
 

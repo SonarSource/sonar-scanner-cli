@@ -17,13 +17,16 @@ fi
 
 JAVA_CMD="`which java`"
 JAVA_CLASSPATH="${SONAR_RUNNER_HOME}"/lib/sonar-runner.jar:"${SONAR_RUNNER_HOME}"/lib/sonar-batch-bootstrapper.jar
+PROJECT_HOME=`pwd`
 
 #echo "Info: Using sonar-runner at $SONAR_RUNNER_HOME"
 #echo "Info: Using java at $JAVACMD"
 #echo "Info: Using classpath $JAVACLASSPATH"
+#echo "Info: Using project $PROJECT_HOME"
 
 exec "$JAVA_CMD" \
   $SONAR_RUNNER_OPTS \
   -classpath $JAVA_CLASSPATH \
   "-Drunner.home=${SONAR_RUNNER_HOME}" \
+  "-Dproject.home=${PROJECT_HOME}" \
   org.sonar.runner.Main "$@"
