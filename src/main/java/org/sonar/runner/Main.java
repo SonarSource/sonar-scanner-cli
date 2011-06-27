@@ -51,11 +51,15 @@ public final class Main {
   }
 
   static Properties loadProperties(String[] args) {
-    Properties props = parseArguments(args);
-    props.putAll(System.getProperties());
-    props.putAll(loadRunnerProperties(props));
-    props.putAll(loadProjectProperties(props));
-    return props;
+    Properties commandLineProps = new Properties();
+    commandLineProps.putAll(System.getProperties());
+    commandLineProps.putAll(parseArguments(args));
+
+    Properties result = new Properties();
+    result.putAll(loadRunnerProperties(commandLineProps));
+    result.putAll(loadProjectProperties(commandLineProps));
+    result.putAll(commandLineProps);
+    return result;
   }
 
   static Properties loadRunnerProperties(Properties props) {
@@ -69,7 +73,7 @@ public final class Main {
 
   static Properties loadProjectProperties(Properties props) {
     File settingsFile = locatePropertiesFile(props, "project.home", "sonar-project.properties", "project.settings");
-    if (settingsFile.isFile() && settingsFile.exists()) {
+    if (settingsFile!=null && settingsFile.isFile() && settingsFile.exists()) {
       log("Project settings: " + settingsFile.getAbsolutePath());
       return toProperties(settingsFile);
     }
