@@ -25,16 +25,17 @@ import org.sonar.batch.bootstrapper.BootstrapperIOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 /**
  * Arguments :
  * <ul>
- *   <li>runner.home: optional path to runner home (root directory with sub-directories bin, lib and conf)</li>
- *   <li>runner.settings: optional path to runner global settings, usually ${runner.home}/conf/sonar-runner.properties. This property is used only if ${runner.home} is not defined</li>
- *   <li>project.home: path to project root directory. If not set, then it's supposed to be the directory where the runner is executed</li>
- *   <li>project.settings: optional path to project settings. Default value is ${project.home}/sonar-project.properties.</li>
+ * <li>runner.home: optional path to runner home (root directory with sub-directories bin, lib and conf)</li>
+ * <li>runner.settings: optional path to runner global settings, usually ${runner.home}/conf/sonar-runner.properties. This property is used only if ${runner.home} is not defined</li>
+ * <li>project.home: path to project root directory. If not set, then it's supposed to be the directory where the runner is executed</li>
+ * <li>project.settings: optional path to project settings. Default value is ${project.home}/sonar-project.properties.</li>
  * </ul>
  *
  * @since 1.0
@@ -42,12 +43,16 @@ import java.util.Properties;
 public final class Main {
 
   public static void main(String[] args) {
-    Properties props = loadProperties(args);
-    Runner runner = Runner.create(props);
-    log("Runner version: " + runner.getRunnerVersion());
-    log("Server: " + runner.getServerURl());
-    log("Work directory: " + runner.getWorkDir().getAbsolutePath());
-    runner.execute();
+    try {
+      Properties props = loadProperties(args);
+      Runner runner = Runner.create(props);
+      log("Runner version: " + runner.getRunnerVersion());
+      log("Server: " + runner.getServerURl());
+      log("Work directory: " + runner.getWorkDir().getCanonicalPath());
+      runner.execute();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   static Properties loadProperties(String[] args) {
@@ -73,7 +78,7 @@ public final class Main {
 
   static Properties loadProjectProperties(Properties props) {
     File settingsFile = locatePropertiesFile(props, "project.home", "sonar-project.properties", "project.settings");
-    if (settingsFile!=null && settingsFile.isFile() && settingsFile.exists()) {
+    if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
       log("Project settings: " + settingsFile.getAbsolutePath());
       return toProperties(settingsFile);
     }
@@ -95,7 +100,6 @@ public final class Main {
     }
     return settingsFile;
   }
-
 
   private static Properties toProperties(File file) {
     InputStream in = null;
