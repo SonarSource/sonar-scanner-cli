@@ -95,8 +95,8 @@ public class MainTest {
         "-D", "project.home=" + projectHome.getCanonicalPath()
     });
 
-    assertThat(props.getProperty("project.key"), is("foo"));
-    assertThat(props.getProperty("sonar.host.url"), is("http://overridden/sonar"));
-    assertThat(props.getProperty("sonar.jdbc.url"), is("jdbc:mysql:localhost/sonar"));
+    assertThat(props.getProperty("project.prop"), is("foo"));
+    assertThat(props.getProperty("overridden.prop"), is("project scope"));
+    assertThat(props.getProperty("global.prop"), is("jdbc:mysql:localhost/sonar"));
   }
 }
