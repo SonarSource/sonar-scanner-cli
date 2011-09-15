@@ -35,6 +35,7 @@
       <directory>src/main/assembly/conf</directory>
       <outputDirectory>conf</outputDirectory>
       <fileMode>0644</fileMode>
+      <lineEnding>dos</lineEnding>
     </fileSet>
   </fileSets>
 </assembly>
