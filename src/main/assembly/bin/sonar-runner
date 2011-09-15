@@ -20,8 +20,8 @@ JAVA_CLASSPATH="${SONAR_RUNNER_HOME}"/lib/sonar-runner.jar:"${SONAR_RUNNER_HOME}
 PROJECT_HOME=`pwd`
 
 #echo "Info: Using sonar-runner at $SONAR_RUNNER_HOME"
-#echo "Info: Using java at $JAVACMD"
-#echo "Info: Using classpath $JAVACLASSPATH"
+#echo "Info: Using java at $JAVA_CMD"
+#echo "Info: Using classpath $JAVA_CLASSPATH"
 #echo "Info: Using project $PROJECT_HOME"
 
 exec "$JAVA_CMD" \
