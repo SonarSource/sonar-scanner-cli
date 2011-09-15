@@ -10,7 +10,7 @@
   <artifactId>sonar-runner</artifactId>
   <version>1.2-SNAPSHOT</version>
   <name>Sonar Standalone Runner</name>
-  
+
   <url>http://docs.codehaus.org/display/SONAR/Sonar+Standalone+Runner</url>
   <inceptionYear>2011</inceptionYear>
   <organization>
@@ -105,6 +105,15 @@
               <descriptors>
                 <descriptor>${basedir}/assembly.xml</descriptor>
               </descriptors>
+              <!-- TODO archiverConfig should be declared in parent POM - http://jira.codehaus.org/browse/SONARPLUGINS-1374 -->
+              <archiverConfig>
+                <!-- Workaround for http://jira.codehaus.org/browse/MASSEMBLY-422 -->
+                <!-- 420(dec) = 644(oct) -->
+                <fileMode>420</fileMode>
+                <!-- 493(dec) = 755(oct) -->
+                <directoryMode>493</directoryMode>
+                <defaultDirectoryMode>493</defaultDirectoryMode>
+              </archiverConfig>
             </configuration>
           </execution>
         </executions>
