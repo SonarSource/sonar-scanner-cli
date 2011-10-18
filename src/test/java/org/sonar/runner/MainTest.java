@@ -48,13 +48,13 @@ public class MainTest {
   @Test
   public void shouldEnableDebugMode() {
     Properties props = Main.parseArguments(new String[]{"-X"});
-    assertThat(props.getProperty(Runner.DEBUG_MODE), is("true"));
+    assertThat(props.getProperty(Runner.VERBOSE), is("true"));
   }
 
   @Test
   public void shouldDisableDebugModeByDefault() {
     Properties props = Main.parseArguments(new String[]{});
-    assertThat(props.getProperty(Runner.DEBUG_MODE), nullValue());
+    assertThat(props.getProperty(Runner.VERBOSE), nullValue());
   }
 
   @Test

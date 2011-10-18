@@ -37,7 +37,12 @@ import java.util.Properties;
  * @since 1.1
  */
 public final class Runner {
+  /**
+   * @deprecated Replaced by sonar.verbose since 1.2
+   */
+  @Deprecated
   public static final String DEBUG_MODE = "runner.debug";
+  private static final String VERBOSE = "sonar.verbose";
 
   private File projectDir;
   private File workDir;
@@ -90,7 +95,7 @@ public final class Runner {
   }
 
   public boolean isDebug() {
-    return Boolean.parseBoolean(properties.getProperty(DEBUG_MODE, "false"));
+    return Boolean.parseBoolean(properties.getProperty(VERBOSE, properties.getProperty(DEBUG_MODE, "false")));
   }
 
   public String getRunnerVersion() {

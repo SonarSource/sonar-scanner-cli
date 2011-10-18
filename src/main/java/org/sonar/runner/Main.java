@@ -125,7 +125,7 @@ public final class Main {
         printUsage();
 
       } else if ("-X".equals(arg) || "--debug".equals(arg)) {
-        props.setProperty(Runner.DEBUG_MODE, "true");
+        props.setProperty(Runner.VERBOSE, "true");
 
       } else if ("-D".equals(arg) || "--define".equals(arg)) {
         i++;
