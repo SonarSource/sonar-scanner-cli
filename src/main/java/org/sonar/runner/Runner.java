@@ -42,7 +42,11 @@ public final class Runner {
    */
   @Deprecated
   public static final String DEBUG_MODE = "runner.debug";
-  private static final String VERBOSE = "sonar.verbose";
+  
+  /**
+   * @since 1.2
+   */
+  public static final String VERBOSE = "sonar.verbose";
 
   private File projectDir;
   private File workDir;
