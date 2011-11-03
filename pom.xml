@@ -44,6 +44,8 @@
     <url>http://svn.sonar-plugins.codehaus.org</url>
   </scm>
   <issueManagement>
+    <system>JIRA</system>
+    <url>http://jira.codehaus.org/browse/SONARPLUGINS/component/14640</url>
   </issueManagement>
   <ciManagement>
   </ciManagement>
