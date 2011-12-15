@@ -20,16 +20,40 @@
 
 package org.sonar.runner;
 
-import org.junit.Test;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import java.util.Properties;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import org.junit.Test;
 
 public class RunnerTest {
+
+  @Test
+  public void shouldThrowExceptionIfMandatoryPropertyNotSpecified() {
+    try {
+      Runner.create(new Properties()).checkMandatoryProperties();
+      fail();
+    } catch (RunnerException e) {
+      assertThat(e.getMessage(), is("You must define mandatory property: sonar.projectKey"));
+    }
+  }
+
+  @Test
+  public void shouldNotThrowExceptionIfAllMandatoryPropertiesSpecified() {
+    Properties properties = new Properties();
+    properties.setProperty("sonar.projectKey", "foo");
+    properties.setProperty("sonar.projectName", "bar");
+    properties.setProperty("sonar.projectVersion", "1.0");
+    properties.setProperty("sources", "src");
+    Runner.create(properties).checkMandatoryProperties();
+  }
+
   @Test
   public void shouldCheckVersion() {
     assertThat(Runner.isUnsupportedVersion("1.0"), is(true));

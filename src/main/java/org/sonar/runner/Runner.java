@@ -48,6 +48,16 @@ public final class Runner {
    */
   public static final String VERBOSE = "sonar.verbose";
 
+  /**
+   * Array of prefixes of versions of Sonar without support of this runner.
+   */
+  private static final String[] unsupportedVersions = { "1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5" };
+
+  /**
+   * Array of all mandatory properties required to execute runner.
+   */
+  private static final String[] MANDATORY_PROPERTIES = { "sonar.projectKey", "sonar.projectName", "sonar.projectVersion", "sources" };
+
   private File projectDir;
   private File workDir;
   private Properties properties;
@@ -62,9 +72,18 @@ public final class Runner {
   }
 
   public void execute() {
+    checkMandatoryProperties();
     Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + getRunnerVersion(), getServerURl(), getWorkDir());
     checkSonarVersion(bootstrapper);
     delegateExecution(createClassLoader(bootstrapper));
+  }
+
+  void checkMandatoryProperties() {
+    for (String mandatoryProperty : MANDATORY_PROPERTIES) {
+      if (!properties.containsKey(mandatoryProperty)) {
+        throw new RunnerException("You must define mandatory property: " + mandatoryProperty);
+      }
+    }
   }
 
   public String getServerURl() {
@@ -130,8 +149,6 @@ public final class Runner {
         new URL[]{url}, // Add JAR with Sonar Runner - it's a Jar which contains this class
         getClass().getClassLoader());
   }
-
-  private static final String[] unsupportedVersions = { "1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5" };
 
   static boolean isUnsupportedVersion(String version) {
     for (String unsupportedVersion : unsupportedVersions) {

@@ -55,7 +55,7 @@ public final class Main {
       log("Work directory: " + runner.getWorkDir().getCanonicalPath());
       runner.execute();
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RunnerException(e);
     } finally {
       printStats(startTime);
     }
