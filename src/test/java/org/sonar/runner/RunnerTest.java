@@ -32,15 +32,15 @@ import static org.junit.Assert.assertThat;
 public class RunnerTest {
   @Test
   public void shouldCheckVersion() {
-    assertThat(Runner.isVersionPriorTo2Dot6("1.0"), is(true));
-    assertThat(Runner.isVersionPriorTo2Dot6("2.0"), is(true));
-    assertThat(Runner.isVersionPriorTo2Dot6("2.1"), is(true));
-    assertThat(Runner.isVersionPriorTo2Dot6("2.2"), is(true));
-    assertThat(Runner.isVersionPriorTo2Dot6("2.3"), is(true));
-    assertThat(Runner.isVersionPriorTo2Dot6("2.4"), is(true));
-    assertThat(Runner.isVersionPriorTo2Dot6("2.4.1"), is(true));
-    assertThat(Runner.isVersionPriorTo2Dot6("2.5"), is(true));
-    assertThat(Runner.isVersionPriorTo2Dot6("2.6"), is(false));
+    assertThat(Runner.isUnsupportedVersion("1.0"), is(true));
+    assertThat(Runner.isUnsupportedVersion("2.0"), is(true));
+    assertThat(Runner.isUnsupportedVersion("2.1"), is(true));
+    assertThat(Runner.isUnsupportedVersion("2.2"), is(true));
+    assertThat(Runner.isUnsupportedVersion("2.3"), is(true));
+    assertThat(Runner.isUnsupportedVersion("2.4"), is(true));
+    assertThat(Runner.isUnsupportedVersion("2.4.1"), is(true));
+    assertThat(Runner.isUnsupportedVersion("2.5"), is(true));
+    assertThat(Runner.isUnsupportedVersion("2.6"), is(false));
   }
 
   /**

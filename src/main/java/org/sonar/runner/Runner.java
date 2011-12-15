@@ -118,7 +118,7 @@ public final class Runner {
 
   private void checkSonarVersion(Bootstrapper bootstrapper) {
     String serverVersion = bootstrapper.getServerVersion();
-    if (isVersionPriorTo2Dot6(serverVersion)) {
+    if (isUnsupportedVersion(serverVersion)) {
       throw new BootstrapException("Sonar " + serverVersion
           + " does not support Standalone Runner. Please upgrade Sonar to version 2.6 or more.");
     }
@@ -131,14 +131,15 @@ public final class Runner {
         getClass().getClassLoader());
   }
 
-  static boolean isVersionPriorTo2Dot6(String version) {
-    return isVersion(version, "1")
-        || isVersion(version, "2.0")
-        || isVersion(version, "2.1")
-        || isVersion(version, "2.2")
-        || isVersion(version, "2.3")
-        || isVersion(version, "2.4")
-        || isVersion(version, "2.5");
+  private static final String[] unsupportedVersions = { "1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5" };
+
+  static boolean isUnsupportedVersion(String version) {
+    for (String unsupportedVersion : unsupportedVersions) {
+      if (isVersion(version, unsupportedVersion)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static boolean isVersion(String version, String prefix) {

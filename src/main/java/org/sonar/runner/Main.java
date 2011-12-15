@@ -33,7 +33,8 @@ import java.util.Properties;
  * Arguments :
  * <ul>
  * <li>runner.home: optional path to runner home (root directory with sub-directories bin, lib and conf)</li>
- * <li>runner.settings: optional path to runner global settings, usually ${runner.home}/conf/sonar-runner.properties. This property is used only if ${runner.home} is not defined</li>
+ * <li>runner.settings: optional path to runner global settings, usually ${runner.home}/conf/sonar-runner.properties.
+ * This property is used only if ${runner.home} is not defined</li>
  * <li>project.home: path to project root directory. If not set, then it's supposed to be the directory where the runner is executed</li>
  * <li>project.settings: optional path to project settings. Default value is ${project.home}/sonar-project.properties.</li>
  * </ul>
