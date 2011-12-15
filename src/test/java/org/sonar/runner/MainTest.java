@@ -33,27 +33,28 @@ public class MainTest {
 
   @Test
   public void shouldParseEmptyArguments() {
-    Properties props = Main.parseArguments(new String[]{});
+    Properties props = Main.parseArguments(new String[] {});
     assertThat(props.isEmpty(), is(true));
   }
 
   @Test
   public void shouldParseArguments() {
-    Properties props = Main.parseArguments(new String[]{"-D", "foo=bar", "--define", "hello=world"});
-    assertThat(props.size(), is(2));
+    Properties props = Main.parseArguments(new String[] { "-D", "foo=bar", "--define", "hello=world", "-Dboolean" });
+    assertThat(props.size(), is(3));
     assertThat(props.getProperty("foo"), is("bar"));
     assertThat(props.getProperty("hello"), is("world"));
+    assertThat(props.getProperty("boolean"), is("true"));
   }
 
   @Test
   public void shouldEnableDebugMode() {
-    Properties props = Main.parseArguments(new String[]{"-X"});
+    Properties props = Main.parseArguments(new String[] { "-X" });
     assertThat(props.getProperty(Runner.VERBOSE), is("true"));
   }
 
   @Test
   public void shouldDisableDebugModeByDefault() {
-    Properties props = Main.parseArguments(new String[]{});
+    Properties props = Main.parseArguments(new String[] {});
     assertThat(props.getProperty(Runner.VERBOSE), nullValue());
   }
 
@@ -90,9 +91,9 @@ public class MainTest {
   public void shouldLoadCompleteConfiguration() throws Exception {
     File runnerHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/runner").toURI());
     File projectHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/project").toURI());
-    Properties props = Main.loadProperties(new String[]{
-        "-D", "runner.home=" + runnerHome.getCanonicalPath(),
-        "-D", "project.home=" + projectHome.getCanonicalPath()
+    Properties props = Main.loadProperties(new String[] {
+      "-D", "runner.home=" + runnerHome.getCanonicalPath(),
+      "-D", "project.home=" + projectHome.getCanonicalPath()
     });
 
     assertThat(props.getProperty("project.prop"), is("foo"));

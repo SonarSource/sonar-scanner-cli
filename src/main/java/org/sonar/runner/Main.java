@@ -133,21 +133,28 @@ public final class Main {
           printError("Missing argument for option --define");
         }
         arg = args[i];
-        final String key, value;
-        int j = arg.indexOf('=');
-        if (j == -1) {
-          key = arg;
-          value = "true";
-        } else {
-          key = arg.substring(0, j);
-          value = arg.substring(j + 1);
-        }
-        props.setProperty(key, value);
+        parseProperty(arg, props);
+      } else if (arg.startsWith("-D")) {
+        arg = arg.substring(2);
+        parseProperty(arg, props);
       } else {
         printError("Unrecognized option: " + arg);
       }
     }
     return props;
+  }
+
+  private static void parseProperty(String arg, Properties props) {
+    final String key, value;
+    int j = arg.indexOf('=');
+    if (j == -1) {
+      key = arg;
+      value = "true";
+    } else {
+      key = arg.substring(0, j);
+      value = arg.substring(j + 1);
+    }
+    props.setProperty(key, value);
   }
 
   private static void printUsage() {
