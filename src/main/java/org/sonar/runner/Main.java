@@ -61,7 +61,7 @@ public final class Main {
 
   private static void printMemoryUsage() {
     Runtime r = Runtime.getRuntime();
-    System.out.println("Final Memory: " + (r.totalMemory() - r.freeMemory()) / MB + "M/" + r.totalMemory() / MB + "M");
+    log("Final Memory: " + (r.totalMemory() - r.freeMemory()) / MB + "M/" + r.totalMemory() / MB + "M");
   }
 
   static Properties loadProperties(String[] args) {
@@ -97,13 +97,13 @@ public final class Main {
   private static File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
     File settingsFile = null;
     String runnerHome = props.getProperty(homeKey);
-    if (runnerHome != null && !runnerHome.equals("")) {
+    if (runnerHome != null && !"".equals(runnerHome)) {
       settingsFile = new File(runnerHome, relativePathFromHome);
     }
 
     if (settingsFile == null || !settingsFile.exists()) {
       String settingsPath = props.getProperty(settingsKey);
-      if (settingsPath != null && !settingsPath.equals("")) {
+      if (settingsPath != null && !"".equals(settingsPath)) {
         settingsFile = new File(settingsPath);
       }
     }
@@ -185,5 +185,8 @@ public final class Main {
 
   private static void log(String message) {
     System.out.println(message); // NOSONAR
+  }
+
+  private Main() {
   }
 }
