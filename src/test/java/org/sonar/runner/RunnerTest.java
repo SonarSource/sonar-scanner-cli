@@ -81,6 +81,32 @@ public class RunnerTest {
   }
 
   @Test
+  public void shouldGetServerUrl() {
+    Properties properties = new Properties();
+    Runner runner = Runner.create(properties);
+    assertThat("Default value", runner.getServerURL(), is("http://localhost:9000"));
+    properties.setProperty("sonar.host.url", "foo");
+    assertThat(runner.getServerURL(), is("foo"));
+  }
+
+  @Test
+  public void shouldDetermineVerboseMode() {
+    Properties properties = new Properties();
+    Runner runner = Runner.create(properties);
+    assertThat("Default value", runner.isDebug(), is(false));
+    properties.setProperty(Runner.VERBOSE, "true");
+    assertThat(runner.isDebug(), is(true));
+  }
+
+  @Test
+  public void shouldSupportDeprecatedDebugProperty() {
+    Properties properties = new Properties();
+    Runner runner = Runner.create(properties);
+    properties.setProperty(Runner.DEBUG_MODE, "true");
+    assertThat(runner.isDebug(), is(true));
+  }
+
+  @Test
   public void shouldInitDirs() throws Exception {
     Properties props = new Properties();
     File home = new File(getClass().getResource("/org/sonar/runner/RunnerTest/shouldInitDirs/").toURI());

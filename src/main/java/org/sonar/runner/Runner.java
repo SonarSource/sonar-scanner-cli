@@ -73,7 +73,7 @@ public final class Runner {
 
   public void execute() {
     checkMandatoryProperties();
-    Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + getRunnerVersion(), getServerURl(), getWorkDir());
+    Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + getRunnerVersion(), getServerURL(), getWorkDir());
     checkSonarVersion(bootstrapper);
     delegateExecution(createClassLoader(bootstrapper));
   }
@@ -86,7 +86,7 @@ public final class Runner {
     }
   }
 
-  public String getServerURl() {
+  public String getServerURL() {
     return properties.getProperty("sonar.host.url", "http://localhost:9000");
   }
 
