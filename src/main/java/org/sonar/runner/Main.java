@@ -44,6 +44,7 @@ import java.util.Properties;
 public final class Main {
 
   public static void main(String[] args) {
+    long startTime = System.currentTimeMillis();
     try {
       Properties props = loadProperties(args);
       Runner runner = Runner.create(props);
@@ -56,15 +57,26 @@ public final class Main {
     } catch (IOException e) {
       throw new RuntimeException(e);
     } finally {
-      printMemoryUsage();
+      printStats(startTime);
     }
   }
 
-  private static final long MB = 1024 * 1024;
+  private static void printStats(long startTime) {
+    long time = System.currentTimeMillis() - startTime;
+    log("Total time: " + formatTime(time));
 
-  private static void printMemoryUsage() {
+    System.gc();
     Runtime r = Runtime.getRuntime();
-    log("Final Memory: " + (r.totalMemory() - r.freeMemory()) / MB + "M/" + r.totalMemory() / MB + "M");
+    long mb = 1024 * 1024;
+    log("Final Memory: " + (r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb + "M");
+  }
+
+  static String formatTime(long time) {
+    long h = time / (60 * 60 * 1000);
+    long m = (time - h * 60 * 60 * 1000) / (60 * 1000);
+    long s = (time - h * 60 * 60 * 1000 - m * 60 * 1000) / 1000;
+    long ms = time % 1000;
+    return String.format("%1$d:%2$02d:%3$02d.%4$03ds", h, m, s, ms);
   }
 
   static Properties loadProperties(String[] args) {

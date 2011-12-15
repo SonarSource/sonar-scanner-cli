@@ -100,4 +100,12 @@ public class MainTest {
     assertThat(props.getProperty("overridden.prop"), is("project scope"));
     assertThat(props.getProperty("global.prop"), is("jdbc:mysql:localhost/sonar"));
   }
+
+  @Test
+  public void shouldFormatTime() {
+    assertThat(Main.formatTime(1 * 60 * 60 * 1000 + 2 * 60 * 1000 + 3 * 1000 + 400), is("1:02:03.400s"));
+    assertThat(Main.formatTime(2 * 60 * 1000 + 3 * 1000 + 400), is("0:02:03.400s"));
+    assertThat(Main.formatTime(3 * 1000 + 400), is("0:00:03.400s"));
+    assertThat(Main.formatTime(400), is("0:00:00.400s"));
+  }
 }
