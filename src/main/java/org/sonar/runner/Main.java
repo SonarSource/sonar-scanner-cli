@@ -52,7 +52,16 @@ public final class Main {
       runner.execute();
     } catch (IOException e) {
       throw new RuntimeException(e);
+    } finally {
+      printMemoryUsage();
     }
+  }
+
+  private static final long MB = 1024 * 1024;
+
+  private static void printMemoryUsage() {
+    Runtime r = Runtime.getRuntime();
+    System.out.println("Final Memory: " + (r.totalMemory() - r.freeMemory()) / MB + "M/" + r.totalMemory() / MB + "M");
   }
 
   static Properties loadProperties(String[] args) {
