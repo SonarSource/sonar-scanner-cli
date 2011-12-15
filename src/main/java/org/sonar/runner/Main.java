@@ -48,6 +48,8 @@ public final class Main {
       Properties props = loadProperties(args);
       Runner runner = Runner.create(props);
       log("Runner version: " + runner.getRunnerVersion());
+      log("Java version: " + System.getProperty("java.version", "<unknown java version>")
+          + ", vendor: " + System.getProperty("java.vendor", "<unknown vendor>"));
       log("Server: " + runner.getServerURl());
       log("Work directory: " + runner.getWorkDir().getCanonicalPath());
       runner.execute();
