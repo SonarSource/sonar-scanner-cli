@@ -103,8 +103,10 @@ public final class Main {
   static Properties loadRunnerProperties(Properties props) {
     File settingsFile = locatePropertiesFile(props, "runner.home", "conf/sonar-runner.properties", "runner.settings");
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
-      log("Runner settings: " + settingsFile.getAbsolutePath());
+      log("Runner configuration file: " + settingsFile.getAbsolutePath());
       return toProperties(settingsFile);
+    } else {
+      log("Runner configuration file: NONE");
     }
     return new Properties();
   }
@@ -112,8 +114,10 @@ public final class Main {
   static Properties loadProjectProperties(Properties props) {
     File settingsFile = locatePropertiesFile(props, "project.home", "sonar-project.properties", "project.settings");
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
-      log("Project settings: " + settingsFile.getAbsolutePath());
+      log("Project configuration file: " + settingsFile.getAbsolutePath());
       return toProperties(settingsFile);
+    } else {
+      log("Project configuration file: NONE");
     }
     return new Properties();
   }
