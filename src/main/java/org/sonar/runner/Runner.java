@@ -51,7 +51,7 @@ public final class Runner {
   /**
    * Array of prefixes of versions of Sonar without support of this runner.
    */
-  private static final String[] unsupportedVersions = { "1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5" };
+  private static final String[] UNSUPPORTED_VERSIONS = { "1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5" };
 
   /**
    * Array of all mandatory properties required to execute runner.
@@ -151,7 +151,7 @@ public final class Runner {
   }
 
   static boolean isUnsupportedVersion(String version) {
-    for (String unsupportedVersion : unsupportedVersions) {
+    for (String unsupportedVersion : UNSUPPORTED_VERSIONS) {
       if (isVersion(version, unsupportedVersion)) {
         return true;
       }

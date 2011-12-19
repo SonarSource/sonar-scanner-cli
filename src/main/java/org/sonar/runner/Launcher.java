@@ -21,6 +21,7 @@
 package org.sonar.runner;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -29,6 +30,9 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import org.apache.commons.configuration.*;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.AndFileFilter;
+import org.apache.commons.io.filefilter.FileFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.utils.SonarException;
@@ -91,10 +95,30 @@ public class Launcher {
     for (String dir : getList(properties, "binaries")) {
       definition.addBinaryDir(dir);
     }
-    for (String file : getList(properties, "libraries")) {
-      definition.addLibrary(file);
+    for (String pattern : getList(properties, "libraries")) {
+      for (File file : getLibraries(pattern)) {
+        definition.addLibrary(file.getAbsolutePath());
+      }
     }
     return definition;
+  }
+
+  /**
+   * Returns files matching specified pattern.
+   * Visibility has been relaxed to make code testable.
+   */
+  static File[] getLibraries(String pattern) {
+    final int i = Math.max(pattern.lastIndexOf('/'), pattern.lastIndexOf('\\'));
+    final String dir, filePattern;
+    if (i == -1) {
+      dir = ".";
+      filePattern = pattern;
+    } else {
+      dir = pattern.substring(0, i);
+      filePattern = pattern.substring(i + 1);
+    }
+    FileFilter fileFilter = new AndFileFilter(FileFileFilter.FILE, new WildcardFileFilter(filePattern));
+    return new File(dir).listFiles(fileFilter);
   }
 
   private String[] getList(Properties properties, String key) {

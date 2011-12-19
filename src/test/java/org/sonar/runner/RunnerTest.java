@@ -68,7 +68,8 @@ public class RunnerTest {
   }
 
   /**
-   * This test can only be executed by Maven, not by IDE
+   * Simon: This test can only be executed by Maven, not by IDE
+   * Godin: This test can be executed by Eclipse
    */
   @Test
   public void shouldGetVersion() {
@@ -124,4 +125,5 @@ public class RunnerTest {
     assertThat(runner.getProjectDir().isDirectory(), is(true));
     assertThat(runner.getProjectDir().exists(), is(true));
   }
+
 }
