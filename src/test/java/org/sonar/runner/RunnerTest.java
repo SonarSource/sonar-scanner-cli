@@ -40,7 +40,7 @@ public class RunnerTest {
       Runner.create(new Properties()).checkMandatoryProperties();
       fail();
     } catch (RunnerException e) {
-      assertThat(e.getMessage(), is("You must define mandatory property: sonar.projectKey"));
+      assertThat(e.getMessage(), is("You must define mandatory properties: sonar.projectKey, sonar.projectName, sonar.projectVersion, sources"));
     }
   }
 

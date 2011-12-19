@@ -79,10 +79,17 @@ public final class Runner {
   }
 
   void checkMandatoryProperties() {
+    StringBuilder missing = new StringBuilder();
     for (String mandatoryProperty : MANDATORY_PROPERTIES) {
       if (!properties.containsKey(mandatoryProperty)) {
-        throw new RunnerException("You must define mandatory property: " + mandatoryProperty);
+        if (missing.length() > 0) {
+          missing.append(", ");
+        }
+        missing.append(mandatoryProperty);
       }
+    }
+    if (missing.length() != 0) {
+      throw new RunnerException("You must define mandatory properties: " + missing);
     }
   }
 
