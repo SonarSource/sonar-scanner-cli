@@ -76,7 +76,15 @@ public final class Main {
     long m = (time - h * 60 * 60 * 1000) / (60 * 1000);
     long s = (time - h * 60 * 60 * 1000 - m * 60 * 1000) / 1000;
     long ms = time % 1000;
-    return String.format("%1$d:%2$02d:%3$02d.%4$03ds", h, m, s, ms);
+    final String format;
+    if (h > 0) {
+      format = "%1$d:%2$02d:%3$02d.%4$03ds";
+    } else if (m > 0) {
+      format = "%2$d:%3$02d.%4$03ds";
+    } else {
+      format = "%3$d.%4$03ds";
+    }
+    return String.format(format, h, m, s, ms);
   }
 
   static Properties loadProperties(String[] args) {

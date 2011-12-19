@@ -104,8 +104,8 @@ public class MainTest {
   @Test
   public void shouldFormatTime() {
     assertThat(Main.formatTime(1 * 60 * 60 * 1000 + 2 * 60 * 1000 + 3 * 1000 + 400), is("1:02:03.400s"));
-    assertThat(Main.formatTime(2 * 60 * 1000 + 3 * 1000 + 400), is("0:02:03.400s"));
-    assertThat(Main.formatTime(3 * 1000 + 400), is("0:00:03.400s"));
-    assertThat(Main.formatTime(400), is("0:00:00.400s"));
+    assertThat(Main.formatTime(2 * 60 * 1000 + 3 * 1000 + 400), is("2:03.400s"));
+    assertThat(Main.formatTime(3 * 1000 + 400), is("3.400s"));
+    assertThat(Main.formatTime(400), is("0.400s"));
   }
 }
