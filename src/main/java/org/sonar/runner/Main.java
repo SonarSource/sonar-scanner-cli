@@ -53,10 +53,12 @@ public final class Main {
           + ", vendor: " + System.getProperty("java.vendor", "<unknown vendor>"));
       log("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
       log("Server: " + runner.getServerURL());
-      log("Work directory: " + runner.getWorkDir().getCanonicalPath());
+      try {
+        log("Work directory: " + runner.getWorkDir().getCanonicalPath());
+      } catch (IOException e) {
+        throw new RunnerException(e);
+      }
       runner.execute();
-    } catch (IOException e) {
-      throw new RunnerException(e);
     } finally {
       printStats(startTime);
     }

@@ -19,6 +19,8 @@
  */
 package org.sonar.runner;
 
+import java.io.IOException;
+
 /**
  * @since 1.2
  */
@@ -30,6 +32,10 @@ public class RunnerException extends RuntimeException {
 
   public RunnerException(Throwable cause) {
     super(cause);
+  }
+
+  public RunnerException(String message, Throwable cause) {
+    super(message, cause);
   }
 
 }

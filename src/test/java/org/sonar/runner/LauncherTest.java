@@ -20,7 +20,9 @@
 package org.sonar.runner;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import org.junit.Test;
@@ -28,15 +30,30 @@ import org.junit.Test;
 public class LauncherTest {
 
   @Test
-  public void shouldNotFailWhenPathNotSpecified() {
-    Launcher.getLibraries("file.jar");
+  public void shouldFilterFiles() throws Exception {
+    File baseDir = new File(getClass().getResource("/org/sonar/runner/LauncherTest/shouldFilterFiles/").toURI());
+    assertThat(Launcher.getLibraries(baseDir, "in*.txt").length, is(1));
+    assertThat(Launcher.getLibraries(baseDir, "*.txt").length, is(2));
+    assertThat(Launcher.getLibraries(baseDir.getParentFile(), "shouldFilterFiles/in*.txt").length, is(1));
+    assertThat(Launcher.getLibraries(baseDir.getParentFile(), "shouldFilterFiles/*.txt").length, is(2));
   }
 
   @Test
-  public void shouldFilterFiles() throws Exception {
-    File dir = new File(getClass().getResource("/org/sonar/runner/LauncherTest/shouldFilterFiles/").toURI());
-    assertThat(Launcher.getLibraries(dir.getAbsolutePath() + "/in*.txt").length, is(1));
-    assertThat(Launcher.getLibraries(dir.getAbsolutePath() + "/*.txt").length, is(2));
+  public void shouldWorkWithAbsolutePath() throws Exception {
+    File baseDir = new File("not-exists");
+    String absolutePattern = new File(getClass().getResource("/org/sonar/runner/LauncherTest/shouldFilterFiles/").toURI()).getAbsolutePath() + "/in*.txt";
+    assertThat(Launcher.getLibraries(baseDir.getParentFile(), absolutePattern).length, is(1));
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenNoFilesMatchingPattern() throws Exception {
+    File baseDir = new File(getClass().getResource("/org/sonar/runner/LauncherTest/shouldFilterFiles/").toURI());
+    try {
+      Launcher.getLibraries(baseDir, "*/*.jar");
+      fail("Exception expected");
+    } catch (RunnerException e) {
+      assertThat(e.getMessage(), startsWith("No files matching pattern \"*.jar\" in directory "));
+    }
   }
 
 }

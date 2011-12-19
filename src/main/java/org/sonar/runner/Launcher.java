@@ -22,6 +22,7 @@ package org.sonar.runner;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -96,7 +97,7 @@ public class Launcher {
       definition.addBinaryDir(dir);
     }
     for (String pattern : getList(properties, "libraries")) {
-      for (File file : getLibraries(pattern)) {
+      for (File file : getLibraries(baseDir, pattern)) {
         definition.addLibrary(file.getAbsolutePath());
       }
     }
@@ -107,18 +108,35 @@ public class Launcher {
    * Returns files matching specified pattern.
    * Visibility has been relaxed to make code testable.
    */
-  static File[] getLibraries(String pattern) {
+  static File[] getLibraries(File baseDir, String pattern) {
     final int i = Math.max(pattern.lastIndexOf('/'), pattern.lastIndexOf('\\'));
-    final String dir, filePattern;
+    final String dirPath, filePattern;
     if (i == -1) {
-      dir = ".";
+      dirPath = ".";
       filePattern = pattern;
     } else {
-      dir = pattern.substring(0, i);
+      dirPath = pattern.substring(0, i);
       filePattern = pattern.substring(i + 1);
     }
     FileFilter fileFilter = new AndFileFilter(FileFileFilter.FILE, new WildcardFileFilter(filePattern));
-    return new File(dir).listFiles(fileFilter);
+    File dir = resolvePath(baseDir, dirPath);
+    File[] files = dir.listFiles(fileFilter);
+    if (files == null || files.length == 0) {
+      throw new RunnerException("No files matching pattern \"" + filePattern + "\" in directory \"" + dir + "\"");
+    }
+    return files;
+  }
+
+  private static File resolvePath(File baseDir, String path) {
+    File file = new File(path);
+    if (!file.isAbsolute()) {
+      try {
+        file = new File(baseDir, path).getCanonicalFile();
+      } catch (IOException e) {
+        throw new RunnerException("Unable to resolve path \"" + path + "\"", e);
+      }
+    }
+    return file;
   }
 
   private String[] getList(Properties properties, String key) {

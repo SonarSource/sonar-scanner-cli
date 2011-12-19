@@ -38,7 +38,7 @@ public class RunnerTest {
   public void shouldThrowExceptionIfMandatoryPropertyNotSpecified() {
     try {
       Runner.create(new Properties()).checkMandatoryProperties();
-      fail();
+      fail("Exception expected");
     } catch (RunnerException e) {
       assertThat(e.getMessage(), is("You must define mandatory properties: sonar.projectKey, sonar.projectName, sonar.projectVersion, sources"));
     }
