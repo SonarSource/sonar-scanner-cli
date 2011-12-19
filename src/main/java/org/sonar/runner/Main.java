@@ -51,6 +51,7 @@ public final class Main {
       log("Runner version: " + runner.getRunnerVersion());
       log("Java version: " + System.getProperty("java.version", "<unknown java version>")
           + ", vendor: " + System.getProperty("java.vendor", "<unknown vendor>"));
+      log("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
       log("Server: " + runner.getServerURL());
       log("Work directory: " + runner.getWorkDir().getCanonicalPath());
       runner.execute();
