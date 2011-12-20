@@ -49,7 +49,7 @@ public class LauncherTest {
   public void shouldThrowExceptionWhenNoFilesMatchingPattern() throws Exception {
     File baseDir = new File(getClass().getResource("/org/sonar/runner/LauncherTest/shouldFilterFiles/").toURI());
     try {
-      Launcher.getLibraries(baseDir, "*/*.jar");
+      Launcher.getLibraries(baseDir, "*.jar");
       fail("Exception expected");
     } catch (RunnerException e) {
       assertThat(e.getMessage(), startsWith("No files matching pattern \"*.jar\" in directory "));

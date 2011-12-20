@@ -19,8 +19,6 @@
  */
 package org.sonar.runner;
 
-import java.io.IOException;
-
 /**
  * @since 1.2
  */
