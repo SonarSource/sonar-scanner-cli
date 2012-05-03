@@ -19,13 +19,16 @@
  */
 package org.sonar.runner;
 
+import org.apache.commons.configuration.BaseConfiguration;
+import org.apache.commons.configuration.Configuration;
+import org.junit.Test;
+
+import java.io.File;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
-import java.io.File;
-import org.junit.Test;
 
 public class LauncherTest {
 
@@ -54,6 +57,32 @@ public class LauncherTest {
     } catch (RunnerException e) {
       assertThat(e.getMessage(), startsWith("No files matching pattern \"*.jar\" in directory "));
     }
+  }
+
+  @Test
+  public void testGetSqlLevel() throws Exception {
+    Configuration conf = new BaseConfiguration();
+
+    assertThat(Launcher.getSqlLevel(conf), is("WARN"));
+
+    conf.setProperty("sonar.showSql", "true");
+    assertThat(Launcher.getSqlLevel(conf), is("DEBUG"));
+
+    conf.setProperty("sonar.showSql", "false");
+    assertThat(Launcher.getSqlLevel(conf), is("WARN"));
+  }
+
+  @Test
+  public void testGetSqlResultsLevel() throws Exception {
+    Configuration conf = new BaseConfiguration();
+
+    assertThat(Launcher.getSqlResultsLevel(conf), is("WARN"));
+
+    conf.setProperty("sonar.showSqlResults", "true");
+    assertThat(Launcher.getSqlResultsLevel(conf), is("DEBUG"));
+
+    conf.setProperty("sonar.showSqlResults", "false");
+    assertThat(Launcher.getSqlResultsLevel(conf), is("WARN"));
   }
 
 }

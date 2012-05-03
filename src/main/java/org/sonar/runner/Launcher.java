@@ -20,16 +20,14 @@
 
 package org.sonar.runner;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
-import org.apache.commons.configuration.*;
+import org.apache.commons.configuration.CompositeConfiguration;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.EnvironmentConfiguration;
+import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.configuration.SystemConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.FileFileFilter;
@@ -41,6 +39,12 @@ import org.sonar.batch.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
 import org.sonar.batch.bootstrapper.ProjectDefinition;
 import org.sonar.batch.bootstrapper.Reactor;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class Launcher {
 
@@ -54,24 +58,27 @@ public class Launcher {
    * This method invoked from {@link Main}. Do not rename it.
    */
   public void execute() {
-    initLogging();
-    executeBatch();
+    ProjectDefinition project = defineProject();
+    Configuration initialConfiguration = getInitialConfiguration(project);
+    initLogging(initialConfiguration);
+    executeBatch(project, initialConfiguration);
   }
 
-  private void executeBatch() {
-    ProjectDefinition project = defineProject();
+  private void executeBatch(ProjectDefinition project, Configuration initialConfiguration) {
     Reactor reactor = new Reactor(project);
-    Batch batch = new Batch(getInitialConfiguration(project), new EnvironmentInformation("Runner", runner.getRunnerVersion()), reactor);
+    Batch batch = new Batch(initialConfiguration, new EnvironmentInformation("Runner", runner.getRunnerVersion()), reactor);
     batch.execute();
   }
 
-  private void initLogging() {
+  private void initLogging(Configuration initialConfiguration) {
     LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
     JoranConfigurator jc = new JoranConfigurator();
     jc.setContext(context);
     context.reset();
     InputStream input = Batch.class.getResourceAsStream("/org/sonar/batch/logback.xml");
     System.setProperty("ROOT_LOGGER_LEVEL", runner.isDebug() ? "DEBUG" : "INFO");
+    context.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(initialConfiguration));// since 2.14. Ignored on previous versions.
+    context.putProperty("SQL_RESULTS_LOGGER_LEVEL", getSqlResultsLevel(initialConfiguration));// since 2.14. Ignored on previous versions.
     try {
       jc.doConfigure(input);
 
@@ -81,6 +88,16 @@ public class Launcher {
     } finally {
       IOUtils.closeQuietly(input);
     }
+  }
+
+  protected static String getSqlLevel(Configuration config) {
+    boolean showSql = config.getBoolean("sonar.showSql", false);
+    return showSql ? "DEBUG" : "WARN";
+  }
+
+  protected static String getSqlResultsLevel(Configuration config) {
+    boolean showSql = config.getBoolean("sonar.showSqlResults", false);
+    return showSql ? "DEBUG" : "WARN";
   }
 
   private ProjectDefinition defineProject() {
