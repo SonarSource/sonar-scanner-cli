@@ -21,12 +21,14 @@ echo.
 goto end
 
 :OkJavaHome
-if NOT "%SONAR_RUNNER_HOME%"=="" (
-  @REM If the property has a trailing backslash, remove it
-  if %SONAR_RUNNER_HOME:~-1%==\ set SONAR_RUNNER_HOME=%SONAR_RUNNER_HOME:~0,-1%
-) else (
-  set SONAR_RUNNER_HOME=%~dp0..
-)
+if NOT "%SONAR_RUNNER_HOME%"=="" goto cleanSonarRunnerHome
+set SONAR_RUNNER_HOME=%~dp0..
+goto run
+
+:cleanSonarRunnerHome
+@REM If the property has a trailing backslash, remove it
+if %SONAR_RUNNER_HOME:~-1%==\ set SONAR_RUNNER_HOME=%SONAR_RUNNER_HOME:~0,-1%
+
 
 @REM ==== START RUN ====
 :run
