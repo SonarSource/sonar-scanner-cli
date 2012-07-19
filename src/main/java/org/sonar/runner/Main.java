@@ -50,8 +50,9 @@ public final class Main {
       Runner runner = Runner.create(props);
       log("Runner version: " + runner.getRunnerVersion());
       log("Java version: " + System.getProperty("java.version", "<unknown java version>")
-          + ", vendor: " + System.getProperty("java.vendor", "<unknown vendor>"));
-      log("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
+        + ", vendor: " + System.getProperty("java.vendor", "<unknown vendor>"));
+      log("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\"");
+      log("Arch: \"" + System.getProperty("os.arch") + "\", sun.arch.data.model: \"" + System.getProperty("sun.arch.data.model") + "\"");
       log("Server: " + runner.getServerURL());
       try {
         log("Work directory: " + runner.getWorkDir().getCanonicalPath());
