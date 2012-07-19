@@ -170,7 +170,7 @@ public final class Main {
         printUsage();
 
       } else if ("-X".equals(arg) || "--debug".equals(arg)) {
-        props.setProperty(Runner.VERBOSE, "true");
+        props.setProperty(Runner.PROPERTY_VERBOSE, "true");
         debugMode = true;
 
       } else if ("-D".equals(arg) || "--define".equals(arg)) {

@@ -42,21 +42,27 @@ public final class Runner {
    */
   @Deprecated
   public static final String DEBUG_MODE = "runner.debug";
-  
+
   /**
    * @since 1.2
    */
-  public static final String VERBOSE = "sonar.verbose";
+  public static final String PROPERTY_VERBOSE = "sonar.verbose";
+
+  /**
+   * @since 1.4
+   */
+  public static final String PROPERTY_WORK_DIRECTORY = "sonar.working.directory";
+  public static final String DEF_VALUE_WORK_DIRECTORY = ".sonar";
 
   /**
    * Array of prefixes of versions of Sonar without support of this runner.
    */
-  private static final String[] UNSUPPORTED_VERSIONS = { "1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5" };
+  private static final String[] UNSUPPORTED_VERSIONS = {"1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5"};
 
   /**
    * Array of all mandatory properties required to execute runner.
    */
-  private static final String[] MANDATORY_PROPERTIES = { "sonar.projectKey", "sonar.projectName", "sonar.projectVersion", "sources" };
+  private static final String[] MANDATORY_PROPERTIES = {"sonar.projectKey", "sonar.projectName", "sonar.projectVersion", "sources"};
 
   private File projectDir;
   private File workDir;
@@ -103,7 +109,7 @@ public final class Runner {
     if (!projectDir.isDirectory() || !projectDir.exists()) {
       throw new IllegalArgumentException("Project home must be an existing directory: " + path);
     }
-    workDir = new File(projectDir, ".sonar");
+    workDir = new File(projectDir, properties.getProperty(PROPERTY_WORK_DIRECTORY, DEF_VALUE_WORK_DIRECTORY));
   }
 
   public File getProjectDir() {
@@ -125,7 +131,7 @@ public final class Runner {
   }
 
   public boolean isDebug() {
-    return Boolean.parseBoolean(properties.getProperty(VERBOSE, properties.getProperty(DEBUG_MODE, "false")));
+    return Boolean.parseBoolean(properties.getProperty(PROPERTY_VERBOSE, properties.getProperty(DEBUG_MODE, "false")));
   }
 
   public String getRunnerVersion() {
@@ -146,14 +152,14 @@ public final class Runner {
     String serverVersion = bootstrapper.getServerVersion();
     if (isUnsupportedVersion(serverVersion)) {
       throw new BootstrapException("Sonar " + serverVersion
-          + " does not support Standalone Runner. Please upgrade Sonar to version 2.6 or more.");
+        + " does not support Standalone Runner. Please upgrade Sonar to version 2.6 or more.");
     }
   }
 
   private BootstrapClassLoader createClassLoader(Bootstrapper bootstrapper) {
     URL url = Main.class.getProtectionDomain().getCodeSource().getLocation();
     return bootstrapper.createClassLoader(
-        new URL[]{url}, // Add JAR with Sonar Runner - it's a Jar which contains this class
+        new URL[] {url}, // Add JAR with Sonar Runner - it's a Jar which contains this class
         getClass().getClassLoader());
   }
 

@@ -20,17 +20,18 @@
 
 package org.sonar.runner;
 
+import org.junit.Test;
+
+import java.io.File;
+import java.util.Properties;
+
+import static org.fest.assertions.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.util.Properties;
-
-import org.junit.Test;
 
 public class RunnerTest {
 
@@ -95,7 +96,7 @@ public class RunnerTest {
     Properties properties = new Properties();
     Runner runner = Runner.create(properties);
     assertThat("Default value", runner.isDebug(), is(false));
-    properties.setProperty(Runner.VERBOSE, "true");
+    properties.setProperty(Runner.PROPERTY_VERBOSE, "true");
     assertThat(runner.isDebug(), is(true));
   }
 
@@ -124,6 +125,17 @@ public class RunnerTest {
 
     assertThat(runner.getProjectDir().isDirectory(), is(true));
     assertThat(runner.getProjectDir().exists(), is(true));
+  }
+
+  @Test
+  public void shouldSpecifyWorkingDirectory() {
+    Properties properties = new Properties();
+    Runner runner = Runner.create(properties);
+    assertThat(runner.getWorkDir()).isEqualTo(new File(".", ".sonar"));
+
+    properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, "temp-dir");
+    runner = Runner.create(properties);
+    assertThat(runner.getWorkDir()).isEqualTo(new File(".", "temp-dir"));
   }
 
 }
