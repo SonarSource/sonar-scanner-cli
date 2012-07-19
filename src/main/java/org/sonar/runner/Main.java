@@ -43,6 +43,8 @@ import java.util.Properties;
  */
 public final class Main {
 
+  private static boolean debugMode = false;
+
   public static void main(String[] args) {
     long startTime = System.currentTimeMillis();
     try {
@@ -51,8 +53,11 @@ public final class Main {
       log("Runner version: " + runner.getRunnerVersion());
       log("Java version: " + System.getProperty("java.version", "<unknown java version>")
         + ", vendor: " + System.getProperty("java.vendor", "<unknown vendor>"));
-      log("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\"");
-      log("Arch: \"" + System.getProperty("os.arch") + "\", sun.arch.data.model: \"" + System.getProperty("sun.arch.data.model") + "\"");
+      log("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
+      if (debugMode) {
+        log("Other system properties:");
+        log("  - sun.arch.data.model: \"" + System.getProperty("sun.arch.data.model") + "\"");
+      }
       log("Server: " + runner.getServerURL());
       try {
         log("Work directory: " + runner.getWorkDir().getCanonicalPath());
@@ -166,6 +171,7 @@ public final class Main {
 
       } else if ("-X".equals(arg) || "--debug".equals(arg)) {
         props.setProperty(Runner.VERBOSE, "true");
+        debugMode = true;
 
       } else if ("-D".equals(arg) || "--define".equals(arg)) {
         i++;
