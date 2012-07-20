@@ -16,6 +16,11 @@ if not "%JAVA_HOME%" == "" goto foundJavaHome
 
 for %%i in (java.exe) do set JAVA_EXEC=%%~$PATH:i
 
+if not "%JAVA_EXEC%" == "" {
+  set JAVA_EXEC="%JAVA_EXEC%"
+  goto OkJava
+}
+
 if not "%JAVA_EXEC%" == "" goto OkJava
 
 echo.
