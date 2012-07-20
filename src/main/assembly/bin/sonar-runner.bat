@@ -11,15 +11,15 @@
 
 
 @REM ==== START VALIDATION ====
-@REM => JAVA EXEC
+@REM *** JAVA EXEC VALIDATION ***
 if not "%JAVA_HOME%" == "" goto foundJavaHome
 
 for %%i in (java.exe) do set JAVA_EXEC=%%~$PATH:i
 
-if not "%JAVA_EXEC%" == "" {
+if not "%JAVA_EXEC%" == "" (
   set JAVA_EXEC="%JAVA_EXEC%"
   goto OkJava
-}
+)
 
 if not "%JAVA_EXEC%" == "" goto OkJava
 
@@ -43,15 +43,24 @@ goto end
 :foundJavaExeFromJavaHome
 set JAVA_EXEC="%JAVA_HOME%\bin\java.exe"
 
+@REM *** SONAR RUNNER HOME VALIDATION ***
 :OkJava
 if NOT "%SONAR_RUNNER_HOME%"=="" goto cleanSonarRunnerHome
 set SONAR_RUNNER_HOME=%~dp0..
 goto run
 
-@REM => SONAR_RUNNER_HOME
 :cleanSonarRunnerHome
 @REM If the property has a trailing backslash, remove it
 if %SONAR_RUNNER_HOME:~-1%==\ set SONAR_RUNNER_HOME=%SONAR_RUNNER_HOME:~0,-1%
+
+@REM Check if the provided SONAR_RUNNER_HOME is a valid install dir
+IF EXIST "%SONAR_RUNNER_HOME%\lib\sonar-runner.jar" goto run
+
+echo.
+echo ERROR: SONAR_RUNNER_HOME exists but does not point to a valid install
+echo        directory: %SONAR_RUNNER_HOME%
+echo.
+goto end
 
 
 

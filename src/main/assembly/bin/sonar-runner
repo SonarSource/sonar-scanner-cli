@@ -13,6 +13,12 @@ if [ -z "$SONAR_RUNNER_HOME" ] ; then
 
   # make it fully qualified
   SONAR_RUNNER_HOME=`cd "$SONAR_RUNNER_HOME" && pwd`
+else
+  # check that the SONAR_RUNNER_HOME has been correctly set
+  if [ ! -e "$SONAR_RUNNER_HOME/lib/sonar-runner.jar" ] ; then
+    echo '$SONAR_RUNNER_HOME' does not point to a valid installation directory: $SONAR_RUNNER_HOME
+    exit 0
+  fi
 fi
 
 JAVA_CMD="`which java`"
