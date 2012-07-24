@@ -23,6 +23,7 @@ package org.sonar.runner;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.EnvironmentConfiguration;
@@ -100,7 +101,8 @@ public class Launcher {
     return showSql ? "DEBUG" : "WARN";
   }
 
-  private ProjectDefinition defineProject() {
+  @VisibleForTesting
+  protected ProjectDefinition defineProject() {
     File baseDir = runner.getProjectDir();
     Properties properties = runner.getProperties();
     ProjectDefinition definition = new ProjectDefinition(baseDir, runner.getWorkDir(), properties);

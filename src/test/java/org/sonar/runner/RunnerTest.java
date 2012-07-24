@@ -20,7 +20,11 @@
 
 package org.sonar.runner;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.sonar.batch.bootstrapper.BootstrapException;
+import org.sonar.batch.bootstrapper.Bootstrapper;
 
 import java.io.File;
 import java.util.Properties;
@@ -32,8 +36,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RunnerTest {
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Test
   public void shouldThrowExceptionIfMandatoryPropertyNotSpecified() {
@@ -114,9 +123,20 @@ public class RunnerTest {
     File home = new File(getClass().getResource("/org/sonar/runner/RunnerTest/shouldInitDirs/").toURI());
     props.setProperty("project.home", home.getCanonicalPath());
     Runner runner = Runner.create(props);
+    assertThat(runner.getProperties().get("project.home")).isEqualTo(home.getCanonicalPath());
 
     assertThat(runner.getProjectDir(), is(home));
     assertThat(runner.getWorkDir(), is(new File(home, ".sonar")));
+  }
+
+  @Test
+  public void shouldFailInitDirsIfNotExist() throws Exception {
+    Properties props = new Properties();
+
+    props.setProperty("project.home", new File("target/foo/").getCanonicalPath());
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("Project home must be an existing directory: ");
+    Runner.create(props);
   }
 
   @Test
@@ -136,6 +156,23 @@ public class RunnerTest {
     properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, "temp-dir");
     runner = Runner.create(properties);
     assertThat(runner.getWorkDir()).isEqualTo(new File(".", "temp-dir"));
+  }
+
+  @Test
+  public void shouldCheckSonarVersion() {
+    Properties properties = new Properties();
+    Runner runner = Runner.create(properties);
+    Bootstrapper bootstrapper = mock(Bootstrapper.class);
+
+    // nothing happens, OK
+    when(bootstrapper.getServerVersion()).thenReturn("3.1");
+    runner.checkSonarVersion(bootstrapper);
+
+    // but fails with older versions
+    when(bootstrapper.getServerVersion()).thenReturn("2.1");
+    thrown.expect(BootstrapException.class);
+    thrown.expectMessage("Sonar 2.1 does not support Standalone Runner. Please upgrade Sonar to version 2.6 or more.");
+    runner.checkSonarVersion(bootstrapper);
   }
 
 }

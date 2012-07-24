@@ -148,7 +148,7 @@ public final class Runner {
     }
   }
 
-  private void checkSonarVersion(Bootstrapper bootstrapper) {
+  protected void checkSonarVersion(Bootstrapper bootstrapper) {
     String serverVersion = bootstrapper.getServerVersion();
     if (isUnsupportedVersion(serverVersion)) {
       throw new BootstrapException("Sonar " + serverVersion
