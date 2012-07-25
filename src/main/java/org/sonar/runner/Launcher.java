@@ -47,6 +47,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Contrary to {@link org.sonar.runner.Runner}, this class is executed within the classloader
+ * provided by the server. It contains the installed plugins and the same version of sonar-batch as the server.
+ *
+ * TODO : instead of depending on Runner, that is not in the same classloader, we could simply use Properties :
+ * sonar.runner.version, sonar.runner.debug, sonar.runner.projectDir, sonar.runner.workDir and all the
+ * other properties.
+ */
 public class Launcher {
 
   private Runner runner;
