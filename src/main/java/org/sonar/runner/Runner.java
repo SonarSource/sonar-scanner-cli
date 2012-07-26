@@ -109,7 +109,22 @@ public final class Runner {
     if (!projectDir.isDirectory() || !projectDir.exists()) {
       throw new IllegalArgumentException("Project home must be an existing directory: " + path);
     }
-    workDir = new File(projectDir, properties.getProperty(PROPERTY_WORK_DIRECTORY, DEF_VALUE_WORK_DIRECTORY));
+    workDir = initWorkDir();
+  }
+
+  private File initWorkDir() {
+    String customWorkDir = properties.getProperty(PROPERTY_WORK_DIRECTORY);
+    if (customWorkDir == null || customWorkDir.trim().length() == 0) {
+      return new File(projectDir, DEF_VALUE_WORK_DIRECTORY);
+    }
+    return defineCustomizedWorkDir(new File(customWorkDir));
+  }
+
+  private File defineCustomizedWorkDir(File customWorkDir) {
+    if (customWorkDir.isAbsolute()) {
+      return customWorkDir;
+    }
+    return new File(projectDir, customWorkDir.getPath());
   }
 
   public File getProjectDir() {

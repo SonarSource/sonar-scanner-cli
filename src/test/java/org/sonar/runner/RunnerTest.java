@@ -153,9 +153,20 @@ public class RunnerTest {
     Runner runner = Runner.create(properties);
     assertThat(runner.getWorkDir()).isEqualTo(new File(".", ".sonar"));
 
+    // empty string
+    properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, "    ");
+    runner = Runner.create(properties);
+    assertThat(runner.getWorkDir()).isEqualTo(new File(".", ".sonar"));
+
+    // real relative path
     properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, "temp-dir");
     runner = Runner.create(properties);
     assertThat(runner.getWorkDir()).isEqualTo(new File(".", "temp-dir"));
+
+    // real asbolute path
+    properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, new File("target").getAbsolutePath());
+    runner = Runner.create(properties);
+    assertThat(runner.getWorkDir()).isEqualTo(new File("target").getAbsoluteFile());
   }
 
   @Test
