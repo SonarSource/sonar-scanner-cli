@@ -17,7 +17,6 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-
 package org.sonar.runner;
 
 import org.junit.Rule;
@@ -30,11 +29,6 @@ import java.io.File;
 import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,7 +44,7 @@ public class RunnerTest {
       Runner.create(new Properties()).checkMandatoryProperties();
       fail("Exception expected");
     } catch (RunnerException e) {
-      assertThat(e.getMessage(), is("You must define mandatory properties: sonar.projectKey, sonar.projectName, sonar.projectVersion, sources"));
+      assertThat(e).hasMessage("You must define mandatory properties: sonar.projectKey, sonar.projectName, sonar.projectVersion, sources");
     }
   }
 
@@ -66,15 +60,16 @@ public class RunnerTest {
 
   @Test
   public void shouldCheckVersion() {
-    assertThat(Runner.isUnsupportedVersion("1.0"), is(true));
-    assertThat(Runner.isUnsupportedVersion("2.0"), is(true));
-    assertThat(Runner.isUnsupportedVersion("2.1"), is(true));
-    assertThat(Runner.isUnsupportedVersion("2.2"), is(true));
-    assertThat(Runner.isUnsupportedVersion("2.3"), is(true));
-    assertThat(Runner.isUnsupportedVersion("2.4"), is(true));
-    assertThat(Runner.isUnsupportedVersion("2.4.1"), is(true));
-    assertThat(Runner.isUnsupportedVersion("2.5"), is(true));
-    assertThat(Runner.isUnsupportedVersion("2.6"), is(false));
+    assertThat(Runner.isUnsupportedVersion("1.0")).isTrue();
+    assertThat(Runner.isUnsupportedVersion("2.0")).isTrue();
+    assertThat(Runner.isUnsupportedVersion("2.1")).isTrue();
+    assertThat(Runner.isUnsupportedVersion("2.2")).isTrue();
+    assertThat(Runner.isUnsupportedVersion("2.3")).isTrue();
+    assertThat(Runner.isUnsupportedVersion("2.4")).isTrue();
+    assertThat(Runner.isUnsupportedVersion("2.4.1")).isTrue();
+    assertThat(Runner.isUnsupportedVersion("2.5")).isTrue();
+    assertThat(Runner.isUnsupportedVersion("2.11")).isFalse();
+    assertThat(Runner.isUnsupportedVersion("3.0")).isFalse();
   }
 
   /**
@@ -84,29 +79,29 @@ public class RunnerTest {
   @Test
   public void shouldGetVersion() {
     String version = Runner.create(new Properties()).getRunnerVersion();
-    assertThat(version.length(), greaterThanOrEqualTo(3));
-    assertThat(version, containsString("."));
+    assertThat(version.length()).isGreaterThanOrEqualTo(3);
+    assertThat(version).contains(".");
 
     // test that version is set by Maven build
-    assertThat(version, not(containsString("$")));
+    assertThat(version).doesNotContain("$");
   }
 
   @Test
   public void shouldGetServerUrl() {
     Properties properties = new Properties();
     Runner runner = Runner.create(properties);
-    assertThat("Default value", runner.getServerURL(), is("http://localhost:9000"));
+    assertThat(runner.getServerURL()).isEqualTo("http://localhost:9000");
     properties.setProperty("sonar.host.url", "foo");
-    assertThat(runner.getServerURL(), is("foo"));
+    assertThat(runner.getServerURL()).isEqualTo("foo");
   }
 
   @Test
   public void shouldDetermineVerboseMode() {
     Properties properties = new Properties();
     Runner runner = Runner.create(properties);
-    assertThat("Default value", runner.isDebug(), is(false));
+    assertThat(runner.isDebug()).isFalse();
     properties.setProperty(Runner.PROPERTY_VERBOSE, "true");
-    assertThat(runner.isDebug(), is(true));
+    assertThat(runner.isDebug()).isTrue();
   }
 
   @Test
@@ -114,7 +109,7 @@ public class RunnerTest {
     Properties properties = new Properties();
     Runner runner = Runner.create(properties);
     properties.setProperty(Runner.DEBUG_MODE, "true");
-    assertThat(runner.isDebug(), is(true));
+    assertThat(runner.isDebug()).isTrue();
   }
 
   @Test
@@ -125,8 +120,8 @@ public class RunnerTest {
     Runner runner = Runner.create(props);
     assertThat(runner.getProperties().get("project.home")).isEqualTo(home.getCanonicalPath());
 
-    assertThat(runner.getProjectDir(), is(home));
-    assertThat(runner.getWorkDir(), is(new File(home, ".sonar")));
+    assertThat(runner.getProjectDir()).isEqualTo(home);
+    assertThat(runner.getWorkDir()).isEqualTo(new File(home, ".sonar"));
   }
 
   @Test
@@ -143,8 +138,8 @@ public class RunnerTest {
   public void shouldInitProjectDirWithCurrentDir() throws Exception {
     Runner runner = Runner.create(new Properties());
 
-    assertThat(runner.getProjectDir().isDirectory(), is(true));
-    assertThat(runner.getProjectDir().exists(), is(true));
+    assertThat(runner.getProjectDir().isDirectory()).isTrue();
+    assertThat(runner.getProjectDir().exists()).isTrue();
   }
 
   @Test

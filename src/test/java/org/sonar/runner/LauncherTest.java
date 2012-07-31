@@ -28,9 +28,6 @@ import java.io.File;
 import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class LauncherTest {
@@ -38,17 +35,17 @@ public class LauncherTest {
   @Test
   public void shouldFilterFiles() throws Exception {
     File baseDir = new File(getClass().getResource("/org/sonar/runner/LauncherTest/shouldFilterFiles/").toURI());
-    assertThat(Launcher.getLibraries(baseDir, "in*.txt").length, is(1));
-    assertThat(Launcher.getLibraries(baseDir, "*.txt").length, is(2));
-    assertThat(Launcher.getLibraries(baseDir.getParentFile(), "shouldFilterFiles/in*.txt").length, is(1));
-    assertThat(Launcher.getLibraries(baseDir.getParentFile(), "shouldFilterFiles/*.txt").length, is(2));
+    assertThat(Launcher.getLibraries(baseDir, "in*.txt").length).isEqualTo(1);
+    assertThat(Launcher.getLibraries(baseDir, "*.txt").length).isEqualTo(2);
+    assertThat(Launcher.getLibraries(baseDir.getParentFile(), "shouldFilterFiles/in*.txt").length).isEqualTo(1);
+    assertThat(Launcher.getLibraries(baseDir.getParentFile(), "shouldFilterFiles/*.txt").length).isEqualTo(2);
   }
 
   @Test
   public void shouldWorkWithAbsolutePath() throws Exception {
     File baseDir = new File("not-exists");
     String absolutePattern = new File(getClass().getResource("/org/sonar/runner/LauncherTest/shouldFilterFiles/").toURI()).getAbsolutePath() + "/in*.txt";
-    assertThat(Launcher.getLibraries(baseDir.getParentFile(), absolutePattern).length, is(1));
+    assertThat(Launcher.getLibraries(baseDir.getParentFile(), absolutePattern).length).isEqualTo(1);
   }
 
   @Test
@@ -58,7 +55,7 @@ public class LauncherTest {
       Launcher.getLibraries(baseDir, "*.jar");
       fail("Exception expected");
     } catch (RunnerException e) {
-      assertThat(e.getMessage(), startsWith("No files matching pattern \"*.jar\" in directory "));
+      assertThat(e.getMessage()).contains("No files matching pattern \"*.jar\" in directory");
     }
   }
 
@@ -83,26 +80,26 @@ public class LauncherTest {
   public void testGetSqlLevel() throws Exception {
     Configuration conf = new BaseConfiguration();
 
-    assertThat(Launcher.getSqlLevel(conf), is("WARN"));
+    assertThat(Launcher.getSqlLevel(conf)).isEqualTo("WARN");
 
     conf.setProperty("sonar.showSql", "true");
-    assertThat(Launcher.getSqlLevel(conf), is("DEBUG"));
+    assertThat(Launcher.getSqlLevel(conf)).isEqualTo("DEBUG");
 
     conf.setProperty("sonar.showSql", "false");
-    assertThat(Launcher.getSqlLevel(conf), is("WARN"));
+    assertThat(Launcher.getSqlLevel(conf)).isEqualTo("WARN");
   }
 
   @Test
   public void testGetSqlResultsLevel() throws Exception {
     Configuration conf = new BaseConfiguration();
 
-    assertThat(Launcher.getSqlResultsLevel(conf), is("WARN"));
+    assertThat(Launcher.getSqlResultsLevel(conf)).isEqualTo("WARN");
 
     conf.setProperty("sonar.showSqlResults", "true");
-    assertThat(Launcher.getSqlResultsLevel(conf), is("DEBUG"));
+    assertThat(Launcher.getSqlResultsLevel(conf)).isEqualTo("DEBUG");
 
     conf.setProperty("sonar.showSqlResults", "false");
-    assertThat(Launcher.getSqlResultsLevel(conf), is("WARN"));
+    assertThat(Launcher.getSqlResultsLevel(conf)).isEqualTo("WARN");
   }
 
 }

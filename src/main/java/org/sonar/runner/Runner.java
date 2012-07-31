@@ -57,7 +57,7 @@ public final class Runner {
   /**
    * Array of prefixes of versions of Sonar without support of this runner.
    */
-  private static final String[] UNSUPPORTED_VERSIONS = {"1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5"};
+  private static final String[] UNSUPPORTED_VERSIONS = {"1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "2.10"};
 
   /**
    * Array of all mandatory properties required to execute runner.
