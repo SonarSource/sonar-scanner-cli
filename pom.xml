@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>sonar-runner</artifactId>
-  <version>1.4-SNAPSHOT</version>
+  <version>1.4</version>
   <name>Sonar Standalone Runner</name>
 
   <url>http://docs.codehaus.org/display/SONAR/Sonar+Standalone+Runner</url>
@@ -44,9 +44,9 @@
   </developers>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/sonar-plugins/trunk/sonar-runner</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/sonar-plugins/trunk/sonar-runner</developerConnection>
-    <url>http://svn.sonar-plugins.codehaus.org</url>
+    <connection>scm:svn:http://svn.codehaus.org/sonar-plugins/tags/sonar-runner-1.4</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/sonar-plugins/tags/sonar-runner-1.4</developerConnection>
+    <url>scm:svn:https://svn.codehaus.org/sonar-plugins/tags/sonar-runner-1.4</url>
   </scm>
   <issueManagement>
     <system>JIRA</system>
