@@ -22,7 +22,7 @@ package org.sonar.runner;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.junit.Test;
-import org.sonar.batch.bootstrapper.ProjectDefinition;
+import org.sonar.api.batch.bootstrap.ProjectDefinition;
 
 import java.io.File;
 import java.util.Properties;

@@ -35,11 +35,11 @@ import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
+import org.sonar.api.batch.bootstrap.ProjectDefinition;
+import org.sonar.api.batch.bootstrap.ProjectReactor;
 import org.sonar.api.utils.SonarException;
 import org.sonar.batch.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
-import org.sonar.batch.bootstrapper.ProjectDefinition;
-import org.sonar.batch.bootstrapper.Reactor;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -73,9 +73,29 @@ public class Launcher {
     executeBatch(project, initialConfiguration);
   }
 
+  @VisibleForTesting
+  protected ProjectDefinition defineProject() {
+    File baseDir = runner.getProjectDir();
+    Properties properties = runner.getProperties();
+    ProjectDefinition definition = ProjectDefinition.create(properties)
+        .setBaseDir(baseDir)
+        .setWorkDir(runner.getWorkDir())
+        .addSourceDirs(getList(properties, "sources"))
+        .addTestDirs(getList(properties, "tests"));
+    for (String dir : getList(properties, "binaries")) {
+      definition.addBinaryDir(dir);
+    }
+    for (String pattern : getList(properties, "libraries")) {
+      for (File file : getLibraries(baseDir, pattern)) {
+        definition.addLibrary(file.getAbsolutePath());
+      }
+    }
+    return definition;
+  }
+
   private void executeBatch(ProjectDefinition project, Configuration initialConfiguration) {
-    Reactor reactor = new Reactor(project);
-    Batch batch = new Batch(initialConfiguration, new EnvironmentInformation("Runner", runner.getRunnerVersion()), reactor);
+    ProjectReactor reactor = new ProjectReactor(project);
+    Batch batch = Batch.create(reactor, initialConfiguration, new EnvironmentInformation("Runner", runner.getRunnerVersion()));
     batch.execute();
   }
 
@@ -107,28 +127,6 @@ public class Launcher {
   protected static String getSqlResultsLevel(Configuration config) {
     boolean showSql = config.getBoolean("sonar.showSqlResults", false);
     return showSql ? "DEBUG" : "WARN";
-  }
-
-  @VisibleForTesting
-  protected ProjectDefinition defineProject() {
-    File baseDir = runner.getProjectDir();
-    Properties properties = runner.getProperties();
-    ProjectDefinition definition = new ProjectDefinition(baseDir, runner.getWorkDir(), properties);
-    for (String dir : getList(properties, "sources")) {
-      definition.addSourceDir(dir);
-    }
-    for (String dir : getList(properties, "tests")) {
-      definition.addTestDir(dir);
-    }
-    for (String dir : getList(properties, "binaries")) {
-      definition.addBinaryDir(dir);
-    }
-    for (String pattern : getList(properties, "libraries")) {
-      for (File file : getLibraries(baseDir, pattern)) {
-        definition.addLibrary(file.getAbsolutePath());
-      }
-    }
-    return definition;
   }
 
   /**

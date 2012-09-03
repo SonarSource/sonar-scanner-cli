@@ -24,6 +24,8 @@ package org.sonar.runner;
  */
 public class RunnerException extends RuntimeException {
 
+  private static final long serialVersionUID = 4810407777585753030L;
+
   public RunnerException(String message) {
     super(message);
   }
