@@ -23,6 +23,8 @@ import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.junit.Test;
 
+import java.util.Properties;
+
 import static org.fest.assertions.Assertions.assertThat;
 
 public class LauncherTest {
@@ -51,6 +53,23 @@ public class LauncherTest {
 
     conf.setProperty("sonar.showSqlResults", "false");
     assertThat(Launcher.getSqlResultsLevel(conf)).isEqualTo("WARN");
+  }
+
+  @Test
+  public void shouldDetermineVerboseMode() {
+    Properties properties = new Properties();
+    Launcher launcher = new Launcher(properties);
+    assertThat(launcher.isDebug()).isFalse();
+    properties.setProperty(Runner.PROPERTY_VERBOSE, "true");
+    assertThat(launcher.isDebug()).isTrue();
+  }
+
+  @Test
+  public void shouldSupportDeprecatedDebugProperty() {
+    Properties properties = new Properties();
+    Launcher launcher = new Launcher(properties);
+    properties.setProperty(Runner.PROPERTY_OLD_DEBUG_MODE, "true");
+    assertThat(launcher.isDebug()).isTrue();
   }
 
 }

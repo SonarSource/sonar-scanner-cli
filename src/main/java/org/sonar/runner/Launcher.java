@@ -23,6 +23,7 @@ package org.sonar.runner;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.EnvironmentConfiguration;
@@ -37,29 +38,28 @@ import org.sonar.batch.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
 import org.sonar.runner.model.SonarProjectBuilder;
 
+import java.io.File;
 import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * Contrary to {@link org.sonar.runner.Runner}, this class is executed within the classloader
  * provided by the server. It contains the installed plugins and the same version of sonar-batch as the server.
- *
- * TODO : instead of depending on Runner, that is not in the same classloader, we could simply use Properties :
- * sonar.runner.version, sonar.runner.debug, sonar.runner.projectDir, sonar.runner.workDir and all the
- * other properties.
  */
 public class Launcher {
 
-  private Runner runner;
+  private Properties propertiesFromRunner;
 
-  public Launcher(Runner runner) {
-    this.runner = runner;
+  public Launcher(Properties properties) {
+    this.propertiesFromRunner = properties;
   }
 
   /**
    * This method invoked from {@link Main}. Do not rename it.
    */
   public void execute() {
-    ProjectDefinition project = SonarProjectBuilder.create(runner.getProjectDir(), runner.getProperties()).generateProjectDefinition();
+    File baseDir = new File(propertiesFromRunner.getProperty(Runner.PROPERTY_PROJECT_DIR));
+    ProjectDefinition project = SonarProjectBuilder.create(baseDir, propertiesFromRunner).generateProjectDefinition();
     Configuration initialConfiguration = getInitialConfiguration(project);
     initLogging(initialConfiguration);
     executeBatch(project, initialConfiguration);
@@ -67,7 +67,8 @@ public class Launcher {
 
   private void executeBatch(ProjectDefinition project, Configuration initialConfiguration) {
     ProjectReactor reactor = new ProjectReactor(project);
-    Batch batch = Batch.create(reactor, initialConfiguration, new EnvironmentInformation("Runner", runner.getRunnerVersion()));
+    String runnerVersion = propertiesFromRunner.getProperty(Runner.PROPERTY_RUNNER_VERSION);
+    Batch batch = Batch.create(reactor, initialConfiguration, new EnvironmentInformation("Runner", runnerVersion));
     batch.execute();
   }
 
@@ -77,7 +78,7 @@ public class Launcher {
     jc.setContext(context);
     context.reset();
     InputStream input = Batch.class.getResourceAsStream("/org/sonar/batch/logback.xml");
-    System.setProperty("ROOT_LOGGER_LEVEL", runner.isDebug() ? "DEBUG" : "INFO");
+    System.setProperty("ROOT_LOGGER_LEVEL", isDebug() ? "DEBUG" : "INFO");
     context.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(initialConfiguration));// since 2.14. Ignored on previous versions.
     context.putProperty("SQL_RESULTS_LOGGER_LEVEL", getSqlResultsLevel(initialConfiguration));// since 2.14. Ignored on previous versions.
     try {
@@ -91,11 +92,18 @@ public class Launcher {
     }
   }
 
+  @VisibleForTesting
+  protected boolean isDebug() {
+    return Boolean.parseBoolean(propertiesFromRunner.getProperty(Runner.PROPERTY_VERBOSE, propertiesFromRunner.getProperty(Runner.PROPERTY_OLD_DEBUG_MODE, "false")));
+  }
+
+  @VisibleForTesting
   protected static String getSqlLevel(Configuration config) {
     boolean showSql = config.getBoolean("sonar.showSql", false);
     return showSql ? "DEBUG" : "WARN";
   }
 
+  @VisibleForTesting
   protected static String getSqlResultsLevel(Configuration config) {
     boolean showSql = config.getBoolean("sonar.showSqlResults", false);
     return showSql ? "DEBUG" : "WARN";

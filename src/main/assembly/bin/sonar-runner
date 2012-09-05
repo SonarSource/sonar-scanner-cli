@@ -22,7 +22,7 @@ else
 fi
 
 JAVA_CMD="`which java`"
-JAVA_CLASSPATH="${SONAR_RUNNER_HOME}"/lib/sonar-runner.jar:"${SONAR_RUNNER_HOME}"/lib/sonar-batch-bootstrapper.jar
+JAVA_CLASSPATH="${SONAR_RUNNER_HOME}"/lib/sonar-runner.jar
 PROJECT_HOME=`pwd`
 
 #echo "Info: Using sonar-runner at $SONAR_RUNNER_HOME"

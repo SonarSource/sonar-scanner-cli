@@ -60,12 +60,6 @@
   </properties>
 
   <dependencies>
-    <!-- Would be embedded in final JAR -->
-    <dependency>
-      <groupId>org.codehaus.sonar</groupId>
-      <artifactId>sonar-batch-bootstrapper</artifactId>
-      <version>${sonar.buildVersion}</version>
-    </dependency>
     <!-- Would be available after bootstrapping -->
     <dependency>
       <groupId>ch.qos.logback</groupId>

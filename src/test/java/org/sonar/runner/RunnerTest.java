@@ -22,8 +22,8 @@ package org.sonar.runner;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.sonar.batch.bootstrapper.BootstrapException;
-import org.sonar.batch.bootstrapper.Bootstrapper;
+import org.sonar.runner.bootstrapper.BootstrapException;
+import org.sonar.runner.bootstrapper.Bootstrapper;
 
 import java.io.File;
 import java.util.Properties;
@@ -93,23 +93,6 @@ public class RunnerTest {
     assertThat(runner.getServerURL()).isEqualTo("http://localhost:9000");
     properties.setProperty("sonar.host.url", "foo");
     assertThat(runner.getServerURL()).isEqualTo("foo");
-  }
-
-  @Test
-  public void shouldDetermineVerboseMode() {
-    Properties properties = new Properties();
-    Runner runner = Runner.create(properties);
-    assertThat(runner.isDebug()).isFalse();
-    properties.setProperty(Runner.PROPERTY_VERBOSE, "true");
-    assertThat(runner.isDebug()).isTrue();
-  }
-
-  @Test
-  public void shouldSupportDeprecatedDebugProperty() {
-    Properties properties = new Properties();
-    Runner runner = Runner.create(properties);
-    properties.setProperty(Runner.DEBUG_MODE, "true");
-    assertThat(runner.isDebug()).isTrue();
   }
 
   @Test

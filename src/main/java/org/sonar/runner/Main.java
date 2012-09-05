@@ -20,8 +20,8 @@
 
 package org.sonar.runner;
 
-import org.sonar.batch.bootstrapper.BootstrapException;
-import org.sonar.batch.bootstrapper.BootstrapperIOUtils;
+import org.sonar.runner.bootstrapper.BootstrapException;
+import org.sonar.runner.bootstrapper.BootstrapperIOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

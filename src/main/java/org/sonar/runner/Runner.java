@@ -19,10 +19,10 @@
  */
 package org.sonar.runner;
 
-import org.sonar.batch.bootstrapper.BootstrapClassLoader;
-import org.sonar.batch.bootstrapper.BootstrapException;
-import org.sonar.batch.bootstrapper.Bootstrapper;
-import org.sonar.batch.bootstrapper.BootstrapperIOUtils;
+import org.sonar.runner.bootstrapper.BootstrapClassLoader;
+import org.sonar.runner.bootstrapper.BootstrapException;
+import org.sonar.runner.bootstrapper.Bootstrapper;
+import org.sonar.runner.bootstrapper.BootstrapperIOUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,11 +37,15 @@ import java.util.Properties;
  * @since 1.1
  */
 public final class Runner {
+
+  public static final String PROPERTY_PROJECT_DIR = "sonar.runner.projectDir";
+  public static final String PROPERTY_RUNNER_VERSION = "sonar.runner.version";
+
   /**
    * @deprecated Replaced by sonar.verbose since 1.2
    */
   @Deprecated
-  public static final String DEBUG_MODE = "runner.debug";
+  public static final String PROPERTY_OLD_DEBUG_MODE = "runner.debug";
 
   /**
    * @since 1.2
@@ -109,6 +113,8 @@ public final class Runner {
     if (!projectDir.isDirectory() || !projectDir.exists()) {
       throw new IllegalArgumentException("Project home must be an existing directory: " + path);
     }
+    // project home exist, add its absolute path as "sonar.runner.projectDir" property
+    properties.put(PROPERTY_PROJECT_DIR, projectDir.getAbsolutePath());
     workDir = initWorkDir();
   }
 
@@ -143,10 +149,6 @@ public final class Runner {
    */
   public Properties getProperties() {
     return properties;
-  }
-
-  public boolean isDebug() {
-    return Boolean.parseBoolean(properties.getProperty(PROPERTY_VERBOSE, properties.getProperty(DEBUG_MODE, "false")));
   }
 
   public String getRunnerVersion() {
@@ -201,12 +203,8 @@ public final class Runner {
     try {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
       Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.Launcher");
-      // TODO: hack to instantiate SonarProjectBuilder in this classloader otherwise it will be found in the parent one, where no deps are
-      // available
-      sonarClassLoader.findClass("org.sonar.runner.model.SonarProjectBuilder");
-      // END of hack
-      Constructor<?> constructor = launcherClass.getConstructor(Runner.class);
-      Object launcher = constructor.newInstance(this);
+      Constructor<?> constructor = launcherClass.getConstructor(Properties.class);
+      Object launcher = constructor.newInstance(getProperties());
       Method method = launcherClass.getMethod("execute");
       method.invoke(launcher);
     } catch (InvocationTargetException e) {
