@@ -19,7 +19,14 @@
  */
 package org.sonar.runner.bootstrapper;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 
 public final class BootstrapperIOUtils {
 
@@ -40,7 +47,7 @@ public final class BootstrapperIOUtils {
       if (closeable != null) {
         closeable.close();
       }
-    } catch (IOException ioe) { // NOSONAR
+    } catch (IOException ioe) {
     }
   }
 

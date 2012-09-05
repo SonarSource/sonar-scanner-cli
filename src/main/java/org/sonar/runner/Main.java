@@ -20,6 +20,8 @@
 
 package org.sonar.runner;
 
+import org.sonar.runner.utils.SonarRunnerVersion;
+
 import org.sonar.runner.bootstrapper.BootstrapException;
 import org.sonar.runner.bootstrapper.BootstrapperIOUtils;
 
@@ -50,7 +52,7 @@ public final class Main {
     try {
       Properties props = loadProperties(args);
       Runner runner = Runner.create(props);
-      log("Runner version: " + runner.getRunnerVersion());
+      log("Runner version: " + SonarRunnerVersion.getVersion());
       log("Java version: " + System.getProperty("java.version", "<unknown java version>")
         + ", vendor: " + System.getProperty("java.vendor", "<unknown vendor>"));
       log("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
@@ -58,7 +60,7 @@ public final class Main {
         log("Other system properties:");
         log("  - sun.arch.data.model: \"" + System.getProperty("sun.arch.data.model") + "\"");
       }
-      log("Server: " + runner.getServerURL());
+      log("Server: " + runner.getSonarServerURL());
       try {
         log("Work directory: " + runner.getWorkDir().getCanonicalPath());
       } catch (IOException e) {

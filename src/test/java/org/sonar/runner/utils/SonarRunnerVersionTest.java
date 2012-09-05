@@ -17,18 +17,19 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.bootstrapper;
+package org.sonar.runner.utils;
+
+import org.sonar.runner.utils.SonarRunnerVersion;
 
 import org.junit.Test;
-import org.sonar.runner.bootstrapper.BootstrapperVersion;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class BootstrapperVersionTest {
+public class SonarRunnerVersionTest {
 
   @Test
   public void shouldLoadVersion() {
-    String version = BootstrapperVersion.getVersion();
+    String version = SonarRunnerVersion.getVersion();
     assertThat(version).contains(".");
     assertThat(version).doesNotContain("$");
   }

@@ -19,14 +19,13 @@
  */
 package org.sonar.runner;
 
+import org.sonar.runner.utils.SonarRunnerVersion;
+
 import org.sonar.runner.bootstrapper.BootstrapClassLoader;
 import org.sonar.runner.bootstrapper.BootstrapException;
 import org.sonar.runner.bootstrapper.Bootstrapper;
-import org.sonar.runner.bootstrapper.BootstrapperIOUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -63,11 +62,6 @@ public final class Runner {
    */
   private static final String[] UNSUPPORTED_VERSIONS = {"1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "2.10"};
 
-  /**
-   * Array of all mandatory properties required to execute runner.
-   */
-  private static final String[] MANDATORY_PROPERTIES = {"sonar.projectKey", "sonar.projectName", "sonar.projectVersion", "sources"};
-
   private File projectDir;
   private File workDir;
   private Properties properties;
@@ -82,28 +76,14 @@ public final class Runner {
   }
 
   public void execute() {
-    checkMandatoryProperties();
-    Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + getRunnerVersion(), getServerURL(), getWorkDir());
+    String sonarRunnerVersion = SonarRunnerVersion.getVersion();
+    properties.put(PROPERTY_RUNNER_VERSION, sonarRunnerVersion);
+    Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + sonarRunnerVersion, getSonarServerURL(), getWorkDir());
     checkSonarVersion(bootstrapper);
     delegateExecution(createClassLoader(bootstrapper));
   }
 
-  void checkMandatoryProperties() {
-    StringBuilder missing = new StringBuilder();
-    for (String mandatoryProperty : MANDATORY_PROPERTIES) {
-      if (!properties.containsKey(mandatoryProperty)) {
-        if (missing.length() > 0) {
-          missing.append(", ");
-        }
-        missing.append(mandatoryProperty);
-      }
-    }
-    if (missing.length() != 0) {
-      throw new RunnerException("You must define mandatory properties: " + missing);
-    }
-  }
-
-  public String getServerURL() {
+  protected String getSonarServerURL() {
     return properties.getProperty("sonar.host.url", "http://localhost:9000");
   }
 
@@ -113,7 +93,7 @@ public final class Runner {
     if (!projectDir.isDirectory() || !projectDir.exists()) {
       throw new IllegalArgumentException("Project home must be an existing directory: " + path);
     }
-    // project home exist, add its absolute path as "sonar.runner.projectDir" property
+    // project home exists: add its absolute path as "sonar.runner.projectDir" property
     properties.put(PROPERTY_PROJECT_DIR, projectDir.getAbsolutePath());
     workDir = initWorkDir();
   }
@@ -133,36 +113,22 @@ public final class Runner {
     return new File(projectDir, customWorkDir.getPath());
   }
 
-  public File getProjectDir() {
+  protected File getProjectDir() {
     return projectDir;
   }
 
   /**
    * @return work directory, default is ".sonar" in project directory
    */
-  public File getWorkDir() {
+  protected File getWorkDir() {
     return workDir;
   }
 
   /**
    * @return global properties, project properties and command-line properties
    */
-  public Properties getProperties() {
+  protected Properties getProperties() {
     return properties;
-  }
-
-  public String getRunnerVersion() {
-    InputStream in = null;
-    try {
-      in = Runner.class.getResourceAsStream("/org/sonar/runner/version.txt");
-      Properties props = new Properties();
-      props.load(in);
-      return props.getProperty("version");
-    } catch (IOException e) {
-      throw new BootstrapException("Could not load the version information for Sonar Standalone Runner", e);
-    } finally {
-      BootstrapperIOUtils.closeQuietly(in);
-    }
   }
 
   protected void checkSonarVersion(Bootstrapper bootstrapper) {
@@ -194,7 +160,7 @@ public final class Runner {
   }
 
   /**
-   * Loads {@link Launcher} from specified {@link org.sonar.batch.bootstrapper.BootstrapClassLoader} and passes control to it.
+   * Loads Launcher class from specified {@link org.sonar.batch.bootstrapper.BootstrapClassLoader} and passes control to it.
    *
    * @see Launcher#execute()
    */
@@ -202,7 +168,7 @@ public final class Runner {
     ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
-      Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.Launcher");
+      Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.model.Launcher");
       Constructor<?> constructor = launcherClass.getConstructor(Properties.class);
       Object launcher = constructor.newInstance(getProperties());
       Method method = launcherClass.getMethod("execute");

@@ -29,7 +29,6 @@ import java.io.File;
 import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,26 +36,6 @@ public class RunnerTest {
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
-
-  @Test
-  public void shouldThrowExceptionIfMandatoryPropertyNotSpecified() {
-    try {
-      Runner.create(new Properties()).checkMandatoryProperties();
-      fail("Exception expected");
-    } catch (RunnerException e) {
-      assertThat(e).hasMessage("You must define mandatory properties: sonar.projectKey, sonar.projectName, sonar.projectVersion, sources");
-    }
-  }
-
-  @Test
-  public void shouldNotThrowExceptionIfAllMandatoryPropertiesSpecified() {
-    Properties properties = new Properties();
-    properties.setProperty("sonar.projectKey", "foo");
-    properties.setProperty("sonar.projectName", "bar");
-    properties.setProperty("sonar.projectVersion", "1.0");
-    properties.setProperty("sources", "src");
-    Runner.create(properties).checkMandatoryProperties();
-  }
 
   @Test
   public void shouldCheckVersion() {
@@ -72,27 +51,13 @@ public class RunnerTest {
     assertThat(Runner.isUnsupportedVersion("3.0")).isFalse();
   }
 
-  /**
-   * Simon: This test can only be executed by Maven, not by IDE
-   * Godin: This test can be executed by Eclipse
-   */
-  @Test
-  public void shouldGetVersion() {
-    String version = Runner.create(new Properties()).getRunnerVersion();
-    assertThat(version.length()).isGreaterThanOrEqualTo(3);
-    assertThat(version).contains(".");
-
-    // test that version is set by Maven build
-    assertThat(version).doesNotContain("$");
-  }
-
   @Test
   public void shouldGetServerUrl() {
     Properties properties = new Properties();
     Runner runner = Runner.create(properties);
-    assertThat(runner.getServerURL()).isEqualTo("http://localhost:9000");
+    assertThat(runner.getSonarServerURL()).isEqualTo("http://localhost:9000");
     properties.setProperty("sonar.host.url", "foo");
-    assertThat(runner.getServerURL()).isEqualTo("foo");
+    assertThat(runner.getSonarServerURL()).isEqualTo("foo");
   }
 
   @Test

@@ -40,8 +40,10 @@ import java.util.Properties;
 
 /**
  * Class that creates a Sonar project definition based on a set of properties.
+ * 
+ * @since 1.5
  */
-public class SonarProjectBuilder {
+public final class SonarProjectBuilder {
 
   private static final String PROPERTY_SONAR_MODULES = "sonar.modules";
   private static final String PROPERTY_MODULE_FILE = "file";
@@ -76,8 +78,7 @@ public class SonarProjectBuilder {
   }
 
   public static SonarProjectBuilder create(File baseDir, Properties properties) {
-    SonarProjectBuilder builder = new SonarProjectBuilder(baseDir, properties);
-    return builder;
+    return new SonarProjectBuilder(baseDir, properties);
   }
 
   public ProjectDefinition generateProjectDefinition() {

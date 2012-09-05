@@ -17,13 +17,15 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.bootstrapper;
+package org.sonar.runner.utils;
+
+import org.sonar.runner.bootstrapper.BootstrapperIOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public enum BootstrapperVersion {
+public enum SonarRunnerVersion {
 
   INSTANCE;
 
@@ -34,7 +36,7 @@ public enum BootstrapperVersion {
     return INSTANCE.version;
   }
 
-  private BootstrapperVersion() {
+  private SonarRunnerVersion() {
     InputStream input = getClass().getResourceAsStream(PROPERTIES_PATH);
     try {
       Properties properties = new Properties();

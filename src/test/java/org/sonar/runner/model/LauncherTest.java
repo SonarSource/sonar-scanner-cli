@@ -17,7 +17,11 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner;
+package org.sonar.runner.model;
+
+import org.sonar.runner.Runner;
+
+import org.sonar.runner.model.Launcher;
 
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;

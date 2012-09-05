@@ -19,6 +19,8 @@
  */
 package org.sonar.runner.bootstrapper;
 
+import org.sonar.runner.utils.SonarRunnerVersion;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -137,7 +139,7 @@ public class Bootstrapper {
    * By convention, the product tokens are listed in order of their significance for identifying the application.
    */
   String getUserAgent() {
-    return "sonar-bootstrapper/" + BootstrapperVersion.getVersion() + " " + productToken;
+    return "sonar-bootstrapper/" + SonarRunnerVersion.getVersion() + " " + productToken;
   }
 
   HttpURLConnection newHttpConnection(URL url) throws IOException {
