@@ -44,9 +44,9 @@
   </developers>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/sonar-plugins/trunk/sonar-runner</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/sonar-plugins/trunk/sonar-runner</developerConnection>
-    <url>http://svn.sonar-plugins.codehaus.org</url>
+    <connection>scm:git:git@github.com:SonarCommunity/sonar-runner.git</connection>
+    <developerConnection>scm:git:git@github.com:SonarCommunity/sonar-runner.git</developerConnection>
+    <url>https://github.com/SonarCommunity/sonar-runner</url>
   </scm>
   <issueManagement>
     <system>JIRA</system>
