@@ -23,29 +23,21 @@ package org.sonar.runner;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.EnvironmentConfiguration;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.configuration.SystemConfiguration;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.AndFileFilter;
-import org.apache.commons.io.filefilter.FileFileFilter;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.bootstrap.ProjectReactor;
 import org.sonar.api.utils.SonarException;
 import org.sonar.batch.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
+import org.sonar.runner.model.SonarProjectBuilder;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Properties;
 
 /**
  * Contrary to {@link org.sonar.runner.Runner}, this class is executed within the classloader
@@ -67,30 +59,10 @@ public class Launcher {
    * This method invoked from {@link Main}. Do not rename it.
    */
   public void execute() {
-    ProjectDefinition project = defineProject();
+    ProjectDefinition project = SonarProjectBuilder.create(runner.getProjectDir(), runner.getProperties()).generateProjectDefinition();
     Configuration initialConfiguration = getInitialConfiguration(project);
     initLogging(initialConfiguration);
     executeBatch(project, initialConfiguration);
-  }
-
-  @VisibleForTesting
-  protected ProjectDefinition defineProject() {
-    File baseDir = runner.getProjectDir();
-    Properties properties = runner.getProperties();
-    ProjectDefinition definition = ProjectDefinition.create(properties)
-        .setBaseDir(baseDir)
-        .setWorkDir(runner.getWorkDir())
-        .addSourceDirs(getList(properties, "sources"))
-        .addTestDirs(getList(properties, "tests"));
-    for (String dir : getList(properties, "binaries")) {
-      definition.addBinaryDir(dir);
-    }
-    for (String pattern : getList(properties, "libraries")) {
-      for (File file : getLibraries(baseDir, pattern)) {
-        definition.addLibrary(file.getAbsolutePath());
-      }
-    }
-    return definition;
   }
 
   private void executeBatch(ProjectDefinition project, Configuration initialConfiguration) {
@@ -127,45 +99,6 @@ public class Launcher {
   protected static String getSqlResultsLevel(Configuration config) {
     boolean showSql = config.getBoolean("sonar.showSqlResults", false);
     return showSql ? "DEBUG" : "WARN";
-  }
-
-  /**
-   * Returns files matching specified pattern.
-   * Visibility has been relaxed to make code testable.
-   */
-  static File[] getLibraries(File baseDir, String pattern) {
-    final int i = Math.max(pattern.lastIndexOf('/'), pattern.lastIndexOf('\\'));
-    final String dirPath, filePattern;
-    if (i == -1) {
-      dirPath = ".";
-      filePattern = pattern;
-    } else {
-      dirPath = pattern.substring(0, i);
-      filePattern = pattern.substring(i + 1);
-    }
-    FileFilter fileFilter = new AndFileFilter(FileFileFilter.FILE, new WildcardFileFilter(filePattern));
-    File dir = resolvePath(baseDir, dirPath);
-    File[] files = dir.listFiles(fileFilter);
-    if (files == null || files.length == 0) {
-      throw new RunnerException("No files matching pattern \"" + filePattern + "\" in directory \"" + dir + "\"");
-    }
-    return files;
-  }
-
-  private static File resolvePath(File baseDir, String path) {
-    File file = new File(path);
-    if (!file.isAbsolute()) {
-      try {
-        file = new File(baseDir, path).getCanonicalFile();
-      } catch (IOException e) {
-        throw new RunnerException("Unable to resolve path \"" + path + "\"", e);
-      }
-    }
-    return file;
-  }
-
-  private String[] getList(Properties properties, String key) {
-    return StringUtils.split(properties.getProperty(key, ""), ',');
   }
 
   private Configuration getInitialConfiguration(ProjectDefinition project) {

@@ -201,6 +201,10 @@ public final class Runner {
     try {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
       Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.Launcher");
+      // TODO: hack to instantiate SonarProjectBuilder in this classloader otherwise it will be found in the parent one, where no deps are
+      // available
+      sonarClassLoader.findClass("org.sonar.runner.model.SonarProjectBuilder");
+      // END of hack
       Constructor<?> constructor = launcherClass.getConstructor(Runner.class);
       Object launcher = constructor.newInstance(this);
       Method method = launcherClass.getMethod("execute");
