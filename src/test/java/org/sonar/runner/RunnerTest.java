@@ -73,16 +73,6 @@ public class RunnerTest {
   }
 
   @Test
-  public void shouldFailInitDirsIfNotExist() throws Exception {
-    Properties props = new Properties();
-
-    props.setProperty("project.home", new File("target/foo/").getCanonicalPath());
-    thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("Project home must be an existing directory: ");
-    Runner.create(props);
-  }
-
-  @Test
   public void shouldInitProjectDirWithCurrentDir() throws Exception {
     Runner runner = Runner.create(new Properties());
 
