@@ -19,7 +19,6 @@
  */
 package org.sonar.runner.utils;
 
-import org.sonar.runner.bootstrapper.BootstrapperIOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +47,7 @@ public enum SonarRunnerVersion {
       this.version = "";
 
     } finally {
-      BootstrapperIOUtils.closeQuietly(input);
+      SonarRunnerIOUtils.closeQuietly(input);
     }
   }
 }

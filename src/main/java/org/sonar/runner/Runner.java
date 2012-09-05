@@ -19,11 +19,10 @@
  */
 package org.sonar.runner;
 
-import org.sonar.runner.utils.SonarRunnerVersion;
-
 import org.sonar.runner.bootstrapper.BootstrapClassLoader;
 import org.sonar.runner.bootstrapper.BootstrapException;
 import org.sonar.runner.bootstrapper.Bootstrapper;
+import org.sonar.runner.utils.SonarRunnerVersion;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -91,7 +90,7 @@ public final class Runner {
     String path = properties.getProperty("project.home", ".");
     projectDir = new File(path);
     if (!projectDir.isDirectory() || !projectDir.exists()) {
-      throw new IllegalArgumentException("Project home must be an existing directory: " + path);
+      throw new RunnerException("Project home must be an existing directory: " + path);
     }
     // project home exists: add its absolute path as "sonar.runner.projectDir" property
     properties.put(PROPERTY_PROJECT_DIR, projectDir.getAbsolutePath());
@@ -101,7 +100,7 @@ public final class Runner {
   private File initWorkDir() {
     String customWorkDir = properties.getProperty(PROPERTY_WORK_DIRECTORY);
     if (customWorkDir == null || customWorkDir.trim().length() == 0) {
-      return new File(projectDir, DEF_VALUE_WORK_DIRECTORY);
+      return new File(getProjectDir(), DEF_VALUE_WORK_DIRECTORY);
     }
     return defineCustomizedWorkDir(new File(customWorkDir));
   }
@@ -110,9 +109,12 @@ public final class Runner {
     if (customWorkDir.isAbsolute()) {
       return customWorkDir;
     }
-    return new File(projectDir, customWorkDir.getPath());
+    return new File(getProjectDir(), customWorkDir.getPath());
   }
 
+  /**
+   * @return the project base directory
+   */
   protected File getProjectDir() {
     return projectDir;
   }

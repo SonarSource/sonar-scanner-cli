@@ -17,7 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.bootstrapper;
+package org.sonar.runner.utils;
 
 import java.io.Closeable;
 import java.io.File;
@@ -28,9 +28,9 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
-public final class BootstrapperIOUtils {
+public final class SonarRunnerIOUtils {
 
-  private BootstrapperIOUtils() {
+  private SonarRunnerIOUtils() {
     // only static methods
   }
 

@@ -19,6 +19,8 @@
  */
 package org.sonar.runner.bootstrapper;
 
+import org.sonar.runner.utils.SonarRunnerIOUtils;
+
 import org.sonar.runner.utils.SonarRunnerVersion;
 
 import java.io.*;
@@ -108,14 +110,14 @@ public class Bootstrapper {
       HttpURLConnection connection = newHttpConnection(new URL(fullUrl));
       output = new FileOutputStream(toFile, false);
       input = connection.getInputStream();
-      BootstrapperIOUtils.copyLarge(input, output);
+      SonarRunnerIOUtils.copyLarge(input, output);
     } catch (IOException e) {
-      BootstrapperIOUtils.closeQuietly(output);
-      BootstrapperIOUtils.deleteFileQuietly(toFile);
+      SonarRunnerIOUtils.closeQuietly(output);
+      SonarRunnerIOUtils.deleteFileQuietly(toFile);
       throw new BootstrapException("Fail to download the file: " + fullUrl, e);
     } finally {
-      BootstrapperIOUtils.closeQuietly(input);
-      BootstrapperIOUtils.closeQuietly(output);
+      SonarRunnerIOUtils.closeQuietly(input);
+      SonarRunnerIOUtils.closeQuietly(output);
     }
   }
 
@@ -128,9 +130,9 @@ public class Bootstrapper {
       if (statusCode != HttpURLConnection.HTTP_OK) {
         throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + statusCode);
       }
-      return BootstrapperIOUtils.toString(reader);
+      return SonarRunnerIOUtils.toString(reader);
     } finally {
-      BootstrapperIOUtils.closeQuietly(reader);
+      SonarRunnerIOUtils.closeQuietly(reader);
       conn.disconnect();
     }
   }

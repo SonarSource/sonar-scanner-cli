@@ -20,9 +20,6 @@
 
 package org.sonar.runner.model;
 
-import org.sonar.runner.Main;
-import org.sonar.runner.Runner;
-
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
@@ -39,6 +36,8 @@ import org.sonar.api.batch.bootstrap.ProjectReactor;
 import org.sonar.api.utils.SonarException;
 import org.sonar.batch.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
+import org.sonar.runner.Main;
+import org.sonar.runner.Runner;
 
 import java.io.File;
 import java.io.InputStream;
