@@ -111,7 +111,7 @@ public final class SonarProjectBuilder {
     mergeParentProperties(childProps, rootProject.getProperties());
     File baseDir = null;
     if (childProps.containsKey(PROPERTY_MODULE_PATH)) {
-      baseDir = getFileFromProperty(childProps, PROPERTY_MODULE_PATH, rootProject.getBaseDir());
+      baseDir = getFileFromPath(childProps.getProperty(PROPERTY_MODULE_PATH), rootProject.getBaseDir());
     } else {
       baseDir = new File(rootProject.getBaseDir(), moduleId);
     }
@@ -123,7 +123,7 @@ public final class SonarProjectBuilder {
   }
 
   private ProjectDefinition loadChildProjectFromPropertyFile(ProjectDefinition rootProject, Properties moduleProps, String moduleId) {
-    File propertyFile = getFileFromProperty(moduleProps, PROPERTY_MODULE_FILE, rootProject.getBaseDir());
+    File propertyFile = getFileFromPath(moduleProps.getProperty(PROPERTY_MODULE_FILE), rootProject.getBaseDir());
     if (!propertyFile.isFile()) {
       throw new RunnerException("The properties file of the module '" + moduleId + "' does not exist: " + propertyFile.getAbsolutePath());
     }
@@ -189,7 +189,9 @@ public final class SonarProjectBuilder {
         .setWorkDir(initWorkDir(baseDir));
     if (!properties.containsKey(PROPERTY_SONAR_MODULES)) {
       // this is not a "aggregator" project, so let's specify its sources, tests, ...
-      definition.addSourceDirs(getListFromProperty(properties, "sources"));
+      String[] sourceDirs = getListFromProperty(properties, "sources");
+      checkExistenceOfDirectories(definition.getKey(), baseDir, sourceDirs);
+      definition.addSourceDirs(sourceDirs);
       definition.addTestDirs(getListFromProperty(properties, "tests"));
       for (String dir : getListFromProperty(properties, "binaries")) {
         definition.addBinaryDir(dir);
@@ -201,6 +203,18 @@ public final class SonarProjectBuilder {
       }
     }
     return definition;
+  }
+
+  @VisibleForTesting
+  protected void checkExistenceOfDirectories(String projectKey, File baseDir, String[] sourceDirs) {
+    for (String path : sourceDirs) {
+      File sourceFolder = getFileFromPath(path, baseDir);
+      if (!sourceFolder.isDirectory()) {
+        throw new RunnerException("The source folder '" + path + "' does not exist for '" + projectKey +
+          "' project/module (base directory = " + baseDir.getAbsolutePath() + ")");
+      }
+    }
+
   }
 
   @VisibleForTesting
@@ -261,11 +275,11 @@ public final class SonarProjectBuilder {
   }
 
   /**
-   * Returns the file denoted by the given property, may it be relative to "baseDir" or absolute.
+   * Returns the file denoted by the given path, may this path be relative to "baseDir" or absolute.
    */
   @VisibleForTesting
-  protected static File getFileFromProperty(Properties properties, String key, File baseDir) {
-    File propertyFile = new File(properties.getProperty(key).trim());
+  protected static File getFileFromPath(String path, File baseDir) {
+    File propertyFile = new File(path.trim());
     if (!propertyFile.isAbsolute()) {
       propertyFile = new File(baseDir, propertyFile.getPath());
     }

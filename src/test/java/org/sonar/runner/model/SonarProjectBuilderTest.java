@@ -57,6 +57,15 @@ public class SonarProjectBuilderTest {
   }
 
   @Test
+  public void shouldFailIfUnexistingSourceDirectory() throws IOException {
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("The source folder 'unexisting-source-dir' does not exist for 'com.foo.project' project/module (base directory = "
+      + TestUtils.getResource(this.getClass(), "simple-project-with-unexisting-source-dir") + ")");
+
+    loadProjectDefinition("simple-project-with-unexisting-source-dir");
+  }
+
+  @Test
   public void shouldDefineMultiModuleProject() throws IOException {
     ProjectDefinition rootProject = loadProjectDefinition("multi-module");
 
@@ -220,10 +229,7 @@ public class SonarProjectBuilderTest {
 
   @Test
   public void shouldGetRelativeFile() {
-    Properties props = new Properties();
-    props.put("path", "shouldGetFile/foo.properties");
-
-    assertThat(SonarProjectBuilder.getFileFromProperty(props, "path", TestUtils.getResource(this.getClass(), "/")))
+    assertThat(SonarProjectBuilder.getFileFromPath("shouldGetFile/foo.properties", TestUtils.getResource(this.getClass(), "/")))
         .isEqualTo(TestUtils.getResource("org/sonar/runner/model/SonarProjectBuilderTest/shouldGetFile/foo.properties"));
   }
 
@@ -231,10 +237,7 @@ public class SonarProjectBuilderTest {
   public void shouldGetAbsoluteFile() {
     File file = TestUtils.getResource("org/sonar/runner/model/SonarProjectBuilderTest/shouldGetFile/foo.properties");
 
-    Properties props = new Properties();
-    props.put("path", file.getAbsolutePath());
-
-    assertThat(SonarProjectBuilder.getFileFromProperty(props, "path", TestUtils.getResource(this.getClass(), "/")))
+    assertThat(SonarProjectBuilder.getFileFromPath(file.getAbsolutePath(), TestUtils.getResource(this.getClass(), "/")))
         .isEqualTo(file);
   }
 
