@@ -27,6 +27,8 @@ import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.runner.RunnerException;
 
@@ -34,8 +36,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 /**
@@ -45,9 +49,37 @@ import java.util.Properties;
  */
 public final class SonarProjectBuilder {
 
+  private static final Logger LOG = LoggerFactory.getLogger(SonarProjectBuilder.class);
+
   private static final String PROPERTY_SONAR_MODULES = "sonar.modules";
   private static final String PROPERTY_MODULE_FILE = "file";
   private static final String PROPERTY_MODULE_PATH = "path";
+
+  /**
+   * New properties, to be consistent with Sonar naming conventions
+   * @since 1.5
+   */
+  private static final String PROPERTY_SOURCES = "sonar.sources";
+  private static final String PROPERTY_TESTS = "sonar.tests";
+  private static final String PROPERTY_BINARIES = "sonar.binaries";
+  private static final String PROPERTY_LIBRARIES = "sonar.libraries";
+
+  /**
+   * Old deprecated properties, replaced by the same ones preceded by "sonar."
+   */
+  private static final String PROPERTY_OLD_SOURCES = "sources";
+  private static final String PROPERTY_OLD_TESTS = "tests";
+  private static final String PROPERTY_OLD_BINARIES = "binaries";
+  private static final String PROPERTY_OLD_LIBRARIES = "libraries";
+  private static final Map<String, String> DEPRECATED_PROPS_TO_NEW_PROPS = new HashMap<String, String>() {
+    {
+      put(PROPERTY_OLD_SOURCES, PROPERTY_SOURCES);
+      put(PROPERTY_OLD_TESTS, PROPERTY_TESTS);
+      put(PROPERTY_OLD_BINARIES, PROPERTY_BINARIES);
+      put(PROPERTY_OLD_LIBRARIES, PROPERTY_LIBRARIES);
+    }
+  };
+
   /**
    * @since 1.4
    */
@@ -57,7 +89,7 @@ public final class SonarProjectBuilder {
   /**
    * Array of all mandatory properties required for a root project.
    */
-  private static final String[] MANDATORY_PROPERTIES_FOR_ROOT = {"sonar.projectKey", "sonar.projectName", "sonar.projectVersion", "sources"};
+  private static final String[] MANDATORY_PROPERTIES_FOR_ROOT = {"sonar.projectKey", "sonar.projectName", "sonar.projectVersion", PROPERTY_SOURCES};
 
   /**
    * Array of all mandatory properties required for a child project.
@@ -84,24 +116,47 @@ public final class SonarProjectBuilder {
   public ProjectDefinition generateProjectDefinition() {
     checkMandatoryProperties("root project", properties, MANDATORY_PROPERTIES_FOR_ROOT);
     ProjectDefinition rootProject = defineProject(rootBaseDir, properties);
-    defineChildren(rootProject, properties);
+    defineChildren(rootProject);
+    cleanAndCheckProjectDefinitions(rootProject);
     return rootProject;
   }
 
-  private void defineChildren(ProjectDefinition rootProject, Properties properties) {
-    if (properties.containsKey(PROPERTY_SONAR_MODULES)) {
-      for (String module : getListFromProperty(properties, PROPERTY_SONAR_MODULES)) {
-        Properties moduleProps = extractModuleProperties(module, properties);
+  private ProjectDefinition defineProject(File baseDir, Properties properties) {
+    ProjectDefinition definition = ProjectDefinition.create((Properties) properties.clone())
+        .setBaseDir(baseDir)
+        .setWorkDir(initWorkDir(baseDir));
+    return definition;
+  }
+
+  @VisibleForTesting
+  protected File initWorkDir(File baseDir) {
+    String workDir = properties.getProperty(PROPERTY_WORK_DIRECTORY);
+    if (StringUtils.isBlank(workDir)) {
+      return new File(baseDir, DEF_VALUE_WORK_DIRECTORY);
+    }
+
+    File customWorkDir = new File(workDir);
+    if (customWorkDir.isAbsolute()) {
+      return customWorkDir;
+    }
+    return new File(baseDir, customWorkDir.getPath());
+  }
+
+  private void defineChildren(ProjectDefinition parentProject) {
+    Properties parentProps = parentProject.getProperties();
+    if (parentProps.containsKey(PROPERTY_SONAR_MODULES)) {
+      for (String module : getListFromProperty(parentProps, PROPERTY_SONAR_MODULES)) {
+        Properties moduleProps = extractModuleProperties(module, parentProps);
         ProjectDefinition childProject = null;
         if (moduleProps.containsKey(PROPERTY_MODULE_FILE)) {
-          childProject = loadChildProjectFromPropertyFile(rootProject, moduleProps, module);
+          childProject = loadChildProjectFromPropertyFile(parentProject, moduleProps, module);
         } else {
-          childProject = loadChildProjectFromProperties(rootProject, moduleProps, module);
+          childProject = loadChildProjectFromProperties(parentProject, moduleProps, module);
         }
         // the child project may have children as well
-        defineChildren(childProject, moduleProps);
+        defineChildren(childProject);
         // and finally add this child project to its parent
-        rootProject.addSubProject(childProject);
+        parentProject.addSubProject(childProject);
       }
     }
   }
@@ -145,6 +200,7 @@ public final class SonarProjectBuilder {
 
   @VisibleForTesting
   protected static void checkMandatoryProperties(String moduleId, Properties props, String[] mandatoryProps) {
+    replaceDeprecatedProperties(props);
     StringBuilder missing = new StringBuilder();
     for (String mandatoryProperty : mandatoryProps) {
       if (!props.containsKey(mandatoryProperty)) {
@@ -160,13 +216,97 @@ public final class SonarProjectBuilder {
   }
 
   @VisibleForTesting
+  protected static void cleanAndCheckProjectDefinitions(ProjectDefinition project) {
+    if (project.getSubProjects().isEmpty()) {
+      cleanAndCheckModuleProperties(project);
+    } else {
+      cleanAggregatorProjectProperties(project);
+
+      // clean modules properties as well
+      for (ProjectDefinition module : project.getSubProjects()) {
+        cleanAndCheckProjectDefinitions(module);
+      }
+    }
+  }
+
+  @VisibleForTesting
+  protected static void cleanAndCheckModuleProperties(ProjectDefinition project) {
+    Properties properties = project.getProperties();
+
+    // We need to check the existence of source directories
+    String[] sourceDirs = getListFromProperty(properties, PROPERTY_SOURCES);
+    checkExistenceOfDirectories(project.getKey(), project.getBaseDir(), sourceDirs);
+
+    // And we need to resolve patterns that may have been used in "sonar.libraries"
+    List<String> libPaths = Lists.newArrayList();
+    for (String pattern : getListFromProperty(properties, PROPERTY_LIBRARIES)) {
+      for (File file : getLibraries(project.getBaseDir(), pattern)) {
+        libPaths.add(file.getAbsolutePath());
+      }
+    }
+    properties.remove(PROPERTY_LIBRARIES);
+    properties.put(PROPERTY_LIBRARIES, StringUtils.join(libPaths, ","));
+  }
+
+  @VisibleForTesting
+  protected static void cleanAggregatorProjectProperties(ProjectDefinition project) {
+    Properties properties = project.getProperties();
+
+    // "aggregator" project must not have the following properties:
+    properties.remove(PROPERTY_SOURCES);
+    properties.remove(PROPERTY_TESTS);
+    properties.remove(PROPERTY_BINARIES);
+    properties.remove(PROPERTY_LIBRARIES);
+
+    // and they don't need properties related to their modules either
+    Properties clone = (Properties) properties.clone();
+    List<String> moduleIds = Lists.newArrayList(getListFromProperty(properties, PROPERTY_SONAR_MODULES));
+    for (Entry<Object, Object> entry : clone.entrySet()) {
+      String key = (String) entry.getKey();
+      if (isKeyPrefixedByModuleId(key, moduleIds)) {
+        properties.remove(key);
+      }
+    }
+  }
+
+  /**
+   * Replaces the deprecated properties by the new ones, and logs a message to warn the users.
+   */
+  @VisibleForTesting
+  protected static void replaceDeprecatedProperties(Properties props) {
+    for (Entry<String, String> entry : DEPRECATED_PROPS_TO_NEW_PROPS.entrySet()) {
+      String key = entry.getKey();
+      if (props.containsKey(key)) {
+        String newKey = entry.getValue();
+        LOG.warn("/!\\ The '{}' property is deprecated and is replaced by '{}'. Don't forget to update your files.", key, newKey);
+        String value = props.getProperty(key);
+        props.remove(key);
+        props.put(newKey, value);
+      }
+    }
+
+  }
+
+  @VisibleForTesting
   protected static void mergeParentProperties(Properties childProps, Properties parentProps) {
+    List<String> moduleIds = Lists.newArrayList(getListFromProperty(parentProps, PROPERTY_SONAR_MODULES));
     for (Map.Entry<Object, Object> entry : parentProps.entrySet()) {
       String key = (String) entry.getKey();
-      if (!childProps.containsKey(key) && !NON_HERITED_PROPERTIES_FOR_CHILD.contains(key)) {
+      if (!childProps.containsKey(key)
+        && !NON_HERITED_PROPERTIES_FOR_CHILD.contains(key)
+        && !isKeyPrefixedByModuleId(key, moduleIds)) {
         childProps.put(entry.getKey(), entry.getValue());
       }
     }
+  }
+
+  private static boolean isKeyPrefixedByModuleId(String key, List<String> moduleIds) {
+    for (String moduleId : moduleIds) {
+      if (key.startsWith(moduleId + ".")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @VisibleForTesting
@@ -183,30 +323,8 @@ public final class SonarProjectBuilder {
     return moduleProps;
   }
 
-  private ProjectDefinition defineProject(File baseDir, Properties properties) {
-    ProjectDefinition definition = ProjectDefinition.create((Properties) properties.clone())
-        .setBaseDir(baseDir)
-        .setWorkDir(initWorkDir(baseDir));
-    if (!properties.containsKey(PROPERTY_SONAR_MODULES)) {
-      // this is not a "aggregator" project, so let's specify its sources, tests, ...
-      String[] sourceDirs = getListFromProperty(properties, "sources");
-      checkExistenceOfDirectories(definition.getKey(), baseDir, sourceDirs);
-      definition.addSourceDirs(sourceDirs);
-      definition.addTestDirs(getListFromProperty(properties, "tests"));
-      for (String dir : getListFromProperty(properties, "binaries")) {
-        definition.addBinaryDir(dir);
-      }
-      for (String pattern : getListFromProperty(properties, "libraries")) {
-        for (File file : getLibraries(baseDir, pattern)) {
-          definition.addLibrary(file.getAbsolutePath());
-        }
-      }
-    }
-    return definition;
-  }
-
   @VisibleForTesting
-  protected void checkExistenceOfDirectories(String projectKey, File baseDir, String[] sourceDirs) {
+  protected static void checkExistenceOfDirectories(String projectKey, File baseDir, String[] sourceDirs) {
     for (String path : sourceDirs) {
       File sourceFolder = getFileFromPath(path, baseDir);
       if (!sourceFolder.isDirectory()) {
@@ -215,20 +333,6 @@ public final class SonarProjectBuilder {
       }
     }
 
-  }
-
-  @VisibleForTesting
-  protected File initWorkDir(File baseDir) {
-    String workDir = properties.getProperty(PROPERTY_WORK_DIRECTORY);
-    if (StringUtils.isBlank(workDir)) {
-      return new File(baseDir, DEF_VALUE_WORK_DIRECTORY);
-    }
-
-    File customWorkDir = new File(workDir);
-    if (customWorkDir.isAbsolute()) {
-      return customWorkDir;
-    }
-    return new File(baseDir, customWorkDir.getPath());
   }
 
   /**

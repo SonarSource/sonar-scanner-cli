@@ -78,6 +78,9 @@ public class SonarProjectBuilderTest {
     assertThat(rootProject.getSourceDirs().contains("sources")).isFalse();
     assertThat(rootProject.getTestDirs().contains("tests")).isFalse();
     assertThat(rootProject.getBinaries().contains("target/classes")).isFalse();
+    // and module properties must have been cleaned
+    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
 
     // CHECK MODULES
     List<ProjectDefinition> modules = rootProject.getSubProjects();
@@ -93,6 +96,9 @@ public class SonarProjectBuilderTest {
     assertThat(module1.getSourceDirs()).contains("sources");
     assertThat(module1.getTestDirs()).contains("tests");
     assertThat(module1.getBinaries()).contains("target/classes");
+    // and module properties must have been cleaned
+    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
 
     // Module 2
     ProjectDefinition module2 = modules.get(1);
@@ -103,6 +109,9 @@ public class SonarProjectBuilderTest {
     assertThat(module2.getSourceDirs()).contains("src");
     assertThat(module2.getTestDirs()).contains("tests");
     assertThat(module2.getBinaries()).contains("target/classes");
+    // and module properties must have been cleaned
+    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
   }
 
   @Test
@@ -165,22 +174,22 @@ public class SonarProjectBuilderTest {
   @Test
   public void shouldFailIfMandatoryPropertiesAreNotPresent() {
     Properties props = new Properties();
-    props.setProperty("sources", "src/main/java");
-    props.setProperty("tests", "src/test/java");
+    props.setProperty("foo1", "bla");
+    props.setProperty("foo4", "bla");
 
     thrown.expect(RunnerException.class);
-    thrown.expectMessage("You must define the following mandatory properties for 'foo': sonar.projectKey, sonar.projectName");
+    thrown.expectMessage("You must define the following mandatory properties for 'foo': foo2, foo3");
 
-    SonarProjectBuilder.checkMandatoryProperties("foo", props, new String[] {"sonar.projectKey", "sonar.projectName", "sources"});
+    SonarProjectBuilder.checkMandatoryProperties("foo", props, new String[] {"foo1", "foo2", "foo3"});
   }
 
   @Test
   public void shouldNotFailIfMandatoryPropertiesArePresent() {
     Properties props = new Properties();
-    props.setProperty("sources", "src/main/java");
-    props.setProperty("tests", "src/test/java");
+    props.setProperty("foo1", "bla");
+    props.setProperty("foo4", "bla");
 
-    SonarProjectBuilder.checkMandatoryProperties("foo", props, new String[] {"sources"});
+    SonarProjectBuilder.checkMandatoryProperties("foo", props, new String[] {"foo1"});
 
     // No exception should be thrown
   }
@@ -247,7 +256,9 @@ public class SonarProjectBuilderTest {
     parentProps.setProperty("toBeMergeProps", "fooParent");
     parentProps.setProperty("existingChildProp", "barParent");
     parentProps.setProperty("sonar.modules", "mod1,mod2");
-    parentProps.setProperty("sonar.projectDescription", "Desc fomr Parent");
+    parentProps.setProperty("sonar.projectDescription", "Desc from Parent");
+    parentProps.setProperty("mod1.sonar.projectDescription", "Desc for Mod1");
+    parentProps.setProperty("mod2.sonar.projectkey", "Key for Mod2");
 
     Properties childProps = new Properties();
     childProps.setProperty("existingChildProp", "barChild");
@@ -261,6 +272,8 @@ public class SonarProjectBuilderTest {
     assertThat(childProps.getProperty("otherProp")).isEqualTo("tutuChild");
     assertThat(childProps.getProperty("sonar.modules")).isNull();
     assertThat(childProps.getProperty("sonar.projectDescription")).isNull();
+    assertThat(childProps.getProperty("mod1.sonar.projectDescription")).isNull();
+    assertThat(childProps.getProperty("mod2.sonar.projectkey")).isNull();
   }
 
   private ProjectDefinition loadProjectDefinition(String projectFolder) throws FileNotFoundException, IOException {
