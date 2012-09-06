@@ -57,6 +57,18 @@ public class SonarProjectBuilderTest {
   }
 
   @Test
+  public void shouldDefineSimpleProjectWithDeprecatedProperties() throws IOException {
+    ProjectDefinition projectDefinition = loadProjectDefinition("simple-project-with-deprecated-props");
+
+    assertThat(projectDefinition.getSourceDirs()).contains("sources");
+    assertThat(projectDefinition.getTestDirs()).contains("tests");
+    assertThat(projectDefinition.getBinaries()).contains("target/classes");
+    assertThat(projectDefinition.getLibraries()).contains(
+        TestUtils.getResource(this.getClass(), "simple-project-with-deprecated-props/libs/lib2.txt").getAbsolutePath(),
+        TestUtils.getResource(this.getClass(), "simple-project-with-deprecated-props/libs/lib2.txt").getAbsolutePath());
+  }
+
+  @Test
   public void shouldFailIfUnexistingSourceDirectory() throws IOException {
     thrown.expect(RunnerException.class);
     thrown.expectMessage("The source folder 'unexisting-source-dir' does not exist for 'com.foo.project' project/module (base directory = "
