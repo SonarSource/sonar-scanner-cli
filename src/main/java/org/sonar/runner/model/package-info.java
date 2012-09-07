@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
 /**
- * Internal package that provides API to bootstrap Sonar Batch.
+ * Internal package that creates the project definition and launches the analyses based on it.
  * Should not be used by consumers.
  */
-package org.sonar.runner.bootstrapper;
+package org.sonar.runner.model;

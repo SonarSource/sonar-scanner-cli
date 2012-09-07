@@ -20,11 +20,9 @@
 
 package org.sonar.runner;
 
-import org.sonar.runner.utils.SonarRunnerIOUtils;
-
-import org.sonar.runner.utils.SonarRunnerVersion;
-
 import org.sonar.runner.bootstrapper.BootstrapException;
+import org.sonar.runner.internal.PrivateIOUtils;
+import org.sonar.runner.utils.SonarRunnerVersion;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -161,7 +159,7 @@ public final class Main {
       throw new BootstrapException(e);
 
     } finally {
-      SonarRunnerIOUtils.closeQuietly(in);
+      PrivateIOUtils.closeQuietly(in);
     }
   }
 

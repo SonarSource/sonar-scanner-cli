@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.runner.RunnerException;
+import org.sonar.runner.utils.SonarRunnerUtils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -145,7 +146,7 @@ public final class SonarProjectBuilder {
   private void defineChildren(ProjectDefinition parentProject) {
     Properties parentProps = parentProject.getProperties();
     if (parentProps.containsKey(PROPERTY_SONAR_MODULES)) {
-      for (String module : getListFromProperty(parentProps, PROPERTY_SONAR_MODULES)) {
+      for (String module : SonarRunnerUtils.getListFromProperty(parentProps, PROPERTY_SONAR_MODULES)) {
         Properties moduleProps = extractModuleProperties(module, parentProps);
         ProjectDefinition childProject = null;
         if (moduleProps.containsKey(PROPERTY_MODULE_FILE)) {
@@ -234,12 +235,12 @@ public final class SonarProjectBuilder {
     Properties properties = project.getProperties();
 
     // We need to check the existence of source directories
-    String[] sourceDirs = getListFromProperty(properties, PROPERTY_SOURCES);
+    String[] sourceDirs = SonarRunnerUtils.getListFromProperty(properties, PROPERTY_SOURCES);
     checkExistenceOfDirectories(project.getKey(), project.getBaseDir(), sourceDirs);
 
     // And we need to resolve patterns that may have been used in "sonar.libraries"
     List<String> libPaths = Lists.newArrayList();
-    for (String pattern : getListFromProperty(properties, PROPERTY_LIBRARIES)) {
+    for (String pattern : SonarRunnerUtils.getListFromProperty(properties, PROPERTY_LIBRARIES)) {
       for (File file : getLibraries(project.getBaseDir(), pattern)) {
         libPaths.add(file.getAbsolutePath());
       }
@@ -260,7 +261,7 @@ public final class SonarProjectBuilder {
 
     // and they don't need properties related to their modules either
     Properties clone = (Properties) properties.clone();
-    List<String> moduleIds = Lists.newArrayList(getListFromProperty(properties, PROPERTY_SONAR_MODULES));
+    List<String> moduleIds = Lists.newArrayList(SonarRunnerUtils.getListFromProperty(properties, PROPERTY_SONAR_MODULES));
     for (Entry<Object, Object> entry : clone.entrySet()) {
       String key = (String) entry.getKey();
       if (isKeyPrefixedByModuleId(key, moduleIds)) {
@@ -289,7 +290,7 @@ public final class SonarProjectBuilder {
 
   @VisibleForTesting
   protected static void mergeParentProperties(Properties childProps, Properties parentProps) {
-    List<String> moduleIds = Lists.newArrayList(getListFromProperty(parentProps, PROPERTY_SONAR_MODULES));
+    List<String> moduleIds = Lists.newArrayList(SonarRunnerUtils.getListFromProperty(parentProps, PROPERTY_SONAR_MODULES));
     for (Map.Entry<Object, Object> entry : parentProps.entrySet()) {
       String key = (String) entry.getKey();
       if (!childProps.containsKey(key)
@@ -368,14 +369,6 @@ public final class SonarProjectBuilder {
       }
     }
     return file;
-  }
-
-  /**
-   * Returns a list of comma-separated values, even if they are separated by whitespace characters (space char, EOL, ...)
-   */
-  @VisibleForTesting
-  protected static String[] getListFromProperty(Properties properties, String key) {
-    return StringUtils.stripAll(StringUtils.split(properties.getProperty(key, ""), ','));
   }
 
   /**

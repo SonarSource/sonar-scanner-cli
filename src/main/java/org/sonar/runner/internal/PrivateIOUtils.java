@@ -17,7 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.utils;
+package org.sonar.runner.internal;
 
 import java.io.Closeable;
 import java.io.File;
@@ -28,9 +28,13 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
-public final class SonarRunnerIOUtils {
+/**
+ * Internal class used only by the Runner as we don't want it to depend on third-party libs.
+ * This class should not be used by Sonar Runner consumers. 
+ */
+public final class PrivateIOUtils {
 
-  private SonarRunnerIOUtils() {
+  private PrivateIOUtils() {
     // only static methods
   }
 

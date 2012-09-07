@@ -233,22 +233,6 @@ public class SonarProjectBuilderTest {
   }
 
   @Test
-  public void shouldGetList() {
-    Properties props = new Properties();
-
-    props.put("prop", "  foo  ,  bar  , \n\ntoto,tutu");
-    assertThat(SonarProjectBuilder.getListFromProperty(props, "prop")).containsOnly("foo", "bar", "toto", "tutu");
-  }
-
-  @Test
-  public void shouldGetListFromFile() throws IOException {
-    String filePath = "shouldGetList/foo.properties";
-    Properties props = loadPropsFromFile(filePath);
-
-    assertThat(SonarProjectBuilder.getListFromProperty(props, "prop")).containsOnly("foo", "bar", "toto", "tutu");
-  }
-
-  @Test
   public void shouldGetRelativeFile() {
     assertThat(SonarProjectBuilder.getFileFromPath("shouldGetFile/foo.properties", TestUtils.getResource(this.getClass(), "/")))
         .isEqualTo(TestUtils.getResource("org/sonar/runner/model/SonarProjectBuilderTest/shouldGetFile/foo.properties"));

@@ -19,11 +19,15 @@
  */
 package org.sonar.runner.bootstrapper;
 
-import org.sonar.runner.utils.SonarRunnerIOUtils;
-
+import org.sonar.runner.internal.PrivateIOUtils;
 import org.sonar.runner.utils.SonarRunnerVersion;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -110,14 +114,14 @@ public class Bootstrapper {
       HttpURLConnection connection = newHttpConnection(new URL(fullUrl));
       output = new FileOutputStream(toFile, false);
       input = connection.getInputStream();
-      SonarRunnerIOUtils.copyLarge(input, output);
+      PrivateIOUtils.copyLarge(input, output);
     } catch (IOException e) {
-      SonarRunnerIOUtils.closeQuietly(output);
-      SonarRunnerIOUtils.deleteFileQuietly(toFile);
+      PrivateIOUtils.closeQuietly(output);
+      PrivateIOUtils.deleteFileQuietly(toFile);
       throw new BootstrapException("Fail to download the file: " + fullUrl, e);
     } finally {
-      SonarRunnerIOUtils.closeQuietly(input);
-      SonarRunnerIOUtils.closeQuietly(output);
+      PrivateIOUtils.closeQuietly(input);
+      PrivateIOUtils.closeQuietly(output);
     }
   }
 
@@ -130,9 +134,9 @@ public class Bootstrapper {
       if (statusCode != HttpURLConnection.HTTP_OK) {
         throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + statusCode);
       }
-      return SonarRunnerIOUtils.toString(reader);
+      return PrivateIOUtils.toString(reader);
     } finally {
-      SonarRunnerIOUtils.closeQuietly(reader);
+      PrivateIOUtils.closeQuietly(reader);
       conn.disconnect();
     }
   }

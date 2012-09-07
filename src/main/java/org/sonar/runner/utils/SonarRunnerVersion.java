@@ -19,6 +19,7 @@
  */
 package org.sonar.runner.utils;
 
+import org.sonar.runner.internal.PrivateIOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +48,7 @@ public enum SonarRunnerVersion {
       this.version = "";
 
     } finally {
-      SonarRunnerIOUtils.closeQuietly(input);
+      PrivateIOUtils.closeQuietly(input);
     }
   }
 }
