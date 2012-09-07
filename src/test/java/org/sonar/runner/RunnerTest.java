@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonar.runner.bootstrapper.BootstrapException;
 import org.sonar.runner.bootstrapper.Bootstrapper;
+import org.sonar.test.TestUtils;
 
 import java.io.File;
 import java.util.Properties;
@@ -79,10 +80,10 @@ public class RunnerTest {
   @Test
   public void shouldInitDirs() throws Exception {
     Properties props = new Properties();
-    File home = new File(getClass().getResource("/org/sonar/runner/RunnerTest/shouldInitDirs/").toURI());
-    props.setProperty("project.home", home.getCanonicalPath());
+    File home = TestUtils.getResource(this.getClass(), "shouldInitDirs");
+    props.setProperty(Runner.PROPERTY_PROJECT_DIR, home.getCanonicalPath());
     Runner runner = Runner.create(props);
-    assertThat(runner.getProperties().get("project.home")).isEqualTo(home.getCanonicalPath());
+    assertThat(runner.getProperties().get(Runner.PROPERTY_PROJECT_DIR)).isEqualTo(home.getCanonicalPath());
 
     assertThat(runner.getProjectDir()).isEqualTo(home);
     assertThat(runner.getWorkDir()).isEqualTo(new File(home, ".sonar"));
@@ -97,6 +98,23 @@ public class RunnerTest {
   }
 
   @Test
+  public void shouldSetValidBaseDirOnConstructor() {
+    File baseDir = TestUtils.getResource(this.getClass(), "shouldInitDirs");
+    Runner runner = Runner.create(new Properties(), baseDir);
+    assertThat(runner.getProjectDir()).isEqualTo(baseDir);
+  }
+
+  @Test
+  public void shouldFailIfBaseDirDoesNotExist() {
+    File fakeBasedir = new File("fake");
+
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("Project home must be an existing directory: " + fakeBasedir.getAbsolutePath());
+
+    Runner.create(new Properties(), fakeBasedir);
+  }
+
+  @Test
   public void shouldSpecifyWorkingDirectory() {
     Properties properties = new Properties();
     Runner runner = Runner.create(properties);
@@ -105,12 +123,12 @@ public class RunnerTest {
     // empty string
     properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, "    ");
     runner = Runner.create(properties);
-    assertThat(runner.getWorkDir()).isEqualTo(new File(".", ".sonar"));
+    assertThat(runner.getWorkDir()).isEqualTo(new File(".", ".sonar").getAbsoluteFile());
 
     // real relative path
     properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, "temp-dir");
     runner = Runner.create(properties);
-    assertThat(runner.getWorkDir()).isEqualTo(new File(".", "temp-dir"));
+    assertThat(runner.getWorkDir()).isEqualTo(new File(".", "temp-dir").getAbsoluteFile());
 
     // real asbolute path
     properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, new File("target").getAbsolutePath());

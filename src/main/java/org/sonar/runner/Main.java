@@ -44,6 +44,11 @@ import java.util.Properties;
  */
 public final class Main {
 
+  private static final String RUNNER_HOME = "runner.home";
+  private static final String RUNNER_SETTINGS = "runner.settings";
+  private static final String PROJECT_HOME = "project.home";
+  private static final String PROJECT_SETTINGS = "project.settings";
+
   private static boolean debugMode = false;
 
   public static void main(String[] args) {
@@ -106,11 +111,19 @@ public final class Main {
     result.putAll(loadRunnerProperties(commandLineProps));
     result.putAll(loadProjectProperties(commandLineProps));
     result.putAll(commandLineProps);
+
+    if (result.contains(PROJECT_HOME)) {
+      // the real property of the Sonar Runner is "sonar.projectDir"
+      String baseDir = result.getProperty(PROJECT_HOME);
+      result.remove(PROJECT_HOME);
+      result.put(Runner.PROPERTY_PROJECT_DIR, baseDir);
+    }
+
     return result;
   }
 
   static Properties loadRunnerProperties(Properties props) {
-    File settingsFile = locatePropertiesFile(props, "runner.home", "conf/sonar-runner.properties", "runner.settings");
+    File settingsFile = locatePropertiesFile(props, RUNNER_HOME, "conf/sonar-runner.properties", RUNNER_SETTINGS);
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
       log("Runner configuration file: " + settingsFile.getAbsolutePath());
       return toProperties(settingsFile);
@@ -121,7 +134,7 @@ public final class Main {
   }
 
   static Properties loadProjectProperties(Properties props) {
-    File settingsFile = locatePropertiesFile(props, "project.home", "sonar-project.properties", "project.settings");
+    File settingsFile = locatePropertiesFile(props, PROJECT_HOME, "sonar-project.properties", PROJECT_SETTINGS);
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
       log("Project configuration file: " + settingsFile.getAbsolutePath());
       return toProperties(settingsFile);

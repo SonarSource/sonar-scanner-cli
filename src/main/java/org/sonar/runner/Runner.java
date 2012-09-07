@@ -32,13 +32,24 @@ import java.net.URL;
 import java.util.Properties;
 
 /**
+ * <p>
+ * Sonar Runner class that can be used to launch Sonar analyses.
+ * </p>
+ * <p>
+ * Configuration is all done through properties:
+ * </p>
+ * <ul>
+ * <li>"sonar.projectDir": the base directory of the project to analyse (this can also be passed via the {@link #create(Properties, File)} constructor)</li>
+ * <li>"sonar.working.directory": the working directory, which is "${sonar.projectDir}/.sonar" by default.</li>
+ * <li>"sonar.verbose": if set to "true", more information is displayed in the log</li>
+ * <li>"sonar.environment.information.key" and "sonar.environment.information.version": can be used to overwrite environment information (can also be
+ * set via {@link #setEnvironmentInformation(String, String)} method)</li>
+ * <li>... plus all the other Sonar and Sonar plugins properties.</li>
+ * </ul>
+ * 
  * @since 1.1
  */
 public final class Runner {
-
-  public static final String PROPERTY_PROJECT_DIR = "sonar.runner.projectDir";
-  public static final String PROPERTY_ENVIRONMENT_INFORMATION_KEY = "sonar.environment.information.key";
-  public static final String PROPERTY_ENVIRONMENT_INFORMATION_VERSION = "sonar.environment.information.version";
 
   /**
    * @deprecated Replaced by sonar.verbose since 1.2
@@ -58,6 +69,21 @@ public final class Runner {
   public static final String DEF_VALUE_WORK_DIRECTORY = ".sonar";
 
   /**
+   * @since 1.5
+   */
+  public static final String PROPERTY_PROJECT_DIR = "sonar.projectDir";
+
+  /**
+   * @since 1.5
+   */
+  public static final String PROPERTY_ENVIRONMENT_INFORMATION_KEY = "sonar.environment.information.key";
+
+  /**
+   * @since 1.5
+   */
+  public static final String PROPERTY_ENVIRONMENT_INFORMATION_VERSION = "sonar.environment.information.version";
+
+  /**
    * Array of prefixes of versions of Sonar without support of this runner.
    */
   private static final String[] UNSUPPORTED_VERSIONS = {"1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "2.10"};
@@ -75,10 +101,24 @@ public final class Runner {
     initDirs();
   }
 
+  /**
+   * Creates a Runner based only on the given properties.
+   */
   public static Runner create(Properties props) {
     return new Runner(props);
   }
 
+  /**
+   * Creates a Runner based only on the properties and with the given base directory.
+   */
+  public static Runner create(Properties props, File basedir) {
+    props.put(PROPERTY_PROJECT_DIR, basedir.getAbsolutePath());
+    return new Runner(props);
+  }
+
+  /**
+   * Runs a Sonar analysis.
+   */
   public void execute() {
     Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + SonarRunnerVersion.getVersion(), getSonarServerURL(), getWorkDir());
     checkSonarVersion(bootstrapper);
@@ -90,9 +130,9 @@ public final class Runner {
   }
 
   private void initDirs() {
-    String path = properties.getProperty("project.home", ".");
+    String path = properties.getProperty(PROPERTY_PROJECT_DIR, ".");
     projectDir = new File(path);
-    if (!projectDir.isDirectory() || !projectDir.exists()) {
+    if (!projectDir.isDirectory()) {
       throw new RunnerException("Project home must be an existing directory: " + path);
     }
     // project home exists: add its absolute path as "sonar.runner.projectDir" property
