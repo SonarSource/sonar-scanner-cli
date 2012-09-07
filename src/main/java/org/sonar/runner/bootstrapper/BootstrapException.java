@@ -19,16 +19,30 @@
  */
 package org.sonar.runner.bootstrapper;
 
+/**
+ * Exception thrown by the bootstrapper when something bad happens.
+ */
 public class BootstrapException extends RuntimeException {
 
+  private static final long serialVersionUID = -4974995497654796971L;
+
+  /**
+   * See {@link RuntimeException}
+   */
   public BootstrapException(String message) {
     super(message);
   }
 
+  /**
+   * See {@link RuntimeException}
+   */
   public BootstrapException(Throwable cause) {
     super(cause);
   }
 
+  /**
+   * See {@link RuntimeException}
+   */
   public BootstrapException(String message, Throwable cause) {
     super(message, cause);
   }

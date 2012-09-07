@@ -19,13 +19,10 @@
  */
 package org.sonar.runner.model;
 
-import org.sonar.runner.Runner;
-
-import org.sonar.runner.model.Launcher;
-
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.junit.Test;
+import org.sonar.runner.Runner;
 
 import java.util.Properties;
 

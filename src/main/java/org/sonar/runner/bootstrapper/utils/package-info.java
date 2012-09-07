@@ -21,4 +21,4 @@
  * Internal package that provides utils for internal purposes.
  * Should not be used by consumers.
  */
-package org.sonar.runner.internal;
+package org.sonar.runner.bootstrapper.utils;

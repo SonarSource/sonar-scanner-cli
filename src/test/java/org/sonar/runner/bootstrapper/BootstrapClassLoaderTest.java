@@ -22,7 +22,6 @@ package org.sonar.runner.bootstrapper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.sonar.runner.bootstrapper.BootstrapClassLoader;
 
 import static org.fest.assertions.Assertions.assertThat;
 

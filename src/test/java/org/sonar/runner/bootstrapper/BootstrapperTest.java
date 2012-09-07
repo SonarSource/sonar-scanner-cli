@@ -20,7 +20,6 @@
 package org.sonar.runner.bootstrapper;
 
 import org.junit.Test;
-import org.sonar.runner.bootstrapper.Bootstrapper;
 
 import java.io.File;
 import java.io.IOException;

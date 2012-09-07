@@ -19,8 +19,6 @@
  */
 package org.sonar.runner.utils;
 
-import org.sonar.runner.utils.SonarRunnerVersion;
-
 import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;

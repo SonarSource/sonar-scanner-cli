@@ -52,33 +52,49 @@ import java.util.Properties;
 public final class Runner {
 
   /**
+   * Old property used to activate debug level for logging.
+   * 
    * @deprecated Replaced by sonar.verbose since 1.2
    */
   @Deprecated
   public static final String PROPERTY_OLD_DEBUG_MODE = "runner.debug";
 
   /**
+   * Property used to increase logging information.
+   * 
    * @since 1.2
    */
   public static final String PROPERTY_VERBOSE = "sonar.verbose";
 
   /**
+   * Property used to specify the working directory for the runner. May be a relative or absolute path. 
+   * 
    * @since 1.4
    */
   public static final String PROPERTY_WORK_DIRECTORY = "sonar.working.directory";
+
+  /**
+   * Default value of the working directory.
+   */
   public static final String DEF_VALUE_WORK_DIRECTORY = ".sonar";
 
   /**
+   * Property used to specify the base directory of the project to analyse.
+   * 
    * @since 1.5
    */
   public static final String PROPERTY_PROJECT_DIR = "sonar.projectDir";
 
   /**
+   * Property used to specify the name of the tool that will run a Sonar analysis.
+   * 
    * @since 1.5
    */
   public static final String PROPERTY_ENVIRONMENT_INFORMATION_KEY = "sonar.environment.information.key";
 
   /**
+   * Property used to specify the version of the tool that will run a Sonar analysis.
+   * 
    * @since 1.5
    */
   public static final String PROPERTY_ENVIRONMENT_INFORMATION_VERSION = "sonar.environment.information.version";

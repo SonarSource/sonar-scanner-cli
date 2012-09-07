@@ -20,8 +20,9 @@
 
 package org.sonar.runner;
 
+import org.sonar.runner.bootstrapper.utils.PrivateIOUtils;
+
 import org.sonar.runner.bootstrapper.BootstrapException;
-import org.sonar.runner.internal.PrivateIOUtils;
 import org.sonar.runner.utils.SonarRunnerVersion;
 
 import java.io.File;
@@ -51,6 +52,9 @@ public final class Main {
 
   private static boolean debugMode = false;
 
+  /**
+   * Entry point of the program.
+   */
   public static void main(String[] args) {
     long startTime = System.currentTimeMillis();
     try {

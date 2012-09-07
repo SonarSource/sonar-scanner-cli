@@ -36,7 +36,6 @@ import org.sonar.api.batch.bootstrap.ProjectReactor;
 import org.sonar.api.utils.SonarException;
 import org.sonar.batch.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
-import org.sonar.runner.Main;
 import org.sonar.runner.Runner;
 
 import java.io.File;
@@ -56,7 +55,7 @@ public class Launcher {
   }
 
   /**
-   * This method invoked from {@link Main}. Do not rename it.
+   * Main entry point.
    */
   public void execute() {
     File baseDir = new File(propertiesFromRunner.getProperty(Runner.PROPERTY_PROJECT_DIR));

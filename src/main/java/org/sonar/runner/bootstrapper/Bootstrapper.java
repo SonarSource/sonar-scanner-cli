@@ -19,7 +19,8 @@
  */
 package org.sonar.runner.bootstrapper;
 
-import org.sonar.runner.internal.PrivateIOUtils;
+import org.sonar.runner.bootstrapper.utils.PrivateIOUtils;
+
 import org.sonar.runner.utils.SonarRunnerVersion;
 
 import java.io.File;
@@ -34,6 +35,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Bootstrapper used to download everything from the server and create the correct classloader required to execute a Sonar analysis in isolation.
+ */
 public class Bootstrapper {
 
   private static final String VERSION_PATH = "/api/server/version";

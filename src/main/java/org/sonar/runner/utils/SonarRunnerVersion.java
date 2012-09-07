@@ -19,7 +19,7 @@
  */
 package org.sonar.runner.utils;
 
-import org.sonar.runner.internal.PrivateIOUtils;
+import org.sonar.runner.bootstrapper.utils.PrivateIOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
