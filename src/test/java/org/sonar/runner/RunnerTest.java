@@ -38,6 +38,22 @@ public class RunnerTest {
   public ExpectedException thrown = ExpectedException.none();
 
   @Test
+  public void shouldHaveDefaultEnvironmentInformationValues() {
+    Runner runner = Runner.create(new Properties());
+    assertThat(runner.getProperties().getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY)).isEqualTo("Runner");
+    assertThat(runner.getProperties().getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION)).contains(".");
+    assertThat(runner.getProperties().getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION)).doesNotContain("$");
+  }
+
+  @Test
+  public void shouldOverwriteDefaultEnvironmentInformationValues() {
+    Runner runner = Runner.create(new Properties());
+    runner.setEnvironmentInformation("Ant", "1.2.3");
+    assertThat(runner.getProperties().getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY)).isEqualTo("Ant");
+    assertThat(runner.getProperties().getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION)).isEqualTo("1.2.3");
+  }
+
+  @Test
   public void shouldCheckVersion() {
     assertThat(Runner.isUnsupportedVersion("1.0")).isTrue();
     assertThat(Runner.isUnsupportedVersion("2.0")).isTrue();

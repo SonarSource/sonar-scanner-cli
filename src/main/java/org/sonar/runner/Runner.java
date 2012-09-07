@@ -37,7 +37,8 @@ import java.util.Properties;
 public final class Runner {
 
   public static final String PROPERTY_PROJECT_DIR = "sonar.runner.projectDir";
-  public static final String PROPERTY_RUNNER_VERSION = "sonar.runner.version";
+  public static final String PROPERTY_ENVIRONMENT_INFORMATION_KEY = "sonar.environment.information.key";
+  public static final String PROPERTY_ENVIRONMENT_INFORMATION_VERSION = "sonar.environment.information.version";
 
   /**
    * @deprecated Replaced by sonar.verbose since 1.2
@@ -67,6 +68,10 @@ public final class Runner {
 
   private Runner(Properties props) {
     this.properties = props;
+    // set the default values for the Sonar Runner - they can be overriden with #setEnvironmentInformation
+    this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_KEY, "Runner");
+    this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, SonarRunnerVersion.getVersion());
+    // and init the directories
     initDirs();
   }
 
@@ -75,9 +80,7 @@ public final class Runner {
   }
 
   public void execute() {
-    String sonarRunnerVersion = SonarRunnerVersion.getVersion();
-    properties.put(PROPERTY_RUNNER_VERSION, sonarRunnerVersion);
-    Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + sonarRunnerVersion, getSonarServerURL(), getWorkDir());
+    Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + SonarRunnerVersion.getVersion(), getSonarServerURL(), getWorkDir());
     checkSonarVersion(bootstrapper);
     delegateExecution(createClassLoader(bootstrapper));
   }
@@ -184,5 +187,16 @@ public final class Runner {
     } finally {
       Thread.currentThread().setContextClassLoader(oldContextClassLoader);
     }
+  }
+
+  /**
+   * Allows to overwrite the environment information when Sonar Runner is embedded in a specific tool (for instance, with the Sonar Ant Task).
+   * 
+   * @param key the key of the tool that embeds Sonar Runner
+   * @param version the version of this tool
+   */
+  public void setEnvironmentInformation(String key, String version) {
+    this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_KEY, key);
+    this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, version);
   }
 }

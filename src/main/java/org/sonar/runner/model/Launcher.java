@@ -68,8 +68,9 @@ public class Launcher {
 
   private void executeBatch(ProjectDefinition project, Configuration initialConfiguration) {
     ProjectReactor reactor = new ProjectReactor(project);
-    String runnerVersion = propertiesFromRunner.getProperty(Runner.PROPERTY_RUNNER_VERSION);
-    Batch batch = Batch.create(reactor, initialConfiguration, new EnvironmentInformation("Runner", runnerVersion));
+    String envKey = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY);
+    String envVersion = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION);
+    Batch batch = Batch.create(reactor, initialConfiguration, new EnvironmentInformation(envKey, envVersion));
     batch.execute();
   }
 
