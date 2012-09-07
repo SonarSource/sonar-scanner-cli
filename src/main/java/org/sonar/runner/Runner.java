@@ -140,7 +140,7 @@ public final class Runner {
     String serverVersion = bootstrapper.getServerVersion();
     if (isUnsupportedVersion(serverVersion)) {
       throw new BootstrapException("Sonar " + serverVersion
-        + " does not support Standalone Runner. Please upgrade Sonar to version 2.10 or more.");
+        + " does not support Standalone Runner. Please upgrade Sonar to version 2.11 or more.");
     }
   }
 

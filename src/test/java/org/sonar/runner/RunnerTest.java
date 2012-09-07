@@ -131,7 +131,7 @@ public class RunnerTest {
     // but fails with older versions
     when(bootstrapper.getServerVersion()).thenReturn("2.1");
     thrown.expect(BootstrapException.class);
-    thrown.expectMessage("Sonar 2.1 does not support Standalone Runner. Please upgrade Sonar to version 2.6 or more.");
+    thrown.expectMessage("Sonar 2.1 does not support Standalone Runner. Please upgrade Sonar to version 2.11 or more.");
     runner.checkSonarVersion(bootstrapper);
   }
 
