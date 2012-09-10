@@ -127,19 +127,22 @@ public class SonarProjectBuilderTest {
   }
 
   @Test
-  public void shouldDefineMultiModuleProjectWithPath() throws IOException {
-    ProjectDefinition rootProject = loadProjectDefinition("multi-module-with-path");
+  public void shouldDefineMultiModuleProjectWithBaseDir() throws IOException {
+    ProjectDefinition rootProject = loadProjectDefinition("multi-module-with-basedir");
     List<ProjectDefinition> modules = rootProject.getSubProjects();
     assertThat(modules.size()).isEqualTo(1);
     assertThat(modules.get(0).getKey()).isEqualTo("com.foo.project.module1");
   }
 
   @Test
-  public void shouldDefineMultiModuleProjectWithFile() throws IOException {
-    ProjectDefinition rootProject = loadProjectDefinition("multi-module-with-file");
+  public void shouldDefineMultiModuleProjectWithConfigFile() throws IOException {
+    ProjectDefinition rootProject = loadProjectDefinition("multi-module-with-configfile");
     List<ProjectDefinition> modules = rootProject.getSubProjects();
     assertThat(modules.size()).isEqualTo(1);
-    assertThat(modules.get(0).getKey()).isEqualTo("com.foo.project.module1");
+    ProjectDefinition module = modules.get(0);
+    assertThat(module.getKey()).isEqualTo("com.foo.project.module1");
+    // verify the base directory that has been changed in this config file
+    assertThat(module.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-with-configfile/any-folder"));
   }
 
   @Test
@@ -274,7 +277,8 @@ public class SonarProjectBuilderTest {
 
   private ProjectDefinition loadProjectDefinition(String projectFolder) throws FileNotFoundException, IOException {
     Properties props = loadPropsFromFile(projectFolder + "/sonar-project.properties");
-    ProjectDefinition projectDefinition = SonarProjectBuilder.create(TestUtils.getResource(this.getClass(), projectFolder), props)
+    props.put("sonar.projectBaseDir", TestUtils.getResource(this.getClass(), projectFolder).getAbsolutePath());
+    ProjectDefinition projectDefinition = SonarProjectBuilder.create(props)
         .generateProjectDefinition();
     return projectDefinition;
   }
@@ -293,7 +297,7 @@ public class SonarProjectBuilderTest {
 
   @Test
   public void shouldInitWorkDir() {
-    SonarProjectBuilder builder = SonarProjectBuilder.create(null, new Properties());
+    SonarProjectBuilder builder = SonarProjectBuilder.create(new Properties());
     File baseDir = new File("target/tmp/baseDir");
 
     File workDir = builder.initWorkDir(baseDir);
@@ -305,7 +309,7 @@ public class SonarProjectBuilderTest {
   public void shouldInitWorkDirWithCustomRelativeFolder() {
     Properties properties = new Properties();
     properties.put("sonar.working.directory", ".foo");
-    SonarProjectBuilder builder = SonarProjectBuilder.create(null, properties);
+    SonarProjectBuilder builder = SonarProjectBuilder.create(properties);
     File baseDir = new File("target/tmp/baseDir");
 
     File workDir = builder.initWorkDir(baseDir);
@@ -317,7 +321,7 @@ public class SonarProjectBuilderTest {
   public void shouldInitWorkDirWithCustomAbsoluteFolder() {
     Properties properties = new Properties();
     properties.put("sonar.working.directory", new File("src").getAbsolutePath());
-    SonarProjectBuilder builder = SonarProjectBuilder.create(null, properties);
+    SonarProjectBuilder builder = SonarProjectBuilder.create(properties);
     File baseDir = new File("target/tmp/baseDir");
 
     File workDir = builder.initWorkDir(baseDir);

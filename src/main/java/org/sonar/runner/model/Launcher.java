@@ -38,7 +38,6 @@ import org.sonar.batch.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
 import org.sonar.runner.Runner;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -58,8 +57,7 @@ public class Launcher {
    * Main entry point.
    */
   public void execute() {
-    File baseDir = new File(propertiesFromRunner.getProperty(Runner.PROPERTY_PROJECT_DIR));
-    ProjectDefinition project = SonarProjectBuilder.create(baseDir, propertiesFromRunner).generateProjectDefinition();
+    ProjectDefinition project = SonarProjectBuilder.create(propertiesFromRunner).generateProjectDefinition();
     Configuration initialConfiguration = getInitialConfiguration(project);
     initLogging(initialConfiguration);
     executeBatch(project, initialConfiguration);

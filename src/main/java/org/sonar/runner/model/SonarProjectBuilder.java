@@ -52,9 +52,13 @@ public final class SonarProjectBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(SonarProjectBuilder.class);
 
-  private static final String PROPERTY_SONAR_MODULES = "sonar.modules";
-  private static final String PROPERTY_MODULE_FILE = "file";
-  private static final String PROPERTY_MODULE_PATH = "path";
+  private static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
+  private static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
+  private static final String PROPERTY_PROJECT_KEY = "sonar.projectKey";
+  private static final String PROPERTY_PROJECT_NAME = "sonar.projectName";
+  private static final String PROPERTY_PROJECT_DESCRIPTION = "sonar.projectDescription";
+  private static final String PROPERTY_PROJECT_VERSION = "sonar.projectVersion";
+  private static final String PROPERTY_MODULES = "sonar.modules";
 
   /**
    * New properties, to be consistent with Sonar naming conventions
@@ -88,41 +92,41 @@ public final class SonarProjectBuilder {
   private static final String DEF_VALUE_WORK_DIRECTORY = ".sonar";
 
   /**
-   * Array of all mandatory properties required for a root project.
+   * Array of all mandatory properties required for a project.
    */
-  private static final String[] MANDATORY_PROPERTIES_FOR_ROOT = {"sonar.projectKey", "sonar.projectName", "sonar.projectVersion", PROPERTY_SOURCES};
+  private static final String[] MANDATORY_PROPERTIES_FOR_PROJECT = {PROPERTY_PROJECT_BASEDIR, PROPERTY_PROJECT_KEY, PROPERTY_PROJECT_NAME, PROPERTY_PROJECT_VERSION,
+    PROPERTY_SOURCES};
 
   /**
-   * Array of all mandatory properties required for a child project.
+   * Array of all mandatory properties required for a child project before its properties get merged with its parent ones.
    */
-  private static final String[] MANDATORY_PROPERTIES_FOR_CHILD = {"sonar.projectKey", "sonar.projectName"};
+  private static final String[] MANDATORY_PROPERTIES_FOR_CHILD = {PROPERTY_PROJECT_KEY, PROPERTY_PROJECT_NAME};
 
   /**
    * Properties that must not be passed from the parent project to its children.
    */
-  private static final List<String> NON_HERITED_PROPERTIES_FOR_CHILD = Lists.newArrayList("sonar.modules", "sonar.projectDescription");
+  private static final List<String> NON_HERITED_PROPERTIES_FOR_CHILD = Lists.newArrayList(PROPERTY_PROJECT_BASEDIR, PROPERTY_MODULES, PROPERTY_PROJECT_DESCRIPTION);
 
-  private File rootBaseDir;
   private Properties properties;
 
-  private SonarProjectBuilder(File baseDir, Properties properties) {
-    this.rootBaseDir = baseDir;
+  private SonarProjectBuilder(Properties properties) {
     this.properties = properties;
   }
 
-  public static SonarProjectBuilder create(File baseDir, Properties properties) {
-    return new SonarProjectBuilder(baseDir, properties);
+  public static SonarProjectBuilder create(Properties properties) {
+    return new SonarProjectBuilder(properties);
   }
 
   public ProjectDefinition generateProjectDefinition() {
-    checkMandatoryProperties("root project", properties, MANDATORY_PROPERTIES_FOR_ROOT);
-    ProjectDefinition rootProject = defineProject(rootBaseDir, properties);
+    ProjectDefinition rootProject = defineProject(properties);
     defineChildren(rootProject);
     cleanAndCheckProjectDefinitions(rootProject);
     return rootProject;
   }
 
-  private ProjectDefinition defineProject(File baseDir, Properties properties) {
+  private ProjectDefinition defineProject(Properties properties) {
+    checkMandatoryProperties("root project", properties, MANDATORY_PROPERTIES_FOR_PROJECT);
+    File baseDir = new File(properties.getProperty(PROPERTY_PROJECT_BASEDIR));
     ProjectDefinition definition = ProjectDefinition.create((Properties) properties.clone())
         .setBaseDir(baseDir)
         .setWorkDir(initWorkDir(baseDir));
@@ -145,11 +149,11 @@ public final class SonarProjectBuilder {
 
   private void defineChildren(ProjectDefinition parentProject) {
     Properties parentProps = parentProject.getProperties();
-    if (parentProps.containsKey(PROPERTY_SONAR_MODULES)) {
-      for (String module : SonarRunnerUtils.getListFromProperty(parentProps, PROPERTY_SONAR_MODULES)) {
+    if (parentProps.containsKey(PROPERTY_MODULES)) {
+      for (String module : SonarRunnerUtils.getListFromProperty(parentProps, PROPERTY_MODULES)) {
         Properties moduleProps = extractModuleProperties(module, parentProps);
         ProjectDefinition childProject = null;
-        if (moduleProps.containsKey(PROPERTY_MODULE_FILE)) {
+        if (moduleProps.containsKey(PROPERTY_PROJECT_CONFIG_FILE)) {
           childProject = loadChildProjectFromPropertyFile(parentProject, moduleProps, module);
         } else {
           childProject = loadChildProjectFromProperties(parentProject, moduleProps, module);
@@ -165,21 +169,20 @@ public final class SonarProjectBuilder {
   private ProjectDefinition loadChildProjectFromProperties(ProjectDefinition rootProject, Properties childProps, String moduleId) {
     checkMandatoryProperties(moduleId, childProps, MANDATORY_PROPERTIES_FOR_CHILD);
     mergeParentProperties(childProps, rootProject.getProperties());
+
     File baseDir = null;
-    if (childProps.containsKey(PROPERTY_MODULE_PATH)) {
-      baseDir = getFileFromPath(childProps.getProperty(PROPERTY_MODULE_PATH), rootProject.getBaseDir());
+    if (childProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
+      baseDir = getFileFromPath(childProps.getProperty(PROPERTY_PROJECT_BASEDIR), rootProject.getBaseDir());
     } else {
       baseDir = new File(rootProject.getBaseDir(), moduleId);
     }
-    if (!baseDir.isDirectory()) {
-      throw new RunnerException("The base directory of the module '" + moduleId + "' does not exist: " + baseDir.getAbsolutePath());
-    }
+    setProjectBaseDirOnProperties(childProps, moduleId, baseDir);
 
-    return defineProject(baseDir, childProps);
+    return defineProject(childProps);
   }
 
   private ProjectDefinition loadChildProjectFromPropertyFile(ProjectDefinition rootProject, Properties moduleProps, String moduleId) {
-    File propertyFile = getFileFromPath(moduleProps.getProperty(PROPERTY_MODULE_FILE), rootProject.getBaseDir());
+    File propertyFile = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_CONFIG_FILE), rootProject.getBaseDir());
     if (!propertyFile.isFile()) {
       throw new RunnerException("The properties file of the module '" + moduleId + "' does not exist: " + propertyFile.getAbsolutePath());
     }
@@ -193,10 +196,26 @@ public final class SonarProjectBuilder {
     } finally {
       IOUtils.closeQuietly(fileInputStream);
     }
+
     checkMandatoryProperties(moduleId, childProps, MANDATORY_PROPERTIES_FOR_CHILD);
     mergeParentProperties(childProps, rootProject.getProperties());
 
-    return defineProject(propertyFile.getParentFile(), childProps);
+    File baseDir = null;
+    if (childProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
+      baseDir = getFileFromPath(childProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParentFile());
+    } else {
+      baseDir = propertyFile.getParentFile();
+    }
+    setProjectBaseDirOnProperties(childProps, moduleId, baseDir);
+
+    return defineProject(childProps);
+  }
+
+  private void setProjectBaseDirOnProperties(Properties childProps, String moduleId, File baseDir) {
+    if (!baseDir.isDirectory()) {
+      throw new RunnerException("The base directory of the module '" + moduleId + "' does not exist: " + baseDir.getAbsolutePath());
+    }
+    childProps.put(PROPERTY_PROJECT_BASEDIR, baseDir.getAbsolutePath());
   }
 
   @VisibleForTesting
@@ -261,7 +280,7 @@ public final class SonarProjectBuilder {
 
     // and they don't need properties related to their modules either
     Properties clone = (Properties) properties.clone();
-    List<String> moduleIds = Lists.newArrayList(SonarRunnerUtils.getListFromProperty(properties, PROPERTY_SONAR_MODULES));
+    List<String> moduleIds = Lists.newArrayList(SonarRunnerUtils.getListFromProperty(properties, PROPERTY_MODULES));
     for (Entry<Object, Object> entry : clone.entrySet()) {
       String key = (String) entry.getKey();
       if (isKeyPrefixedByModuleId(key, moduleIds)) {
@@ -290,7 +309,7 @@ public final class SonarProjectBuilder {
 
   @VisibleForTesting
   protected static void mergeParentProperties(Properties childProps, Properties parentProps) {
-    List<String> moduleIds = Lists.newArrayList(SonarRunnerUtils.getListFromProperty(parentProps, PROPERTY_SONAR_MODULES));
+    List<String> moduleIds = Lists.newArrayList(SonarRunnerUtils.getListFromProperty(parentProps, PROPERTY_MODULES));
     for (Map.Entry<Object, Object> entry : parentProps.entrySet()) {
       String key = (String) entry.getKey();
       if (!childProps.containsKey(key)

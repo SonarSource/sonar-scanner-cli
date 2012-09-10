@@ -83,7 +83,7 @@ public final class Runner {
    * 
    * @since 1.5
    */
-  public static final String PROPERTY_PROJECT_DIR = "sonar.projectDir";
+  public static final String PROPERTY_SONAR_PROJECT_BASEDIR = "sonar.projectBaseDir";
 
   /**
    * Property used to specify the name of the tool that will run a Sonar analysis.
@@ -128,7 +128,7 @@ public final class Runner {
    * Creates a Runner based only on the properties and with the given base directory.
    */
   public static Runner create(Properties props, File basedir) {
-    props.put(PROPERTY_PROJECT_DIR, basedir.getAbsolutePath());
+    props.put(PROPERTY_SONAR_PROJECT_BASEDIR, basedir.getAbsolutePath());
     return new Runner(props);
   }
 
@@ -146,13 +146,13 @@ public final class Runner {
   }
 
   private void initDirs() {
-    String path = properties.getProperty(PROPERTY_PROJECT_DIR, ".");
+    String path = properties.getProperty(PROPERTY_SONAR_PROJECT_BASEDIR, ".");
     projectDir = new File(path);
     if (!projectDir.isDirectory()) {
       throw new RunnerException("Project home must be an existing directory: " + path);
     }
     // project home exists: add its absolute path as "sonar.runner.projectDir" property
-    properties.put(PROPERTY_PROJECT_DIR, projectDir.getAbsolutePath());
+    properties.put(PROPERTY_SONAR_PROJECT_BASEDIR, projectDir.getAbsolutePath());
     workDir = initWorkDir();
   }
 

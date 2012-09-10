@@ -81,9 +81,9 @@ public class RunnerTest {
   public void shouldInitDirs() throws Exception {
     Properties props = new Properties();
     File home = TestUtils.getResource(this.getClass(), "shouldInitDirs");
-    props.setProperty(Runner.PROPERTY_PROJECT_DIR, home.getCanonicalPath());
+    props.setProperty(Runner.PROPERTY_SONAR_PROJECT_BASEDIR, home.getCanonicalPath());
     Runner runner = Runner.create(props);
-    assertThat(runner.getProperties().get(Runner.PROPERTY_PROJECT_DIR)).isEqualTo(home.getCanonicalPath());
+    assertThat(runner.getProperties().get(Runner.PROPERTY_SONAR_PROJECT_BASEDIR)).isEqualTo(home.getCanonicalPath());
 
     assertThat(runner.getProjectDir()).isEqualTo(home);
     assertThat(runner.getWorkDir()).isEqualTo(new File(home, ".sonar"));

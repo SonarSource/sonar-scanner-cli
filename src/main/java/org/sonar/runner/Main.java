@@ -120,7 +120,7 @@ public final class Main {
       // the real property of the Sonar Runner is "sonar.projectDir"
       String baseDir = result.getProperty(PROJECT_HOME);
       result.remove(PROJECT_HOME);
-      result.put(Runner.PROPERTY_PROJECT_DIR, baseDir);
+      result.put(Runner.PROPERTY_SONAR_PROJECT_BASEDIR, baseDir);
     }
 
     return result;
