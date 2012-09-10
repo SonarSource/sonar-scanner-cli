@@ -17,8 +17,34 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
+package org.sonar.runner.internal.bootstrapper;
+
 /**
- * Internal package that creates the project definition and launches the analyses based on it.
- * Should not be used by consumers.
+ * Exception thrown by the bootstrapper when something bad happens.
  */
-package org.sonar.runner.model;
+public class BootstrapException extends RuntimeException {
+
+  private static final long serialVersionUID = -4974995497654796971L;
+
+  /**
+   * See {@link RuntimeException}
+   */
+  public BootstrapException(String message) {
+    super(message);
+  }
+
+  /**
+   * See {@link RuntimeException}
+   */
+  public BootstrapException(Throwable cause) {
+    super(cause);
+  }
+
+  /**
+   * See {@link RuntimeException}
+   */
+  public BootstrapException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+}

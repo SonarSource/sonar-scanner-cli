@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
 
-package org.sonar.runner.model;
+package org.sonar.runner.internal.batch;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;

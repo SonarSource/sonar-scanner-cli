@@ -18,9 +18,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
 
-package org.sonar.runner;
+package org.sonar.runner.internal;
+
+import org.sonar.runner.internal.Main;
 
 import org.junit.Test;
+import org.sonar.runner.Runner;
 
 import java.io.File;
 import java.util.Properties;
@@ -39,7 +42,7 @@ public class MainTest {
 
   @Test
   public void shouldParseArguments() {
-    Properties props = Main.parseArguments(new String[] { "-D", "foo=bar", "--define", "hello=world", "-Dboolean" });
+    Properties props = Main.parseArguments(new String[] {"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
     assertThat(props.size(), is(3));
     assertThat(props.getProperty("foo"), is("bar"));
     assertThat(props.getProperty("hello"), is("world"));
@@ -48,7 +51,7 @@ public class MainTest {
 
   @Test
   public void shouldEnableDebugMode() {
-    Properties props = Main.parseArguments(new String[] { "-X" });
+    Properties props = Main.parseArguments(new String[] {"-X"});
     assertThat(props.getProperty(Runner.PROPERTY_VERBOSE), is("true"));
   }
 
@@ -60,7 +63,7 @@ public class MainTest {
 
   @Test
   public void shouldLoadRunnerSettingsByHome() throws Exception {
-    File home = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadRunnerSettingsByHome/").toURI());
+    File home = new File(getClass().getResource("/org/sonar/runner/internal/bootstrapper/MainTest/shouldLoadRunnerSettingsByHome/").toURI());
     Properties args = new Properties();
     args.setProperty("runner.home", home.getCanonicalPath());
 
@@ -79,7 +82,7 @@ public class MainTest {
 
   @Test
   public void shouldLoadRunnerSettingsByDirectPath() throws Exception {
-    File settings = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
+    File settings = new File(getClass().getResource("/org/sonar/runner/internal/bootstrapper/MainTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
     Properties args = new Properties();
     args.setProperty("runner.settings", settings.getCanonicalPath());
     Properties props = Main.loadRunnerProperties(args);
@@ -89,8 +92,8 @@ public class MainTest {
 
   @Test
   public void shouldLoadCompleteConfiguration() throws Exception {
-    File runnerHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/runner").toURI());
-    File projectHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/project").toURI());
+    File runnerHome = new File(getClass().getResource("/org/sonar/runner/internal/bootstrapper/MainTest/shouldLoadCompleteConfiguration/runner").toURI());
+    File projectHome = new File(getClass().getResource("/org/sonar/runner/internal/bootstrapper/MainTest/shouldLoadCompleteConfiguration/project").toURI());
     Properties props = Main.loadProperties(new String[] {
       "-D", "runner.home=" + runnerHome.getCanonicalPath(),
       "-D", "project.home=" + projectHome.getCanonicalPath()

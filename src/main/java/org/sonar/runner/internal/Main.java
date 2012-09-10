@@ -18,11 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
 
-package org.sonar.runner;
+package org.sonar.runner.internal;
 
-import org.sonar.runner.bootstrapper.utils.PrivateIOUtils;
+import org.sonar.runner.internal.bootstrapper.BootstrapException;
 
-import org.sonar.runner.bootstrapper.BootstrapException;
+import org.sonar.runner.Runner;
+import org.sonar.runner.RunnerException;
+
+import org.sonar.runner.internal.bootstrapper.utils.PrivateIOUtils;
+
 import org.sonar.runner.utils.SonarRunnerVersion;
 
 import java.io.File;

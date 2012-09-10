@@ -17,7 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.model;
+package org.sonar.runner.internal.batch;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
@@ -238,12 +238,12 @@ public class SonarProjectBuilderTest {
   @Test
   public void shouldGetRelativeFile() {
     assertThat(SonarProjectBuilder.getFileFromPath("shouldGetFile/foo.properties", TestUtils.getResource(this.getClass(), "/")))
-        .isEqualTo(TestUtils.getResource("org/sonar/runner/model/SonarProjectBuilderTest/shouldGetFile/foo.properties"));
+        .isEqualTo(TestUtils.getResource(this.getClass(), "shouldGetFile/foo.properties"));
   }
 
   @Test
   public void shouldGetAbsoluteFile() {
-    File file = TestUtils.getResource("org/sonar/runner/model/SonarProjectBuilderTest/shouldGetFile/foo.properties");
+    File file = TestUtils.getResource(this.getClass(), "shouldGetFile/foo.properties");
 
     assertThat(SonarProjectBuilder.getFileFromPath(file.getAbsolutePath(), TestUtils.getResource(this.getClass(), "/")))
         .isEqualTo(file);

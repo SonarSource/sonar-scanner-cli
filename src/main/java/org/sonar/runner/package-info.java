@@ -17,34 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.bootstrapper;
-
 /**
- * Exception thrown by the bootstrapper when something bad happens.
+ * API package of the Sonar Runner.
  */
-public class BootstrapException extends RuntimeException {
-
-  private static final long serialVersionUID = -4974995497654796971L;
-
-  /**
-   * See {@link RuntimeException}
-   */
-  public BootstrapException(String message) {
-    super(message);
-  }
-
-  /**
-   * See {@link RuntimeException}
-   */
-  public BootstrapException(Throwable cause) {
-    super(cause);
-  }
-
-  /**
-   * See {@link RuntimeException}
-   */
-  public BootstrapException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-}
+package org.sonar.runner;

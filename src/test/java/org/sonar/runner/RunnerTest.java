@@ -19,11 +19,12 @@
  */
 package org.sonar.runner;
 
+import org.sonar.runner.internal.bootstrapper.BootstrapException;
+import org.sonar.runner.internal.bootstrapper.Bootstrapper;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.sonar.runner.bootstrapper.BootstrapException;
-import org.sonar.runner.bootstrapper.Bootstrapper;
 import org.sonar.test.TestUtils;
 
 import java.io.File;

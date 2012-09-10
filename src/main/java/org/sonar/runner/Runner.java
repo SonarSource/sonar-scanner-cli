@@ -19,9 +19,9 @@
  */
 package org.sonar.runner;
 
-import org.sonar.runner.bootstrapper.BootstrapClassLoader;
-import org.sonar.runner.bootstrapper.BootstrapException;
-import org.sonar.runner.bootstrapper.Bootstrapper;
+import org.sonar.runner.internal.bootstrapper.BootstrapClassLoader;
+import org.sonar.runner.internal.bootstrapper.BootstrapException;
+import org.sonar.runner.internal.bootstrapper.Bootstrapper;
 import org.sonar.runner.utils.SonarRunnerVersion;
 
 import java.io.File;
@@ -141,7 +141,7 @@ public final class Runner {
     delegateExecution(createClassLoader(bootstrapper));
   }
 
-  protected String getSonarServerURL() {
+  public String getSonarServerURL() {
     return properties.getProperty("sonar.host.url", "http://localhost:9000");
   }
 
@@ -174,14 +174,14 @@ public final class Runner {
   /**
    * @return the project base directory
    */
-  protected File getProjectDir() {
+  public File getProjectDir() {
     return projectDir;
   }
 
   /**
    * @return work directory, default is ".sonar" in project directory
    */
-  protected File getWorkDir() {
+  public File getWorkDir() {
     return workDir;
   }
 
@@ -201,7 +201,7 @@ public final class Runner {
   }
 
   private BootstrapClassLoader createClassLoader(Bootstrapper bootstrapper) {
-    URL url = Main.class.getProtectionDomain().getCodeSource().getLocation();
+    URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
     return bootstrapper.createClassLoader(
         new URL[] {url}, // Add JAR with Sonar Runner - it's a Jar which contains this class
         getClass().getClassLoader());
@@ -229,7 +229,7 @@ public final class Runner {
     ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
-      Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.model.Launcher");
+      Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.internal.batch.Launcher");
       Constructor<?> constructor = launcherClass.getConstructor(Properties.class);
       Object launcher = constructor.newInstance(getProperties());
       Method method = launcherClass.getMethod("execute");
