@@ -158,6 +158,8 @@ public final class SonarProjectBuilder {
         } else {
           childProject = loadChildProjectFromProperties(parentProject, moduleProps, module);
         }
+        // check the unicity of the child key
+        checkUnicityOfChildKey(childProject, parentProject);
         // the child project may have children as well
         defineChildren(childProject);
         // and finally add this child project to its parent
@@ -211,6 +213,15 @@ public final class SonarProjectBuilder {
     prefixProjectKeyWithParentKey(childProps, parentProject.getKey());
 
     return defineProject(childProps);
+  }
+
+  @VisibleForTesting
+  protected static void checkUnicityOfChildKey(ProjectDefinition childProject, ProjectDefinition parentProject) {
+    for (ProjectDefinition definition : parentProject.getSubProjects()) {
+      if (definition.getKey().equals(childProject.getKey())) {
+        throw new RunnerException("Project '" + parentProject.getKey() + "' can't have 2 modules with the following key: " + childProject.getKey());
+      }
+    }
   }
 
   @VisibleForTesting
