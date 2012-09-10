@@ -363,4 +363,18 @@ public class SonarProjectBuilderTest {
     SonarProjectBuilder.checkUnicityOfChildKey(mod2, root);
   }
 
+  @Test
+  public void shouldSetProjectKeyIfNotPresent() {
+    Properties props = new Properties();
+    props.put("sonar.projectVersion", "1.0");
+
+    // should be set
+    SonarProjectBuilder.setProjectKeyIfNotDefined(props, "foo");
+    assertThat(props.getProperty("sonar.projectKey")).isEqualTo("foo");
+
+    // but not this 2nd time
+    SonarProjectBuilder.setProjectKeyIfNotDefined(props, "bar");
+    assertThat(props.getProperty("sonar.projectKey")).isEqualTo("foo");
+  }
+
 }

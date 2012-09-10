@@ -20,13 +20,10 @@
 
 package org.sonar.runner.internal;
 
-import org.sonar.runner.internal.bootstrapper.BootstrapException;
-
 import org.sonar.runner.Runner;
 import org.sonar.runner.RunnerException;
-
+import org.sonar.runner.internal.bootstrapper.BootstrapException;
 import org.sonar.runner.internal.bootstrapper.utils.PrivateIOUtils;
-
 import org.sonar.runner.utils.SonarRunnerVersion;
 
 import java.io.File;
@@ -120,7 +117,7 @@ public final class Main {
     result.putAll(loadProjectProperties(commandLineProps));
     result.putAll(commandLineProps);
 
-    if (result.contains(PROJECT_HOME)) {
+    if (result.containsKey(PROJECT_HOME)) {
       // the real property of the Sonar Runner is "sonar.projectDir"
       String baseDir = result.getProperty(PROJECT_HOME);
       result.remove(PROJECT_HOME);

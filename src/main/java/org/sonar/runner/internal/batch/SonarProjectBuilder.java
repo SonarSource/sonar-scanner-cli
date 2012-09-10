@@ -169,6 +169,7 @@ public final class SonarProjectBuilder {
   }
 
   private ProjectDefinition loadChildProjectFromProperties(ProjectDefinition parentProject, Properties childProps, String moduleId) {
+    setProjectKeyIfNotDefined(childProps, moduleId);
     checkMandatoryProperties(moduleId, childProps, MANDATORY_PROPERTIES_FOR_CHILD);
     mergeParentProperties(childProps, parentProject.getProperties());
 
@@ -213,6 +214,13 @@ public final class SonarProjectBuilder {
     prefixProjectKeyWithParentKey(childProps, parentProject.getKey());
 
     return defineProject(childProps);
+  }
+
+  @VisibleForTesting
+  protected static void setProjectKeyIfNotDefined(Properties childProps, String moduleId) {
+    if (!childProps.containsKey(PROPERTY_PROJECT_KEY)) {
+      childProps.put(PROPERTY_PROJECT_KEY, moduleId);
+    }
   }
 
   @VisibleForTesting
