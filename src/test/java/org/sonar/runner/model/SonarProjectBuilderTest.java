@@ -100,7 +100,7 @@ public class SonarProjectBuilderTest {
 
     // Module 1
     ProjectDefinition module1 = modules.get(0);
-    assertThat(module1.getKey()).isEqualTo("com.foo.project.module1");
+    assertThat(module1.getKey()).isEqualTo("com.foo.project:com.foo.project.module1");
     assertThat(module1.getName()).isEqualTo("Foo Module 1");
     assertThat(module1.getVersion()).isEqualTo("1.0-SNAPSHOT");
     // Description should not be inherited from parent if not set
@@ -114,7 +114,7 @@ public class SonarProjectBuilderTest {
 
     // Module 2
     ProjectDefinition module2 = modules.get(1);
-    assertThat(module2.getKey()).isEqualTo("com.foo.project.module2");
+    assertThat(module2.getKey()).isEqualTo("com.foo.project:com.foo.project.module2");
     assertThat(module2.getName()).isEqualTo("Foo Module 2");
     assertThat(module2.getVersion()).isEqualTo("1.0-SNAPSHOT");
     assertThat(module2.getDescription()).isEqualTo("Description of Module 2");
@@ -131,7 +131,7 @@ public class SonarProjectBuilderTest {
     ProjectDefinition rootProject = loadProjectDefinition("multi-module-with-basedir");
     List<ProjectDefinition> modules = rootProject.getSubProjects();
     assertThat(modules.size()).isEqualTo(1);
-    assertThat(modules.get(0).getKey()).isEqualTo("com.foo.project.module1");
+    assertThat(modules.get(0).getKey()).isEqualTo("com.foo.project:com.foo.project.module1");
   }
 
   @Test
@@ -140,7 +140,7 @@ public class SonarProjectBuilderTest {
     List<ProjectDefinition> modules = rootProject.getSubProjects();
     assertThat(modules.size()).isEqualTo(1);
     ProjectDefinition module = modules.get(0);
-    assertThat(module.getKey()).isEqualTo("com.foo.project.module1");
+    assertThat(module.getKey()).isEqualTo("com.foo.project:com.foo.project.module1");
     // verify the base directory that has been changed in this config file
     assertThat(module.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-with-configfile/any-folder"));
   }
@@ -327,6 +327,15 @@ public class SonarProjectBuilderTest {
     File workDir = builder.initWorkDir(baseDir);
 
     assertThat(workDir).isEqualTo(new File("src").getAbsoluteFile());
+  }
+
+  @Test
+  public void shouldReturnPrefixedKey() {
+    Properties props = new Properties();
+    props.put("sonar.projectKey", "my-module-key");
+
+    SonarProjectBuilder.prefixProjectKeyWithParentKey(props, "my-parent-key");
+    assertThat(props.getProperty("sonar.projectKey")).isEqualTo("my-parent-key:my-module-key");
   }
 
 }
