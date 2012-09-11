@@ -19,7 +19,6 @@
  */
 package org.sonar.runner.internal.batch;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -28,7 +27,6 @@ import org.sonar.runner.RunnerException;
 import org.sonar.test.TestUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
@@ -78,8 +76,8 @@ public class SonarProjectBuilderTest {
   }
 
   @Test
-  public void shouldDefineMultiModuleProject() throws IOException {
-    ProjectDefinition rootProject = loadProjectDefinition("multi-module");
+  public void shouldDefineMultiModuleProjectWithDefinitionsAllInRootProject() throws IOException {
+    ProjectDefinition rootProject = loadProjectDefinition("multi-module-definitions-all-in-root");
 
     // CHECK ROOT
     assertThat(rootProject.getKey()).isEqualTo("com.foo.project");
@@ -100,6 +98,7 @@ public class SonarProjectBuilderTest {
 
     // Module 1
     ProjectDefinition module1 = modules.get(0);
+    assertThat(module1.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root/module1"));
     assertThat(module1.getKey()).isEqualTo("com.foo.project:com.foo.project.module1");
     assertThat(module1.getName()).isEqualTo("Foo Module 1");
     assertThat(module1.getVersion()).isEqualTo("1.0-SNAPSHOT");
@@ -114,6 +113,58 @@ public class SonarProjectBuilderTest {
 
     // Module 2
     ProjectDefinition module2 = modules.get(1);
+    assertThat(module2.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root/module2"));
+    assertThat(module2.getKey()).isEqualTo("com.foo.project:com.foo.project.module2");
+    assertThat(module2.getName()).isEqualTo("Foo Module 2");
+    assertThat(module2.getVersion()).isEqualTo("1.0-SNAPSHOT");
+    assertThat(module2.getDescription()).isEqualTo("Description of Module 2");
+    assertThat(module2.getSourceDirs()).contains("src");
+    assertThat(module2.getTestDirs()).contains("tests");
+    assertThat(module2.getBinaries()).contains("target/classes");
+    // and module properties must have been cleaned
+    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+  }
+
+  @Test
+  public void shouldDefineMultiModuleProjectWithDefinitionsAllInEachModule() throws IOException {
+    ProjectDefinition rootProject = loadProjectDefinition("multi-module-definitions-in-each-module");
+
+    // CHECK ROOT
+    assertThat(rootProject.getKey()).isEqualTo("com.foo.project");
+    assertThat(rootProject.getName()).isEqualTo("Foo Project");
+    assertThat(rootProject.getVersion()).isEqualTo("1.0-SNAPSHOT");
+    assertThat(rootProject.getDescription()).isEqualTo("Description of Foo Project");
+    // root project must not contain some properties - even if they are defined in the root properties file
+    assertThat(rootProject.getSourceDirs().contains("sources")).isFalse();
+    assertThat(rootProject.getTestDirs().contains("tests")).isFalse();
+    assertThat(rootProject.getBinaries().contains("target/classes")).isFalse();
+    // and module properties must have been cleaned
+    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+
+    // CHECK MODULES
+    List<ProjectDefinition> modules = rootProject.getSubProjects();
+    assertThat(modules.size()).isEqualTo(2);
+
+    // Module 1
+    ProjectDefinition module1 = modules.get(0);
+    assertThat(module1.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-in-each-module/module1"));
+    assertThat(module1.getKey()).isEqualTo("com.foo.project:com.foo.project.module1");
+    assertThat(module1.getName()).isEqualTo("Foo Module 1");
+    assertThat(module1.getVersion()).isEqualTo("1.0-SNAPSHOT");
+    // Description should not be inherited from parent if not set
+    assertThat(module1.getDescription()).isNull();
+    assertThat(module1.getSourceDirs()).contains("sources");
+    assertThat(module1.getTestDirs()).contains("tests");
+    assertThat(module1.getBinaries()).contains("target/classes");
+    // and module properties must have been cleaned
+    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+
+    // Module 2
+    ProjectDefinition module2 = modules.get(1);
+    assertThat(module2.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-in-each-module/module2/newBaseDir"));
     assertThat(module2.getKey()).isEqualTo("com.foo.project:com.foo.project.module2");
     assertThat(module2.getName()).isEqualTo("Foo Module 2");
     assertThat(module2.getVersion()).isEqualTo("1.0-SNAPSHOT");
@@ -143,6 +194,17 @@ public class SonarProjectBuilderTest {
     assertThat(module.getKey()).isEqualTo("com.foo.project:com.foo.project.module1");
     // verify the base directory that has been changed in this config file
     assertThat(module.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-with-configfile/any-folder"));
+  }
+
+  @Test
+  public void shouldDefineMultiModuleProjectWithConfigFileAndOverwrittenBasedir() throws IOException {
+    ProjectDefinition rootProject = loadProjectDefinition("multi-module-with-configfile-and-overwritten-basedir");
+    List<ProjectDefinition> modules = rootProject.getSubProjects();
+    assertThat(modules.size()).isEqualTo(1);
+    ProjectDefinition module = modules.get(0);
+    assertThat(module.getKey()).isEqualTo("com.foo.project:com.foo.project.module1");
+    // verify the base directory that has been changed in this config file
+    assertThat(module.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-with-configfile-and-overwritten-basedir/any-folder"));
   }
 
   @Test
@@ -275,26 +337,6 @@ public class SonarProjectBuilderTest {
     assertThat(childProps.getProperty("mod2.sonar.projectkey")).isNull();
   }
 
-  private ProjectDefinition loadProjectDefinition(String projectFolder) throws FileNotFoundException, IOException {
-    Properties props = loadPropsFromFile(projectFolder + "/sonar-project.properties");
-    props.put("sonar.projectBaseDir", TestUtils.getResource(this.getClass(), projectFolder).getAbsolutePath());
-    ProjectDefinition projectDefinition = SonarProjectBuilder.create(props)
-        .generateProjectDefinition();
-    return projectDefinition;
-  }
-
-  private Properties loadPropsFromFile(String filePath) throws FileNotFoundException, IOException {
-    Properties props = new Properties();
-    FileInputStream fileInputStream = null;
-    try {
-      fileInputStream = new FileInputStream(TestUtils.getResource(this.getClass(), filePath));
-      props.load(fileInputStream);
-    } finally {
-      IOUtils.closeQuietly(fileInputStream);
-    }
-    return props;
-  }
-
   @Test
   public void shouldInitWorkDir() {
     SonarProjectBuilder builder = SonarProjectBuilder.create(new Properties());
@@ -375,6 +417,22 @@ public class SonarProjectBuilderTest {
     // but not this 2nd time
     SonarProjectBuilder.setProjectKeyIfNotDefined(props, "bar");
     assertThat(props.getProperty("sonar.projectKey")).isEqualTo("foo");
+  }
+
+  @Test
+  public void shouldFailToLoadPropertiesFile() throws Exception {
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("Impossible to read the property file");
+
+    SonarProjectBuilder.toProperties(new File("foo.properties"));
+  }
+
+  private ProjectDefinition loadProjectDefinition(String projectFolder) throws FileNotFoundException, IOException {
+    Properties props = SonarProjectBuilder.toProperties(TestUtils.getResource(this.getClass(), projectFolder + "/sonar-project.properties"));
+    props.put("sonar.projectBaseDir", TestUtils.getResource(this.getClass(), projectFolder).getAbsolutePath());
+    ProjectDefinition projectDefinition = SonarProjectBuilder.create(props)
+        .generateProjectDefinition();
+    return projectDefinition;
   }
 
 }

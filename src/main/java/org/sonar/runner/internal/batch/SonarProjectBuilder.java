@@ -152,12 +152,7 @@ public final class SonarProjectBuilder {
     if (parentProps.containsKey(PROPERTY_MODULES)) {
       for (String module : SonarRunnerUtils.getListFromProperty(parentProps, PROPERTY_MODULES)) {
         Properties moduleProps = extractModuleProperties(module, parentProps);
-        ProjectDefinition childProject = null;
-        if (moduleProps.containsKey(PROPERTY_PROJECT_CONFIG_FILE)) {
-          childProject = loadChildProjectFromPropertyFile(parentProject, moduleProps, module);
-        } else {
-          childProject = loadChildProjectFromProperties(parentProject, moduleProps, module);
-        }
+        ProjectDefinition childProject = loadChildProject(parentProject, moduleProps, module);
         // check the unicity of the child key
         checkUnicityOfChildKey(childProject, parentProject);
         // the child project may have children as well
@@ -168,52 +163,76 @@ public final class SonarProjectBuilder {
     }
   }
 
-  private ProjectDefinition loadChildProjectFromProperties(ProjectDefinition parentProject, Properties childProps, String moduleId) {
-    setProjectKeyIfNotDefined(childProps, moduleId);
-    checkMandatoryProperties(moduleId, childProps, MANDATORY_PROPERTIES_FOR_CHILD);
-    mergeParentProperties(childProps, parentProject.getProperties());
+  private ProjectDefinition loadChildProject(ProjectDefinition parentProject, Properties moduleProps, String moduleId) {
+    setProjectKeyIfNotDefined(moduleProps, moduleId);
 
-    File baseDir = null;
-    if (childProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-      baseDir = getFileFromPath(childProps.getProperty(PROPERTY_PROJECT_BASEDIR), parentProject.getBaseDir());
+    if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
+      File baseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), parentProject.getBaseDir());
+      setProjectBaseDir(baseDir, moduleProps, moduleId);
+      tryToFindAndLoadPropsFile(baseDir, moduleProps, moduleId);
+    } else if (moduleProps.containsKey(PROPERTY_PROJECT_CONFIG_FILE)) {
+      loadPropsFile(parentProject, moduleProps, moduleId);
     } else {
-      baseDir = new File(parentProject.getBaseDir(), moduleId);
+      File baseDir = new File(parentProject.getBaseDir(), moduleId);
+      setProjectBaseDir(baseDir, moduleProps, moduleId);
+      tryToFindAndLoadPropsFile(baseDir, moduleProps, moduleId);
     }
-    setProjectBaseDirOnProperties(childProps, moduleId, baseDir);
-    prefixProjectKeyWithParentKey(childProps, parentProject.getKey());
 
-    return defineProject(childProps);
+    // and finish
+    checkMandatoryProperties(moduleId, moduleProps, MANDATORY_PROPERTIES_FOR_CHILD);
+    mergeParentProperties(moduleProps, parentProject.getProperties());
+
+    prefixProjectKeyWithParentKey(moduleProps, parentProject.getKey());
+
+    return defineProject(moduleProps);
   }
 
-  private ProjectDefinition loadChildProjectFromPropertyFile(ProjectDefinition parentProject, Properties moduleProps, String moduleId) {
+  protected void loadPropsFile(ProjectDefinition parentProject, Properties moduleProps, String moduleId) {
     File propertyFile = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_CONFIG_FILE), parentProject.getBaseDir());
-    if (!propertyFile.isFile()) {
+    if (propertyFile.isFile()) {
+      Properties propsFromFile = toProperties(propertyFile);
+      for (Entry<Object, Object> entry : propsFromFile.entrySet()) {
+        moduleProps.put(entry.getKey(), entry.getValue());
+      }
+      File baseDir = null;
+      if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
+        baseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParentFile());
+      } else {
+        baseDir = propertyFile.getParentFile();
+      }
+      setProjectBaseDir(baseDir, moduleProps, moduleId);
+    } else {
       throw new RunnerException("The properties file of the module '" + moduleId + "' does not exist: " + propertyFile.getAbsolutePath());
     }
-    Properties childProps = new Properties();
+  }
+
+  private void tryToFindAndLoadPropsFile(File baseDir, Properties moduleProps, String moduleId) {
+    File propertyFile = new File(baseDir, "sonar-project.properties");
+    if (propertyFile.isFile()) {
+      Properties propsFromFile = toProperties(propertyFile);
+      for (Entry<Object, Object> entry : propsFromFile.entrySet()) {
+        moduleProps.put(entry.getKey(), entry.getValue());
+      }
+      if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
+        File overwrittenBaseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParentFile());
+        setProjectBaseDir(overwrittenBaseDir, moduleProps, moduleId);
+      }
+    }
+  }
+
+  @VisibleForTesting
+  protected static Properties toProperties(File propertyFile) {
+    Properties propsFromFile = new Properties();
     FileInputStream fileInputStream = null;
     try {
       fileInputStream = new FileInputStream(propertyFile);
-      childProps.load(fileInputStream);
+      propsFromFile.load(fileInputStream);
     } catch (IOException e) {
       throw new RunnerException("Impossible to read the property file: " + propertyFile.getAbsolutePath(), e);
     } finally {
       IOUtils.closeQuietly(fileInputStream);
     }
-
-    checkMandatoryProperties(moduleId, childProps, MANDATORY_PROPERTIES_FOR_CHILD);
-    mergeParentProperties(childProps, parentProject.getProperties());
-
-    File baseDir = null;
-    if (childProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-      baseDir = getFileFromPath(childProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParentFile());
-    } else {
-      baseDir = propertyFile.getParentFile();
-    }
-    setProjectBaseDirOnProperties(childProps, moduleId, baseDir);
-    prefixProjectKeyWithParentKey(childProps, parentProject.getKey());
-
-    return defineProject(childProps);
+    return propsFromFile;
   }
 
   @VisibleForTesting
@@ -238,7 +257,7 @@ public final class SonarProjectBuilder {
     childProps.put(PROPERTY_PROJECT_KEY, parentKey + ":" + childKey);
   }
 
-  private static void setProjectBaseDirOnProperties(Properties childProps, String moduleId, File baseDir) {
+  private static void setProjectBaseDir(File baseDir, Properties childProps, String moduleId) {
     if (!baseDir.isDirectory()) {
       throw new RunnerException("The base directory of the module '" + moduleId + "' does not exist: " + baseDir.getAbsolutePath());
     }
@@ -258,7 +277,8 @@ public final class SonarProjectBuilder {
       }
     }
     if (missing.length() != 0) {
-      throw new RunnerException("You must define the following mandatory properties for '" + moduleId + "': " + missing);
+      String projectKey = props.getProperty(PROPERTY_PROJECT_KEY);
+      throw new RunnerException("You must define the following mandatory properties for '" + (projectKey == null ? moduleId : projectKey) + "': " + missing);
     }
   }
 
