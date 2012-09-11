@@ -63,55 +63,28 @@ public final class Main {
   }
 
   private void execute(String[] args) {
-    long startTime = System.currentTimeMillis();
+    Stats stats = new Stats().start();
     try {
       Properties props = loadProperties(args);
       Runner runner = Runner.create(props);
-      log("Runner version: " + SonarRunnerVersion.getVersion());
-      log("Java version: " + System.getProperty("java.version", "<unknown java version>")
-        + ", vendor: " + System.getProperty("java.vendor", "<unknown vendor>"));
-      log("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
+      Logs.info("Runner version: " + SonarRunnerVersion.getVersion());
+      Logs.info("Java version: " + System.getProperty("java.version", "<unknown>")
+        + ", vendor: " + System.getProperty("java.vendor", "<unknown>"));
+      Logs.info("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
       if (debugMode) {
-        log("Other system properties:");
-        log("  - sun.arch.data.model: \"" + System.getProperty("sun.arch.data.model") + "\"");
+        Logs.info("Other system properties:");
+        Logs.info("  - sun.arch.data.model: \"" + System.getProperty("sun.arch.data.model") + "\"");
       }
-      log("Server: " + runner.getSonarServerURL());
+      Logs.info("Server: " + runner.getSonarServerURL());
       try {
-        log("Work directory: " + runner.getWorkDir().getCanonicalPath());
+        Logs.info("Work directory: " + runner.getWorkDir().getCanonicalPath());
       } catch (IOException e) {
         throw new RunnerException(e);
       }
       runner.execute();
     } finally {
-      printStats(startTime);
+      stats.stop();
     }
-  }
-
-  private void printStats(long startTime) {
-    long time = System.currentTimeMillis() - startTime;
-    log("Total time: " + formatTime(time));
-
-    System.gc();
-    Runtime r = Runtime.getRuntime();
-    long mb = 1024L * 1024;
-    log("Final Memory: " + (r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb + "M");
-  }
-
-  @VisibleForTesting
-  static String formatTime(long time) {
-    long h = time / (60 * 60 * 1000);
-    long m = (time - h * 60 * 60 * 1000) / (60 * 1000);
-    long s = (time - h * 60 * 60 * 1000 - m * 60 * 1000) / 1000;
-    long ms = time % 1000;
-    final String format;
-    if (h > 0) {
-      format = "%1$d:%2$02d:%3$02d.%4$03ds";
-    } else if (m > 0) {
-      format = "%2$d:%3$02d.%4$03ds";
-    } else {
-      format = "%3$d.%4$03ds";
-    }
-    return String.format(format, h, m, s, ms);
   }
 
   @VisibleForTesting
@@ -139,22 +112,20 @@ public final class Main {
   Properties loadRunnerProperties(Properties props) {
     File settingsFile = locatePropertiesFile(props, RUNNER_HOME, "conf/sonar-runner.properties", RUNNER_SETTINGS);
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
-      log("Runner configuration file: " + settingsFile.getAbsolutePath());
+      Logs.info("Runner configuration file: " + settingsFile.getAbsolutePath());
       return toProperties(settingsFile);
-    } else {
-      log("Runner configuration file: NONE");
     }
+    Logs.info("Runner configuration file: NONE");
     return new Properties();
   }
 
   private Properties loadProjectProperties(Properties props) {
     File settingsFile = locatePropertiesFile(props, PROJECT_HOME, "sonar-project.properties", PROJECT_SETTINGS);
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
-      log("Project configuration file: " + settingsFile.getAbsolutePath());
+      Logs.info("Project configuration file: " + settingsFile.getAbsolutePath());
       return toProperties(settingsFile);
-    } else {
-      log("Project configuration file: NONE");
     }
+    Logs.info("Project configuration file: NONE");
     return new Properties();
   }
 
@@ -208,10 +179,12 @@ public final class Main {
           printError("Missing argument for option --define");
         }
         arg = args[i];
-        parseProperty(arg, props);
+        appendPropertyTo(arg, props);
+
       } else if (arg.startsWith("-D")) {
         arg = arg.substring(2);
-        parseProperty(arg, props);
+        appendPropertyTo(arg, props);
+
       } else {
         printError("Unrecognized option: " + arg);
       }
@@ -219,7 +192,7 @@ public final class Main {
     return props;
   }
 
-  private void parseProperty(String arg, Properties props) {
+  private void appendPropertyTo(String arg, Properties props) {
     final String key, value;
     int j = arg.indexOf('=');
     if (j == -1) {
@@ -232,24 +205,20 @@ public final class Main {
     props.setProperty(key, value);
   }
 
-  private void printUsage() {
-    log("");
-    log("usage: sonar-runner [options]");
-    log("");
-    log("Options:");
-    log(" -h,--help             Display help information");
-    log(" -X,--debug            Produce execution debug output");
-    log(" -D,--define <arg>     Define property");
-    System.exit(0); // NOSONAR
-  }
-
   private void printError(String message) {
-    log("");
-    log(message);
+    Logs.info("");
+    Logs.info(message);
     printUsage();
   }
 
-  private void log(String message) {
-    System.out.println(message); // NOSONAR
+  private void printUsage() {
+    Logs.info("");
+    Logs.info("usage: sonar-runner [options]");
+    Logs.info("");
+    Logs.info("Options:");
+    Logs.info(" -h,--help             Display help information");
+    Logs.info(" -X,--debug            Produce execution debug output");
+    Logs.info(" -D,--define <arg>     Define property");
+    System.exit(0); // NOSONAR
   }
 }

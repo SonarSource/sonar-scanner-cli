@@ -24,37 +24,36 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Properties;
 
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.fest.assertions.Assertions.assertThat;
+
 
 public class MainTest {
 
   @Test
   public void shouldParseEmptyArguments() {
-    Properties props = new Main().parseArguments(new String[] {});
-    assertThat(props.isEmpty(), is(true));
+    Properties props = new Main().parseArguments(new String[]{});
+    assertThat(props).isEmpty();
   }
 
   @Test
   public void shouldParseArguments() {
-    Properties props = new Main().parseArguments(new String[] {"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
-    assertThat(props.size(), is(3));
-    assertThat(props.getProperty("foo"), is("bar"));
-    assertThat(props.getProperty("hello"), is("world"));
-    assertThat(props.getProperty("boolean"), is("true"));
+    Properties props = new Main().parseArguments(new String[]{"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
+    assertThat(props).hasSize(3);
+    assertThat(props.getProperty("foo")).isEqualTo("bar");
+    assertThat(props.getProperty("hello")).isEqualTo("world");
+    assertThat(props.getProperty("boolean")).isEqualTo("true");
   }
 
   @Test
   public void shouldEnableDebugMode() {
     Properties props = new Main().parseArguments(new String[]{"-X"});
-    assertThat(props.getProperty(Runner.PROPERTY_VERBOSE), is("true"));
+    assertThat(props.getProperty(Runner.PROPERTY_VERBOSE)).isEqualTo("true");
   }
 
   @Test
   public void shouldDisableDebugModeByDefault() {
     Properties props = new Main().parseArguments(new String[]{});
-    assertThat(props.getProperty(Runner.PROPERTY_VERBOSE), nullValue());
+    assertThat(props.getProperty(Runner.PROPERTY_VERBOSE)).isNull();
   }
 
   @Test
@@ -65,7 +64,7 @@ public class MainTest {
 
     Properties props = new Main().loadRunnerProperties(args);
 
-    assertThat(props.getProperty("sonar.host.url"), is("http://moon/sonar"));
+    assertThat(props.getProperty("sonar.host.url")).isEqualTo("http://moon/sonar");
   }
 
   @Test
@@ -73,7 +72,7 @@ public class MainTest {
     Properties args = new Properties();
     Properties props = new Main().loadRunnerProperties(args);
 
-    assertThat(props.isEmpty(), is(true));
+    assertThat(props).isEmpty();
   }
 
   @Test
@@ -83,7 +82,7 @@ public class MainTest {
     args.setProperty("runner.settings", settings.getCanonicalPath());
     Properties props = new Main().loadRunnerProperties(args);
 
-    assertThat(props.getProperty("sonar.host.url"), is("http://other/sonar"));
+    assertThat(props.getProperty("sonar.host.url")).isEqualTo("http://other/sonar");
   }
 
   @Test
@@ -95,16 +94,9 @@ public class MainTest {
       "-D", "project.home=" + projectHome.getCanonicalPath()
     });
 
-    assertThat(props.getProperty("project.prop"), is("foo"));
-    assertThat(props.getProperty("overridden.prop"), is("project scope"));
-    assertThat(props.getProperty("global.prop"), is("jdbc:mysql:localhost/sonar"));
+    assertThat(props.getProperty("project.prop")).isEqualTo("foo");
+    assertThat(props.getProperty("overridden.prop")).isEqualTo("project scope");
+    assertThat(props.getProperty("global.prop")).isEqualTo("jdbc:mysql:localhost/sonar");
   }
 
-  @Test
-  public void shouldFormatTime() {
-    assertThat(Main.formatTime(1 * 60 * 60 * 1000 + 2 * 60 * 1000 + 3 * 1000 + 400), is("1:02:03.400s"));
-    assertThat(Main.formatTime(2 * 60 * 1000 + 3 * 1000 + 400), is("2:03.400s"));
-    assertThat(Main.formatTime(3 * 1000 + 400), is("3.400s"));
-    assertThat(Main.formatTime(400), is("0.400s"));
-  }
 }
