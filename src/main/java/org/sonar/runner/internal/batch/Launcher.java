@@ -39,6 +39,7 @@ import org.sonar.batch.bootstrapper.EnvironmentInformation;
 import org.sonar.runner.Runner;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -48,9 +49,11 @@ import java.util.Properties;
 public class Launcher {
 
   private Properties propertiesFromRunner;
+  private List<Object> containerExtensions;
 
-  public Launcher(Properties properties) {
+  public Launcher(Properties properties, List<Object> containerExtensions) {
     this.propertiesFromRunner = properties;
+    this.containerExtensions = containerExtensions;
   }
 
   /**
@@ -64,11 +67,20 @@ public class Launcher {
   }
 
   private void executeBatch(ProjectDefinition project, Configuration initialConfiguration) {
-    ProjectReactor reactor = new ProjectReactor(project);
+    setContainerExtensionsOnProject(project);
     String envKey = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY);
     String envVersion = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION);
-    Batch batch = Batch.create(reactor, initialConfiguration, new EnvironmentInformation(envKey, envVersion));
+    Batch batch = Batch.create(new ProjectReactor(project), initialConfiguration, new EnvironmentInformation(envKey, envVersion));
     batch.execute();
+  }
+
+  private void setContainerExtensionsOnProject(ProjectDefinition projectDefinition) {
+    for (Object extension : containerExtensions) {
+      projectDefinition.addContainerExtension(extension);
+    }
+    for (ProjectDefinition module : projectDefinition.getSubProjects()) {
+      setContainerExtensionsOnProject(module);
+    }
   }
 
   private void initLogging(Configuration initialConfiguration) {
