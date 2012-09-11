@@ -29,6 +29,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -106,10 +108,13 @@ public final class Runner {
 
   private File projectDir;
   private File workDir;
+  private String[] unmaskedPackages;
+  private List<Object> containerExtensions = new ArrayList<Object>();
   private Properties properties;
 
   private Runner(Properties props) {
     this.properties = props;
+    this.unmaskedPackages = new String[0];
     // set the default values for the Sonar Runner - they can be overriden with #setEnvironmentInformation
     this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_KEY, "Runner");
     this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, SonarRunnerVersion.getVersion());
@@ -204,7 +209,8 @@ public final class Runner {
     URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
     return bootstrapper.createClassLoader(
         new URL[] {url}, // Add JAR with Sonar Runner - it's a Jar which contains this class
-        getClass().getClassLoader());
+        getClass().getClassLoader(),
+        unmaskedPackages);
   }
 
   static boolean isUnsupportedVersion(String version) {
@@ -230,8 +236,8 @@ public final class Runner {
     try {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
       Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.internal.batch.Launcher");
-      Constructor<?> constructor = launcherClass.getConstructor(Properties.class);
-      Object launcher = constructor.newInstance(getProperties());
+      Constructor<?> constructor = launcherClass.getConstructor(Properties.class, List.class);
+      Object launcher = constructor.newInstance(getProperties(), containerExtensions);
       Method method = launcherClass.getMethod("execute");
       method.invoke(launcher);
     } catch (InvocationTargetException e) {
@@ -255,4 +261,13 @@ public final class Runner {
     this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_KEY, key);
     this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, version);
   }
+
+  public void setUnmaskedPackages(String... unmaskedPackages) {
+    this.unmaskedPackages = unmaskedPackages;
+  }
+
+  public void addContainerExtension(Object extension) {
+    containerExtensions.add(extension);
+  }
+
 }

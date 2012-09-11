@@ -19,7 +19,7 @@
  */
 package org.sonar.runner.internal.batch;
 
-
+import com.google.common.collect.Lists;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.junit.Test;
@@ -60,7 +60,7 @@ public class LauncherTest {
   @Test
   public void shouldDetermineVerboseMode() {
     Properties properties = new Properties();
-    Launcher launcher = new Launcher(properties);
+    Launcher launcher = new Launcher(properties, Lists.newArrayList());
     assertThat(launcher.isDebug()).isFalse();
     properties.setProperty(Runner.PROPERTY_VERBOSE, "true");
     assertThat(launcher.isDebug()).isTrue();
@@ -69,7 +69,7 @@ public class LauncherTest {
   @Test
   public void shouldSupportDeprecatedDebugProperty() {
     Properties properties = new Properties();
-    Launcher launcher = new Launcher(properties);
+    Launcher launcher = new Launcher(properties, Lists.newArrayList());
     properties.setProperty(Runner.PROPERTY_OLD_DEBUG_MODE, "true");
     assertThat(launcher.isDebug()).isTrue();
   }
