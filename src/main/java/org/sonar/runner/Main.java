@@ -17,11 +17,9 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
+package org.sonar.runner;
 
-package org.sonar.runner.internal;
-
-import org.sonar.runner.Runner;
-import org.sonar.runner.RunnerException;
+import com.google.common.annotations.VisibleForTesting;
 import org.sonar.runner.internal.bootstrapper.BootstrapException;
 import org.sonar.runner.internal.bootstrapper.utils.PrivateIOUtils;
 import org.sonar.runner.utils.SonarRunnerVersion;
@@ -51,12 +49,20 @@ public final class Main {
   private static final String PROJECT_HOME = "project.home";
   private static final String PROJECT_SETTINGS = "project.settings";
 
-  private static boolean debugMode = false;
+  private boolean debugMode = false;
 
   /**
    * Entry point of the program.
    */
   public static void main(String[] args) {
+    new Main().execute(args);
+  }
+
+  @VisibleForTesting
+  Main() {
+  }
+
+  private void execute(String[] args) {
     long startTime = System.currentTimeMillis();
     try {
       Properties props = loadProperties(args);
@@ -81,16 +87,17 @@ public final class Main {
     }
   }
 
-  private static void printStats(long startTime) {
+  private void printStats(long startTime) {
     long time = System.currentTimeMillis() - startTime;
     log("Total time: " + formatTime(time));
 
     System.gc();
     Runtime r = Runtime.getRuntime();
-    long mb = 1024 * 1024;
+    long mb = 1024L * 1024;
     log("Final Memory: " + (r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb + "M");
   }
 
+  @VisibleForTesting
   static String formatTime(long time) {
     long h = time / (60 * 60 * 1000);
     long m = (time - h * 60 * 60 * 1000) / (60 * 1000);
@@ -107,7 +114,8 @@ public final class Main {
     return String.format(format, h, m, s, ms);
   }
 
-  static Properties loadProperties(String[] args) {
+  @VisibleForTesting
+  Properties loadProperties(String[] args) {
     Properties commandLineProps = new Properties();
     commandLineProps.putAll(System.getProperties());
     commandLineProps.putAll(parseArguments(args));
@@ -127,7 +135,8 @@ public final class Main {
     return result;
   }
 
-  static Properties loadRunnerProperties(Properties props) {
+  @VisibleForTesting
+  Properties loadRunnerProperties(Properties props) {
     File settingsFile = locatePropertiesFile(props, RUNNER_HOME, "conf/sonar-runner.properties", RUNNER_SETTINGS);
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
       log("Runner configuration file: " + settingsFile.getAbsolutePath());
@@ -138,7 +147,7 @@ public final class Main {
     return new Properties();
   }
 
-  static Properties loadProjectProperties(Properties props) {
+  private Properties loadProjectProperties(Properties props) {
     File settingsFile = locatePropertiesFile(props, PROJECT_HOME, "sonar-project.properties", PROJECT_SETTINGS);
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
       log("Project configuration file: " + settingsFile.getAbsolutePath());
@@ -149,7 +158,7 @@ public final class Main {
     return new Properties();
   }
 
-  private static File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
+  private File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
     File settingsFile = null;
     String runnerHome = props.getProperty(homeKey);
     if (runnerHome != null && !"".equals(runnerHome)) {
@@ -165,7 +174,7 @@ public final class Main {
     return settingsFile;
   }
 
-  private static Properties toProperties(File file) {
+  private Properties toProperties(File file) {
     InputStream in = null;
     Properties properties = new Properties();
     try {
@@ -181,7 +190,8 @@ public final class Main {
     }
   }
 
-  static Properties parseArguments(String[] args) {
+  @VisibleForTesting
+  Properties parseArguments(String[] args) {
     Properties props = new Properties();
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
@@ -209,7 +219,7 @@ public final class Main {
     return props;
   }
 
-  private static void parseProperty(String arg, Properties props) {
+  private void parseProperty(String arg, Properties props) {
     final String key, value;
     int j = arg.indexOf('=');
     if (j == -1) {
@@ -222,7 +232,7 @@ public final class Main {
     props.setProperty(key, value);
   }
 
-  private static void printUsage() {
+  private void printUsage() {
     log("");
     log("usage: sonar-runner [options]");
     log("");
@@ -233,16 +243,13 @@ public final class Main {
     System.exit(0); // NOSONAR
   }
 
-  private static void printError(String message) {
+  private void printError(String message) {
     log("");
     log(message);
     printUsage();
   }
 
-  private static void log(String message) {
+  private void log(String message) {
     System.out.println(message); // NOSONAR
-  }
-
-  private Main() {
   }
 }

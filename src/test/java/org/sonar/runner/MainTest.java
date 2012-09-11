@@ -17,13 +17,9 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-
-package org.sonar.runner.internal;
-
-import org.sonar.runner.internal.Main;
+package org.sonar.runner;
 
 import org.junit.Test;
-import org.sonar.runner.Runner;
 
 import java.io.File;
 import java.util.Properties;
@@ -36,13 +32,13 @@ public class MainTest {
 
   @Test
   public void shouldParseEmptyArguments() {
-    Properties props = Main.parseArguments(new String[] {});
+    Properties props = new Main().parseArguments(new String[] {});
     assertThat(props.isEmpty(), is(true));
   }
 
   @Test
   public void shouldParseArguments() {
-    Properties props = Main.parseArguments(new String[] {"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
+    Properties props = new Main().parseArguments(new String[] {"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
     assertThat(props.size(), is(3));
     assertThat(props.getProperty("foo"), is("bar"));
     assertThat(props.getProperty("hello"), is("world"));
@@ -51,23 +47,23 @@ public class MainTest {
 
   @Test
   public void shouldEnableDebugMode() {
-    Properties props = Main.parseArguments(new String[] {"-X"});
+    Properties props = new Main().parseArguments(new String[]{"-X"});
     assertThat(props.getProperty(Runner.PROPERTY_VERBOSE), is("true"));
   }
 
   @Test
   public void shouldDisableDebugModeByDefault() {
-    Properties props = Main.parseArguments(new String[] {});
+    Properties props = new Main().parseArguments(new String[]{});
     assertThat(props.getProperty(Runner.PROPERTY_VERBOSE), nullValue());
   }
 
   @Test
   public void shouldLoadRunnerSettingsByHome() throws Exception {
-    File home = new File(getClass().getResource("/org/sonar/runner/internal/bootstrapper/MainTest/shouldLoadRunnerSettingsByHome/").toURI());
+    File home = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadRunnerSettingsByHome/").toURI());
     Properties args = new Properties();
     args.setProperty("runner.home", home.getCanonicalPath());
 
-    Properties props = Main.loadRunnerProperties(args);
+    Properties props = new Main().loadRunnerProperties(args);
 
     assertThat(props.getProperty("sonar.host.url"), is("http://moon/sonar"));
   }
@@ -75,26 +71,26 @@ public class MainTest {
   @Test
   public void shouldNotFailIfNoHome() throws Exception {
     Properties args = new Properties();
-    Properties props = Main.loadRunnerProperties(args);
+    Properties props = new Main().loadRunnerProperties(args);
 
     assertThat(props.isEmpty(), is(true));
   }
 
   @Test
   public void shouldLoadRunnerSettingsByDirectPath() throws Exception {
-    File settings = new File(getClass().getResource("/org/sonar/runner/internal/bootstrapper/MainTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
+    File settings = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
     Properties args = new Properties();
     args.setProperty("runner.settings", settings.getCanonicalPath());
-    Properties props = Main.loadRunnerProperties(args);
+    Properties props = new Main().loadRunnerProperties(args);
 
     assertThat(props.getProperty("sonar.host.url"), is("http://other/sonar"));
   }
 
   @Test
   public void shouldLoadCompleteConfiguration() throws Exception {
-    File runnerHome = new File(getClass().getResource("/org/sonar/runner/internal/bootstrapper/MainTest/shouldLoadCompleteConfiguration/runner").toURI());
-    File projectHome = new File(getClass().getResource("/org/sonar/runner/internal/bootstrapper/MainTest/shouldLoadCompleteConfiguration/project").toURI());
-    Properties props = Main.loadProperties(new String[] {
+    File runnerHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/runner").toURI());
+    File projectHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/project").toURI());
+    Properties props = new Main().loadProperties(new String[]{
       "-D", "runner.home=" + runnerHome.getCanonicalPath(),
       "-D", "project.home=" + projectHome.getCanonicalPath()
     });
