@@ -69,7 +69,7 @@ public class SonarProjectBuilderTest {
   @Test
   public void shouldFailIfUnexistingSourceDirectory() throws IOException {
     thrown.expect(RunnerException.class);
-    thrown.expectMessage("The source folder 'unexisting-source-dir' does not exist for 'com.foo.project' project/module (base directory = "
+    thrown.expectMessage("The folder 'unexisting-source-dir' does not exist for 'com.foo.project' project (base directory = "
       + TestUtils.getResource(this.getClass(), "simple-project-with-unexisting-source-dir") + ")");
 
     loadProjectDefinition("simple-project-with-unexisting-source-dir");

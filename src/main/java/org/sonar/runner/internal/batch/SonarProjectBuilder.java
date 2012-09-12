@@ -395,8 +395,8 @@ public final class SonarProjectBuilder {
     for (String path : sourceDirs) {
       File sourceFolder = getFileFromPath(path, baseDir);
       if (!sourceFolder.isDirectory()) {
-        throw new RunnerException("The source folder '" + path + "' does not exist for '" + projectKey +
-          "' project/module (base directory = " + baseDir.getAbsolutePath() + ")");
+        throw new RunnerException("The folder '" + path + "' does not exist for '" + projectKey +
+          "' project (base directory = " + baseDir.getAbsolutePath() + ")");
       }
     }
 
