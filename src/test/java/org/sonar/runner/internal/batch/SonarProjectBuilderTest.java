@@ -99,8 +99,8 @@ public class SonarProjectBuilderTest {
     // Module 1
     ProjectDefinition module1 = modules.get(0);
     assertThat(module1.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root/module1"));
-    assertThat(module1.getKey()).isEqualTo("com.foo.project:com.foo.project.module1");
-    assertThat(module1.getName()).isEqualTo("Foo Module 1");
+    assertThat(module1.getKey()).isEqualTo("com.foo.project:module1");
+    assertThat(module1.getName()).isEqualTo("module1");
     assertThat(module1.getVersion()).isEqualTo("1.0-SNAPSHOT");
     // Description should not be inherited from parent if not set
     assertThat(module1.getDescription()).isNull();
@@ -150,8 +150,8 @@ public class SonarProjectBuilderTest {
     // Module 1
     ProjectDefinition module1 = modules.get(0);
     assertThat(module1.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-in-each-module/module1"));
-    assertThat(module1.getKey()).isEqualTo("com.foo.project:com.foo.project.module1");
-    assertThat(module1.getName()).isEqualTo("Foo Module 1");
+    assertThat(module1.getKey()).isEqualTo("com.foo.project:module1");
+    assertThat(module1.getName()).isEqualTo("module1");
     assertThat(module1.getVersion()).isEqualTo("1.0-SNAPSHOT");
     // Description should not be inherited from parent if not set
     assertThat(module1.getDescription()).isNull();
@@ -255,9 +255,21 @@ public class SonarProjectBuilderTest {
     props.setProperty("foo4", "bla");
 
     thrown.expect(RunnerException.class);
-    thrown.expectMessage("You must define the following mandatory properties for 'foo': foo2, foo3");
+    thrown.expectMessage("You must define the following mandatory properties for 'Unknown': foo2, foo3");
 
-    SonarProjectBuilder.checkMandatoryProperties("foo", props, new String[] {"foo1", "foo2", "foo3"});
+    SonarProjectBuilder.checkMandatoryProperties(props, new String[] {"foo1", "foo2", "foo3"});
+  }
+
+  @Test
+  public void shouldFailIfMandatoryPropertiesAreNotPresentButWithProjectKey() {
+    Properties props = new Properties();
+    props.setProperty("foo1", "bla");
+    props.setProperty("sonar.projectKey", "my-project");
+
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("You must define the following mandatory properties for 'my-project': foo2, foo3");
+
+    SonarProjectBuilder.checkMandatoryProperties(props, new String[] {"foo1", "foo2", "foo3"});
   }
 
   @Test
@@ -266,7 +278,7 @@ public class SonarProjectBuilderTest {
     props.setProperty("foo1", "bla");
     props.setProperty("foo4", "bla");
 
-    SonarProjectBuilder.checkMandatoryProperties("foo", props, new String[] {"foo1"});
+    SonarProjectBuilder.checkMandatoryProperties(props, new String[] {"foo1"});
 
     // No exception should be thrown
   }
@@ -411,12 +423,14 @@ public class SonarProjectBuilderTest {
     props.put("sonar.projectVersion", "1.0");
 
     // should be set
-    SonarProjectBuilder.setProjectKeyIfNotDefined(props, "foo");
+    SonarProjectBuilder.setProjectKeyAndNameIfNotDefined(props, "foo");
     assertThat(props.getProperty("sonar.projectKey")).isEqualTo("foo");
+    assertThat(props.getProperty("sonar.projectName")).isEqualTo("foo");
 
     // but not this 2nd time
-    SonarProjectBuilder.setProjectKeyIfNotDefined(props, "bar");
+    SonarProjectBuilder.setProjectKeyAndNameIfNotDefined(props, "bar");
     assertThat(props.getProperty("sonar.projectKey")).isEqualTo("foo");
+    assertThat(props.getProperty("sonar.projectName")).isEqualTo("foo");
   }
 
   @Test

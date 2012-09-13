@@ -124,7 +124,7 @@ public final class SonarProjectBuilder {
   }
 
   private ProjectDefinition defineProject(Properties properties) {
-    checkMandatoryProperties("root project", properties, MANDATORY_PROPERTIES_FOR_PROJECT);
+    checkMandatoryProperties(properties, MANDATORY_PROPERTIES_FOR_PROJECT);
     File baseDir = new File(properties.getProperty(PROPERTY_PROJECT_BASEDIR));
     ProjectDefinition definition = ProjectDefinition.create((Properties) properties.clone())
         .setBaseDir(baseDir)
@@ -163,7 +163,7 @@ public final class SonarProjectBuilder {
   }
 
   private ProjectDefinition loadChildProject(ProjectDefinition parentProject, Properties moduleProps, String moduleId) {
-    setProjectKeyIfNotDefined(moduleProps, moduleId);
+    setProjectKeyAndNameIfNotDefined(moduleProps, moduleId);
 
     if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
       File baseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), parentProject.getBaseDir());
@@ -178,7 +178,7 @@ public final class SonarProjectBuilder {
     }
 
     // and finish
-    checkMandatoryProperties(moduleId, moduleProps, MANDATORY_PROPERTIES_FOR_CHILD);
+    checkMandatoryProperties(moduleProps, MANDATORY_PROPERTIES_FOR_CHILD);
     mergeParentProperties(moduleProps, parentProject.getProperties());
 
     prefixProjectKeyWithParentKey(moduleProps, parentProject.getKey());
@@ -235,9 +235,12 @@ public final class SonarProjectBuilder {
   }
 
   @VisibleForTesting
-  protected static void setProjectKeyIfNotDefined(Properties childProps, String moduleId) {
+  protected static void setProjectKeyAndNameIfNotDefined(Properties childProps, String moduleId) {
     if (!childProps.containsKey(PROPERTY_PROJECT_KEY)) {
       childProps.put(PROPERTY_PROJECT_KEY, moduleId);
+    }
+    if (!childProps.containsKey(PROPERTY_PROJECT_NAME)) {
+      childProps.put(PROPERTY_PROJECT_NAME, moduleId);
     }
   }
 
@@ -264,7 +267,7 @@ public final class SonarProjectBuilder {
   }
 
   @VisibleForTesting
-  protected static void checkMandatoryProperties(String moduleId, Properties props, String[] mandatoryProps) {
+  protected static void checkMandatoryProperties(Properties props, String[] mandatoryProps) {
     replaceDeprecatedProperties(props);
     StringBuilder missing = new StringBuilder();
     for (String mandatoryProperty : mandatoryProps) {
@@ -277,7 +280,7 @@ public final class SonarProjectBuilder {
     }
     if (missing.length() != 0) {
       String projectKey = props.getProperty(PROPERTY_PROJECT_KEY);
-      throw new RunnerException("You must define the following mandatory properties for '" + (projectKey == null ? moduleId : projectKey) + "': " + missing);
+      throw new RunnerException("You must define the following mandatory properties for '" + (projectKey == null ? "Unknown" : projectKey) + "': " + missing);
     }
   }
 
