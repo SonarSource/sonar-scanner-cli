@@ -107,6 +107,7 @@ public final class SonarProjectBuilder {
   private static final List<String> NON_HERITED_PROPERTIES_FOR_CHILD = Lists.newArrayList(PROPERTY_PROJECT_BASEDIR, PROPERTY_MODULES, PROPERTY_PROJECT_DESCRIPTION);
 
   private Properties properties;
+  private File rootProjectWorkDir;
 
   private SonarProjectBuilder(Properties properties) {
     this.properties = properties;
@@ -117,23 +118,31 @@ public final class SonarProjectBuilder {
   }
 
   public ProjectDefinition generateProjectDefinition() {
-    ProjectDefinition rootProject = defineProject(properties);
+    ProjectDefinition rootProject = defineProject(properties, null);
+    rootProjectWorkDir = rootProject.getWorkDir();
     defineChildren(rootProject);
     cleanAndCheckProjectDefinitions(rootProject);
     return rootProject;
   }
 
-  private ProjectDefinition defineProject(Properties properties) {
+  private ProjectDefinition defineProject(Properties properties, ProjectDefinition parent) {
     checkMandatoryProperties(properties, MANDATORY_PROPERTIES_FOR_PROJECT);
     File baseDir = new File(properties.getProperty(PROPERTY_PROJECT_BASEDIR));
+    File workDir = null;
+    if (parent == null) {
+      workDir = initRootProjectWorkDir(baseDir);
+    } else {
+      workDir = initModuleWorkDir(properties);
+    }
+
     ProjectDefinition definition = ProjectDefinition.create((Properties) properties.clone())
         .setBaseDir(baseDir)
-        .setWorkDir(initWorkDir(baseDir));
+        .setWorkDir(workDir);
     return definition;
   }
 
   @VisibleForTesting
-  protected File initWorkDir(File baseDir) {
+  protected File initRootProjectWorkDir(File baseDir) {
     String workDir = properties.getProperty(PROPERTY_WORK_DIRECTORY);
     if (StringUtils.isBlank(workDir)) {
       return new File(baseDir, DEF_VALUE_WORK_DIRECTORY);
@@ -144,6 +153,11 @@ public final class SonarProjectBuilder {
       return customWorkDir;
     }
     return new File(baseDir, customWorkDir.getPath());
+  }
+
+  @VisibleForTesting
+  protected File initModuleWorkDir(Properties properties) {
+    return new File(rootProjectWorkDir, properties.getProperty(PROPERTY_PROJECT_KEY));
   }
 
   private void defineChildren(ProjectDefinition parentProject) {
@@ -183,7 +197,7 @@ public final class SonarProjectBuilder {
 
     prefixProjectKeyWithParentKey(moduleProps, parentProject.getKey());
 
-    return defineProject(moduleProps);
+    return defineProject(moduleProps, parentProject);
   }
 
   protected void loadPropsFile(ProjectDefinition parentProject, Properties moduleProps, String moduleId) {

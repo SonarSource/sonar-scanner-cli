@@ -91,6 +91,11 @@ public class SonarProjectBuilderTest {
     // and module properties must have been cleaned
     assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
     assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+    // Check baseDir and workDir
+    assertThat(rootProject.getBaseDir().getCanonicalFile())
+        .isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root"));
+    assertThat(rootProject.getWorkDir().getCanonicalFile())
+        .isEqualTo(new File(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root"), ".sonar"));
 
     // CHECK MODULES
     List<ProjectDefinition> modules = rootProject.getSubProjects();
@@ -108,8 +113,13 @@ public class SonarProjectBuilderTest {
     assertThat(module1.getTestDirs()).contains("tests");
     assertThat(module1.getBinaries()).contains("target/classes");
     // and module properties must have been cleaned
-    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
-    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+    assertThat(module1.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(module1.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+    // Check baseDir and workDir
+    assertThat(module1.getBaseDir().getCanonicalFile())
+        .isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root/module1"));
+    assertThat(module1.getWorkDir().getCanonicalFile())
+        .isEqualTo(new File(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root"), ".sonar/com.foo.project:module1"));
 
     // Module 2
     ProjectDefinition module2 = modules.get(1);
@@ -122,8 +132,13 @@ public class SonarProjectBuilderTest {
     assertThat(module2.getTestDirs()).contains("tests");
     assertThat(module2.getBinaries()).contains("target/classes");
     // and module properties must have been cleaned
-    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
-    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+    assertThat(module2.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(module2.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+    // Check baseDir and workDir
+    assertThat(module2.getBaseDir().getCanonicalFile())
+        .isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root/module2"));
+    assertThat(module2.getWorkDir().getCanonicalFile())
+        .isEqualTo(new File(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root"), ".sonar/com.foo.project:com.foo.project.module2"));
   }
 
   @Test
@@ -159,8 +174,8 @@ public class SonarProjectBuilderTest {
     assertThat(module1.getTestDirs()).contains("tests");
     assertThat(module1.getBinaries()).contains("target/classes");
     // and module properties must have been cleaned
-    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
-    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+    assertThat(module1.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(module1.getProperties().getProperty("module2.sonar.projectKey")).isNull();
 
     // Module 2
     ProjectDefinition module2 = modules.get(1);
@@ -173,8 +188,8 @@ public class SonarProjectBuilderTest {
     assertThat(module2.getTestDirs()).contains("tests");
     assertThat(module2.getBinaries()).contains("target/classes");
     // and module properties must have been cleaned
-    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
-    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+    assertThat(module2.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(module2.getProperties().getProperty("module2.sonar.projectKey")).isNull();
   }
 
   @Test
@@ -350,11 +365,11 @@ public class SonarProjectBuilderTest {
   }
 
   @Test
-  public void shouldInitWorkDir() {
+  public void shouldInitRootWorkDir() {
     SonarProjectBuilder builder = SonarProjectBuilder.create(new Properties());
     File baseDir = new File("target/tmp/baseDir");
 
-    File workDir = builder.initWorkDir(baseDir);
+    File workDir = builder.initRootProjectWorkDir(baseDir);
 
     assertThat(workDir).isEqualTo(new File(baseDir, ".sonar"));
   }
@@ -366,19 +381,19 @@ public class SonarProjectBuilderTest {
     SonarProjectBuilder builder = SonarProjectBuilder.create(properties);
     File baseDir = new File("target/tmp/baseDir");
 
-    File workDir = builder.initWorkDir(baseDir);
+    File workDir = builder.initRootProjectWorkDir(baseDir);
 
     assertThat(workDir).isEqualTo(new File(baseDir, ".foo"));
   }
 
   @Test
-  public void shouldInitWorkDirWithCustomAbsoluteFolder() {
+  public void shouldInitRootWorkDirWithCustomAbsoluteFolder() {
     Properties properties = new Properties();
     properties.put("sonar.working.directory", new File("src").getAbsolutePath());
     SonarProjectBuilder builder = SonarProjectBuilder.create(properties);
     File baseDir = new File("target/tmp/baseDir");
 
-    File workDir = builder.initWorkDir(baseDir);
+    File workDir = builder.initRootProjectWorkDir(baseDir);
 
     assertThat(workDir).isEqualTo(new File("src").getAbsoluteFile());
   }
