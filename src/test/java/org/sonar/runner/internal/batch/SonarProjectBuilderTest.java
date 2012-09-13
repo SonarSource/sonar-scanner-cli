@@ -119,7 +119,7 @@ public class SonarProjectBuilderTest {
     assertThat(module1.getBaseDir().getCanonicalFile())
         .isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root/module1"));
     assertThat(module1.getWorkDir().getCanonicalFile())
-        .isEqualTo(new File(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root"), ".sonar/com.foo.project:module1"));
+        .isEqualTo(new File(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root"), ".sonar/com.foo.project_module1"));
 
     // Module 2
     ProjectDefinition module2 = modules.get(1);
@@ -138,7 +138,7 @@ public class SonarProjectBuilderTest {
     assertThat(module2.getBaseDir().getCanonicalFile())
         .isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root/module2"));
     assertThat(module2.getWorkDir().getCanonicalFile())
-        .isEqualTo(new File(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root"), ".sonar/com.foo.project:com.foo.project.module2"));
+        .isEqualTo(new File(TestUtils.getResource(this.getClass(), "multi-module-definitions-all-in-root"), ".sonar/com.foo.project_com.foo.project.module2"));
   }
 
   @Test

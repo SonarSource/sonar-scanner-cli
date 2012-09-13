@@ -156,7 +156,9 @@ public final class SonarProjectBuilder {
 
   @VisibleForTesting
   protected File initModuleWorkDir(Properties properties) {
-    return new File(rootProjectWorkDir, properties.getProperty(PROPERTY_PROJECT_KEY));
+    String cleanKey = StringUtils.deleteWhitespace(properties.getProperty(PROPERTY_PROJECT_KEY));
+    cleanKey = StringUtils.replace(cleanKey, ":", "_");
+    return new File(rootProjectWorkDir, cleanKey);
   }
 
   private void defineChildren(ProjectDefinition parentProject) {
