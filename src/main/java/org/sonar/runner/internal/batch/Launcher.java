@@ -1,5 +1,5 @@
 /*
- * Sonar Standalone Runner
+ * Sonar Runner
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
