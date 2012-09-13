@@ -17,18 +17,13 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-
-package org.sonar.runner.internal.batch;
+package org.sonar.runner.batch;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.configuration.CompositeConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.EnvironmentConfiguration;
-import org.apache.commons.configuration.MapConfiguration;
-import org.apache.commons.configuration.SystemConfiguration;
+import org.apache.commons.configuration.*;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;

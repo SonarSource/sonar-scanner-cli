@@ -17,7 +17,20 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-/**
- * Public package that provides utils and can be used by consumers.
- */
-package org.sonar.runner.utils;
+package org.sonar.runner;
+
+import org.junit.Test;
+import org.sonar.runner.Version;
+
+import static org.fest.assertions.Assertions.assertThat;
+
+public class VersionTest {
+
+  @Test
+  public void shouldLoadVersion() {
+    String version = Version.getVersion();
+    assertThat(version).contains(".");
+    assertThat(version).doesNotContain("$");
+  }
+
+}

@@ -17,9 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.internal.bootstrapper;
-
-import org.sonar.runner.internal.bootstrapper.BootstrapClassLoader;
+package org.sonar.runner;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,14 +31,16 @@ public class BootstrapClassLoaderTest {
   public ExpectedException thrown = ExpectedException.none();
 
   @Test
-  public void shouldRestrictLoadingFromParent() throws Exception {
-    BootstrapClassLoader classLoader = new BootstrapClassLoader(getClass().getClassLoader(), "org.sonar.ant");
-    assertThat(classLoader.canLoadFromParent("org.sonar.ant.Launcher")).isTrue();
+  public void should_restrict_loading_from_parent() throws Exception {
+    BootstrapClassLoader classLoader = new BootstrapClassLoader(getClass().getClassLoader(), "org.apache.ant");
+    assertThat(classLoader.canLoadFromParent("org.sonar.runner.batch.Launcher")).isFalse();
+    assertThat(classLoader.canLoadFromParent("org.sonar.runner.Runner")).isTrue();
     assertThat(classLoader.canLoadFromParent("org.objectweb.asm.ClassVisitor")).isFalse();
+    assertThat(classLoader.canLoadFromParent("org.apache.ant.project.Project")).isTrue();
   }
 
   @Test
-  public void use_isolated_system_classloader_when_parent_is_excluded() throws ClassNotFoundException {
+  public void should_use_isolated_system_classloader_when_parent_is_excluded() throws ClassNotFoundException {
     thrown.expect(ClassNotFoundException.class);
     thrown.expectMessage("org.junit.Test");
     ClassLoader parent = getClass().getClassLoader();
@@ -52,7 +52,7 @@ public class BootstrapClassLoaderTest {
   }
 
   @Test
-  public void find_in_parent_when_matches_unmasked_packages() throws ClassNotFoundException {
+  public void should_find_in_parent_when_matches_unmasked_packages() throws ClassNotFoundException {
     ClassLoader parent = getClass().getClassLoader();
     BootstrapClassLoader classLoader = new BootstrapClassLoader(parent, "org.junit");
 

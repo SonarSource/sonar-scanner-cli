@@ -17,8 +17,29 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
+package org.sonar.runner.batch;
+
+import org.apache.commons.lang.StringUtils;
+
+import java.util.Properties;
+
 /**
- * Internal package that provides API to bootstrap Sonar Batch.
- * Should not be used by consumers.
+ * Public utility that can be used by consumers of the Sonar Runner.
  */
-package org.sonar.runner.internal.bootstrapper;
+public final class SonarRunnerUtils {
+
+  private SonarRunnerUtils() {
+    // only static methods
+  }
+
+  /**
+   * Transforms a comma-separated list String property in to a array of trimmed strings.
+   *
+   * This works even if they are separated by whitespace characters (space char, EOL, ...)
+   *
+   */
+  public static String[] getListFromProperty(Properties properties, String key) {
+    return StringUtils.stripAll(StringUtils.split(properties.getProperty(key, ""), ','));
+  }
+
+}

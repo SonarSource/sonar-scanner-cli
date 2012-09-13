@@ -17,7 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.internal.bootstrapper;
+package org.sonar.runner;
 
 import java.io.IOException;
 import java.net.URL;
@@ -27,11 +27,11 @@ import java.util.Enumeration;
 /**
  * Special {@link URLClassLoader} to execute Sonar, which restricts loading from parent.
  */
-public class BootstrapClassLoader extends URLClassLoader {
+class BootstrapClassLoader extends URLClassLoader {
 
   private final String[] unmaskedPackages;
 
-  public BootstrapClassLoader(ClassLoader parent, String... unmaskedPackages) {
+  BootstrapClassLoader(ClassLoader parent, String... unmaskedPackages) {
     super(new URL[0], parent);
     this.unmaskedPackages = unmaskedPackages;
   }
@@ -56,6 +56,9 @@ public class BootstrapClassLoader extends URLClassLoader {
    * @return true, if class can be loaded from parent ClassLoader
    */
   boolean canLoadFromParent(String name) {
+    if (name.startsWith("org.sonar.runner.") && !name.startsWith("org.sonar.runner.batch.")) {
+      return true;
+    }
     for (String pkg : unmaskedPackages) {
       if (name.startsWith(pkg + ".")) {
         return true;

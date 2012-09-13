@@ -17,34 +17,36 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.internal.bootstrapper;
+package org.sonar.runner;
 
-/**
- * Exception thrown by the bootstrapper when something bad happens.
- */
-public class BootstrapException extends RuntimeException {
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
-  private static final long serialVersionUID = -4974995497654796971L;
+public enum Version {
 
-  /**
-   * See {@link RuntimeException}
-   */
-  public BootstrapException(String message) {
-    super(message);
+  INSTANCE;
+
+  private static final String PROPERTIES_PATH = "/org/sonar/runner/version.txt";
+  private String version;
+
+  public static String getVersion() {
+    return INSTANCE.version;
   }
 
-  /**
-   * See {@link RuntimeException}
-   */
-  public BootstrapException(Throwable cause) {
-    super(cause);
-  }
+  private Version() {
+    InputStream input = getClass().getResourceAsStream(PROPERTIES_PATH);
+    try {
+      Properties properties = new Properties();
+      properties.load(input);
+      this.version = properties.getProperty("version");
 
-  /**
-   * See {@link RuntimeException}
-   */
-  public BootstrapException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    } catch (IOException e) {
+      // Can not load the version
+      this.version = "";
 
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
 }

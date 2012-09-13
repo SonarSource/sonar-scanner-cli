@@ -17,18 +17,9 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.internal.bootstrapper;
+package org.sonar.runner;
 
-import org.sonar.runner.internal.bootstrapper.utils.PrivateIOUtils;
-
-import org.sonar.runner.utils.SonarRunnerVersion;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,13 +29,12 @@ import java.util.List;
 /**
  * Bootstrapper used to download everything from the server and create the correct classloader required to execute a Sonar analysis in isolation.
  */
-public class Bootstrapper {
+class Bootstrapper {
 
-  private static final String VERSION_PATH = "/api/server/version";
-  private static final String BATCH_PATH = "/batch/";
-
-  public static final int CONNECT_TIMEOUT_MILLISECONDS = 30000;
-  public static final int READ_TIMEOUT_MILLISECONDS = 60000;
+  static final String VERSION_PATH = "/api/server/version";
+  static final String BATCH_PATH = "/batch/";
+  static final int CONNECT_TIMEOUT_MILLISECONDS = 30000;
+  static final int READ_TIMEOUT_MILLISECONDS = 60000;
 
   private File bootDir;
   private String serverUrl;
@@ -54,7 +44,7 @@ public class Bootstrapper {
   /**
    * @param productToken part of User-Agent request-header field - see http://tools.ietf.org/html/rfc1945#section-10.15
    */
-  public Bootstrapper(String productToken, String serverUrl, File workDir) {
+  Bootstrapper(String productToken, String serverUrl, File workDir) {
     this.productToken = productToken;
     bootDir = new File(workDir, "batch");
     bootDir.mkdirs();
@@ -68,19 +58,19 @@ public class Bootstrapper {
   /**
    * @return server url
    */
-  public String getServerUrl() {
+  String getServerUrl() {
     return serverUrl;
   }
 
   /**
    * @return server version
    */
-  public String getServerVersion() {
+  String getServerVersion() {
     if (serverVersion == null) {
       try {
         serverVersion = remoteContent(VERSION_PATH);
       } catch (IOException e) {
-        throw new BootstrapException(e.getMessage(), e);
+        throw new IllegalStateException("Fail to request server version", e);
       }
     }
     return serverVersion;
@@ -89,12 +79,12 @@ public class Bootstrapper {
   /**
    * Download batch files from server and creates {@link BootstrapClassLoader}.
    * To use this method version of Sonar should be at least 2.6.
-   * 
-   * @param urls additional URLs for loading classes and resources
-   * @param parent parent ClassLoader
+   *
+   * @param urls             additional URLs for loading classes and resources
+   * @param parent           parent ClassLoader
    * @param unmaskedPackages only classes and resources from those packages would be available for loading from parent
    */
-  public BootstrapClassLoader createClassLoader(URL[] urls, ClassLoader parent, String... unmaskedPackages) {
+  BootstrapClassLoader createClassLoader(URL[] urls, ClassLoader parent, String... unmaskedPackages) {
     BootstrapClassLoader classLoader = new BootstrapClassLoader(parent, unmaskedPackages);
     List<File> files = downloadBatchFiles();
     for (URL url : urls) {
@@ -104,7 +94,7 @@ public class Bootstrapper {
       try {
         classLoader.addURL(file.toURI().toURL());
       } catch (MalformedURLException e) {
-        throw new BootstrapException(e);
+        throw new IllegalStateException("Fail to create classloader", e);
       }
     }
     return classLoader;
@@ -118,14 +108,14 @@ public class Bootstrapper {
       HttpURLConnection connection = newHttpConnection(new URL(fullUrl));
       output = new FileOutputStream(toFile, false);
       input = connection.getInputStream();
-      PrivateIOUtils.copyLarge(input, output);
+      IOUtils.copyLarge(input, output);
     } catch (IOException e) {
-      PrivateIOUtils.closeQuietly(output);
-      PrivateIOUtils.deleteFileQuietly(toFile);
-      throw new BootstrapException("Fail to download the file: " + fullUrl, e);
+      IOUtils.closeQuietly(output);
+      IOUtils.deleteFileQuietly(toFile);
+      throw new IllegalStateException("Fail to download the file: " + fullUrl, e);
     } finally {
-      PrivateIOUtils.closeQuietly(input);
-      PrivateIOUtils.closeQuietly(output);
+      IOUtils.closeQuietly(input);
+      IOUtils.closeQuietly(output);
     }
   }
 
@@ -138,9 +128,9 @@ public class Bootstrapper {
       if (statusCode != HttpURLConnection.HTTP_OK) {
         throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + statusCode);
       }
-      return PrivateIOUtils.toString(reader);
+      return IOUtils.toString(reader);
     } finally {
-      PrivateIOUtils.closeQuietly(reader);
+      IOUtils.closeQuietly(reader);
       conn.disconnect();
     }
   }
@@ -149,7 +139,7 @@ public class Bootstrapper {
    * By convention, the product tokens are listed in order of their significance for identifying the application.
    */
   String getUserAgent() {
-    return "sonar-bootstrapper/" + SonarRunnerVersion.getVersion() + " " + productToken;
+    return "sonar-bootstrapper/" + Version.getVersion() + " " + productToken;
   }
 
   HttpURLConnection newHttpConnection(URL url) throws IOException {
@@ -173,7 +163,7 @@ public class Bootstrapper {
       }
       return files;
     } catch (Exception e) {
-      throw new BootstrapException(e);
+      throw new IllegalStateException("Fail to download libraries from server", e);
     }
   }
 }

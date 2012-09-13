@@ -20,9 +20,6 @@
 package org.sonar.runner;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.sonar.runner.internal.bootstrapper.BootstrapException;
-import org.sonar.runner.internal.bootstrapper.utils.PrivateIOUtils;
-import org.sonar.runner.utils.SonarRunnerVersion;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -67,7 +64,7 @@ public final class Main {
     try {
       Properties props = loadProperties(args);
       Runner runner = Runner.create(props);
-      Logs.info("Runner version: " + SonarRunnerVersion.getVersion());
+      Logs.info("Runner version: " + Version.getVersion());
       Logs.info("Java version: " + System.getProperty("java.version", "<unknown>")
         + ", vendor: " + System.getProperty("java.vendor", "<unknown>"));
       Logs.info("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
@@ -154,10 +151,10 @@ public final class Main {
       return properties;
 
     } catch (Exception e) {
-      throw new BootstrapException(e);
+      throw new IllegalStateException("Fail to load file: " + file.getAbsolutePath(), e);
 
     } finally {
-      PrivateIOUtils.closeQuietly(in);
+      IOUtils.closeQuietly(in);
     }
   }
 

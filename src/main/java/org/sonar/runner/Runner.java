@@ -19,15 +19,11 @@
  */
 package org.sonar.runner;
 
-import org.sonar.runner.internal.bootstrapper.BootstrapClassLoader;
-import org.sonar.runner.internal.bootstrapper.BootstrapException;
-import org.sonar.runner.internal.bootstrapper.Bootstrapper;
-import org.sonar.runner.utils.SonarRunnerVersion;
-
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,14 +44,14 @@ import java.util.Properties;
  * set via {@link #setEnvironmentInformation(String, String)} method)</li>
  * <li>... plus all the other Sonar and Sonar plugins properties.</li>
  * </ul>
- * 
+ *
  * @since 1.1
  */
 public final class Runner {
 
   /**
    * Old property used to activate debug level for logging.
-   * 
+   *
    * @deprecated Replaced by sonar.verbose since 1.2
    */
   @Deprecated
@@ -63,14 +59,14 @@ public final class Runner {
 
   /**
    * Property used to increase logging information.
-   * 
+   *
    * @since 1.2
    */
   public static final String PROPERTY_VERBOSE = "sonar.verbose";
 
   /**
-   * Property used to specify the working directory for the runner. May be a relative or absolute path. 
-   * 
+   * Property used to specify the working directory for the runner. May be a relative or absolute path.
+   *
    * @since 1.4
    */
   public static final String PROPERTY_WORK_DIRECTORY = "sonar.working.directory";
@@ -82,21 +78,21 @@ public final class Runner {
 
   /**
    * Property used to specify the base directory of the project to analyse.
-   * 
+   *
    * @since 1.5
    */
   public static final String PROPERTY_SONAR_PROJECT_BASEDIR = "sonar.projectBaseDir";
 
   /**
    * Property used to specify the name of the tool that will run a Sonar analysis.
-   * 
+   *
    * @since 1.5
    */
   public static final String PROPERTY_ENVIRONMENT_INFORMATION_KEY = "sonar.environment.information.key";
 
   /**
    * Property used to specify the version of the tool that will run a Sonar analysis.
-   * 
+   *
    * @since 1.5
    */
   public static final String PROPERTY_ENVIRONMENT_INFORMATION_VERSION = "sonar.environment.information.version";
@@ -117,7 +113,7 @@ public final class Runner {
     this.unmaskedPackages = new String[0];
     // set the default values for the Sonar Runner - they can be overriden with #setEnvironmentInformation
     this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_KEY, "Runner");
-    this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, SonarRunnerVersion.getVersion());
+    this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, Version.getVersion());
     // and init the directories
     initDirs();
   }
@@ -141,7 +137,7 @@ public final class Runner {
    * Runs a Sonar analysis.
    */
   public void execute() {
-    Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + SonarRunnerVersion.getVersion(), getSonarServerURL(), getWorkDir());
+    Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + Version.getVersion(), getSonarServerURL(), getWorkDir());
     checkSonarVersion(bootstrapper);
     delegateExecution(createClassLoader(bootstrapper));
   }
@@ -200,17 +196,46 @@ public final class Runner {
   protected void checkSonarVersion(Bootstrapper bootstrapper) {
     String serverVersion = bootstrapper.getServerVersion();
     if (isUnsupportedVersion(serverVersion)) {
-      throw new BootstrapException("Sonar " + serverVersion
-        + " does not support Standalone Runner. Please upgrade Sonar to version 2.11 or more.");
+      throw new RunnerException("Sonar " + serverVersion
+        + " is not supported. Please upgrade Sonar to version 2.11 or more.");
     }
   }
 
   private BootstrapClassLoader createClassLoader(Bootstrapper bootstrapper) {
-    URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
+    URL url = getJarPath();
     return bootstrapper.createClassLoader(
-        new URL[] {url}, // Add JAR with Sonar Runner - it's a Jar which contains this class
-        getClass().getClassLoader(),
-        unmaskedPackages);
+      new URL[]{url}, // Add JAR with Sonar Runner - it's a Jar which contains this class
+      getClass().getClassLoader(),
+      unmaskedPackages);
+  }
+
+  /**
+   * For unknown reasons <code>getClass().getProtectionDomain().getCodeSource().getLocation()</code> doesn't work under Ant 1.7.0.
+   * So this is a workaround.
+   *
+   * @return Jar which contains this class
+   */
+  public static URL getJarPath() {
+    String pathToClass = "/" + Runner.class.getName().replace('.', '/') + ".class";
+    URL url = Runner.class.getResource(pathToClass);
+    if (url != null) {
+      String path = url.toString();
+      String uri = null;
+      if (path.startsWith("jar:file:")) {
+        int bang = path.indexOf('!');
+        uri = path.substring(4, bang);
+      } else if (path.startsWith("file:")) {
+        int tail = path.indexOf(pathToClass);
+        uri = path.substring(0, tail);
+      }
+      if (uri != null) {
+        try {
+          return new URL(uri);
+        } catch (MalformedURLException e) { // NOSONAR
+        }
+      }
+    }
+    return null;
   }
 
   static boolean isUnsupportedVersion(String version) {
@@ -226,26 +251,21 @@ public final class Runner {
     return version.startsWith(prefix + ".") || version.equals(prefix);
   }
 
-  /**
-   * Loads Launcher class from specified {@link org.sonar.batch.bootstrapper.BootstrapClassLoader} and passes control to it.
-   *
-   * @see Launcher#execute()
-   */
   private void delegateExecution(BootstrapClassLoader sonarClassLoader) {
     ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
-      Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.internal.batch.Launcher");
+      Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.batch.Launcher");
       Constructor<?> constructor = launcherClass.getConstructor(Properties.class, List.class);
       Object launcher = constructor.newInstance(getProperties(), containerExtensions);
       Method method = launcherClass.getMethod("execute");
       method.invoke(launcher);
     } catch (InvocationTargetException e) {
       // Unwrap original exception
-      throw new BootstrapException(e.getTargetException());
+      throw new RunnerException(e.getTargetException());
     } catch (Exception e) {
       // Catch all other exceptions, which relates to reflection
-      throw new BootstrapException(e);
+      throw new RunnerException(e);
     } finally {
       Thread.currentThread().setContextClassLoader(oldContextClassLoader);
     }
@@ -253,8 +273,8 @@ public final class Runner {
 
   /**
    * Allows to overwrite the environment information when Sonar Runner is embedded in a specific tool (for instance, with the Sonar Ant Task).
-   * 
-   * @param key the key of the tool that embeds Sonar Runner
+   *
+   * @param key     the key of the tool that embeds Sonar Runner
    * @param version the version of this tool
    */
   public void setEnvironmentInformation(String key, String version) {

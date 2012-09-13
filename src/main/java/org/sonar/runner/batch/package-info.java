@@ -17,19 +17,8 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.utils;
-
-import org.junit.Test;
-
-import static org.fest.assertions.Assertions.assertThat;
-
-public class SonarRunnerVersionTest {
-
-  @Test
-  public void shouldLoadVersion() {
-    String version = SonarRunnerVersion.getVersion();
-    assertThat(version).contains(".");
-    assertThat(version).doesNotContain("$");
-  }
-
-}
+/**
+ * Internal package that creates the project definition and launches the analyses based on it.
+ * Should not be used by consumers.
+ */
+package org.sonar.runner.batch;

@@ -17,24 +17,17 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.internal.bootstrapper.utils;
+package org.sonar.runner;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 
 /**
  * Internal class used only by the Runner as we don't want it to depend on third-party libs.
- * This class should not be used by Sonar Runner consumers. 
+ * This class should not be used by Sonar Runner consumers.
  */
-public final class PrivateIOUtils {
+final class IOUtils {
 
-  private PrivateIOUtils() {
+  private IOUtils() {
     // only static methods
   }
 
@@ -46,7 +39,7 @@ public final class PrivateIOUtils {
   /**
    * Unconditionally close a <code>Closeable</code>.
    */
-  public static void closeQuietly(Closeable closeable) {
+  static void closeQuietly(Closeable closeable) {
     try {
       if (closeable != null) {
         closeable.close();
@@ -58,7 +51,7 @@ public final class PrivateIOUtils {
   /**
    * Get the contents of a <code>Reader</code> as a String.
    */
-  public static String toString(Reader input) throws IOException {
+  static String toString(Reader input) throws IOException {
     StringWriter sw = new StringWriter();
     copyLarge(input, sw);
     return sw.toString();
@@ -67,7 +60,7 @@ public final class PrivateIOUtils {
   /**
    * Copy bytes from an <code>InputStream</code> to an <code>OutputStream</code>.
    */
-  public static long copyLarge(InputStream input, OutputStream output) throws IOException {
+  static long copyLarge(InputStream input, OutputStream output) throws IOException {
     byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
     long count = 0;
     int n = 0;
@@ -81,7 +74,7 @@ public final class PrivateIOUtils {
   /**
    * Copy chars from a <code>Reader</code> to a <code>Writer</code>.
    */
-  public static long copyLarge(Reader input, Writer output) throws IOException {
+  static long copyLarge(Reader input, Writer output) throws IOException {
     char[] buffer = new char[DEFAULT_BUFFER_SIZE];
     long count = 0;
     int n = 0;
@@ -95,7 +88,7 @@ public final class PrivateIOUtils {
   /**
    * Deletes a file (not a directory).
    */
-  public static boolean deleteFileQuietly(File file) {
+  static boolean deleteFileQuietly(File file) {
     if (file == null) {
       return false;
     }

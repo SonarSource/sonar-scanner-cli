@@ -17,14 +17,13 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.utils;
+package org.sonar.runner.batch;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.sonar.test.TestUtils;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -48,7 +47,7 @@ public class SonarRunnerUtilsTest {
     assertThat(SonarRunnerUtils.getListFromProperty(props, "prop")).containsOnly("foo", "bar", "toto", "tutu");
   }
 
-  private Properties loadPropsFromFile(String filePath) throws FileNotFoundException, IOException {
+  private Properties loadPropsFromFile(String filePath) throws IOException {
     Properties props = new Properties();
     FileInputStream fileInputStream = null;
     try {

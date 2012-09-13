@@ -19,8 +19,6 @@
  */
 package org.sonar.runner;
 
-import com.google.common.annotations.VisibleForTesting;
-
 class Stats {
   private long startTime;
 
@@ -44,7 +42,6 @@ class Stats {
     return this;
   }
 
-  @VisibleForTesting
   static String formatTime(long time) {
     long h = time / (60 * 60 * 1000);
     long m = (time - h * 60 * 60 * 1000) / (60 * 1000);
