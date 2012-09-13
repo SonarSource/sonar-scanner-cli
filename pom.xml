@@ -56,6 +56,7 @@
 
   <properties>
     <sonar.buildVersion>2.11</sonar.buildVersion>
+    <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
   </properties>
 
   <dependencies>
