@@ -56,7 +56,7 @@ class BootstrapClassLoader extends URLClassLoader {
    * @return true, if class can be loaded from parent ClassLoader
    */
   boolean canLoadFromParent(String name) {
-    if (name.startsWith("org.sonar.runner.") && !name.startsWith("org.sonar.runner.batch.")) {
+    if (name.startsWith("org.sonar.runner.") && !name.startsWith("org.sonar.runner.internal.batch.")) {
       return true;
     }
     for (String pkg : unmaskedPackages) {

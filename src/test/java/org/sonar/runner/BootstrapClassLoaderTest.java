@@ -33,7 +33,7 @@ public class BootstrapClassLoaderTest {
   @Test
   public void should_restrict_loading_from_parent() throws Exception {
     BootstrapClassLoader classLoader = new BootstrapClassLoader(getClass().getClassLoader(), "org.apache.ant");
-    assertThat(classLoader.canLoadFromParent("org.sonar.runner.batch.Launcher")).isFalse();
+    assertThat(classLoader.canLoadFromParent("org.sonar.runner.internal.batch.Launcher")).isFalse();
     assertThat(classLoader.canLoadFromParent("org.sonar.runner.Runner")).isTrue();
     assertThat(classLoader.canLoadFromParent("org.objectweb.asm.ClassVisitor")).isFalse();
     assertThat(classLoader.canLoadFromParent("org.apache.ant.project.Project")).isTrue();

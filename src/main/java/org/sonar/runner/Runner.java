@@ -255,7 +255,7 @@ public final class Runner {
     ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
-      Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.batch.Launcher");
+      Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.internal.batch.Launcher");
       Constructor<?> constructor = launcherClass.getConstructor(Properties.class, List.class);
       Object launcher = constructor.newInstance(getProperties(), containerExtensions);
       Method method = launcherClass.getMethod("execute");

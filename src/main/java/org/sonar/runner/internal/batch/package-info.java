@@ -21,4 +21,4 @@
  * Internal package that creates the project definition and launches the analyses based on it.
  * Should not be used by consumers.
  */
-package org.sonar.runner.batch;
+package org.sonar.runner.internal.batch;
