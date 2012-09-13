@@ -8,7 +8,7 @@
 
   <artifactId>sonar-runner</artifactId>
   <version>1.5-SNAPSHOT</version>
-  <name>Sonar Runner</name>
+  <name>Sonar Standalone Runner</name>
 
   <url>http://docs.codehaus.org/display/SONAR/Sonar+Standalone+Runner</url>
   <inceptionYear>2011</inceptionYear>
