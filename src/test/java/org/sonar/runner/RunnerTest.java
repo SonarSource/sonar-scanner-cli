@@ -25,6 +25,7 @@ import org.junit.rules.ExpectedException;
 import org.sonar.test.TestUtils;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -35,6 +36,21 @@ public class RunnerTest {
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
+
+  @Test
+  public void shouldHaveDefaultEncodingIfNotForce() {
+    Runner runner = Runner.create(new Properties());
+    assertThat(runner.getSourceCodeEncoding()).isEqualTo(Charset.defaultCharset().name());
+  }
+
+  @Test
+  public void shouldKeepEncodingIfSpecified() {
+    Properties props = new Properties();
+    // Yeah, windows charset!
+    props.setProperty("sonar.sourceEncoding", "cp1252");
+    Runner runner = Runner.create(props);
+    assertThat(runner.getSourceCodeEncoding()).isEqualTo("cp1252");
+  }
 
   @Test
   public void shouldHaveDefaultEnvironmentInformationValues() {

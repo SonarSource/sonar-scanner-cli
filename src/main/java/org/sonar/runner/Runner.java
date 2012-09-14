@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -102,6 +103,8 @@ public final class Runner {
    */
   private static final String[] UNSUPPORTED_VERSIONS = {"1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "2.10"};
 
+  private static final String PROPERTY_SOURCE_ENCODING = "sonar.sourceEncoding";
+
   private File projectDir;
   private File workDir;
   private String[] unmaskedPackages;
@@ -114,6 +117,10 @@ public final class Runner {
     // set the default values for the Sonar Runner - they can be overriden with #setEnvironmentInformation
     this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_KEY, "Runner");
     this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, Version.getVersion());
+    // sets the encoding if not forced
+    if (!properties.containsKey(PROPERTY_SOURCE_ENCODING)) {
+      properties.setProperty(PROPERTY_SOURCE_ENCODING, Charset.defaultCharset().name());
+    }
     // and init the directories
     initDirs();
   }
@@ -187,6 +194,13 @@ public final class Runner {
   }
 
   /**
+   * @return the source code encoding that will be used by Sonar
+   */
+  public String getSourceCodeEncoding() {
+    return properties.getProperty(PROPERTY_SOURCE_ENCODING);
+  }
+
+  /**
    * @return global properties, project properties and command-line properties
    */
   protected Properties getProperties() {
@@ -204,9 +218,9 @@ public final class Runner {
   private BootstrapClassLoader createClassLoader(Bootstrapper bootstrapper) {
     URL url = getJarPath();
     return bootstrapper.createClassLoader(
-      new URL[]{url}, // Add JAR with Sonar Runner - it's a Jar which contains this class
-      getClass().getClassLoader(),
-      unmaskedPackages);
+        new URL[] {url}, // Add JAR with Sonar Runner - it's a Jar which contains this class
+        getClass().getClassLoader(),
+        unmaskedPackages);
   }
 
   /**
