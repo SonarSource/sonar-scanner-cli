@@ -110,6 +110,7 @@ public final class Runner {
   private String[] unmaskedPackages;
   private List<Object> containerExtensions = new ArrayList<Object>();
   private Properties properties;
+  private boolean isEncodingPlatformDependant;
 
   private Runner(Properties props) {
     this.properties = props;
@@ -119,6 +120,7 @@ public final class Runner {
     this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, Version.getVersion());
     // sets the encoding if not forced
     if (!properties.containsKey(PROPERTY_SOURCE_ENCODING)) {
+      isEncodingPlatformDependant = true;
       properties.setProperty(PROPERTY_SOURCE_ENCODING, Charset.defaultCharset().name());
     }
     // and init the directories
@@ -198,6 +200,13 @@ public final class Runner {
    */
   public String getSourceCodeEncoding() {
     return properties.getProperty(PROPERTY_SOURCE_ENCODING);
+  }
+
+  /**
+   * @return true if the property "sonar.sourceEncoding" hasn't been forced
+   */
+  public boolean isEncodingPlatformDependant() {
+    return isEncodingPlatformDependant;
   }
 
   /**

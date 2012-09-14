@@ -69,7 +69,8 @@ public final class Main {
       Logs.info("Java version: " + System.getProperty("java.version", "<unknown>")
         + ", vendor: " + System.getProperty("java.vendor", "<unknown>"));
       Logs.info("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
-      Logs.info("Default locale: \"" + Locale.getDefault() + "\", source code encoding: \"" + runner.getSourceCodeEncoding() + "\"");
+      Logs.info("Default locale: \"" + Locale.getDefault() + "\", source code encoding: \"" + runner.getSourceCodeEncoding() + "\""
+        + (runner.isEncodingPlatformDependant() ? " (analysis is platform dependent)" : ""));
       if (debugMode) {
         Logs.info("Other system properties:");
         Logs.info("  - sun.arch.data.model: \"" + System.getProperty("sun.arch.data.model") + "\"");
