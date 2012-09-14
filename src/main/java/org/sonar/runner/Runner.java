@@ -166,7 +166,7 @@ public final class Runner {
 
   private File initWorkDir() {
     String customWorkDir = properties.getProperty(PROPERTY_WORK_DIRECTORY);
-    if (customWorkDir == null || customWorkDir.trim().length() == 0) {
+    if (customWorkDir == null || "".equals(customWorkDir.trim())) {
       return new File(getProjectDir(), DEF_VALUE_WORK_DIRECTORY);
     }
     return defineCustomizedWorkDir(new File(customWorkDir));

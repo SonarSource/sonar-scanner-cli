@@ -19,7 +19,7 @@
  */
 package org.sonar.runner;
 
-class Logs {
+final class Logs {
   private Logs() {
   }
 
