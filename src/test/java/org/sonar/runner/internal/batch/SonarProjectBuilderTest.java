@@ -417,11 +417,11 @@ public class SonarProjectBuilderTest {
     props1.put("sonar.projectKey", "mod1");
     root.addSubProject(ProjectDefinition.create(props1));
 
-    // Check unicity of a new module: OK
+    // Check uniqueness of a new module: OK
     Properties props2 = new Properties();
     props2.put("sonar.projectKey", "mod2");
     ProjectDefinition mod2 = ProjectDefinition.create(props2);
-    SonarProjectBuilder.checkUnicityOfChildKey(mod2, root);
+    SonarProjectBuilder.checkUniquenessOfChildKey(mod2, root);
 
     // Now, add it and check again
     root.addSubProject(mod2);
@@ -429,7 +429,7 @@ public class SonarProjectBuilderTest {
     thrown.expect(RunnerException.class);
     thrown.expectMessage("Project 'root' can't have 2 modules with the following key: mod2");
 
-    SonarProjectBuilder.checkUnicityOfChildKey(mod2, root);
+    SonarProjectBuilder.checkUniquenessOfChildKey(mod2, root);
   }
 
   @Test
