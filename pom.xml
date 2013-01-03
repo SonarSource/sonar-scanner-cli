@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.codehaus.sonar-plugins</groupId>
     <artifactId>parent</artifactId>
-    <version>13</version>
+    <version>15</version>
   </parent>
 
   <artifactId>sonar-runner</artifactId>
@@ -40,6 +40,11 @@
       <name>Fabrice Bellingard</name>
       <timezone>+1</timezone>
     </developer>
+    <developer>
+      <id>henryju</id>
+      <name>Julien Henry</name>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <scm>
@@ -55,7 +60,7 @@
   </ciManagement>
 
   <properties>
-    <sonar.buildVersion>2.11</sonar.buildVersion>
+    <sonar.buildVersion>3.0</sonar.buildVersion>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
   </properties>
 
@@ -106,7 +111,8 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2</version>
+        <!-- SONARPLUGINS-2573 -->
+        <version>2.4</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -118,15 +124,6 @@
               <descriptors>
                 <descriptor>${basedir}/assembly.xml</descriptor>
               </descriptors>
-              <!-- TODO archiverConfig should be declared in parent POM - http://jira.codehaus.org/browse/SONARPLUGINS-1374 -->
-              <archiverConfig>
-                <!-- Workaround for http://jira.codehaus.org/browse/MASSEMBLY-422 -->
-                <!-- 420(dec) = 644(oct) -->
-                <fileMode>420</fileMode>
-                <!-- 493(dec) = 755(oct) -->
-                <directoryMode>493</directoryMode>
-                <defaultDirectoryMode>493</defaultDirectoryMode>
-              </archiverConfig>
             </configuration>
           </execution>
         </executions>
