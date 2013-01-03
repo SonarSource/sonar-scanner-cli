@@ -411,16 +411,16 @@ public class SonarProjectBuilderTest {
   public void shouldFailIf2ModulesWithSameKey() {
     Properties props = new Properties();
     props.put("sonar.projectKey", "root");
-    ProjectDefinition root = ProjectDefinition.create(props);
+    ProjectDefinition root = ProjectDefinition.create().setProperties(props);
 
     Properties props1 = new Properties();
     props1.put("sonar.projectKey", "mod1");
-    root.addSubProject(ProjectDefinition.create(props1));
+    root.addSubProject(ProjectDefinition.create().setProperties(props1));
 
     // Check uniqueness of a new module: OK
     Properties props2 = new Properties();
     props2.put("sonar.projectKey", "mod2");
-    ProjectDefinition mod2 = ProjectDefinition.create(props2);
+    ProjectDefinition mod2 = ProjectDefinition.create().setProperties(props2);
     SonarProjectBuilder.checkUniquenessOfChildKey(mod2, root);
 
     // Now, add it and check again

@@ -23,17 +23,23 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.configuration.*;
+import org.apache.commons.configuration.CompositeConfiguration;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.EnvironmentConfiguration;
+import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.configuration.SystemConfiguration;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.bootstrap.ProjectReactor;
 import org.sonar.api.utils.SonarException;
-import org.sonar.batch.Batch;
+import org.sonar.batch.bootstrapper.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
 import org.sonar.runner.Runner;
 
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -65,8 +71,27 @@ public class Launcher {
     setContainerExtensionsOnProject(project);
     String envKey = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY);
     String envVersion = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION);
-    Batch batch = Batch.create(new ProjectReactor(project), initialConfiguration, new EnvironmentInformation(envKey, envVersion));
+    ProjectReactor projectReactor = new ProjectReactor(project);
+    if (initialConfiguration != null) {
+      projectReactor.getRoot().setProperties(convertToProperties(initialConfiguration));
+    }
+    Batch batch = Batch.builder()
+        .setProjectReactor(new ProjectReactor(project))
+        .setEnvironment(new EnvironmentInformation(envKey, envVersion))
+        .build();
     batch.execute();
+  }
+
+  static Properties convertToProperties(Configuration configuration) {
+    Properties props = new Properties();
+    Iterator keys = configuration.getKeys();
+    while (keys.hasNext()) {
+      String key = (String) keys.next();
+      // Configuration#getString() automatically splits strings by comma separator.
+      String value = StringUtils.join(configuration.getStringArray(key), ",");
+      props.setProperty(key, value);
+    }
+    return props;
   }
 
   private void setContainerExtensionsOnProject(ProjectDefinition projectDefinition) {
@@ -85,8 +110,8 @@ public class Launcher {
     context.reset();
     InputStream input = Batch.class.getResourceAsStream("/org/sonar/batch/logback.xml");
     System.setProperty("ROOT_LOGGER_LEVEL", isDebug() ? "DEBUG" : "INFO");
-    context.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(initialConfiguration));// since 2.14. Ignored on previous versions.
-    context.putProperty("SQL_RESULTS_LOGGER_LEVEL", getSqlResultsLevel(initialConfiguration));// since 2.14. Ignored on previous versions.
+    context.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(initialConfiguration));
+    context.putProperty("SQL_RESULTS_LOGGER_LEVEL", getSqlResultsLevel(initialConfiguration));
     try {
       jc.doConfigure(input);
 

@@ -43,7 +43,7 @@ import java.util.Properties;
 
 /**
  * Class that creates a Sonar project definition based on a set of properties.
- * 
+ *
  * @since 1.5
  */
 public final class SonarProjectBuilder {
@@ -134,7 +134,7 @@ public final class SonarProjectBuilder {
       workDir = initModuleWorkDir(properties);
     }
 
-    ProjectDefinition definition = ProjectDefinition.create((Properties) properties.clone())
+    ProjectDefinition definition = ProjectDefinition.create().setProperties(properties)
         .setBaseDir(baseDir)
         .setWorkDir(workDir);
     return definition;
