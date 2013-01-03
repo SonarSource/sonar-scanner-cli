@@ -19,6 +19,8 @@
  */
 package org.sonar.runner;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -167,11 +169,16 @@ public final class Runner {
   }
 
   private File initWorkDir() {
+    File workDir;
     String customWorkDir = properties.getProperty(PROPERTY_WORK_DIRECTORY);
     if (customWorkDir == null || "".equals(customWorkDir.trim())) {
-      return new File(getProjectDir(), DEF_VALUE_WORK_DIRECTORY);
+      workDir = new File(getProjectDir(), DEF_VALUE_WORK_DIRECTORY);
     }
-    return defineCustomizedWorkDir(new File(customWorkDir));
+    else {
+      workDir = defineCustomizedWorkDir(new File(customWorkDir));
+    }
+    FileUtils.deleteQuietly(workDir);
+    return workDir;
   }
 
   private File defineCustomizedWorkDir(File customWorkDir) {

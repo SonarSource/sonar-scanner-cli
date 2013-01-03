@@ -146,10 +146,22 @@ public class RunnerTest {
     runner = Runner.create(properties);
     assertThat(runner.getWorkDir()).isEqualTo(new File(".", "temp-dir").getAbsoluteFile());
 
-    // real asbolute path
-    properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, new File("target").getAbsolutePath());
+    // real absolute path
+    properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, new File("target", "temp-dir2").getAbsolutePath());
     runner = Runner.create(properties);
-    assertThat(runner.getWorkDir()).isEqualTo(new File("target").getAbsoluteFile());
+    assertThat(runner.getWorkDir()).isEqualTo(new File("target", "temp-dir2").getAbsoluteFile());
+  }
+
+  @Test
+  public void shouldDeleteWorkingDirectory() {
+    Properties properties = new Properties();
+    File workDir = new File("target", "temp-dir-should-be-deleted");
+    workDir.mkdirs();
+    assertThat(workDir.exists()).isTrue();
+    // real absolute path
+    properties.setProperty(Runner.PROPERTY_WORK_DIRECTORY, workDir.getAbsolutePath());
+    Runner.create(properties);
+    assertThat(workDir.exists()).isFalse();
   }
 
   @Test
