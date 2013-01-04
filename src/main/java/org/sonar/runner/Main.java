@@ -48,6 +48,7 @@ public final class Main {
   private static final String PROJECT_SETTINGS = "project.settings";
 
   private boolean debugMode = false;
+  private boolean displayVersionOnly = false;
 
   /**
    * Entry point of the program.
@@ -80,6 +81,9 @@ public final class Main {
         Logs.info("Work directory: " + runner.getWorkDir().getCanonicalPath());
       } catch (IOException e) {
         throw new RunnerException(e);
+      }
+      if (displayVersionOnly) {
+        return;
       }
       runner.execute();
     } finally {
@@ -168,12 +172,15 @@ public final class Main {
       String arg = args[i];
       if ("-h".equals(arg) || "--help".equals(arg)) {
         printUsage();
-
-      } else if ("-X".equals(arg) || "--debug".equals(arg)) {
+      }
+      else if ("-v".equals(arg) || "--version".equals(arg)) {
+        displayVersionOnly = true;
+      }
+      else if ("-X".equals(arg) || "--debug".equals(arg)) {
         props.setProperty(Runner.PROPERTY_VERBOSE, "true");
         debugMode = true;
-
-      } else if ("-D".equals(arg) || "--define".equals(arg)) {
+      }
+      else if ("-D".equals(arg) || "--define".equals(arg)) {
         i++;
         if (i >= args.length) {
           printError("Missing argument for option --define");
@@ -181,11 +188,13 @@ public final class Main {
         arg = args[i];
         appendPropertyTo(arg, props);
 
-      } else if (arg.startsWith("-D")) {
+      }
+      else if (arg.startsWith("-D")) {
         arg = arg.substring(2);
         appendPropertyTo(arg, props);
 
-      } else {
+      }
+      else {
         printError("Unrecognized option: " + arg);
       }
     }
@@ -217,8 +226,9 @@ public final class Main {
     Logs.info("");
     Logs.info("Options:");
     Logs.info(" -h,--help             Display help information");
+    Logs.info(" -v,--version          Display version information");
     Logs.info(" -X,--debug            Produce execution debug output");
     Logs.info(" -D,--define <arg>     Define property");
-    System.exit(0); // NOSONAR
+    System.exit(0);
   }
 }
