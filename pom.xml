@@ -83,6 +83,12 @@
       <artifactId>sonar-plugin-api</artifactId>
       <version>${sonar.buildVersion}</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-configuration</artifactId>
+          <groupId>commons-configuration</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- Unit tests -->
     <dependency>
@@ -90,6 +96,12 @@
       <artifactId>sonar-testing-harness</artifactId>
       <version>${sonar.buildVersion}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-configuration</artifactId>
+          <groupId>commons-configuration</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.easytesting</groupId>

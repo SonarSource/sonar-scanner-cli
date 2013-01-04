@@ -20,8 +20,6 @@
 package org.sonar.runner.internal.batch;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.Configuration;
 import org.junit.Test;
 import org.sonar.runner.Runner;
 
@@ -33,7 +31,7 @@ public class LauncherTest {
 
   @Test
   public void testGetSqlLevel() throws Exception {
-    Configuration conf = new BaseConfiguration();
+    Properties conf = new Properties();
 
     assertThat(Launcher.getSqlLevel(conf)).isEqualTo("WARN");
 
@@ -46,7 +44,7 @@ public class LauncherTest {
 
   @Test
   public void testGetSqlResultsLevel() throws Exception {
-    Configuration conf = new BaseConfiguration();
+    Properties conf = new Properties();
 
     assertThat(Launcher.getSqlResultsLevel(conf)).isEqualTo("WARN");
 

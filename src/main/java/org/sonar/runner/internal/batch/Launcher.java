@@ -23,13 +23,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.configuration.CompositeConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.EnvironmentConfiguration;
-import org.apache.commons.configuration.MapConfiguration;
-import org.apache.commons.configuration.SystemConfiguration;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.bootstrap.ProjectReactor;
@@ -39,7 +33,6 @@ import org.sonar.batch.bootstrapper.EnvironmentInformation;
 import org.sonar.runner.Runner;
 
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -61,37 +54,23 @@ public class Launcher {
    * Main entry point.
    */
   public void execute() {
-    ProjectDefinition project = SonarProjectBuilder.create(propertiesFromRunner).generateProjectDefinition();
-    Configuration initialConfiguration = getInitialConfiguration(project);
-    initLogging(initialConfiguration);
-    executeBatch(project, initialConfiguration);
+    Properties configuration = getInitialConfiguration();
+    configuration.putAll(propertiesFromRunner);
+    ProjectDefinition project = SonarProjectBuilder.create(configuration).generateProjectDefinition();
+    initLogging(configuration);
+    executeBatch(project);
   }
 
-  private void executeBatch(ProjectDefinition project, Configuration initialConfiguration) {
+  private void executeBatch(ProjectDefinition project) {
     setContainerExtensionsOnProject(project);
     String envKey = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY);
     String envVersion = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION);
     ProjectReactor projectReactor = new ProjectReactor(project);
-    if (initialConfiguration != null) {
-      projectReactor.getRoot().setProperties(convertToProperties(initialConfiguration));
-    }
     Batch batch = Batch.builder()
         .setProjectReactor(new ProjectReactor(project))
         .setEnvironment(new EnvironmentInformation(envKey, envVersion))
         .build();
     batch.execute();
-  }
-
-  static Properties convertToProperties(Configuration configuration) {
-    Properties props = new Properties();
-    Iterator keys = configuration.getKeys();
-    while (keys.hasNext()) {
-      String key = (String) keys.next();
-      // Configuration#getString() automatically splits strings by comma separator.
-      String value = StringUtils.join(configuration.getStringArray(key), ",");
-      props.setProperty(key, value);
-    }
-    return props;
   }
 
   private void setContainerExtensionsOnProject(ProjectDefinition projectDefinition) {
@@ -103,15 +82,15 @@ public class Launcher {
     }
   }
 
-  private void initLogging(Configuration initialConfiguration) {
+  private void initLogging(Properties props) {
     LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
     JoranConfigurator jc = new JoranConfigurator();
     jc.setContext(context);
     context.reset();
     InputStream input = Batch.class.getResourceAsStream("/org/sonar/batch/logback.xml");
     System.setProperty("ROOT_LOGGER_LEVEL", isDebug() ? "DEBUG" : "INFO");
-    context.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(initialConfiguration));
-    context.putProperty("SQL_RESULTS_LOGGER_LEVEL", getSqlResultsLevel(initialConfiguration));
+    context.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(props));
+    context.putProperty("SQL_RESULTS_LOGGER_LEVEL", getSqlResultsLevel(props));
     try {
       jc.doConfigure(input);
 
@@ -129,23 +108,22 @@ public class Launcher {
   }
 
   @VisibleForTesting
-  protected static String getSqlLevel(Configuration config) {
-    boolean showSql = config.getBoolean("sonar.showSql", false);
+  protected static String getSqlLevel(Properties props) {
+    boolean showSql = "true".equals(props.get("sonar.showSql"));
     return showSql ? "DEBUG" : "WARN";
   }
 
   @VisibleForTesting
-  protected static String getSqlResultsLevel(Configuration config) {
-    boolean showSql = config.getBoolean("sonar.showSqlResults", false);
+  protected static String getSqlResultsLevel(Properties props) {
+    boolean showSql = "true".equals(props.get("sonar.showSqlResults"));
     return showSql ? "DEBUG" : "WARN";
   }
 
-  private Configuration getInitialConfiguration(ProjectDefinition project) {
-    CompositeConfiguration configuration = new CompositeConfiguration();
-    configuration.addConfiguration(new SystemConfiguration());
-    configuration.addConfiguration(new EnvironmentConfiguration());
-    configuration.addConfiguration(new MapConfiguration(project.getProperties()));
-    return configuration;
+  private Properties getInitialConfiguration() {
+    Properties props = new Properties();
+    props.putAll(System.getProperties());
+    props.putAll(System.getenv());
+    return props;
   }
 
 }
