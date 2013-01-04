@@ -20,8 +20,6 @@
 package org.sonar.runner;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -169,97 +167,16 @@ public final class Runner {
   }
 
   private File initWorkDir() {
-    File workDir;
+    File newWorkDir;
     String customWorkDir = properties.getProperty(PROPERTY_WORK_DIRECTORY);
     if (customWorkDir == null || "".equals(customWorkDir.trim())) {
-      workDir = new File(getProjectDir(), DEF_VALUE_WORK_DIRECTORY);
+      newWorkDir = new File(getProjectDir(), DEF_VALUE_WORK_DIRECTORY);
     }
     else {
-      workDir = defineCustomizedWorkDir(new File(customWorkDir));
+      newWorkDir = defineCustomizedWorkDir(new File(customWorkDir));
     }
-    deleteQuietly(workDir);
-    return workDir;
-  }
-
-  /**
-   * Duplicated from Commons IO because we don't want dependencies in Sonar Runner
-   */
-  private static boolean deleteQuietly(File file) {
-    if (file == null) {
-      return false;
-    }
-    try {
-      if (file.isDirectory()) {
-        cleanDirectory(file);
-      }
-    } catch (Exception ignored) {
-    }
-
-    try {
-      return file.delete();
-    } catch (Exception ignored) {
-      return false;
-    }
-  }
-
-  private static void cleanDirectory(File directory) throws IOException {
-    if (!directory.exists()) {
-      String message = directory + " does not exist";
-      throw new IllegalArgumentException(message);
-    }
-
-    if (!directory.isDirectory()) {
-      String message = directory + " is not a directory";
-      throw new IllegalArgumentException(message);
-    }
-
-    File[] files = directory.listFiles();
-    if (files == null) { // null if security restricted
-      throw new IOException("Failed to list contents of " + directory);
-    }
-
-    IOException exception = null;
-    for (File file : files) {
-      try {
-        forceDelete(file);
-      } catch (IOException ioe) {
-        exception = ioe;
-      }
-    }
-
-    if (null != exception) {
-      throw exception;
-    }
-  }
-
-  private static void forceDelete(File file) throws IOException {
-    if (file.isDirectory()) {
-      deleteDirectory(file);
-    } else {
-      boolean filePresent = file.exists();
-      if (!file.delete()) {
-        if (!filePresent) {
-          throw new FileNotFoundException("File does not exist: " + file);
-        }
-        String message =
-            "Unable to delete file: " + file;
-        throw new IOException(message);
-      }
-    }
-  }
-
-  private static void deleteDirectory(File directory) throws IOException {
-    if (!directory.exists()) {
-      return;
-    }
-
-    cleanDirectory(directory);
-
-    if (!directory.delete()) {
-      String message =
-          "Unable to delete directory " + directory + ".";
-      throw new IOException(message);
-    }
+    IOUtils.deleteQuietly(newWorkDir);
+    return newWorkDir;
   }
 
   private File defineCustomizedWorkDir(File customWorkDir) {

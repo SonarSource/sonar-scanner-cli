@@ -116,7 +116,7 @@ class Bootstrapper {
       IOUtils.copyLarge(input, output);
     } catch (IOException e) {
       IOUtils.closeQuietly(output);
-      IOUtils.deleteFileQuietly(toFile);
+      IOUtils.deleteQuietly(toFile);
       throw new IllegalStateException("Fail to download the file: " + fullUrl, e);
     } finally {
       IOUtils.closeQuietly(input);
