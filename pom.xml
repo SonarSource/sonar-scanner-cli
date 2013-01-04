@@ -110,6 +110,17 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <!-- SONARPLUGINS-2573 -->
         <version>2.4</version>
@@ -121,6 +132,7 @@
             </goals>
             <configuration>
               <appendAssemblyId>false</appendAssemblyId>
+              <escapeString>\</escapeString>
               <descriptors>
                 <descriptor>${basedir}/assembly.xml</descriptor>
               </descriptors>

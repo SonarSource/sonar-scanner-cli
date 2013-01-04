@@ -15,14 +15,14 @@ if [ -z "$SONAR_RUNNER_HOME" ] ; then
   SONAR_RUNNER_HOME=`cd "$SONAR_RUNNER_HOME" && pwd`
 else
   # check that the SONAR_RUNNER_HOME has been correctly set
-  if [ ! -e "$SONAR_RUNNER_HOME/lib/sonar-runner.jar" ] ; then
+  if [ ! -e "$SONAR_RUNNER_HOME/lib/sonar-runner-${project.version}.jar" ] ; then
     echo '$SONAR_RUNNER_HOME' does not point to a valid installation directory: $SONAR_RUNNER_HOME
     exit 0
   fi
 fi
 
 JAVA_CMD="`which java`"
-JAVA_CLASSPATH="${SONAR_RUNNER_HOME}"/lib/sonar-runner.jar
+JAVA_CLASSPATH="${SONAR_RUNNER_HOME}"/lib/sonar-runner-${project.version}.jar
 PROJECT_HOME=`pwd`
 
 #echo "Info: Using sonar-runner at $SONAR_RUNNER_HOME"
@@ -33,6 +33,6 @@ PROJECT_HOME=`pwd`
 exec "$JAVA_CMD" \
   $SONAR_RUNNER_OPTS \
   -classpath $JAVA_CLASSPATH \
-  "-Drunner.home=${SONAR_RUNNER_HOME}" \
-  "-Dproject.home=${PROJECT_HOME}" \
+  "-Drunner.home=\${SONAR_RUNNER_HOME}" \
+  "-Dproject.home=\${PROJECT_HOME}" \
   org.sonar.runner.Main "$@"

@@ -24,7 +24,7 @@ if not "%JAVA_EXEC%" == "" (
 if not "%JAVA_EXEC%" == "" goto OkJava
 
 echo.
-echo ERROR: JAVA_HOME not found in your environment, and no Java 
+echo ERROR: JAVA_HOME not found in your environment, and no Java
 echo        executable present in the PATH.
 echo Please set the JAVA_HOME variable in your environment to match the
 echo location of your Java installation, or add "java.exe" to the PATH
@@ -54,7 +54,7 @@ goto run
 if %SONAR_RUNNER_HOME:~-1%==\ set SONAR_RUNNER_HOME=%SONAR_RUNNER_HOME:~0,-1%
 
 @REM Check if the provided SONAR_RUNNER_HOME is a valid install dir
-IF EXIST "%SONAR_RUNNER_HOME%\lib\sonar-runner.jar" goto run
+IF EXIST "%SONAR_RUNNER_HOME%\lib\sonar-runner-${project.version}.jar" goto run
 
 echo.
 echo ERROR: SONAR_RUNNER_HOME exists but does not point to a valid install
@@ -70,7 +70,7 @@ echo %SONAR_RUNNER_HOME%
 
 set PROJECT_HOME=%CD%
 
-%JAVA_EXEC% %SONAR_RUNNER_OPTS% -classpath "%SONAR_RUNNER_HOME%\lib\sonar-runner.jar" "-Drunner.home=%SONAR_RUNNER_HOME%" "-Dproject.home=%PROJECT_HOME%" org.sonar.runner.Main %*
+%JAVA_EXEC% %SONAR_RUNNER_OPTS% -classpath "%SONAR_RUNNER_HOME%\lib\sonar-runner-${project.version}.jar" "-Drunner.home=%SONAR_RUNNER_HOME%" "-Dproject.home=%PROJECT_HOME%" org.sonar.runner.Main %*
 
 
 
