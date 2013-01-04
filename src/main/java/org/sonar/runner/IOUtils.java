@@ -19,7 +19,16 @@
  */
 package org.sonar.runner;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Internal class used only by the Runner as we don't want it to depend on third-party libs.
@@ -35,6 +44,8 @@ final class IOUtils {
    * The default buffer size to use.
    */
   private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+
+  private static final Pattern CHARSET_PATTERN = Pattern.compile("(?i)\\bcharset=\\s*\"?([^\\s;\"]*)");
 
   /**
    * Unconditionally close a <code>Closeable</code>.
@@ -97,6 +108,24 @@ final class IOUtils {
     } catch (Exception e) {
       return false;
     }
+  }
+
+  /**
+   * Parse out a charset from a content type header.
+   *
+   * @param contentType e.g. "text/html; charset=EUC-JP"
+   * @return "EUC-JP", or null if not found. Charset is trimmed and uppercased.
+   */
+  static String getCharsetFromContentType(String contentType) {
+    if (contentType == null) {
+      return null;
+    }
+
+    Matcher m = CHARSET_PATTERN.matcher(contentType);
+    if (m.find()) {
+      return m.group(1).trim().toUpperCase();
+    }
+    return null;
   }
 
 }

@@ -19,7 +19,12 @@
  */
 package org.sonar.runner;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -122,7 +127,11 @@ class Bootstrapper {
   String remoteContent(String path) throws IOException {
     String fullUrl = serverUrl + path;
     HttpURLConnection conn = newHttpConnection(new URL(fullUrl));
-    Reader reader = new InputStreamReader((InputStream) conn.getContent());
+    String charset = IOUtils.getCharsetFromContentType(conn.getContentType());
+    if (charset == null || "".equals(charset)) {
+      charset = "UTF-8";
+    }
+    Reader reader = new InputStreamReader((InputStream) conn.getContent(), charset);
     try {
       int statusCode = conn.getResponseCode();
       if (statusCode != HttpURLConnection.HTTP_OK) {
