@@ -243,6 +243,37 @@ public class SonarProjectBuilderTest {
     assertThat(module2.getProperties().getProperty("module2.sonar.projectKey")).isNull();
   }
 
+  // SONARPLUGINS-2421
+  @Test
+  public void shouldDefineMultiLanguageProjectWithDefinitionsAllInRootProject() throws IOException {
+    ProjectDefinition rootProject = loadProjectDefinition("multi-language-definitions-all-in-root");
+
+    // CHECK ROOT
+    assertThat(rootProject.getKey()).isEqualTo("example");
+    assertThat(rootProject.getName()).isEqualTo("Example");
+    assertThat(rootProject.getVersion()).isEqualTo("1.0");
+
+    // CHECK MODULES
+    List<ProjectDefinition> modules = rootProject.getSubProjects();
+    assertThat(modules.size()).isEqualTo(2);
+
+    // Module 1
+    ProjectDefinition module1 = modules.get(0);
+    assertThat(module1.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-language-definitions-all-in-root"));
+    assertThat(module1.getSourceDirs()).contains("src/main/java");
+    // and module properties must have been cleaned
+    assertThat(module1.getWorkDir().getCanonicalFile())
+        .isEqualTo(new File(TestUtils.getResource(this.getClass(), "multi-language-definitions-all-in-root"), ".sonar/example_java-module"));
+
+    // Module 2
+    ProjectDefinition module2 = modules.get(1);
+    assertThat(module2.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-language-definitions-all-in-root"));
+    assertThat(module2.getSourceDirs()).contains("src/main/groovy");
+    // and module properties must have been cleaned
+    assertThat(module2.getWorkDir().getCanonicalFile())
+        .isEqualTo(new File(TestUtils.getResource(this.getClass(), "multi-language-definitions-all-in-root"), ".sonar/example_groovy-module"));
+  }
+
   @Test
   public void shouldDefineMultiModuleProjectWithBaseDir() throws IOException {
     ProjectDefinition rootProject = loadProjectDefinition("multi-module-with-basedir");

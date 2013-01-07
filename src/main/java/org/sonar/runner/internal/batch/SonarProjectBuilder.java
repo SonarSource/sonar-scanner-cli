@@ -193,7 +193,13 @@ public final class SonarProjectBuilder {
     if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
       File baseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), parentProject.getBaseDir());
       setProjectBaseDir(baseDir, moduleProps, moduleId);
-      tryToFindAndLoadPropsFile(baseDir, moduleProps, moduleId);
+      try {
+        if (!parentProject.getBaseDir().getCanonicalFile().equals(baseDir.getCanonicalFile())) {
+          tryToFindAndLoadPropsFile(baseDir, moduleProps, moduleId);
+        }
+      } catch (IOException e) {
+        throw new RunnerException("Error when resolving baseDir", e);
+      }
     } else if (moduleProps.containsKey(PROPERTY_PROJECT_CONFIG_FILE)) {
       loadPropsFile(parentProject, moduleProps, moduleId);
     } else {
