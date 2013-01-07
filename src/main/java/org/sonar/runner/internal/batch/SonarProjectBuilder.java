@@ -320,7 +320,7 @@ public final class SonarProjectBuilder {
     if (project.getSubProjects().isEmpty()) {
       cleanAndCheckModuleProperties(project);
     } else {
-      cleanAggregatorProjectProperties(project);
+      cleanAndCheckAggregatorProjectProperties(project);
 
       // clean modules properties as well
       for (ProjectDefinition module : project.getSubProjects()) {
@@ -349,8 +349,19 @@ public final class SonarProjectBuilder {
   }
 
   @VisibleForTesting
-  protected static void cleanAggregatorProjectProperties(ProjectDefinition project) {
+  protected static void cleanAndCheckAggregatorProjectProperties(ProjectDefinition project) {
     Properties properties = project.getProperties();
+
+    // SONARPLUGINS-2295
+    String[] sourceDirs = SonarRunnerUtils.getListFromProperty(properties, PROPERTY_SOURCES);
+    for (String path : sourceDirs) {
+      File sourceFolder = getFileFromPath(path, project.getBaseDir());
+      if (sourceFolder.isDirectory()) {
+        LOG.warn("/!\\ A multi-module project can't have source folders, so '{}' won't be used for the analysis. " +
+          "If you want to analyse files of this folder, you should create another sub-module and move them inside it.",
+            sourceFolder.toString());
+      }
+    }
 
     // "aggregator" project must not have the following properties:
     properties.remove(PROPERTY_SOURCES);
