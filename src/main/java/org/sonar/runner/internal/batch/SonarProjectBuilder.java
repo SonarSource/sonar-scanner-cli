@@ -190,8 +190,9 @@ public final class SonarProjectBuilder {
   private ProjectDefinition loadChildProject(ProjectDefinition parentProject, Properties moduleProps, String moduleId) {
     setProjectKeyAndNameIfNotDefined(moduleProps, moduleId);
 
+    final File baseDir;
     if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-      File baseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), parentProject.getBaseDir());
+      baseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), parentProject.getBaseDir());
       setProjectBaseDir(baseDir, moduleProps, moduleId);
       try {
         if (!parentProject.getBaseDir().getCanonicalFile().equals(baseDir.getCanonicalFile())) {
@@ -201,15 +202,35 @@ public final class SonarProjectBuilder {
         throw new RunnerException("Error when resolving baseDir", e);
       }
     } else if (moduleProps.containsKey(PROPERTY_PROJECT_CONFIG_FILE)) {
-      loadPropsFile(parentProject, moduleProps, moduleId);
+      baseDir = loadPropsFile(parentProject, moduleProps, moduleId);
     } else {
-      File baseDir = new File(parentProject.getBaseDir(), moduleId);
+      baseDir = new File(parentProject.getBaseDir(), moduleId);
       setProjectBaseDir(baseDir, moduleProps, moduleId);
       tryToFindAndLoadPropsFile(baseDir, moduleProps, moduleId);
     }
 
     // and finish
     checkMandatoryProperties(moduleProps, MANDATORY_PROPERTIES_FOR_CHILD);
+    if (!moduleProps.containsKey(PROPERTY_MODULES)) {
+      // SONARPLUGINS-2285 Not an aggreator project so we can validate that paths are correct if defined
+
+      // We need to resolve patterns that may have been used in "sonar.libraries"
+      for (String pattern : SonarRunnerUtils.getListFromProperty(moduleProps, PROPERTY_LIBRARIES)) {
+        File[] files = getLibraries(baseDir, pattern);
+        if (files == null || files.length == 0) {
+          LOG.error("Invalid value of " + PROPERTY_LIBRARIES + " for module " + moduleId);
+          throw new RunnerException("No files matching pattern \"" + pattern + "\" in directory \"" + baseDir + "\"");
+        }
+      }
+
+      // Check sonar.tests
+      String[] testDirs = SonarRunnerUtils.getListFromProperty(moduleProps, PROPERTY_TESTS);
+      checkExistenceOfDirectories(moduleId, baseDir, testDirs, PROPERTY_TESTS);
+
+      // Check sonar.binaries
+      String[] binDirs = SonarRunnerUtils.getListFromProperty(moduleProps, PROPERTY_BINARIES);
+      checkExistenceOfDirectories(moduleId, baseDir, binDirs, PROPERTY_BINARIES);
+    }
     mergeParentProperties(moduleProps, parentProject.getProperties());
 
     prefixProjectKeyWithParentKey(moduleProps, parentProject.getKey());
@@ -217,7 +238,10 @@ public final class SonarProjectBuilder {
     return defineProject(moduleProps, parentProject);
   }
 
-  protected void loadPropsFile(ProjectDefinition parentProject, Properties moduleProps, String moduleId) {
+  /**
+   * @return baseDir
+   */
+  protected File loadPropsFile(ProjectDefinition parentProject, Properties moduleProps, String moduleId) {
     File propertyFile = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_CONFIG_FILE), parentProject.getBaseDir());
     if (propertyFile.isFile()) {
       Properties propsFromFile = toProperties(propertyFile);
@@ -231,6 +255,7 @@ public final class SonarProjectBuilder {
         baseDir = propertyFile.getParentFile();
       }
       setProjectBaseDir(baseDir, moduleProps, moduleId);
+      return baseDir;
     } else {
       throw new RunnerException("The properties file of the module '" + moduleId + "' does not exist: " + propertyFile.getAbsolutePath());
     }
@@ -335,7 +360,7 @@ public final class SonarProjectBuilder {
 
     // We need to check the existence of source directories
     String[] sourceDirs = SonarRunnerUtils.getListFromProperty(properties, PROPERTY_SOURCES);
-    checkExistenceOfDirectories(project.getKey(), project.getBaseDir(), sourceDirs);
+    checkExistenceOfDirectories(project.getKey(), project.getBaseDir(), sourceDirs, PROPERTY_SOURCES);
 
     // And we need to resolve patterns that may have been used in "sonar.libraries"
     List<String> libPaths = Lists.newArrayList();
@@ -435,12 +460,13 @@ public final class SonarProjectBuilder {
   }
 
   @VisibleForTesting
-  protected static void checkExistenceOfDirectories(String projectKey, File baseDir, String[] sourceDirs) {
+  protected static void checkExistenceOfDirectories(String moduleRef, File baseDir, String[] sourceDirs, String propName) {
     for (String path : sourceDirs) {
       File sourceFolder = getFileFromPath(path, baseDir);
       if (!sourceFolder.isDirectory()) {
-        throw new RunnerException("The folder '" + path + "' does not exist for '" + projectKey +
-          "' project (base directory = " + baseDir.getAbsolutePath() + ")");
+        LOG.error("Invalid value of " + propName + " for " + moduleRef);
+        throw new RunnerException("The folder '" + path + "' does not exist for '" + moduleRef +
+          "' (base directory = " + baseDir.getAbsolutePath() + ")");
       }
     }
 
@@ -463,8 +489,8 @@ public final class SonarProjectBuilder {
     FileFilter fileFilter = new AndFileFilter(FileFileFilter.FILE, new WildcardFileFilter(filePattern));
     File dir = resolvePath(baseDir, dirPath);
     File[] files = dir.listFiles(fileFilter);
-    if (files == null || files.length == 0) {
-      throw new RunnerException("No files matching pattern \"" + filePattern + "\" in directory \"" + dir + "\"");
+    if (files == null) {
+      files = new File[0];
     }
     return files;
   }

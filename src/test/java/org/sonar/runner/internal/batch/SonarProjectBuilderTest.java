@@ -69,7 +69,7 @@ public class SonarProjectBuilderTest {
   @Test
   public void shouldFailIfUnexistingSourceDirectory() throws IOException {
     thrown.expect(RunnerException.class);
-    thrown.expectMessage("The folder 'unexisting-source-dir' does not exist for 'com.foo.project' project (base directory = "
+    thrown.expectMessage("The folder 'unexisting-source-dir' does not exist for 'com.foo.project' (base directory = "
       + TestUtils.getResource(this.getClass(), "simple-project-with-unexisting-source-dir") + ")");
 
     loadProjectDefinition("simple-project-with-unexisting-source-dir");
@@ -324,6 +324,47 @@ public class SonarProjectBuilderTest {
   }
 
   @Test
+  public void shouldFailIfUnexistingSourceFolderInheritedInMultimodule() throws IOException {
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("The folder 'unexisting-source-dir' does not exist for 'com.foo.project:module1' (base directory = "
+      + TestUtils.getResource(this.getClass(), "multi-module-with-unexisting-source-dir").getAbsolutePath() + File.separator + "module1)");
+
+    loadProjectDefinition("multi-module-with-unexisting-source-dir");
+  }
+
+  @Test
+  public void shouldNotFailIfUnexistingTestBinLibFolderInheritedInMultimodule() throws IOException {
+    loadProjectDefinition("multi-module-with-unexisting-test-bin-lib-dir");
+  }
+
+  @Test
+  public void shouldFailIfExplicitUnexistingTestFolder() throws IOException {
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("The folder 'tests' does not exist for 'module1' (base directory = "
+      + TestUtils.getResource(this.getClass(), "multi-module-with-explicit-unexisting-test-dir").getAbsolutePath() + File.separator + "module1)");
+
+    loadProjectDefinition("multi-module-with-explicit-unexisting-test-dir");
+  }
+
+  @Test
+  public void shouldFailIfExplicitUnexistingBinaryFolder() throws IOException {
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("The folder 'bin' does not exist for 'module1' (base directory = "
+      + TestUtils.getResource(this.getClass(), "multi-module-with-explicit-unexisting-binary-dir").getAbsolutePath() + File.separator + "module1)");
+
+    loadProjectDefinition("multi-module-with-explicit-unexisting-binary-dir");
+  }
+
+  @Test
+  public void shouldFailIfExplicitUnmatchingLibFolder() throws IOException {
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("No files matching pattern \"lib/*.jar\" in directory \""
+      + TestUtils.getResource(this.getClass(), "multi-module-with-explicit-unexisting-lib").getAbsolutePath() + File.separator + "module1\"");
+
+    loadProjectDefinition("multi-module-with-explicit-unexisting-lib");
+  }
+
+  @Test
   public void shouldExtractModuleProperties() {
     Properties props = new Properties();
     props.setProperty("sources", "src/main/java");
@@ -394,16 +435,6 @@ public class SonarProjectBuilderTest {
     File baseDir = new File("not-exists");
     String absolutePattern = TestUtils.getResource(this.getClass(), "shouldFilterFiles").getAbsolutePath() + "/in*.txt";
     assertThat(SonarProjectBuilder.getLibraries(baseDir.getParentFile(), absolutePattern).length).isEqualTo(1);
-  }
-
-  @Test
-  public void shouldThrowExceptionWhenNoFilesMatchingPattern() throws Exception {
-    File baseDir = TestUtils.getResource(this.getClass(), "shouldFilterFiles");
-
-    thrown.expect(RunnerException.class);
-    thrown.expectMessage("No files matching pattern \"*.jar\" in directory");
-
-    SonarProjectBuilder.getLibraries(baseDir, "*.jar");
   }
 
   @Test
