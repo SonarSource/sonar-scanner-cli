@@ -65,7 +65,6 @@ public class Launcher {
     setContainerExtensionsOnProject(project);
     String envKey = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY);
     String envVersion = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION);
-    ProjectReactor projectReactor = new ProjectReactor(project);
     Batch batch = Batch.builder()
         .setProjectReactor(new ProjectReactor(project))
         .setEnvironment(new EnvironmentInformation(envKey, envVersion))
