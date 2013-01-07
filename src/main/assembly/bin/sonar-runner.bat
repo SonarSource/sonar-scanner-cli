@@ -87,4 +87,11 @@ set ERROR_CODE=1
 @REM set local scope for the variables with windows NT shell
 @endlocal & set ERROR_CODE=%ERROR_CODE%
 
-cmd /C exit /B %ERROR_CODE%
+@REM see http://code-bear.com/bearlog/2007/06/01/getting-the-exit-code-from-a-batch-file-that-is-run-from-a-python-program/
+goto exit
+
+:returncode
+exit /B %1
+
+:exit
+call :returncode %ERROR_CODE%
