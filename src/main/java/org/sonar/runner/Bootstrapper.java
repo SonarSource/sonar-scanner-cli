@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -74,6 +75,9 @@ class Bootstrapper {
     if (serverVersion == null) {
       try {
         serverVersion = remoteContent(VERSION_PATH);
+      } catch (ConnectException e) {
+        Logs.error("Sonar server '" + serverUrl + "' can not be reached");
+        throw new IllegalStateException("Fail to request server version", e);
       } catch (IOException e) {
         throw new IllegalStateException("Fail to request server version", e);
       }

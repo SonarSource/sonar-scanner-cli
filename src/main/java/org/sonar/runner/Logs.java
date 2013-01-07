@@ -24,6 +24,10 @@ final class Logs {
   }
 
   static void info(String message) {
-    System.out.println(message); // NOSONAR
+    System.out.println(message);
+  }
+
+  static void error(String message) {
+    System.err.println("ERROR: " + message);
   }
 }
