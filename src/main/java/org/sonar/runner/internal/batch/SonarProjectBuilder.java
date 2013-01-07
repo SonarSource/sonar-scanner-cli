@@ -90,10 +90,15 @@ public final class SonarProjectBuilder {
   private static final String DEF_VALUE_WORK_DIRECTORY = ".sonar";
 
   /**
-   * Array of all mandatory properties required for a project.
+   * Array of all mandatory properties required for a project without child.
    */
-  private static final String[] MANDATORY_PROPERTIES_FOR_PROJECT = {PROPERTY_PROJECT_BASEDIR, PROPERTY_PROJECT_KEY, PROPERTY_PROJECT_NAME, PROPERTY_PROJECT_VERSION,
+  private static final String[] MANDATORY_PROPERTIES_FOR_SIMPLE_PROJECT = {PROPERTY_PROJECT_BASEDIR, PROPERTY_PROJECT_KEY, PROPERTY_PROJECT_NAME, PROPERTY_PROJECT_VERSION,
     PROPERTY_SOURCES};
+
+  /**
+   * Array of all mandatory properties required for a project with children.
+   */
+  private static final String[] MANDATORY_PROPERTIES_FOR_MULTIMODULE_PROJECT = {PROPERTY_PROJECT_BASEDIR, PROPERTY_PROJECT_KEY, PROPERTY_PROJECT_NAME, PROPERTY_PROJECT_VERSION};
 
   /**
    * Array of all mandatory properties required for a child project before its properties get merged with its parent ones.
@@ -125,7 +130,12 @@ public final class SonarProjectBuilder {
   }
 
   private ProjectDefinition defineProject(Properties properties, ProjectDefinition parent) {
-    checkMandatoryProperties(properties, MANDATORY_PROPERTIES_FOR_PROJECT);
+    if (properties.containsKey(PROPERTY_MODULES)) {
+      checkMandatoryProperties(properties, MANDATORY_PROPERTIES_FOR_MULTIMODULE_PROJECT);
+    }
+    else {
+      checkMandatoryProperties(properties, MANDATORY_PROPERTIES_FOR_SIMPLE_PROJECT);
+    }
     File baseDir = new File(properties.getProperty(PROPERTY_PROJECT_BASEDIR));
     File workDir = null;
     if (parent == null) {

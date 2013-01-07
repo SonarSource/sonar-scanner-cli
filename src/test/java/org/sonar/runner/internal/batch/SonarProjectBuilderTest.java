@@ -165,6 +165,57 @@ public class SonarProjectBuilderTest {
     // Module 1
     ProjectDefinition module1 = modules.get(0);
     assertThat(module1.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-in-each-module/module1"));
+    assertThat(module1.getKey()).isEqualTo("com.foo.project:com.foo.project.module1");
+    assertThat(module1.getName()).isEqualTo("Foo Module 1");
+    assertThat(module1.getVersion()).isEqualTo("1.0-SNAPSHOT");
+    // Description should not be inherited from parent if not set
+    assertThat(module1.getDescription()).isEqualTo("Description of Module 1");
+    assertThat(module1.getSourceDirs()).contains("sources");
+    assertThat(module1.getTestDirs()).contains("tests");
+    assertThat(module1.getBinaries()).contains("target/classes");
+    // and module properties must have been cleaned
+    assertThat(module1.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(module1.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+
+    // Module 2
+    ProjectDefinition module2 = modules.get(1);
+    assertThat(module2.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-in-each-module/module2/newBaseDir"));
+    assertThat(module2.getKey()).isEqualTo("com.foo.project:com.foo.project.module2");
+    assertThat(module2.getName()).isEqualTo("Foo Module 2");
+    assertThat(module2.getVersion()).isEqualTo("1.0-SNAPSHOT");
+    assertThat(module2.getDescription()).isEqualTo("Description of Module 2");
+    assertThat(module2.getSourceDirs()).contains("src");
+    assertThat(module2.getTestDirs()).contains("tests");
+    assertThat(module2.getBinaries()).contains("target/classes");
+    // and module properties must have been cleaned
+    assertThat(module2.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(module2.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+  }
+
+  @Test
+  public void shouldDefineMultiModuleProjectWithDefinitionsModule1Inherited() throws IOException {
+    ProjectDefinition rootProject = loadProjectDefinition("multi-module-definitions-in-each-module-inherited");
+
+    // CHECK ROOT
+    assertThat(rootProject.getKey()).isEqualTo("com.foo.project");
+    assertThat(rootProject.getName()).isEqualTo("Foo Project");
+    assertThat(rootProject.getVersion()).isEqualTo("1.0-SNAPSHOT");
+    assertThat(rootProject.getDescription()).isEqualTo("Description of Foo Project");
+    // root project must not contain some properties - even if they are defined in the root properties file
+    assertThat(rootProject.getSourceDirs().contains("sources")).isFalse();
+    assertThat(rootProject.getTestDirs().contains("tests")).isFalse();
+    assertThat(rootProject.getBinaries().contains("target/classes")).isFalse();
+    // and module properties must have been cleaned
+    assertThat(rootProject.getProperties().getProperty("module1.sonar.projectKey")).isNull();
+    assertThat(rootProject.getProperties().getProperty("module2.sonar.projectKey")).isNull();
+
+    // CHECK MODULES
+    List<ProjectDefinition> modules = rootProject.getSubProjects();
+    assertThat(modules.size()).isEqualTo(2);
+
+    // Module 1
+    ProjectDefinition module1 = modules.get(0);
+    assertThat(module1.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-in-each-module-inherited/module1"));
     assertThat(module1.getKey()).isEqualTo("com.foo.project:module1");
     assertThat(module1.getName()).isEqualTo("module1");
     assertThat(module1.getVersion()).isEqualTo("1.0-SNAPSHOT");
@@ -179,7 +230,7 @@ public class SonarProjectBuilderTest {
 
     // Module 2
     ProjectDefinition module2 = modules.get(1);
-    assertThat(module2.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-in-each-module/module2/newBaseDir"));
+    assertThat(module2.getBaseDir().getCanonicalFile()).isEqualTo(TestUtils.getResource(this.getClass(), "multi-module-definitions-in-each-module-inherited/module2/newBaseDir"));
     assertThat(module2.getKey()).isEqualTo("com.foo.project:com.foo.project.module2");
     assertThat(module2.getName()).isEqualTo("Foo Module 2");
     assertThat(module2.getVersion()).isEqualTo("1.0-SNAPSHOT");
