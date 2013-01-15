@@ -101,7 +101,7 @@ public final class Runner {
   /**
    * Array of prefixes of versions of Sonar without support of this runner.
    */
-  private static final String[] UNSUPPORTED_VERSIONS = {"1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "2.10"};
+  private static final String[] UNSUPPORTED_VERSIONS = {"1", "2", "3.0", "3.1", "3.2", "3.3", "3.4"};
 
   private static final String PROPERTY_SOURCE_ENCODING = "sonar.sourceEncoding";
 
@@ -250,7 +250,7 @@ public final class Runner {
     String serverVersion = bootstrapper.getServerVersion();
     if (isUnsupportedVersion(serverVersion)) {
       throw new RunnerException("Sonar " + serverVersion
-        + " is not supported. Please upgrade Sonar to version 2.11 or more.");
+        + " is not supported. Please upgrade Sonar to version 3.5 or more.");
     }
   }
 
