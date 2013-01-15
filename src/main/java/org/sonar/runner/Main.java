@@ -49,6 +49,11 @@ public final class Main {
 
   private boolean debugMode = false;
   private boolean displayVersionOnly = false;
+  private String command;
+  @VisibleForTesting
+  Properties globalProperties;
+  @VisibleForTesting
+  Properties projectProperties;
 
   /**
    * Entry point of the program.
@@ -64,8 +69,8 @@ public final class Main {
   private void execute(String[] args) {
     Stats stats = new Stats().start();
     try {
-      Properties props = loadProperties(args);
-      Runner runner = Runner.create(props);
+      loadProperties(args);
+      Runner runner = Runner.create(command, globalProperties, projectProperties);
       Logs.info("Runner version: " + Version.getVersion());
       Logs.info("Java version: " + System.getProperty("java.version", "<unknown>")
         + ", vendor: " + System.getProperty("java.vendor", "<unknown>"));
@@ -92,14 +97,33 @@ public final class Main {
   }
 
   @VisibleForTesting
-  Properties loadProperties(String[] args) {
+  void loadProperties(String[] args) {
+    Properties argsProperties = parseArguments(args);
+    globalProperties = loadGlobalProperties(argsProperties);
+    projectProperties = loadProjectProperties(argsProperties);
+  }
+
+  @VisibleForTesting
+  Properties loadGlobalProperties(Properties argsProperties) {
     Properties commandLineProps = new Properties();
     commandLineProps.putAll(System.getProperties());
-    commandLineProps.putAll(parseArguments(args));
+    commandLineProps.putAll(argsProperties);
 
     Properties result = new Properties();
-    result.putAll(loadRunnerProperties(commandLineProps));
-    result.putAll(loadProjectProperties(commandLineProps));
+    result.putAll(loadRunnerConfiguration(commandLineProps));
+    result.putAll(commandLineProps);
+
+    return result;
+  }
+
+  @VisibleForTesting
+  Properties loadProjectProperties(Properties argsProperties) {
+    Properties commandLineProps = new Properties();
+    commandLineProps.putAll(System.getProperties());
+    commandLineProps.putAll(argsProperties);
+
+    Properties result = new Properties();
+    result.putAll(loadProjectConfiguration(commandLineProps));
     result.putAll(commandLineProps);
 
     if (result.containsKey(PROJECT_HOME)) {
@@ -113,7 +137,7 @@ public final class Main {
   }
 
   @VisibleForTesting
-  Properties loadRunnerProperties(Properties props) {
+  Properties loadRunnerConfiguration(Properties props) {
     File settingsFile = locatePropertiesFile(props, RUNNER_HOME, "conf/sonar-runner.properties", RUNNER_SETTINGS);
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
       Logs.info("Runner configuration file: " + settingsFile.getAbsolutePath());
@@ -123,7 +147,7 @@ public final class Main {
     return new Properties();
   }
 
-  private Properties loadProjectProperties(Properties props) {
+  private Properties loadProjectConfiguration(Properties props) {
     File settingsFile = locatePropertiesFile(props, PROJECT_HOME, "sonar-project.properties", PROJECT_SETTINGS);
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
       Logs.info("Project configuration file: " + settingsFile.getAbsolutePath());
@@ -167,8 +191,16 @@ public final class Main {
 
   @VisibleForTesting
   Properties parseArguments(String[] args) {
+    int i = 0;
+    if (args.length > 0 && !args[0].startsWith("-")) {
+      command = args[0];
+      i++;
+    }
+    else {
+      command = null;
+    }
     Properties props = new Properties();
-    for (int i = 0; i < args.length; i++) {
+    for (; i < args.length; i++) {
       String arg = args[i];
       if ("-h".equals(arg) || "--help".equals(arg)) {
         printUsage();
@@ -222,8 +254,11 @@ public final class Main {
 
   private void printUsage() {
     Logs.info("");
-    Logs.info("usage: sonar-runner [options]");
+    Logs.info("usage: sonar-runner [command] [options]");
     Logs.info("");
+    Logs.info("Command:");
+    Logs.info(" analyse-project       Run Sonar analysis task on the current project (default)");
+    Logs.info(" list-tasks            Display all tasks available");
     Logs.info("Options:");
     Logs.info(" -h,--help             Display help information");
     Logs.info(" -v,--version          Display version information");

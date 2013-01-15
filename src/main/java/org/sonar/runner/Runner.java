@@ -105,23 +105,27 @@ public final class Runner {
 
   private static final String PROPERTY_SOURCE_ENCODING = "sonar.sourceEncoding";
 
+  private String command;
   private File projectDir;
   private File workDir;
   private String[] unmaskedPackages;
   private List<Object> containerExtensions = new ArrayList<Object>();
-  private Properties properties;
+  private Properties globalProperties;
+  private Properties projectProperties;
   private boolean isEncodingPlatformDependant;
 
-  private Runner(Properties props) {
-    this.properties = props;
+  private Runner(String command, Properties globalProperties, Properties projectProperties) {
+    this.command = command;
+    this.globalProperties = globalProperties;
+    this.projectProperties = projectProperties;
     this.unmaskedPackages = new String[0];
     // set the default values for the Sonar Runner - they can be overriden with #setEnvironmentInformation
-    this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_KEY, "Runner");
-    this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, Version.getVersion());
+    this.globalProperties.put(PROPERTY_ENVIRONMENT_INFORMATION_KEY, "Runner");
+    this.globalProperties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, Version.getVersion());
     // sets the encoding if not forced
-    if (!properties.containsKey(PROPERTY_SOURCE_ENCODING)) {
+    if (!globalProperties.containsKey(PROPERTY_SOURCE_ENCODING) && !projectProperties.containsKey(PROPERTY_SOURCE_ENCODING)) {
       isEncodingPlatformDependant = true;
-      properties.setProperty(PROPERTY_SOURCE_ENCODING, Charset.defaultCharset().name());
+      globalProperties.setProperty(PROPERTY_SOURCE_ENCODING, Charset.defaultCharset().name());
     }
     // and init the directories
     initDirs();
@@ -131,15 +135,29 @@ public final class Runner {
    * Creates a Runner based only on the given properties.
    */
   public static Runner create(Properties props) {
-    return new Runner(props);
+    return create(null, new Properties(), props);
+  }
+
+  /**
+   * Creates a Runner based only on the given properties.
+   */
+  public static Runner create(String command, Properties globalProperties, Properties projectProperties) {
+    return new Runner(command, globalProperties, projectProperties);
   }
 
   /**
    * Creates a Runner based only on the properties and with the given base directory.
    */
   public static Runner create(Properties props, File basedir) {
-    props.put(PROPERTY_SONAR_PROJECT_BASEDIR, basedir.getAbsolutePath());
-    return new Runner(props);
+    return create(null, new Properties(), props, basedir);
+  }
+
+  /**
+   * Creates a Runner based only on the properties and with the given base directory.
+   */
+  public static Runner create(String command, Properties globalProperties, Properties projectProperties, File basedir) {
+    projectProperties.put(PROPERTY_SONAR_PROJECT_BASEDIR, basedir.getAbsolutePath());
+    return new Runner(command, globalProperties, projectProperties);
   }
 
   /**
@@ -152,23 +170,23 @@ public final class Runner {
   }
 
   public String getSonarServerURL() {
-    return properties.getProperty("sonar.host.url", "http://localhost:9000");
+    return projectProperties.getProperty("sonar.host.url", globalProperties.getProperty("sonar.host.url", "http://localhost:9000"));
   }
 
   private void initDirs() {
-    String path = properties.getProperty(PROPERTY_SONAR_PROJECT_BASEDIR, ".");
+    String path = projectProperties.getProperty(PROPERTY_SONAR_PROJECT_BASEDIR, ".");
     projectDir = new File(path);
     if (!projectDir.isDirectory()) {
       throw new RunnerException("Project home must be an existing directory: " + path);
     }
     // project home exists: add its absolute path as "sonar.runner.projectDir" property
-    properties.put(PROPERTY_SONAR_PROJECT_BASEDIR, projectDir.getAbsolutePath());
+    projectProperties.put(PROPERTY_SONAR_PROJECT_BASEDIR, projectDir.getAbsolutePath());
     workDir = initWorkDir();
   }
 
   private File initWorkDir() {
     File newWorkDir;
-    String customWorkDir = properties.getProperty(PROPERTY_WORK_DIRECTORY);
+    String customWorkDir = projectProperties.getProperty(PROPERTY_WORK_DIRECTORY, globalProperties.getProperty(PROPERTY_WORK_DIRECTORY));
     if (customWorkDir == null || "".equals(customWorkDir.trim())) {
       newWorkDir = new File(getProjectDir(), DEF_VALUE_WORK_DIRECTORY);
     }
@@ -204,7 +222,7 @@ public final class Runner {
    * @return the source code encoding that will be used by Sonar
    */
   public String getSourceCodeEncoding() {
-    return properties.getProperty(PROPERTY_SOURCE_ENCODING);
+    return projectProperties.getProperty(PROPERTY_SOURCE_ENCODING, globalProperties.getProperty(PROPERTY_SOURCE_ENCODING));
   }
 
   /**
@@ -214,11 +232,18 @@ public final class Runner {
     return isEncodingPlatformDependant;
   }
 
+  public String getCommand() {
+    return command;
+  }
+
   /**
    * @return global properties, project properties and command-line properties
    */
   protected Properties getProperties() {
-    return properties;
+    Properties props = new Properties();
+    props.putAll(globalProperties);
+    props.putAll(projectProperties);
+    return props;
   }
 
   protected void checkSonarVersion(Bootstrapper bootstrapper) {
@@ -284,8 +309,8 @@ public final class Runner {
     try {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
       Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.runner.internal.batch.Launcher");
-      Constructor<?> constructor = launcherClass.getConstructor(Properties.class, List.class);
-      Object launcher = constructor.newInstance(getProperties(), containerExtensions);
+      Constructor<?> constructor = launcherClass.getConstructor(String.class, Properties.class, Properties.class, List.class);
+      Object launcher = constructor.newInstance(getCommand(), globalProperties, projectProperties, containerExtensions);
       Method method = launcherClass.getMethod("execute");
       method.invoke(launcher);
     } catch (InvocationTargetException e) {
@@ -306,8 +331,8 @@ public final class Runner {
    * @param version the version of this tool
    */
   public void setEnvironmentInformation(String key, String version) {
-    this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_KEY, key);
-    this.properties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, version);
+    this.globalProperties.put(PROPERTY_ENVIRONMENT_INFORMATION_KEY, key);
+    this.globalProperties.put(PROPERTY_ENVIRONMENT_INFORMATION_VERSION, version);
   }
 
   public void setUnmaskedPackages(String... unmaskedPackages) {

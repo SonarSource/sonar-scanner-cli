@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
+import org.sonar.batch.tasks.AnalyseProjectTaskDefinition;
 import org.sonar.runner.RunnerException;
 
 import java.io.File;
@@ -110,23 +111,47 @@ public final class SonarProjectBuilder {
    */
   private static final List<String> NON_HERITED_PROPERTIES_FOR_CHILD = Lists.newArrayList(PROPERTY_PROJECT_BASEDIR, PROPERTY_MODULES, PROPERTY_PROJECT_DESCRIPTION);
 
+  private String command;
   private Properties properties;
   private File rootProjectWorkDir;
 
-  private SonarProjectBuilder(Properties properties) {
+  private SonarProjectBuilder(String command, Properties properties) {
+    this.command = command;
     this.properties = properties;
   }
 
   public static SonarProjectBuilder create(Properties properties) {
-    return new SonarProjectBuilder(properties);
+    return create(null, properties);
+  }
+
+  public static SonarProjectBuilder create(String command, Properties properties) {
+    if (StringUtils.isBlank(command)) {
+      command = AnalyseProjectTaskDefinition.COMMAND;
+    }
+    return new SonarProjectBuilder(command, properties);
   }
 
   public ProjectDefinition generateProjectDefinition() {
-    ProjectDefinition rootProject = defineProject(properties, null);
-    rootProjectWorkDir = rootProject.getWorkDir();
-    defineChildren(rootProject);
-    cleanAndCheckProjectDefinitions(rootProject);
-    return rootProject;
+    if (AnalyseProjectTaskDefinition.COMMAND.equals(command)) {
+      ProjectDefinition rootProject = defineProject(properties, null);
+      rootProjectWorkDir = rootProject.getWorkDir();
+      defineChildren(rootProject);
+      cleanAndCheckProjectDefinitions(rootProject);
+      return rootProject;
+    }
+    else {
+      return defineTaskContext();
+    }
+  }
+
+  private ProjectDefinition defineTaskContext() {
+    File baseDir = new File(System.getProperty("user.home"));
+    File workDir = initRootProjectWorkDir(baseDir);
+
+    ProjectDefinition definition = ProjectDefinition.create().setProperties(properties)
+        .setBaseDir(baseDir)
+        .setWorkDir(workDir);
+    return definition;
   }
 
   private ProjectDefinition defineProject(Properties properties, ProjectDefinition parent) {

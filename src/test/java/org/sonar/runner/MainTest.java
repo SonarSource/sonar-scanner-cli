@@ -26,18 +26,17 @@ import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-
 public class MainTest {
 
   @Test
   public void shouldParseEmptyArguments() {
-    Properties props = new Main().parseArguments(new String[]{});
+    Properties props = new Main().parseArguments(new String[] {});
     assertThat(props).isEmpty();
   }
 
   @Test
   public void shouldParseArguments() {
-    Properties props = new Main().parseArguments(new String[]{"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
+    Properties props = new Main().parseArguments(new String[] {"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
     assertThat(props).hasSize(3);
     assertThat(props.getProperty("foo")).isEqualTo("bar");
     assertThat(props.getProperty("hello")).isEqualTo("world");
@@ -46,13 +45,13 @@ public class MainTest {
 
   @Test
   public void shouldEnableDebugMode() {
-    Properties props = new Main().parseArguments(new String[]{"-X"});
+    Properties props = new Main().parseArguments(new String[] {"-X"});
     assertThat(props.getProperty(Runner.PROPERTY_VERBOSE)).isEqualTo("true");
   }
 
   @Test
   public void shouldDisableDebugModeByDefault() {
-    Properties props = new Main().parseArguments(new String[]{});
+    Properties props = new Main().parseArguments(new String[] {});
     assertThat(props.getProperty(Runner.PROPERTY_VERBOSE)).isNull();
   }
 
@@ -62,7 +61,7 @@ public class MainTest {
     Properties args = new Properties();
     args.setProperty("runner.home", home.getCanonicalPath());
 
-    Properties props = new Main().loadRunnerProperties(args);
+    Properties props = new Main().loadRunnerConfiguration(args);
 
     assertThat(props.getProperty("sonar.host.url")).isEqualTo("http://moon/sonar");
   }
@@ -70,7 +69,7 @@ public class MainTest {
   @Test
   public void shouldNotFailIfNoHome() throws Exception {
     Properties args = new Properties();
-    Properties props = new Main().loadRunnerProperties(args);
+    Properties props = new Main().loadRunnerConfiguration(args);
 
     assertThat(props).isEmpty();
   }
@@ -80,7 +79,7 @@ public class MainTest {
     File settings = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
     Properties args = new Properties();
     args.setProperty("runner.settings", settings.getCanonicalPath());
-    Properties props = new Main().loadRunnerProperties(args);
+    Properties props = new Main().loadRunnerConfiguration(args);
 
     assertThat(props.getProperty("sonar.host.url")).isEqualTo("http://other/sonar");
   }
@@ -89,14 +88,15 @@ public class MainTest {
   public void shouldLoadCompleteConfiguration() throws Exception {
     File runnerHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/runner").toURI());
     File projectHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/project").toURI());
-    Properties props = new Main().loadProperties(new String[]{
+    Main main = new Main();
+    main.loadProperties(new String[] {
       "-D", "runner.home=" + runnerHome.getCanonicalPath(),
       "-D", "project.home=" + projectHome.getCanonicalPath()
     });
 
-    assertThat(props.getProperty("project.prop")).isEqualTo("foo");
-    assertThat(props.getProperty("overridden.prop")).isEqualTo("project scope");
-    assertThat(props.getProperty("global.prop")).isEqualTo("jdbc:mysql:localhost/sonar");
+    assertThat(main.projectProperties.getProperty("project.prop")).isEqualTo("foo");
+    assertThat(main.projectProperties.getProperty("overridden.prop")).isEqualTo("project scope");
+    assertThat(main.globalProperties.getProperty("global.prop")).isEqualTo("jdbc:mysql:localhost/sonar");
   }
 
 }

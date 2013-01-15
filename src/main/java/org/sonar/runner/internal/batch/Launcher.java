@@ -23,6 +23,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
@@ -34,6 +35,7 @@ import org.sonar.runner.Runner;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -42,11 +44,20 @@ import java.util.Properties;
  */
 public class Launcher {
 
-  private Properties propertiesFromRunner;
+  private String command;
+  private Properties globalProperties;
+  private Properties projectProperties;
   private List<Object> containerExtensions;
 
+  @Deprecated
   public Launcher(Properties properties, List<Object> containerExtensions) {
-    this.propertiesFromRunner = properties;
+    this("project-analysis", new Properties(), properties, containerExtensions);
+  }
+
+  public Launcher(String command, Properties globalProperties, Properties projectProperties, List<Object> containerExtensions) {
+    this.command = command;
+    this.globalProperties = globalProperties;
+    this.projectProperties = projectProperties;
     this.containerExtensions = containerExtensions;
   }
 
@@ -54,22 +65,35 @@ public class Launcher {
    * Main entry point.
    */
   public void execute() {
-    Properties configuration = getInitialConfiguration();
-    configuration.putAll(propertiesFromRunner);
-    ProjectDefinition project = SonarProjectBuilder.create(configuration).generateProjectDefinition();
-    initLogging(configuration);
-    executeBatch(project);
+    Properties globalConfiguration = getInitialConfiguration();
+    globalConfiguration.putAll(globalProperties);
+    Properties projectConfiguration = new Properties();
+    projectConfiguration.putAll(globalConfiguration);
+    projectConfiguration.putAll(projectProperties);
+    ProjectDefinition project = SonarProjectBuilder.create(command, projectConfiguration).generateProjectDefinition();
+    initLogging(globalConfiguration);
+    executeBatch(globalConfiguration, project);
   }
 
-  private void executeBatch(ProjectDefinition project) {
+  private void executeBatch(Properties globalConfiguration, ProjectDefinition project) {
     setContainerExtensionsOnProject(project);
-    String envKey = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY);
-    String envVersion = propertiesFromRunner.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION);
+    String envKey = projectProperties.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY);
+    String envVersion = projectProperties.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION);
     Batch batch = Batch.builder()
+        .setGlobalProperties(toMap(globalConfiguration))
+        .setTaskCommand(command)
         .setProjectReactor(new ProjectReactor(project))
         .setEnvironment(new EnvironmentInformation(envKey, envVersion))
         .build();
     batch.execute();
+  }
+
+  private Map<String, String> toMap(Properties props) {
+    Map<String, String> result = Maps.newHashMap();
+    for (Map.Entry<Object, Object> entry : props.entrySet()) {
+      result.put(entry.getKey().toString(), entry.getValue().toString());
+    }
+    return result;
   }
 
   private void setContainerExtensionsOnProject(ProjectDefinition projectDefinition) {
@@ -103,7 +127,7 @@ public class Launcher {
 
   @VisibleForTesting
   protected boolean isDebug() {
-    return Boolean.parseBoolean(propertiesFromRunner.getProperty(Runner.PROPERTY_VERBOSE, propertiesFromRunner.getProperty(Runner.PROPERTY_OLD_DEBUG_MODE, "false")));
+    return Boolean.parseBoolean(projectProperties.getProperty(Runner.PROPERTY_VERBOSE, projectProperties.getProperty(Runner.PROPERTY_OLD_DEBUG_MODE, "false")));
   }
 
   @VisibleForTesting

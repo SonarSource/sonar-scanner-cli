@@ -60,7 +60,7 @@
   </ciManagement>
 
   <properties>
-    <sonar.buildVersion>3.0</sonar.buildVersion>
+    <sonar.buildVersion>3.5-SNAPSHOT</sonar.buildVersion>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
   </properties>
 
