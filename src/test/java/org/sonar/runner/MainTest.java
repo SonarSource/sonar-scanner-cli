@@ -89,10 +89,11 @@ public class MainTest {
     File runnerHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/runner").toURI());
     File projectHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/project").toURI());
     Main main = new Main();
-    main.loadProperties(new String[] {
+    Properties args = main.parseArguments(new String[] {
       "-D", "runner.home=" + runnerHome.getCanonicalPath(),
       "-D", "project.home=" + projectHome.getCanonicalPath()
     });
+    main.loadProperties(args);
 
     assertThat(main.projectProperties.getProperty("project.prop")).isEqualTo("foo");
     assertThat(main.projectProperties.getProperty("overridden.prop")).isEqualTo("project scope");

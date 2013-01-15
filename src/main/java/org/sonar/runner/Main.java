@@ -69,12 +69,16 @@ public final class Main {
   private void execute(String[] args) {
     Stats stats = new Stats().start();
     try {
-      loadProperties(args);
-      Runner runner = Runner.create(command, globalProperties, projectProperties);
+      Properties argsProperties = parseArguments(args);
       Logs.info("Runner version: " + Version.getVersion());
       Logs.info("Java version: " + System.getProperty("java.version", "<unknown>")
         + ", vendor: " + System.getProperty("java.vendor", "<unknown>"));
       Logs.info("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
+      if (displayVersionOnly) {
+        return;
+      }
+      loadProperties(argsProperties);
+      Runner runner = Runner.create(command, globalProperties, projectProperties);
       Logs.info("Default locale: \"" + Locale.getDefault() + "\", source code encoding: \"" + runner.getSourceCodeEncoding() + "\""
         + (runner.isEncodingPlatformDependant() ? " (analysis is platform dependent)" : ""));
       if (debugMode) {
@@ -87,9 +91,6 @@ public final class Main {
       } catch (IOException e) {
         throw new RunnerException(e);
       }
-      if (displayVersionOnly) {
-        return;
-      }
       runner.execute();
     } finally {
       stats.stop();
@@ -97,8 +98,7 @@ public final class Main {
   }
 
   @VisibleForTesting
-  void loadProperties(String[] args) {
-    Properties argsProperties = parseArguments(args);
+  void loadProperties(Properties argsProperties) {
     globalProperties = loadGlobalProperties(argsProperties);
     projectProperties = loadProjectProperties(argsProperties);
   }
