@@ -24,10 +24,17 @@ final class Logs {
   }
 
   static void info(String message) {
-    System.out.println(message);
+    System.out.println("INFO: " + message);
   }
 
   static void error(String message) {
     System.err.println("ERROR: " + message);
+  }
+
+  static void error(String message, Throwable t) {
+    System.err.println("ERROR: " + message);
+    if (t != null) {
+      t.printStackTrace(System.err);
+    }
   }
 }

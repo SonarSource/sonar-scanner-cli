@@ -49,6 +49,7 @@ public final class Main {
 
   private boolean debugMode = false;
   private boolean displayVersionOnly = false;
+  private boolean displayStackTrace = false;
   private String command;
   @VisibleForTesting
   Properties globalProperties;
@@ -68,16 +69,18 @@ public final class Main {
 
   private void execute(String[] args) {
     Properties argsProperties = parseArguments(args);
-    Logs.info("Runner version: " + Version.getVersion());
-    Logs.info("Java version: " + System.getProperty("java.version", "<unknown>")
+    System.out.println("Runner version: " + Version.getVersion());
+    System.out.println("Java version: " + System.getProperty("java.version", "<unknown>")
       + ", vendor: " + System.getProperty("java.vendor", "<unknown>"));
-    Logs.info("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
+    System.out
+        .println("OS name: \"" + System.getProperty("os.name") + "\", version: \"" + System.getProperty("os.version") + "\", arch: \"" + System.getProperty("os.arch") + "\"");
     if (!displayVersionOnly) {
-      execute(argsProperties);
+      int result = execute(argsProperties);
+      System.exit(result);
     }
   }
 
-  private void execute(Properties argsProperties) {
+  private int execute(Properties argsProperties) {
     Stats stats = new Stats().start();
     try {
       loadProperties(argsProperties);
@@ -92,12 +95,52 @@ public final class Main {
       try {
         Logs.info("Work directory: " + runner.getWorkDir().getCanonicalPath());
       } catch (IOException e) {
-        throw new RunnerException(e);
+        throw new RunnerException("Unable to display work directory", e);
       }
       runner.execute();
-    } finally {
-      stats.stop();
+    } catch (Exception e) {
+      displayExecutionResult(stats, "FAILURE");
+      showError("Error during Sonar runner execution", e, displayStackTrace);
+      return 1;
     }
+    displayExecutionResult(stats, "SUCCESS");
+    return 0;
+  }
+
+  private void displayExecutionResult(Stats stats, String resultMsg) {
+    Logs.info("------------------------------------------------------------------------");
+    Logs.info("EXECUTION " + resultMsg);
+    Logs.info("------------------------------------------------------------------------");
+    stats.stop();
+    Logs.info("------------------------------------------------------------------------");
+  }
+
+  public void showError(String message, Throwable e, boolean showStackTrace) {
+    if (showStackTrace) {
+      Logs.error(message, e);
+      if (!debugMode) {
+        Logs.error("");
+        suggestDebugMode();
+      }
+    }
+    else {
+      Logs.error(message);
+      if (e != null) {
+        Logs.error(e.getMessage());
+        for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
+          Logs.error("Caused by: " + cause.getMessage());
+        }
+      }
+      Logs.error("");
+      Logs.error("To see the full stack trace of the errors, re-run Sonar Runner with the -e switch.");
+      if (!debugMode) {
+        suggestDebugMode();
+      }
+    }
+  }
+
+  private void suggestDebugMode() {
+    Logs.error("Re-run Sonar Runner using the -X switch to enable full debug logging.");
   }
 
   @VisibleForTesting
@@ -211,6 +254,10 @@ public final class Main {
       else if ("-v".equals(arg) || "--version".equals(arg)) {
         displayVersionOnly = true;
       }
+      else if ("-e".equals(arg) || "--errors".equals(arg)) {
+        displayStackTrace = true;
+        Logs.info("Error stacktraces are turned on.");
+      }
       else if ("-X".equals(arg) || "--debug".equals(arg)) {
         props.setProperty(Runner.PROPERTY_VERBOSE, "true");
         debugMode = true;
@@ -250,8 +297,7 @@ public final class Main {
   }
 
   private void printError(String message) {
-    Logs.info("");
-    Logs.info(message);
+    Logs.error(message);
     printUsage();
   }
 
@@ -263,10 +309,11 @@ public final class Main {
     Logs.info(" analyse-project       Run Sonar analysis task on the current project (default)");
     Logs.info(" list-tasks            Display all tasks available");
     Logs.info("Options:");
+    Logs.info(" -D,--define <arg>     Define property");
+    Logs.info(" -e,--errors           Produce execution error messages");
     Logs.info(" -h,--help             Display help information");
     Logs.info(" -v,--version          Display version information");
     Logs.info(" -X,--debug            Produce execution debug output");
-    Logs.info(" -D,--define <arg>     Define property");
     System.exit(0);
   }
 }

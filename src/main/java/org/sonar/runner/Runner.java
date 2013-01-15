@@ -315,10 +315,10 @@ public final class Runner {
       method.invoke(launcher);
     } catch (InvocationTargetException e) {
       // Unwrap original exception
-      throw new RunnerException(e.getTargetException());
+      throw new RunnerException("Unable to execute Sonar", e.getTargetException());
     } catch (Exception e) {
       // Catch all other exceptions, which relates to reflection
-      throw new RunnerException(e);
+      throw new RunnerException("Unable to execute Sonar", e);
     } finally {
       Thread.currentThread().setContextClassLoader(oldContextClassLoader);
     }
