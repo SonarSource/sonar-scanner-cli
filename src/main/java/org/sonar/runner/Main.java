@@ -81,6 +81,9 @@ public final class Main {
   }
 
   private int execute(Properties argsProperties) {
+    if (displayStackTrace) {
+      Logs.info("Error stacktraces are turned on.");
+    }
     Stats stats = new Stats().start();
     try {
       loadProperties(argsProperties);
@@ -256,10 +259,10 @@ public final class Main {
       }
       else if ("-e".equals(arg) || "--errors".equals(arg)) {
         displayStackTrace = true;
-        Logs.info("Error stacktraces are turned on.");
       }
       else if ("-X".equals(arg) || "--debug".equals(arg)) {
         props.setProperty(Runner.PROPERTY_VERBOSE, "true");
+        displayStackTrace = true;
         debugMode = true;
       }
       else if ("-D".equals(arg) || "--define".equals(arg)) {
