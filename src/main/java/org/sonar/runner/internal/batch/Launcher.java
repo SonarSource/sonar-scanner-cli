@@ -25,6 +25,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.bootstrap.ProjectReactor;
@@ -79,12 +80,16 @@ public class Launcher {
     setContainerExtensionsOnProject(project);
     String envKey = projectProperties.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY);
     String envVersion = projectProperties.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION);
-    Batch batch = Batch.builder()
-        .setGlobalProperties(toMap(globalConfiguration))
-        .setTaskCommand(command)
+    Batch.Builder builder = Batch.builder()
         .setProjectReactor(new ProjectReactor(project))
-        .setEnvironment(new EnvironmentInformation(envKey, envVersion))
-        .build();
+        .setEnvironment(new EnvironmentInformation(envKey, envVersion));
+    if (StringUtils.isNotBlank(command)) {
+      // This code can only works on Sonar 3.5+
+      builder
+          .setGlobalProperties(toMap(globalConfiguration))
+          .setTaskCommand(command);
+    }
+    Batch batch = builder.build();
     batch.execute();
   }
 

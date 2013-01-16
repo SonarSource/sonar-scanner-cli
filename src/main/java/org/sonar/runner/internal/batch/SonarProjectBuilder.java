@@ -29,7 +29,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
-import org.sonar.batch.tasks.AnalyseProjectTaskDefinition;
 import org.sonar.runner.RunnerException;
 
 import java.io.File;
@@ -125,14 +124,11 @@ public final class SonarProjectBuilder {
   }
 
   public static SonarProjectBuilder create(String command, Properties properties) {
-    if (StringUtils.isBlank(command)) {
-      command = AnalyseProjectTaskDefinition.COMMAND;
-    }
     return new SonarProjectBuilder(command, properties);
   }
 
   public ProjectDefinition generateProjectDefinition() {
-    if (AnalyseProjectTaskDefinition.COMMAND.equals(command)) {
+    if (StringUtils.isBlank(command) || command.equals("inspect")) {
       ProjectDefinition rootProject = defineProject(properties, null);
       rootProjectWorkDir = rootProject.getWorkDir();
       defineChildren(rootProject);

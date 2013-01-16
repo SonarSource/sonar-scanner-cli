@@ -80,13 +80,32 @@ public class RunnerTest {
     assertThat(Runner.isUnsupportedVersion("2.4")).isTrue();
     assertThat(Runner.isUnsupportedVersion("2.4.1")).isTrue();
     assertThat(Runner.isUnsupportedVersion("2.5")).isTrue();
-    assertThat(Runner.isUnsupportedVersion("2.11")).isTrue();
-    assertThat(Runner.isUnsupportedVersion("3.0")).isTrue();
-    assertThat(Runner.isUnsupportedVersion("3.1")).isTrue();
-    assertThat(Runner.isUnsupportedVersion("3.2")).isTrue();
-    assertThat(Runner.isUnsupportedVersion("3.3")).isTrue();
-    assertThat(Runner.isUnsupportedVersion("3.4")).isTrue();
+    assertThat(Runner.isUnsupportedVersion("2.11")).isFalse();
+    assertThat(Runner.isUnsupportedVersion("3.0")).isFalse();
+    assertThat(Runner.isUnsupportedVersion("3.1")).isFalse();
+    assertThat(Runner.isUnsupportedVersion("3.2")).isFalse();
+    assertThat(Runner.isUnsupportedVersion("3.3")).isFalse();
+    assertThat(Runner.isUnsupportedVersion("3.4")).isFalse();
     assertThat(Runner.isUnsupportedVersion("3.5")).isFalse();
+  }
+
+  @Test
+  public void shouldCheckVersionForTasks() {
+    assertThat(Runner.isUnsupportedVersionForTasks("1.0")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("2.0")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("2.1")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("2.2")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("2.3")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("2.4")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("2.4.1")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("2.5")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("2.11")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("3.0")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("3.1")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("3.2")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("3.3")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("3.4")).isTrue();
+    assertThat(Runner.isUnsupportedVersionForTasks("3.5")).isFalse();
   }
 
   @Test
@@ -176,14 +195,30 @@ public class RunnerTest {
     Bootstrapper bootstrapper = mock(Bootstrapper.class);
 
     // nothing happens, OK
-    when(bootstrapper.getServerVersion()).thenReturn("3.5");
+    when(bootstrapper.getServerVersion()).thenReturn("3.0");
     runner.checkSonarVersion(bootstrapper);
 
     // but fails with older versions
     when(bootstrapper.getServerVersion()).thenReturn("2.1");
     thrown.expect(RunnerException.class);
-    thrown.expectMessage("Sonar 2.1 is not supported. Please upgrade Sonar to version 3.5 or more.");
+    thrown.expectMessage("Sonar 2.1 is not supported. Please upgrade Sonar to version 2.11 or more.");
     runner.checkSonarVersion(bootstrapper);
   }
 
+  @Test
+  public void shouldCheckSonarVersionForTasks() {
+    Properties properties = new Properties();
+    Runner runner = Runner.create("foo-cmd", properties, properties);
+    Bootstrapper bootstrapper = mock(Bootstrapper.class);
+
+    // nothing happens, OK
+    when(bootstrapper.getServerVersion()).thenReturn("3.5");
+    runner.checkSonarVersion(bootstrapper);
+
+    // but fails with older versions
+    when(bootstrapper.getServerVersion()).thenReturn("3.4");
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("Sonar 3.4 doesn't support tasks. Please upgrade Sonar to version 3.5 or more.");
+    runner.checkSonarVersion(bootstrapper);
+  }
 }
