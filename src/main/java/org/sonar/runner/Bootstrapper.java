@@ -29,6 +29,7 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,9 +78,12 @@ class Bootstrapper {
         serverVersion = remoteContent(VERSION_PATH);
       } catch (ConnectException e) {
         Logs.error("Sonar server '" + serverUrl + "' can not be reached");
-        throw new IllegalStateException("Fail to request server version", e);
+        throw new RunnerException("Fail to request server version", e);
+      } catch (UnknownHostException e) {
+        Logs.error("Sonar server '" + serverUrl + "' can not be reached");
+        throw new RunnerException("Fail to request server version", e);
       } catch (IOException e) {
-        throw new IllegalStateException("Fail to request server version", e);
+        throw new RunnerException("Fail to request server version", e);
       }
     }
     return serverVersion;

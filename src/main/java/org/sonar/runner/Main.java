@@ -132,8 +132,12 @@ public final class Main {
       Logs.error(message);
       if (e != null) {
         Logs.error(e.getMessage());
-        for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
+        String previousMsg = "";
+        for (Throwable cause = e.getCause(); cause != null
+          && cause.getMessage() != null
+          && !cause.getMessage().equals(previousMsg); cause = cause.getCause()) {
           Logs.error("Caused by: " + cause.getMessage());
+          previousMsg = cause.getMessage();
         }
       }
       Logs.error("");
