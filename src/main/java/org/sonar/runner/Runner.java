@@ -134,7 +134,9 @@ public final class Runner {
 
   /**
    * Creates a Runner based only on the given properties.
+   * @deprecated Use {@link Runner#create(String, Properties, Properties)}
    */
+  @Deprecated
   public static Runner create(Properties props) {
     return create(null, new Properties(), props);
   }
@@ -148,7 +150,9 @@ public final class Runner {
 
   /**
    * Creates a Runner based only on the properties and with the given base directory.
+   * @deprecated Use {@link Runner#create(String, Properties, Properties, File)}
    */
+  @Deprecated
   public static Runner create(Properties props, File basedir) {
     return create(null, new Properties(), props, basedir);
   }
@@ -180,7 +184,7 @@ public final class Runner {
     if (!projectDir.isDirectory()) {
       throw new RunnerException("Project home must be an existing directory: " + path);
     }
-    // project home exists: add its absolute path as "sonar.runner.projectDir" property
+    // project home exists: add its absolute path as "sonar.projectBaseDir" property
     projectProperties.put(PROPERTY_SONAR_PROJECT_BASEDIR, projectDir.getAbsolutePath());
     workDir = initWorkDir();
   }

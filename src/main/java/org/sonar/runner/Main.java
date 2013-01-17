@@ -46,6 +46,8 @@ public final class Main {
   private static final String RUNNER_SETTINGS = "runner.settings";
   private static final String PROJECT_HOME = "project.home";
   private static final String PROJECT_SETTINGS = "project.settings";
+  // TODO Remove this after everything is updated to support tasks
+  private static final String TASK_COMMAND = "sonar.task";
 
   private boolean debugMode = false;
   private boolean displayVersionOnly = false;
@@ -296,7 +298,12 @@ public final class Main {
       key = arg.substring(0, j);
       value = arg.substring(j + 1);
     }
-    props.setProperty(key, value);
+    if (TASK_COMMAND.equals(key)) {
+      command = value;
+    }
+    else {
+      props.setProperty(key, value);
+    }
   }
 
   private void printError(String message) {

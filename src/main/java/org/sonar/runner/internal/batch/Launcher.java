@@ -68,21 +68,27 @@ public class Launcher {
   public void execute() {
     Properties globalConfiguration = getInitialConfiguration();
     globalConfiguration.putAll(globalProperties);
+    initLogging(globalConfiguration);
+
     Properties projectConfiguration = new Properties();
     projectConfiguration.putAll(globalConfiguration);
     projectConfiguration.putAll(projectProperties);
     ProjectDefinition project = SonarProjectBuilder.create(command, projectConfiguration).generateProjectDefinition();
-    initLogging(globalConfiguration);
+
     executeBatch(globalConfiguration, project);
   }
 
   private void executeBatch(Properties globalConfiguration, ProjectDefinition project) {
-    setContainerExtensionsOnProject(project);
-    String envKey = projectProperties.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY);
-    String envVersion = projectProperties.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION);
+    String envKey = globalProperties.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_KEY);
+    String envVersion = globalProperties.getProperty(Runner.PROPERTY_ENVIRONMENT_INFORMATION_VERSION);
     Batch.Builder builder = Batch.builder()
-        .setProjectReactor(new ProjectReactor(project))
         .setEnvironment(new EnvironmentInformation(envKey, envVersion));
+    for (Object extension : containerExtensions) {
+      builder.addComponent(extension);
+    }
+    if (project != null) {
+      builder.setProjectReactor(new ProjectReactor(project));
+    }
     if (StringUtils.isNotBlank(command)) {
       // This code can only works on Sonar 3.5+
       builder
@@ -99,15 +105,6 @@ public class Launcher {
       result.put(entry.getKey().toString(), entry.getValue().toString());
     }
     return result;
-  }
-
-  private void setContainerExtensionsOnProject(ProjectDefinition projectDefinition) {
-    for (Object extension : containerExtensions) {
-      projectDefinition.addContainerExtension(extension);
-    }
-    for (ProjectDefinition module : projectDefinition.getSubProjects()) {
-      setContainerExtensionsOnProject(module);
-    }
   }
 
   private void initLogging(Properties props) {

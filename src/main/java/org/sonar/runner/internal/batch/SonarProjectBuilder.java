@@ -135,8 +135,11 @@ public final class SonarProjectBuilder {
       cleanAndCheckProjectDefinitions(rootProject);
       return rootProject;
     }
-    else {
+    else if (properties.containsKey(PROPERTY_PROJECT_KEY)) {
       return defineTaskContext();
+    }
+    else {
+      return null;
     }
   }
 
