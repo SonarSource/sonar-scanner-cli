@@ -19,6 +19,8 @@
  */
 package org.sonar.runner;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -244,7 +246,8 @@ public final class Runner {
   /**
    * @return global properties, project properties and command-line properties
    */
-  protected Properties getProperties() {
+  @VisibleForTesting
+  public Properties getProperties() {
     Properties props = new Properties();
     props.putAll(globalProperties);
     props.putAll(projectProperties);
@@ -266,7 +269,8 @@ public final class Runner {
   private BootstrapClassLoader createClassLoader(Bootstrapper bootstrapper) {
     URL url = getJarPath();
     return bootstrapper.createClassLoader(
-        new URL[] {url}, // Add JAR with Sonar Runner - it's a Jar which contains this class
+        // Add JAR with Sonar Runner - it's a Jar which contains this class
+        new URL[] {url},
         getClass().getClassLoader(),
         unmaskedPackages);
   }
@@ -293,7 +297,7 @@ public final class Runner {
       if (uri != null) {
         try {
           return new URL(uri);
-        } catch (MalformedURLException e) { // NOSONAR
+        } catch (MalformedURLException e) {
         }
       }
     }

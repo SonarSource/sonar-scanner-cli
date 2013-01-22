@@ -128,7 +128,7 @@ public final class SonarProjectBuilder {
   }
 
   public ProjectDefinition generateProjectDefinition() {
-    if (StringUtils.isBlank(command) || command.equals("inspect")) {
+    if (StringUtils.isBlank(command) || "inspect".equals(command)) {
       ProjectDefinition rootProject = defineProject(properties, null);
       rootProjectWorkDir = rootProject.getWorkDir();
       defineChildren(rootProject);

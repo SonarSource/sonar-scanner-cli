@@ -49,10 +49,14 @@ public final class Main {
   // TODO Remove this after everything is updated to support tasks
   private static final String TASK_COMMAND = "sonar.task";
 
-  private boolean debugMode = false;
-  private boolean displayVersionOnly = false;
-  private boolean displayStackTrace = false;
-  private String command;
+  @VisibleForTesting
+  boolean debugMode = false;
+  @VisibleForTesting
+  boolean displayVersionOnly = false;
+  @VisibleForTesting
+  boolean displayStackTrace = false;
+  @VisibleForTesting
+  String command;
   @VisibleForTesting
   Properties globalProperties;
   @VisibleForTesting

@@ -19,6 +19,7 @@
  */
 package org.sonar.runner;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -28,15 +29,22 @@ import static org.fest.assertions.Assertions.assertThat;
 
 public class MainTest {
 
+  private Main main;
+
+  @Before
+  public void prepare() {
+    main = new Main();
+  }
+
   @Test
   public void shouldParseEmptyArguments() {
-    Properties props = new Main().parseArguments(new String[] {});
+    Properties props = main.parseArguments(new String[] {});
     assertThat(props).isEmpty();
   }
 
   @Test
   public void shouldParseArguments() {
-    Properties props = new Main().parseArguments(new String[] {"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
+    Properties props = main.parseArguments(new String[] {"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
     assertThat(props).hasSize(3);
     assertThat(props.getProperty("foo")).isEqualTo("bar");
     assertThat(props.getProperty("hello")).isEqualTo("world");
@@ -44,14 +52,34 @@ public class MainTest {
   }
 
   @Test
+  public void shouldParseCommand() {
+
+    Properties props = main.parseArguments(new String[] {"cmd", "-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
+    assertThat(main.command).isEqualTo("cmd");
+    assertThat(props).hasSize(3);
+  }
+
+  @Test
   public void shouldEnableDebugMode() {
-    Properties props = new Main().parseArguments(new String[] {"-X"});
+    Properties props = main.parseArguments(new String[] {"-X"});
+    assertThat(main.debugMode).isTrue();
+    assertThat(main.displayStackTrace).isTrue();
     assertThat(props.getProperty(Runner.PROPERTY_VERBOSE)).isEqualTo("true");
   }
 
   @Test
-  public void shouldDisableDebugModeByDefault() {
-    Properties props = new Main().parseArguments(new String[] {});
+  public void shouldEnableError() {
+    Properties props = main.parseArguments(new String[] {"-e"});
+    assertThat(main.debugMode).isFalse();
+    assertThat(main.displayStackTrace).isTrue();
+    assertThat(props.getProperty(Runner.PROPERTY_VERBOSE)).isNull();
+  }
+
+  @Test
+  public void shouldDisableDebugModeAndStackByDefault() {
+    Properties props = main.parseArguments(new String[] {});
+    assertThat(main.debugMode).isFalse();
+    assertThat(main.displayStackTrace).isFalse();
     assertThat(props.getProperty(Runner.PROPERTY_VERBOSE)).isNull();
   }
 

@@ -50,6 +50,9 @@ public class Launcher {
   private Properties projectProperties;
   private List<Object> containerExtensions;
 
+  /**
+   * @deprecated Use {@link Launcher#Launcher(String, Properties, Properties, List)} instead
+   */
   @Deprecated
   public Launcher(Properties properties, List<Object> containerExtensions) {
     this("project-analysis", new Properties(), properties, containerExtensions);

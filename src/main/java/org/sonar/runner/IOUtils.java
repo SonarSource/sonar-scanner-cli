@@ -130,7 +130,8 @@ final class IOUtils {
     }
 
     File[] files = directory.listFiles();
-    if (files == null) { // null if security restricted
+    // null if security restricted
+    if (files == null) {
       throw new IOException("Failed to list contents of " + directory);
     }
 
