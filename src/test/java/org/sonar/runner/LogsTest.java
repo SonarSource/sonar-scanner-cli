@@ -68,6 +68,13 @@ public class LogsTest {
   }
 
   @Test
+  public void shouldLogErrorWithoutThrowable() {
+    Logs.error("error", null);
+    assertThat(baosOut.toString()).isEmpty();
+    assertThat(baosErr.toString()).contains("ERROR: error");
+  }
+
+  @Test
   public void shouldLogErrorWithThrowable() {
     Logs.error("error", new SonarException());
     assertThat(baosOut.toString()).isEmpty();
