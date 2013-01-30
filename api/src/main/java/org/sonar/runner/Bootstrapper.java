@@ -222,8 +222,11 @@ class Bootstrapper {
       String[] libAndMd5 = line.split("\\|");
       String libName = libAndMd5[0];
       String remoteMd5 = libAndMd5.length > 0 ? libAndMd5[1] : null;
-      Logs.debug("Looking if library " + libName + " with md5 " + remoteMd5 + " is already in cache");
-      File libInCache = cache.getFileFromCache(libName, remoteMd5);
+      File libInCache = null;
+      if (remoteMd5 != null && !"".equals(remoteMd5)) {
+        Logs.debug("Looking if library " + libName + " with md5 " + remoteMd5 + " is already in cache");
+        libInCache = cache.getFileFromCache(libName, remoteMd5);
+      }
       if (libInCache != null) {
         Logs.debug("File is already cached at location " + libInCache.getAbsolutePath());
       }
