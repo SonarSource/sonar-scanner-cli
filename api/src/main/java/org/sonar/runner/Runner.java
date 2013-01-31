@@ -101,11 +101,11 @@ public final class Runner {
   public static final String PROPERTY_ENVIRONMENT_INFORMATION_VERSION = "sonar.environment.information.version";
 
   /**
-   * Property used to define cache location (default to ~/.sonar/.cache).
+   * Property used to define cache location (default to ~/.sonar/cache).
    *
    * @since 2.1
    */
-  public static final String PROPERTY_CACHE_LOCATION = "sonar.cacheLocation";
+  public static final String PROPERTY_CACHE_LOCATION = "sonar.cachePath";
 
   /**
    * Array of prefixes of versions of Sonar without support of this runner.

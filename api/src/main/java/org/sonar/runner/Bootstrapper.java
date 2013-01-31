@@ -224,23 +224,17 @@ class Bootstrapper {
       String remoteMd5 = libAndMd5.length > 0 ? libAndMd5[1] : null;
       File libInCache = null;
       if (remoteMd5 != null && !"".equals(remoteMd5)) {
-        Logs.debug("Looking if library " + libName + " with md5 " + remoteMd5 + " is already in cache");
         libInCache = cache.getFileFromCache(libName, remoteMd5);
       }
-      if (libInCache != null) {
-        Logs.debug("File is already cached at location " + libInCache.getAbsolutePath());
-      }
-      else {
-        Logs.debug("File is not cached");
+      if (libInCache == null) {
         File tmpLocation = cache.getTemporaryFile();
         remoteContentToFile(BATCH_PATH + libName, tmpLocation);
-        Logs.debug("Trying to cache file");
         String md5 = cache.cacheFile(tmpLocation, libName);
         libInCache = cache.getFileFromCache(libName, md5);
         if (!md5.equals(remoteMd5)) {
-          Logs.warn("INVALID CHECKSUM: File " + libInCache.getAbsolutePath() + " was expected to have checksum " + remoteMd5 + " but was cached with checksum " + md5);
+          throw new RunnerException("INVALID CHECKSUM: File " + libInCache.getAbsolutePath() + " was expected to have checksum " + remoteMd5
+            + " but was downloaded with checksum " + md5);
         }
-        Logs.debug("File cached at location " + libInCache.getAbsolutePath());
       }
       files.add(libInCache);
     }
