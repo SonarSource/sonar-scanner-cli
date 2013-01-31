@@ -61,9 +61,9 @@ class Bootstrapper {
   /**
    * @param productToken part of User-Agent request-header field - see http://tools.ietf.org/html/rfc1945#section-10.15
    */
-  Bootstrapper(String productToken, String serverUrl, File workDir, File cacheLocation) {
+  Bootstrapper(String productToken, String serverUrl, File workDir, SonarCache cache) {
     this.productToken = productToken;
-    this.cache = SonarCache.create().setCacheLocation(cacheLocation).build();
+    this.cache = cache;
     bootDir = new File(workDir, "batch");
     bootDir.mkdirs();
     if (serverUrl.endsWith("/")) {

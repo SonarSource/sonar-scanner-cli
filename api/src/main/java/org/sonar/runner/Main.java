@@ -89,15 +89,14 @@ public final class Main {
       Runner runner = Runner.create(command, globalProperties, projectProperties);
       Logs.info("Default locale: \"" + Locale.getDefault() + "\", source code encoding: \"" + runner.getSourceCodeEncoding() + "\""
         + (runner.isEncodingPlatformDependant() ? " (analysis is platform dependent)" : ""));
-      if (debugMode) {
-        Logs.info("Other system properties:");
-        Logs.info("  - sun.arch.data.model: \"" + System.getProperty("sun.arch.data.model") + "\"");
-      }
+      Logs.debug("Other system properties:");
+      Logs.debug("  - sun.arch.data.model: \"" + System.getProperty("sun.arch.data.model") + "\"");
       Logs.info("Server: " + runner.getSonarServerURL());
       try {
         Logs.info("Work directory: " + runner.getWorkDir().getCanonicalPath());
+        Logs.info("Cache directory: " + runner.getCache().getCacheLocation());
       } catch (IOException e) {
-        throw new RunnerException("Unable to display work directory", e);
+        throw new RunnerException("Unable to resolve directory", e);
       }
       runner.execute();
     } catch (Exception e) {

@@ -105,7 +105,7 @@ public final class Runner {
    *
    * @since 2.1
    */
-  public static final String PROPERTY_CACHE_LOCATION = "sonar.cachePath";
+  public static final String PROPERTY_CACHE_PATH = "sonar.cachePath";
 
   /**
    * Array of prefixes of versions of Sonar without support of this runner.
@@ -117,13 +117,14 @@ public final class Runner {
 
   private String command;
   private File projectDir;
-  private File cacheLocation;
+  private File cacheDir;
   private File workDir;
   private String[] unmaskedPackages;
   private List<Object> containerExtensions = new ArrayList<Object>();
   private Properties globalProperties;
   private Properties projectProperties;
   private boolean isEncodingPlatformDependant;
+  private SonarCache cache;
 
   private Runner(String command, Properties globalProperties, Properties projectProperties) {
     this.command = command;
@@ -140,6 +141,8 @@ public final class Runner {
     }
     // and init the directories
     initDirs();
+    // init the cache
+    cache = SonarCache.create().setCacheLocation(getCacheDir()).build();
   }
 
   /**
@@ -179,7 +182,7 @@ public final class Runner {
    * Runs a Sonar analysis.
    */
   public void execute() {
-    Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + Version.getVersion(), getSonarServerURL(), getWorkDir(), cacheLocation);
+    Bootstrapper bootstrapper = new Bootstrapper("SonarRunner/" + Version.getVersion(), getSonarServerURL(), getWorkDir(), getCache());
     checkSonarVersion(bootstrapper);
     delegateExecution(createClassLoader(bootstrapper));
   }
@@ -188,16 +191,20 @@ public final class Runner {
     return projectProperties.getProperty("sonar.host.url", globalProperties.getProperty("sonar.host.url", "http://localhost:9000"));
   }
 
+  public SonarCache getCache() {
+    return cache;
+  }
+
   private void initDirs() {
     projectDir = initProjectDir();
     // project home exists: add its absolute path as "sonar.projectBaseDir" property
     projectProperties.put(PROPERTY_SONAR_PROJECT_BASEDIR, projectDir.getAbsolutePath());
     workDir = initWorkDir();
-    cacheLocation = initCacheLocation();
+    cacheDir = initCacheLocation();
   }
 
   private File initCacheLocation() {
-    String path = projectProperties.getProperty(PROPERTY_CACHE_LOCATION);
+    String path = projectProperties.getProperty(PROPERTY_CACHE_PATH);
     if (path != null) {
       return new File(path);
     }
@@ -245,6 +252,13 @@ public final class Runner {
    */
   public File getWorkDir() {
     return workDir;
+  }
+
+  /**
+   * @return cache directory for files downloaded from the Sonar server
+   */
+  public File getCacheDir() {
+    return cacheDir;
   }
 
   /**

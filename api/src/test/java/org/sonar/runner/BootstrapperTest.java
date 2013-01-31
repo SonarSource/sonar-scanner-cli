@@ -108,7 +108,7 @@ public class BootstrapperTest {
     connections.register("/batch_bootstrap/index", "foo.jar|922afef30ca31573d7131347d01b76c4\nbar.jar|69155f65900fbabbf21e28abb33dd06a");
     connections.register("/batch/foo.jar", "fakecontent1");
     connections.register("/batch/bar.jar", "fakecontent2");
-    Bootstrapper bootstrapper = new Bootstrapper("", "http://test", new File("target/tmp"), cacheLocation) {
+    Bootstrapper bootstrapper = new Bootstrapper("", "http://test", new File("target/tmp"), SonarCache.create().setCacheLocation(cacheLocation).build()) {
       @Override
       HttpURLConnection newHttpConnection(URL url) throws IOException {
         return connections.get(url);
@@ -122,7 +122,7 @@ public class BootstrapperTest {
     final MockedConnectionFactory connections2 = new MockedConnectionFactory("http://test");
     connections2.register("/api/server/version", "3.5");
     connections2.register("/batch_bootstrap/index", "foo.jar|922afef30ca31573d7131347d01b76c4\nbar.jar|69155f65900fbabbf21e28abb33dd06a");
-    Bootstrapper bootstrapper2 = new Bootstrapper("", "http://test", new File("target/tmp"), cacheLocation) {
+    Bootstrapper bootstrapper2 = new Bootstrapper("", "http://test", new File("target/tmp"), SonarCache.create().setCacheLocation(cacheLocation).build()) {
       @Override
       HttpURLConnection newHttpConnection(URL url) throws IOException {
         return connections2.get(url);
@@ -139,7 +139,7 @@ public class BootstrapperTest {
     connections.register("/batch/", "foo.jar,bar.jar");
     connections.register("/batch/foo.jar", "fakecontent1");
     connections.register("/batch/bar.jar", "fakecontent2");
-    Bootstrapper bootstrapper = new Bootstrapper("", "http://test", new File("target/tmp"), cacheLocation) {
+    Bootstrapper bootstrapper = new Bootstrapper("", "http://test", new File("target/tmp"), SonarCache.create().setCacheLocation(cacheLocation).build()) {
       @Override
       HttpURLConnection newHttpConnection(URL url) throws IOException {
         return connections.get(url);
