@@ -123,13 +123,13 @@ public class RunnerTest {
   @Test
   public void shouldInitDirs() throws Exception {
     Properties props = new Properties();
-    File home = tempFolder.newFolder("shouldInitDirs");
+    File home = tempFolder.newFolder("shouldInitDirs").getCanonicalFile();
     props.setProperty(Runner.PROPERTY_SONAR_PROJECT_BASEDIR, home.getCanonicalPath());
     Runner runner = Runner.create(props);
     assertThat(runner.getProperties().get(Runner.PROPERTY_SONAR_PROJECT_BASEDIR)).isEqualTo(home.getCanonicalPath());
 
-    assertThat(runner.getProjectDir()).isEqualTo(home);
-    assertThat(runner.getWorkDir()).isEqualTo(new File(home, ".sonar"));
+    assertThat(runner.getProjectDir().getCanonicalFile()).isEqualTo(home);
+    assertThat(runner.getWorkDir().getCanonicalFile()).isEqualTo(new File(home, ".sonar"));
   }
 
   @Test
