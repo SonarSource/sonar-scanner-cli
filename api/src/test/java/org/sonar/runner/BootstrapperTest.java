@@ -102,27 +102,28 @@ public class BootstrapperTest {
 
   @Test
   public void shouldCacheWhenNecessary() throws Exception {
-    File cacheLocation = tempFolder.newFolder();
+    File sonarUserHome = tempFolder.newFolder();
+    SonarCache cache = SonarCache.create(sonarUserHome).build();
     final MockedConnectionFactory connections = new MockedConnectionFactory("http://test");
     connections.register("/api/server/version", "3.5");
     connections.register("/batch_bootstrap/index", "foo.jar|922afef30ca31573d7131347d01b76c4\nbar.jar|69155f65900fbabbf21e28abb33dd06a");
     connections.register("/batch/foo.jar", "fakecontent1");
     connections.register("/batch/bar.jar", "fakecontent2");
-    Bootstrapper bootstrapper = new Bootstrapper("", "http://test", new File("target/tmp"), SonarCache.create().setCacheLocation(cacheLocation).build()) {
+    Bootstrapper bootstrapper = new Bootstrapper("", "http://test", new File("target/tmp"), cache) {
       @Override
       HttpURLConnection newHttpConnection(URL url) throws IOException {
         return connections.get(url);
       }
     };
     bootstrapper.createClassLoader(new URL[] {}, this.getClass().getClassLoader());
-    assertThat(new File(new File(cacheLocation, "922afef30ca31573d7131347d01b76c4"), "foo.jar")).exists();
-    assertThat(new File(new File(cacheLocation, "69155f65900fbabbf21e28abb33dd06a"), "bar.jar")).exists();
+    assertThat(new File(new File(cache.getCacheLocation(), "922afef30ca31573d7131347d01b76c4"), "foo.jar")).exists();
+    assertThat(new File(new File(cache.getCacheLocation(), "69155f65900fbabbf21e28abb33dd06a"), "bar.jar")).exists();
 
     // Should not download during the second execution
     final MockedConnectionFactory connections2 = new MockedConnectionFactory("http://test");
     connections2.register("/api/server/version", "3.5");
     connections2.register("/batch_bootstrap/index", "foo.jar|922afef30ca31573d7131347d01b76c4\nbar.jar|69155f65900fbabbf21e28abb33dd06a");
-    Bootstrapper bootstrapper2 = new Bootstrapper("", "http://test", new File("target/tmp"), SonarCache.create().setCacheLocation(cacheLocation).build()) {
+    Bootstrapper bootstrapper2 = new Bootstrapper("", "http://test", new File("target/tmp"), cache) {
       @Override
       HttpURLConnection newHttpConnection(URL url) throws IOException {
         return connections2.get(url);
@@ -133,13 +134,13 @@ public class BootstrapperTest {
 
   @Test
   public void shouldDownloadFromOldURL() throws Exception {
-    File cacheLocation = tempFolder.newFolder();
+    File sonarUserHome = tempFolder.newFolder();
     final MockedConnectionFactory connections = new MockedConnectionFactory("http://test");
     connections.register("/api/server/version", "3.4");
     connections.register("/batch/", "foo.jar,bar.jar");
     connections.register("/batch/foo.jar", "fakecontent1");
     connections.register("/batch/bar.jar", "fakecontent2");
-    Bootstrapper bootstrapper = new Bootstrapper("", "http://test", new File("target/tmp"), SonarCache.create().setCacheLocation(cacheLocation).build()) {
+    Bootstrapper bootstrapper = new Bootstrapper("", "http://test", new File("target/tmp"), SonarCache.create(sonarUserHome).build()) {
       @Override
       HttpURLConnection newHttpConnection(URL url) throws IOException {
         return connections.get(url);

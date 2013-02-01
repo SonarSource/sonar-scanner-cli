@@ -20,6 +20,7 @@
 package org.sonar.runner;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -105,7 +106,8 @@ public final class Runner {
    *
    * @since 2.1
    */
-  public static final String PROPERTY_CACHE_PATH = "sonar.cachePath";
+  String ENV_SONAR_USER_HOME = "SONAR_USER_HOME";
+  String PROPERTY_SONAR_USER_HOME = "sonar.userHome";
 
   /**
    * Array of prefixes of versions of Sonar without support of this runner.
@@ -117,7 +119,7 @@ public final class Runner {
 
   private String command;
   private File projectDir;
-  private File cacheDir;
+  private File sonarUserHomeDir;
   private File workDir;
   private String[] unmaskedPackages;
   private List<Object> containerExtensions = new ArrayList<Object>();
@@ -142,7 +144,8 @@ public final class Runner {
     // and init the directories
     initDirs();
     // init the cache
-    cache = SonarCache.create().setCacheLocation(getCacheDir()).build();
+    // Try to get Sonar user home from property
+    cache = SonarCache.create(getSonarUserHomeDir()).build();
   }
 
   /**
@@ -200,15 +203,20 @@ public final class Runner {
     // project home exists: add its absolute path as "sonar.projectBaseDir" property
     projectProperties.put(PROPERTY_SONAR_PROJECT_BASEDIR, projectDir.getAbsolutePath());
     workDir = initWorkDir();
-    cacheDir = initCacheLocation();
+    sonarUserHomeDir = initSonarUserHomeDir();
   }
 
-  private File initCacheLocation() {
-    String path = projectProperties.getProperty(PROPERTY_CACHE_PATH);
-    if (path != null) {
-      return new File(path);
+  private File initSonarUserHomeDir() {
+    String sonarUserHome = globalProperties.getProperty(PROPERTY_SONAR_USER_HOME);
+    if (StringUtils.isBlank(sonarUserHome)) {
+      // Try to get Sonar user home from environment variable
+      sonarUserHome = System.getenv(ENV_SONAR_USER_HOME);
     }
-    return null;
+    if (StringUtils.isBlank(sonarUserHome)) {
+      // Default Sonar user home
+      sonarUserHome = System.getProperty("user.home") + File.separator + ".sonar";
+    }
+    return new File(sonarUserHome);
   }
 
   private File initProjectDir() {
@@ -255,10 +263,10 @@ public final class Runner {
   }
 
   /**
-   * @return cache directory for files downloaded from the Sonar server
+   * @return sonar user home directory
    */
-  public File getCacheDir() {
-    return cacheDir;
+  public File getSonarUserHomeDir() {
+    return sonarUserHomeDir;
   }
 
   /**

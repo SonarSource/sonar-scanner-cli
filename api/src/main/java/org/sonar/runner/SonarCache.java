@@ -62,7 +62,12 @@ public class SonarCache {
 
   public static class Builder {
 
+    private File sonarUserHomeLocation;
     private File cacheLocation;
+
+    public Builder(File sonarUserHomeLocation) {
+      this.sonarUserHomeLocation = sonarUserHomeLocation;
+    }
 
     public Builder setCacheLocation(File cacheLocation) {
       this.cacheLocation = cacheLocation;
@@ -71,18 +76,19 @@ public class SonarCache {
 
     public SonarCache build() {
       if (cacheLocation == null) {
-        File sonarHome = new File(System.getProperty("user.home"), ".sonar");
-        return new SonarCache(new File(sonarHome, "cache"));
+        return new SonarCache(new File(sonarUserHomeLocation, "cache"));
       }
       else {
         return new SonarCache(cacheLocation);
       }
     }
-
   }
 
-  public static Builder create() {
-    return new Builder();
+  public static Builder create(File sonarUserHomeLocation) {
+    if (sonarUserHomeLocation == null) {
+      throw new RunnerException("Sonar user home directory should not be null");
+    }
+    return new Builder(sonarUserHomeLocation);
   }
 
   /**
