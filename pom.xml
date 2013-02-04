@@ -12,9 +12,9 @@
   <name>Sonar Runner</name>
   
   <modules>
-    <module>api</module>
-    <module>impl</module>
-    <module>distribution</module>
+    <module>sonar-runner-api</module>
+    <module>sonar-runner-impl</module>
+    <module>sonar-runner-dist</module>
   </modules>
 
   <url>http://docs.codehaus.org/display/SONAR/Sonar+Standalone+Runner</url>
