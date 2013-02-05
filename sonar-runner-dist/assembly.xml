@@ -12,7 +12,7 @@
       <!-- Enable access to all projects in the current multimodule build! -->
       <useAllReactorProjects>true</useAllReactorProjects>
       <includes>
-        <include>org.codehaus.sonar-plugins:sonar-runner-impl</include>
+        <include>org.codehaus.sonar.runner:sonar-runner-impl</include>
       </includes>
       <binaries>
         <outputDirectory>lib</outputDirectory>
