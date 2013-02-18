@@ -154,15 +154,16 @@ public final class SonarProjectBuilder {
   }
 
   private ProjectDefinition defineProject(Properties properties, ProjectDefinition parent) {
+    File baseDir = new File(properties.getProperty(PROPERTY_PROJECT_BASEDIR));
     if (properties.containsKey(PROPERTY_MODULES)) {
       checkMandatoryProperties(properties, MANDATORY_PROPERTIES_FOR_MULTIMODULE_PROJECT);
     }
     else {
       checkMandatoryProperties(properties, MANDATORY_PROPERTIES_FOR_SIMPLE_PROJECT);
     }
-    File baseDir = new File(properties.getProperty(PROPERTY_PROJECT_BASEDIR));
     File workDir = null;
     if (parent == null) {
+      validateDirectories(properties, baseDir, properties.getProperty(PROPERTY_PROJECT_KEY));
       workDir = initRootProjectWorkDir(baseDir);
     } else {
       workDir = initModuleWorkDir(properties);
@@ -235,26 +236,8 @@ public final class SonarProjectBuilder {
 
     // and finish
     checkMandatoryProperties(moduleProps, MANDATORY_PROPERTIES_FOR_CHILD);
-    if (!moduleProps.containsKey(PROPERTY_MODULES)) {
-      // SONARPLUGINS-2285 Not an aggreator project so we can validate that paths are correct if defined
+    validateDirectories(moduleProps, baseDir, moduleId);
 
-      // We need to resolve patterns that may have been used in "sonar.libraries"
-      for (String pattern : SonarRunnerUtils.getListFromProperty(moduleProps, PROPERTY_LIBRARIES)) {
-        File[] files = getLibraries(baseDir, pattern);
-        if (files == null || files.length == 0) {
-          LOG.error("Invalid value of " + PROPERTY_LIBRARIES + " for module " + moduleId);
-          throw new RunnerException("No files matching pattern \"" + pattern + "\" in directory \"" + baseDir + "\"");
-        }
-      }
-
-      // Check sonar.tests
-      String[] testDirs = SonarRunnerUtils.getListFromProperty(moduleProps, PROPERTY_TESTS);
-      checkExistenceOfDirectories(moduleId, baseDir, testDirs, PROPERTY_TESTS);
-
-      // Check sonar.binaries
-      String[] binDirs = SonarRunnerUtils.getListFromProperty(moduleProps, PROPERTY_BINARIES);
-      checkExistenceOfDirectories(moduleId, baseDir, binDirs, PROPERTY_BINARIES);
-    }
     mergeParentProperties(moduleProps, parentProject.getProperties());
 
     prefixProjectKeyWithParentKey(moduleProps, parentProject.getKey());
@@ -358,9 +341,32 @@ public final class SonarProjectBuilder {
         missing.append(mandatoryProperty);
       }
     }
+    String projectKey = props.getProperty(PROPERTY_PROJECT_KEY);
     if (missing.length() != 0) {
-      String projectKey = props.getProperty(PROPERTY_PROJECT_KEY);
       throw new RunnerException("You must define the following mandatory properties for '" + (projectKey == null ? "Unknown" : projectKey) + "': " + missing);
+    }
+  }
+
+  private static void validateDirectories(Properties props, File baseDir, String projectId) {
+    if (!props.containsKey(PROPERTY_MODULES)) {
+      // SONARPLUGINS-2285 Not an aggreator project so we can validate that paths are correct if defined
+
+      // We need to resolve patterns that may have been used in "sonar.libraries"
+      for (String pattern : SonarRunnerUtils.getListFromProperty(props, PROPERTY_LIBRARIES)) {
+        File[] files = getLibraries(baseDir, pattern);
+        if (files == null || files.length == 0) {
+          LOG.error("Invalid value of " + PROPERTY_LIBRARIES + " for " + projectId);
+          throw new RunnerException("No file matching pattern \"" + pattern + "\" in directory \"" + baseDir + "\"");
+        }
+      }
+
+      // Check sonar.tests
+      String[] testDirs = SonarRunnerUtils.getListFromProperty(props, PROPERTY_TESTS);
+      checkExistenceOfDirectories(projectId, baseDir, testDirs, PROPERTY_TESTS);
+
+      // Check sonar.binaries
+      String[] binDirs = SonarRunnerUtils.getListFromProperty(props, PROPERTY_BINARIES);
+      checkExistenceOfDirectories(projectId, baseDir, binDirs, PROPERTY_BINARIES);
     }
   }
 

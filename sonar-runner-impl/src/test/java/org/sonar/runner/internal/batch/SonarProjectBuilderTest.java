@@ -48,8 +48,6 @@ public class SonarProjectBuilderTest {
     assertThat(projectDefinition.getVersion()).isEqualTo("1.0-SNAPSHOT");
     assertThat(projectDefinition.getDescription()).isEqualTo("Description of Foo Project");
     assertThat(projectDefinition.getSourceDirs()).contains("sources");
-    assertThat(projectDefinition.getTestDirs()).contains("tests");
-    assertThat(projectDefinition.getBinaries()).contains("target/classes");
     assertThat(projectDefinition.getLibraries()).contains(TestUtils.getResource(this.getClass(), "simple-project/libs/lib2.txt").getAbsolutePath(),
         TestUtils.getResource(this.getClass(), "simple-project/libs/lib2.txt").getAbsolutePath());
   }
@@ -59,8 +57,6 @@ public class SonarProjectBuilderTest {
     ProjectDefinition projectDefinition = loadProjectDefinition("simple-project-with-deprecated-props");
 
     assertThat(projectDefinition.getSourceDirs()).contains("sources");
-    assertThat(projectDefinition.getTestDirs()).contains("tests");
-    assertThat(projectDefinition.getBinaries()).contains("target/classes");
     assertThat(projectDefinition.getLibraries()).contains(
         TestUtils.getResource(this.getClass(), "simple-project-with-deprecated-props/libs/lib2.txt").getAbsolutePath(),
         TestUtils.getResource(this.getClass(), "simple-project-with-deprecated-props/libs/lib2.txt").getAbsolutePath());
@@ -340,6 +336,33 @@ public class SonarProjectBuilderTest {
   @Test
   public void shouldFailIfExplicitUnexistingTestFolder() throws IOException {
     thrown.expect(RunnerException.class);
+    thrown.expectMessage("The folder 'tests' does not exist for 'com.foo.project' (base directory = "
+      + TestUtils.getResource(this.getClass(), "simple-project-with-unexisting-test-dir").getAbsolutePath());
+
+    loadProjectDefinition("simple-project-with-unexisting-test-dir");
+  }
+
+  @Test
+  public void shouldFailIfExplicitUnexistingBinaryFolder() throws IOException {
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("The folder 'bin' does not exist for 'com.foo.project' (base directory = "
+      + TestUtils.getResource(this.getClass(), "simple-project-with-unexisting-binary").getAbsolutePath());
+
+    loadProjectDefinition("simple-project-with-unexisting-binary");
+  }
+
+  @Test
+  public void shouldFailIfExplicitUnmatchingLibFolder() throws IOException {
+    thrown.expect(RunnerException.class);
+    thrown.expectMessage("No file matching pattern \"libs/*.txt\" in directory \""
+      + TestUtils.getResource(this.getClass(), "simple-project-with-unexisting-lib").getAbsolutePath());
+
+    loadProjectDefinition("simple-project-with-unexisting-lib");
+  }
+
+  @Test
+  public void shouldFailIfExplicitUnexistingTestFolderOnModule() throws IOException {
+    thrown.expect(RunnerException.class);
     thrown.expectMessage("The folder 'tests' does not exist for 'module1' (base directory = "
       + TestUtils.getResource(this.getClass(), "multi-module-with-explicit-unexisting-test-dir").getAbsolutePath() + File.separator + "module1)");
 
@@ -347,7 +370,7 @@ public class SonarProjectBuilderTest {
   }
 
   @Test
-  public void shouldFailIfExplicitUnexistingBinaryFolder() throws IOException {
+  public void shouldFailIfExplicitUnexistingBinaryFolderOnModule() throws IOException {
     thrown.expect(RunnerException.class);
     thrown.expectMessage("The folder 'bin' does not exist for 'module1' (base directory = "
       + TestUtils.getResource(this.getClass(), "multi-module-with-explicit-unexisting-binary-dir").getAbsolutePath() + File.separator + "module1)");
@@ -356,9 +379,9 @@ public class SonarProjectBuilderTest {
   }
 
   @Test
-  public void shouldFailIfExplicitUnmatchingLibFolder() throws IOException {
+  public void shouldFailIfExplicitUnmatchingLibFolderOnModule() throws IOException {
     thrown.expect(RunnerException.class);
-    thrown.expectMessage("No files matching pattern \"lib/*.jar\" in directory \""
+    thrown.expectMessage("No file matching pattern \"lib/*.jar\" in directory \""
       + TestUtils.getResource(this.getClass(), "multi-module-with-explicit-unexisting-lib").getAbsolutePath() + File.separator + "module1\"");
 
     loadProjectDefinition("multi-module-with-explicit-unexisting-lib");
