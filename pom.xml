@@ -11,7 +11,7 @@
   <version>2.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Sonar Runner</name>
-  
+
   <modules>
     <module>sonar-runner-api</module>
     <module>sonar-runner-impl</module>
@@ -68,7 +68,7 @@
   </ciManagement>
 
   <properties>
-    <sonar.buildVersion>3.5-SNAPSHOT</sonar.buildVersion>
+    <sonar.buildVersion>3.5-RC1</sonar.buildVersion>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
   </properties>
 
