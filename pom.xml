@@ -14,12 +14,20 @@
   <url>http://docs.codehaus.org/display/SONAR/Analyzing+with+Sonar+Runner</url>
   <inceptionYear>2011</inceptionYear>
 
+  <!-- Overridding default properties to be able to deploy the release -->
+  <distributionManagement>
+    <repository>
+      <id>codehaus-nexus-staging</id>
+      <name>Codehaus Release Repository</name>
+      <url>https://nexus.codehaus.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
   <modules>
     <module>sonar-runner-api</module>
     <module>sonar-runner-impl</module>
     <module>sonar-runner-dist</module>
   </modules>
-
 
   <organization>
     <name>SonarSource</name>
