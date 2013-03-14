@@ -94,9 +94,8 @@ public class Launcher {
     }
     if (StringUtils.isNotBlank(command)) {
       // This code can only works on Sonar 3.5+
-      builder
-          .setGlobalProperties(toMap(globalConfiguration))
-          .setTaskCommand(command);
+      globalConfiguration.put("sonar.task", command);
+      builder.setGlobalProperties(toMap(globalConfiguration));
     }
     Batch batch = builder.build();
     batch.execute();
