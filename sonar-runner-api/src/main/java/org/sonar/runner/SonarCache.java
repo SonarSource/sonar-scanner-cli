@@ -31,7 +31,7 @@ import java.io.IOException;
  * This class is responsible for managing Sonar batch file cache. You can put file into cache and
  * later try to retrieve them. MD5 is used to differentiate files (name is not secure as files may come
  * from different Sonar servers and have same name but be actually different, and same for SNAPSHOTs).
- * Default location of cache is 
+ * Default location of cache is
  * @author Julien HENRY
  *
  */
@@ -55,7 +55,7 @@ public class SonarCache {
       try {
         FileUtils.forceMkdir(cacheLocation);
       } catch (IOException e) {
-        throw new RuntimeException("Unable to create cache directory " + cacheLocation.getAbsolutePath(), e);
+        throw new RunnerException("Unable to create cache directory " + cacheLocation.getAbsolutePath(), e);
       }
     }
   }
@@ -94,7 +94,7 @@ public class SonarCache {
   /**
    * Move the given file inside the cache. Return the MD5 of the cached file.
    * @param sourceFile
-   * @throws IOException 
+   * @throws IOException
    */
   public String cacheFile(File sourceFile, String filename) throws IOException {
     Logs.debug("Trying to cache file " + sourceFile.getAbsolutePath() + " with filename " + filename);
@@ -123,13 +123,12 @@ public class SonarCache {
       FileUtils.forceMkdir(finalDir);
       // Now try to move the file from temporary folder to final location
       boolean rename = tmpFileName.renameTo(finalFileName);
-      if (!rename) {
+      if (!rename
         // Check if the file was already in cache
-        if (!finalFileName.exists()) {
-          Logs.warn("Unable to rename " + tmpFileName.getAbsolutePath() + " to " + finalFileName.getAbsolutePath());
-          Logs.warn("A copy/delete will be tempted but with no garantee of atomicity");
-          FileUtils.moveFile(tmpFileName, finalFileName);
-        }
+        && !finalFileName.exists()) {
+        Logs.warn("Unable to rename " + tmpFileName.getAbsolutePath() + " to " + finalFileName.getAbsolutePath());
+        Logs.warn("A copy/delete will be tempted but with no garantee of atomicity");
+        FileUtils.moveFile(tmpFileName, finalFileName);
       }
       Logs.debug("File cached at " + finalFileName.getAbsolutePath());
       return md5;
@@ -158,7 +157,7 @@ public class SonarCache {
    * asking for caching it with {@link #cacheFile(File)}.
    * This is to avoid extra copy.
    * @return
-   * @throws IOException 
+   * @throws IOException
    */
   public File getTemporaryFile() throws IOException {
     return createTempFile(getTmpDir());
@@ -168,7 +167,7 @@ public class SonarCache {
    * Create a temporary file in the given directory.
    * @param baseDir
    * @return
-   * @throws IOException 
+   * @throws IOException
    */
   private static File createTempFile(File baseDir) throws IOException {
     String baseName = System.currentTimeMillis() + "-";
@@ -190,7 +189,7 @@ public class SonarCache {
       try {
         FileUtils.forceMkdir(tmpDir);
       } catch (IOException e) {
-        throw new RuntimeException("Unable to create temporary cache directory " + tmpDir.getAbsolutePath(), e);
+        throw new RunnerException("Unable to create temporary cache directory " + tmpDir.getAbsolutePath(), e);
       }
     }
     return tmpDir;

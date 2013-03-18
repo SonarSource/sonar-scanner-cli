@@ -133,7 +133,7 @@ class Bootstrapper {
     }
     // Don't log for old versions without cache to not pollute logs
     else if (!isUnsupportedVersionForCache(getServerVersion())) {
-      Logs.info("Downloading " + path.substring(path.lastIndexOf("/") + 1));
+      Logs.info("Downloading " + path.substring(path.lastIndexOf('/') + 1));
     }
     try {
       HttpURLConnection connection = newHttpConnection(new URL(fullUrl));

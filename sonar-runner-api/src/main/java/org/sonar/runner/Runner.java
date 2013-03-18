@@ -106,8 +106,8 @@ public final class Runner {
    *
    * @since 2.1
    */
-  String ENV_SONAR_USER_HOME = "SONAR_USER_HOME";
-  String PROPERTY_SONAR_USER_HOME = "sonar.userHome";
+  public static final String ENV_SONAR_USER_HOME = "SONAR_USER_HOME";
+  public static final String PROPERTY_SONAR_USER_HOME = "sonar.userHome";
 
   /**
    * Array of prefixes of versions of Sonar without support of this runner.

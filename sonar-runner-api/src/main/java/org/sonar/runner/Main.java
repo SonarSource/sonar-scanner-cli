@@ -46,7 +46,6 @@ public final class Main {
   private static final String RUNNER_SETTINGS = "runner.settings";
   private static final String PROJECT_HOME = "project.home";
   private static final String PROJECT_SETTINGS = "project.settings";
-  // TODO Remove this after everything is updated to support tasks
   private static final String TASK_COMMAND = "sonar.task";
 
   boolean debugMode = false;
