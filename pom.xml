@@ -8,7 +8,7 @@
 
   <groupId>org.codehaus.sonar.runner</groupId>
   <artifactId>sonar-runner</artifactId>
-  <version>2.1-SNAPSHOT</version>
+  <version>2.1</version>
   <packaging>pom</packaging>
   <name>Sonar Runner</name>
   <url>http://docs.codehaus.org/display/SONAR/Analyzing+with+Sonar+Runner</url>
@@ -46,7 +46,7 @@
     <connection>scm:git:git@github.com:SonarSource/sonar-runner.git</connection>
     <developerConnection>scm:git:git@github.com:SonarSource/sonar-runner.git</developerConnection>
     <url>https://github.com/SonarSource/sonar-runner</url>
-    <tag>HEAD</tag>
+    <tag>2.1</tag>
   </scm>
 
   <issueManagement>
