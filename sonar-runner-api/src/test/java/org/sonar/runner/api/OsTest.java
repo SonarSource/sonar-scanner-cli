@@ -34,13 +34,13 @@ public class OsTest {
 
   @Test
   public void testUsedJavaHome() throws Exception {
-    File javaHome = new Os().usedJavaHome();
+    File javaHome = new Os().thisJavaHome();
     assertThat(javaHome).isNotNull().exists().isDirectory();
   }
 
   @Test
   public void testUsedJavaExe() throws Exception {
-    File javaExe = new Os().usedJavaExe();
+    File javaExe = new Os().thisJavaExe();
     assertThat(javaExe).isNotNull().isFile().exists();
     assertThat(javaExe.getName()).contains("java");
   }

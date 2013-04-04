@@ -26,15 +26,15 @@ class Os {
     return System.getProperty("os.name").contains("Windows");
   }
 
-  File usedJavaHome() {
+  File thisJavaHome() {
     return new File(System.getProperty("java.home"));
   }
 
   /**
    * Path to the java executable used by this VM
    */
-  File usedJavaExe() {
-    File bin = new File(usedJavaHome(), "bin");
+  File thisJavaExe() {
+    File bin = new File(thisJavaHome(), "bin");
     return new File(bin, isWindows() ? "java.exe" : "java");
   }
 }

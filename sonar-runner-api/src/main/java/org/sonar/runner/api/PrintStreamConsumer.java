@@ -21,8 +21,14 @@ package org.sonar.runner.api;
 
 import java.io.PrintStream;
 
+/**
+ * Implementation of StreamConsumer that prints lines to {@link java.io.PrintStream}. Generally used
+ * to forward to {@link System.out} or {@link System.err}.
+ *
+ * @since 2.2
+ */
 public class PrintStreamConsumer implements StreamConsumer {
-  private final PrintStream output;
+  final PrintStream output;
 
   public PrintStreamConsumer(PrintStream output) {
     this.output = output;

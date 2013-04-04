@@ -19,28 +19,24 @@
  */
 package org.sonar.runner.api;
 
-import java.util.Scanner;
+import org.junit.Test;
 
-/**
- * Version of this sonar-runner API.
- * @since 2.2
- */
-public enum RunnerVersion {
+import java.io.PrintStream;
 
-  INSTANCE;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-  private String version;
+public class PrintStreamConsumerTest {
+  @Test
+  public void consumeLine() {
+    PrintStream stream = mock(PrintStream.class);
+    PrintStreamConsumer consumer = new PrintStreamConsumer(stream);
+    consumer.consumeLine("foo");
+    consumer.consumeLine("bar");
 
-  public static String version() {
-    return INSTANCE.version;
-  }
-
-  private RunnerVersion() {
-    Scanner scanner = new Scanner(getClass().getResourceAsStream("/org/sonar/runner/api/version.txt"), "UTF-8");
-    try {
-      this.version = scanner.next();
-    } finally {
-      scanner.close();
-    }
+    verify(stream).println("foo");
+    verify(stream).println("bar");
+    verifyNoMoreInteractions(stream);
   }
 }

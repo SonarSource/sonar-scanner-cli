@@ -24,48 +24,79 @@ import org.sonar.runner.impl.BatchLauncherMain;
 import org.sonar.runner.impl.JarExtractor;
 
 import javax.annotation.Nullable;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Runner executed in a new JVM.
+ *
+ * @since 2.2
+ */
 public class ForkedRunner extends Runner<ForkedRunner> {
 
   private static final int ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
   private final Map<String, String> jvmEnvVariables = new HashMap<String, String>();
   private final List<String> jvmArguments = new ArrayList<String>();
-  private String javaCommand;
+  private String javaExecutable;
   private StreamConsumer stdOut = null, stdErr = null;
   private final JarExtractor jarExtractor;
+  private final CommandExecutor commandExecutor;
 
-  ForkedRunner(JarExtractor jarExtractor) {
+  ForkedRunner(JarExtractor jarExtractor, CommandExecutor commandExecutor) {
     this.jarExtractor = jarExtractor;
+    this.commandExecutor = commandExecutor;
   }
 
+  /**
+   * Create new instance. Never return null.
+   */
   public static ForkedRunner create() {
-    return new ForkedRunner(new JarExtractor());
+    return new ForkedRunner(new JarExtractor(), CommandExecutor.create());
   }
 
-  public ForkedRunner setJavaCommand(@Nullable String s) {
-    this.javaCommand = s;
+  /**
+   * Path to the java executable. The JVM of the client app is used by default
+   * (see the system property java.home)
+   */
+  public ForkedRunner setJavaExecutable(@Nullable String s) {
+    this.javaExecutable = s;
     return this;
   }
 
+  /**
+   * See {@link #addJvmArguments(java.util.List)}
+   */
   public ForkedRunner addJvmArguments(String... s) {
     return addJvmArguments(Arrays.asList(s));
   }
 
+  /**
+   * JVM arguments, for example "-Xmx512m"
+   */
   public ForkedRunner addJvmArguments(List<String> args) {
     jvmArguments.addAll(args);
     return this;
   }
 
+  /**
+   * Set a JVM environment variable. By default no variables are set.
+   */
   public ForkedRunner setJvmEnvVariable(String key, String value) {
     jvmEnvVariables.put(key, value);
     return this;
   }
 
+  /**
+   * Add some JVM environment variables. By default no variables are set.
+   */
   public ForkedRunner addJvmEnvVariables(Map<String, String> map) {
     jvmEnvVariables.putAll(map);
     return this;
@@ -92,16 +123,15 @@ public class ForkedRunner extends Runner<ForkedRunner> {
     fork(createCommand());
   }
 
-  Command createCommand() {
+  private Command createCommand() {
     File propertiesFile = writeProperties();
     File jarFile = jarExtractor.extract("sonar-runner-impl");
-
-    Os os = new Os();
-    if (javaCommand == null) {
-      javaCommand = os.usedJavaExe().getAbsolutePath();
+    if (javaExecutable == null) {
+      javaExecutable = new Os().thisJavaExe().getAbsolutePath();
     }
     return Command.builder()
-        .setExecutable(javaCommand)
+        .setExecutable(javaExecutable)
+        .addEnvVariables(jvmEnvVariables)
         .addArguments(jvmArguments)
         .addArguments("-cp", jarFile.getAbsolutePath(), BatchLauncherMain.class.getName(), propertiesFile.getAbsolutePath())
         .build();
@@ -130,9 +160,9 @@ public class ForkedRunner extends Runner<ForkedRunner> {
     if (stdErr == null) {
       stdErr = new PrintStreamConsumer(System.err);
     }
-    int status = CommandExecutor.create().execute(command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS);
+    int status = commandExecutor.execute(command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS);
     if (status != 0) {
-      throw new IllegalStateException("TODO");
+      throw new IllegalStateException("Error status: " + status);
     }
   }
 

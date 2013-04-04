@@ -53,6 +53,9 @@ public abstract class Runner<T extends Runner> {
     return clone;
   }
 
+  /**
+   * Declare Sonar properties, for example sonar.projectKey=>foo.
+   */
   public T addProperties(Properties p) {
     properties.putAll(p);
     return (T) this;
@@ -67,6 +70,9 @@ public abstract class Runner<T extends Runner> {
     return properties.getProperty(key, defaultValue);
   }
 
+  /**
+   * User-agent used in the HTTP requests to the Sonar server
+   */
   public T setApp(String app, String version) {
     setProperty(Constants.PROP_APP, app);
     setProperty(Constants.PROP_APP_VERSION, version);

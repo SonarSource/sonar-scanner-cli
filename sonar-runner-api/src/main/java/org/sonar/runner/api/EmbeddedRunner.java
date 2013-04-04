@@ -25,17 +25,34 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Implementation of {@link Runner} that is executed in the same JVM. The application can inject
+ * some extensions into Sonar IoC container (see {@link #addExtensions(Object...)}. It can be
+ * used for example in the Maven Sonar plugin to register Maven components like MavenProject
+ * or MavenPluginExecutor.
+ * @since 2.2
+ */
 public class EmbeddedRunner extends Runner<EmbeddedRunner> {
 
+  private final BatchLauncher batchLauncher;
   private final List<Object> extensions = new ArrayList<Object>();
 
-  private EmbeddedRunner() {
+  EmbeddedRunner(BatchLauncher bl) {
+    this.batchLauncher = bl;
   }
 
+  /**
+   * Create a new instance.
+   */
   public static EmbeddedRunner create() {
-    return new EmbeddedRunner();
+    return new EmbeddedRunner(new BatchLauncher());
   }
 
+  /**
+   * Sonar is executed in an almost fully isolated classloader. The unmasked packages
+   * define the classes of the client application that are visible from Sonar classloader. They
+   * relate to the extensions provided by {@link #setUnmaskedPackages(String...)}.
+   */
   public EmbeddedRunner setUnmaskedPackages(String... packages) {
     return setProperty("sonarRunner.unmaskedPackages", Utils.join(packages, ","));
   }
@@ -51,6 +68,6 @@ public class EmbeddedRunner extends Runner<EmbeddedRunner> {
 
   @Override
   protected void doExecute() {
-    new BatchLauncher().execute(properties(), extensions);
+    batchLauncher.execute(properties(), extensions);
   }
 }

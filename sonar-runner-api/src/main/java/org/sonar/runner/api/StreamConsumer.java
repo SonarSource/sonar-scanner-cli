@@ -19,6 +19,9 @@
  */
 package org.sonar.runner.api;
 
+/**
+ * @since 2.2
+ */
 public interface StreamConsumer {
   void consumeLine(String line);
 }

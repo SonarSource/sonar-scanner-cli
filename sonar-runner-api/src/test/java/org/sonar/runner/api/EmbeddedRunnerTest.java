@@ -20,14 +20,29 @@
 package org.sonar.runner.api;
 
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
+import org.sonar.runner.impl.BatchLauncher;
 import org.sonar.runner.impl.Constants;
 
+import java.util.List;
+import java.util.Properties;
+
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class EmbeddedRunnerTest {
   @Test
   public void should_create() {
     assertThat(EmbeddedRunner.create()).isNotNull().isInstanceOf(EmbeddedRunner.class);
+  }
+
+  @Test
+  public void test_app() {
+    EmbeddedRunner runner = EmbeddedRunner.create().setApp("Eclipse", "3.1");
+    assertThat(runner.app()).isEqualTo("Eclipse");
+    assertThat(runner.appVersion()).isEqualTo("3.1");
   }
 
   @Test
@@ -47,6 +62,43 @@ public class EmbeddedRunnerTest {
     FakeExtension fakeExtension = new FakeExtension();
     runner.addExtensions(fakeExtension);
     assertThat(runner.extensions()).containsExactly(fakeExtension);
+  }
+
+  @Test
+  public void should_set_properties() {
+    EmbeddedRunner runner = EmbeddedRunner.create();
+    runner.setProperty("sonar.projectKey", "foo");
+    runner.addProperties(new Properties() {{
+      setProperty("sonar.login", "admin");
+      setProperty("sonar.password", "gniark");
+    }});
+
+    assertThat(runner.property("sonar.projectKey", null)).isEqualTo("foo");
+    assertThat(runner.property("sonar.login", null)).isEqualTo("admin");
+    assertThat(runner.property("sonar.password", null)).isEqualTo("gniark");
+    assertThat(runner.property("not.set", "this_is_default")).isEqualTo("this_is_default");
+  }
+
+  @Test
+  public void should_launch_batch() {
+    BatchLauncher batchLauncher = mock(BatchLauncher.class);
+    EmbeddedRunner runner = new EmbeddedRunner(batchLauncher);
+    final FakeExtension fakeExtension = new FakeExtension();
+    runner.addExtensions(fakeExtension);
+    runner.setProperty("sonar.projectKey", "foo");
+    runner.execute();
+
+    verify(batchLauncher).execute(argThat(new ArgumentMatcher<Properties>() {
+      @Override
+      public boolean matches(Object o) {
+        return "foo".equals(((Properties) o).getProperty("sonar.projectKey"));
+      }
+    }), argThat(new ArgumentMatcher<List<Object>>() {
+      @Override
+      public boolean matches(Object o) {
+        return ((List) o).contains(fakeExtension);
+      }
+    }));
   }
 
   static class FakeExtension {
