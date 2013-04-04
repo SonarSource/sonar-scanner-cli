@@ -302,11 +302,8 @@ public final class Main {
 
   private void printUsage() {
     Logs.info("");
-    Logs.info("usage: sonar-runner [command] [options]");
+    Logs.info("usage: sonar-runner [options]");
     Logs.info("");
-    Logs.info("Command:");
-    Logs.info(" analyse-project       Run Sonar analysis task on the current project (default)");
-    Logs.info(" list-tasks            Display all tasks available");
     Logs.info("Options:");
     Logs.info(" -D,--define <arg>     Define property");
     Logs.info(" -e,--errors           Produce execution error messages");
