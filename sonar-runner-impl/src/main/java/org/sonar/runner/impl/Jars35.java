@@ -1,0 +1,85 @@
+/*
+ * Sonar Runner - Implementation
+ * Copyright (C) 2011 SonarSource
+ * dev@sonar.codehaus.org
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
+ */
+
+package org.sonar.runner.impl;
+
+import org.sonar.home.cache.FileCache;
+import org.sonar.home.cache.FileCacheBuilder;
+import org.sonar.home.log.StandardLog;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+class Jars35 {
+  private static final String BOOTSTRAP_INDEX_PATH = "/batch_bootstrap/index";
+  static final String BATCH_PATH = "/batch/";
+
+  private final FileCache fileCache;
+  private final FileDownloader downloader;
+  private final JarExtractor jarExtractor;
+
+  Jars35(FileDownloader downloader, JarExtractor jarExtractor) {
+    this.fileCache = new FileCacheBuilder().setLog(new StandardLog()).build();
+    this.downloader = downloader;
+    this.jarExtractor = jarExtractor;
+  }
+
+  List<File> download() {
+    List<File> files = new ArrayList<File>();
+    files.add(jarExtractor.extract("sonar-runner-batch"));
+    files.addAll(dowloadFiles());
+    return files;
+  }
+
+  private List<File> dowloadFiles() {
+    try {
+      List<File> files = new ArrayList<File>();
+      String libs = downloader.downloadString(BOOTSTRAP_INDEX_PATH);
+      String[] lines = libs.split("[\r\n]+");
+      JarDownloader jarDownloader = new JarDownloader(downloader);
+      for (String line : lines) {
+        line = line.trim();
+        if (!"".equals(line)) {
+          String[] libAndHash = line.split("\\|");
+          String filename = libAndHash[0];
+          String hash = libAndHash.length > 0 ? libAndHash[1] : null;
+          files.add(fileCache.get(filename, hash, jarDownloader));
+        }
+      }
+      return files;
+    } catch (IOException e) {
+      throw new IllegalStateException("Fail to download libraries", e);
+    }
+  }
+
+  private static class JarDownloader implements FileCache.Downloader {
+    private final FileDownloader downloader;
+
+    private JarDownloader(FileDownloader downloader) {
+      this.downloader = downloader;
+    }
+
+    public void download(String filename, File toFile) throws IOException {
+      downloader.download(BATCH_PATH + filename, toFile);
+    }
+  }
+}
