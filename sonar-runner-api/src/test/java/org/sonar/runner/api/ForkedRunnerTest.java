@@ -19,13 +19,66 @@
  */
 package org.sonar.runner.api;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.sonar.runner.impl.JarExtractor;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ForkedRunnerTest {
+
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
+
   @Test
   public void should_create() {
-    assertThat(ForkedRunner.create()).isNotNull().isInstanceOf(ForkedRunner.class);
+    ForkedRunner runner = ForkedRunner.create();
+    assertThat(runner).isNotNull().isInstanceOf(ForkedRunner.class);
+  }
+
+  @Test
+  public void test_java_command() throws IOException {
+    JarExtractor jarExtractor = mock(JarExtractor.class);
+    File jar = temp.newFile();
+    when(jarExtractor.extract("sonar-runner-impl")).thenReturn(jar);
+
+    ForkedRunner runner = new ForkedRunner(jarExtractor);
+    runner.setJavaCommand("java");
+    runner.setProperty("sonar.dynamicAnalysis", "false");
+    runner.setProperty("sonar.login", "admin");
+    runner.addJvmArguments("-Xmx512m");
+    runner.setJvmEnvVariable("SONAR_HOME", "/path/to/sonar");
+
+    Command command = runner.createCommand();
+    assertThat(command).isNotNull();
+    assertThat(command.toStrings()).hasSize(6);
+    assertThat(command.toStrings()[0]).isEqualTo("java");
+    assertThat(command.toStrings()[1]).isEqualTo("-Xmx512m");
+    assertThat(command.toStrings()[2]).isEqualTo("-cp");
+    assertThat(command.toStrings()[3]).isEqualTo(jar.getAbsolutePath());
+    assertThat(command.toStrings()[4]).isEqualTo("org.sonar.runner.impl.BatchLauncherMain");
+
+    // the properties
+    String propsPath = command.toStrings()[5];
+    assertThat(propsPath).endsWith(".properties");
+    Properties properties = new Properties();
+    properties.load(new FileInputStream(propsPath));
+    assertThat(properties.size()).isGreaterThan(2);
+    assertThat(properties.getProperty("sonar.dynamicAnalysis")).isEqualTo("false");
+    assertThat(properties.getProperty("sonar.login")).isEqualTo("admin");
+    assertThat(properties.getProperty("-Xmx512m")).isNull();
+    assertThat(properties.getProperty("SONAR_HOME")).isNull();
+    // default values
+    assertThat(properties.getProperty("sonar.task")).isEqualTo("scan");
+    assertThat(properties.getProperty("sonar.host.url")).isEqualTo("http://localhost:9000");
   }
 }

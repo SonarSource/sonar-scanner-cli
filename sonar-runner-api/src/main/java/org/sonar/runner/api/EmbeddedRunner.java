@@ -50,7 +50,7 @@ public class EmbeddedRunner extends Runner<EmbeddedRunner> {
   }
 
   @Override
-  public void doExecute() {
+  protected void doExecute() {
     new BatchLauncher().execute(properties(), extensions);
   }
 }

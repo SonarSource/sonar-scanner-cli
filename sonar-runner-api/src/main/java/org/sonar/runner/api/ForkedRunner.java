@@ -23,54 +23,72 @@ import org.apache.commons.io.IOUtils;
 import org.sonar.runner.impl.BatchLauncherMain;
 import org.sonar.runner.impl.JarExtractor;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ForkedRunner extends Runner<ForkedRunner> {
 
   private static final int ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
-  private final Command.Builder commandBuilder;
+  private final Map<String, String> jvmEnvVariables = new HashMap<String, String>();
+  private final List<String> jvmArguments = new ArrayList<String>();
+  private String javaCommand;
+
   private final JarExtractor jarExtractor;
 
-  ForkedRunner(Command.Builder commandBuilder, JarExtractor jarExtractor) {
-    this.commandBuilder = commandBuilder;
+  ForkedRunner(JarExtractor jarExtractor) {
     this.jarExtractor = jarExtractor;
   }
 
   public static ForkedRunner create() {
-    Os os = new Os();
-    Command.Builder builder = Command.builder().setExecutable(os.usedJavaExe().getAbsolutePath());
-    return new ForkedRunner(builder, new JarExtractor());
+    return new ForkedRunner(new JarExtractor());
+  }
+
+  public ForkedRunner setJavaCommand(@Nullable String s) {
+    this.javaCommand = s;
+    return this;
+  }
+
+  public ForkedRunner addJvmArguments(String... s) {
+    return addJvmArguments(Arrays.asList(s));
+  }
+
+  public ForkedRunner addJvmArguments(List<String> args) {
+    jvmArguments.addAll(args);
+    return this;
+  }
+
+  public ForkedRunner setJvmEnvVariable(String key, String value) {
+    jvmEnvVariables.put(key, value);
+    return this;
+  }
+
+  public ForkedRunner addJvmEnvVariables(Map<String, String> map) {
+    jvmEnvVariables.putAll(map);
+    return this;
   }
 
   @Override
-  public void doExecute() {
+  protected void doExecute() {
+    fork(createCommand());
+  }
+
+  Command createCommand() {
     File propertiesFile = writeProperties();
-    File jarFile = extractJar();
-    fork(jarFile, propertiesFile);
-  }
+    File jarFile = jarExtractor.extract("sonar-runner-impl");
 
-  private File extractJar() {
-    return jarExtractor.extract("sonar-runner-impl");
-  }
-
-  private void fork(File jarFile, File propertiesFile) {
-    // java -jar sonar-runner-impl.jar path/to/propertiesFile
-    Command command = commandBuilder
-      .addArguments("-cp", jarFile.getAbsolutePath())
-      .addArguments(BatchLauncherMain.class.getName())
-      .addArguments(propertiesFile.getAbsolutePath())
-      .build();
-    System.out.println("---------- execute: " + command);
-    int status = CommandExecutor.create().execute(command, ONE_DAY_IN_MILLISECONDS);
-    if (status != 0) {
-      throw new IllegalStateException("TODO");
+    Os os = new Os();
+    if (javaCommand == null) {
+      javaCommand = os.usedJavaExe().getAbsolutePath();
     }
+    return Command.builder()
+        .setExecutable(javaCommand)
+        .addArguments(jvmArguments)
+        .addArguments("-cp", jarFile.getAbsolutePath(), BatchLauncherMain.class.getName(), propertiesFile.getAbsolutePath())
+        .build();
   }
 
   private File writeProperties() {
@@ -89,30 +107,10 @@ public class ForkedRunner extends Runner<ForkedRunner> {
     }
   }
 
-  public ForkedRunner setJavaCommand(String s) {
-    commandBuilder.setExecutable(s);
-    return this;
+  private void fork(Command command) {
+    int status = CommandExecutor.create().execute(command, ONE_DAY_IN_MILLISECONDS);
+    if (status != 0) {
+      throw new IllegalStateException("TODO");
+    }
   }
-
-  public ForkedRunner addJvmArgument(String... s) {
-    commandBuilder.addArguments(Arrays.asList(s));
-    return this;
-  }
-
-  public ForkedRunner addJvmArguments(List<String> args) {
-    commandBuilder.addArguments(args);
-    return this;
-  }
-
-  public ForkedRunner setJvmEnvVariable(String key, String value) {
-    commandBuilder.setEnvVariable(key, value);
-    return this;
-  }
-
-  public ForkedRunner addJvmEnvVariables(Map<String, String> map) {
-    commandBuilder.addEnvVariables(map);
-    return this;
-  }
-
-
 }
