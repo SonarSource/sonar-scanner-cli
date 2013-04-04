@@ -44,7 +44,9 @@ public class CommandExecutorTest {
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  private File workDir;
+  PrintStreamConsumer stdout = new PrintStreamConsumer(System.out);
+  PrintStreamConsumer stderr = new PrintStreamConsumer(System.err);
+  File workDir;
 
   @Before
   public void setUp() throws IOException {
@@ -54,13 +56,13 @@ public class CommandExecutorTest {
   @Test
   public void should_consume_StdOut_and_StdErr() throws Exception {
     final StringBuilder stdOutBuilder = new StringBuilder();
-    CommandExecutor.StreamConsumer stdOutConsumer = new CommandExecutor.StreamConsumer() {
+    StreamConsumer stdOutConsumer = new StreamConsumer() {
       public void consumeLine(String line) {
         stdOutBuilder.append(line).append(System.getProperty("line.separator"));
       }
     };
     final StringBuilder stdErrBuilder = new StringBuilder();
-    CommandExecutor.StreamConsumer stdErrConsumer = new CommandExecutor.StreamConsumer() {
+    StreamConsumer stdErrConsumer = new StreamConsumer() {
       public void consumeLine(String line) {
         stdErrBuilder.append(line).append(System.getProperty("line.separator"));
       }
@@ -93,13 +95,13 @@ public class CommandExecutorTest {
     CommandExecutor.create().execute(command, NOP_CONSUMER, BAD_CONSUMER, 1000L);
   }
 
-  private static final CommandExecutor.StreamConsumer NOP_CONSUMER = new CommandExecutor.StreamConsumer() {
+  private static final StreamConsumer NOP_CONSUMER = new StreamConsumer() {
     public void consumeLine(String line) {
       // nop
     }
   };
 
-  private static final CommandExecutor.StreamConsumer BAD_CONSUMER = new CommandExecutor.StreamConsumer() {
+  private static final StreamConsumer BAD_CONSUMER = new StreamConsumer() {
     public void consumeLine(String line) {
       throw new RuntimeException();
     }
@@ -113,7 +115,7 @@ public class CommandExecutorTest {
         .addArguments("1")
         .setEnvVariable("ENVVAR", "2")
         .build();
-    int exitCode = CommandExecutor.create().execute(command, 1000L);
+    int exitCode = CommandExecutor.create().execute(command, stdout, stderr, 1000L);
     assertThat(exitCode).isEqualTo(0);
     File logFile = new File(workDir, "echo.log");
     assertThat(logFile).exists();
@@ -128,7 +130,8 @@ public class CommandExecutorTest {
     String executable = getScript("forever");
     long start = System.currentTimeMillis();
     try {
-      CommandExecutor.create().execute(Command.builder().setExecutable(executable).setDirectory(workDir).build(), 300L);
+      Command command = Command.builder().setExecutable(executable).setDirectory(workDir).build();
+      CommandExecutor.create().execute(command, stdout, stderr, 300L);
       fail();
     } catch (CommandException e) {
       long duration = System.currentTimeMillis() - start;
@@ -141,7 +144,8 @@ public class CommandExecutorTest {
   @Test
   public void should_fail_if_script_not_found() {
     thrown.expect(CommandException.class);
-    CommandExecutor.create().execute(Command.builder().setExecutable("notfound").setDirectory(workDir).build(), 1000L);
+    Command command = Command.builder().setExecutable("notfound").setDirectory(workDir).build();
+    CommandExecutor.create().execute(command, stdout, stderr, 1000L);
   }
 
   private static String getScript(String name) throws IOException {

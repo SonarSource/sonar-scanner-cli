@@ -36,7 +36,7 @@ public class ForkedRunner extends Runner<ForkedRunner> {
   private final Map<String, String> jvmEnvVariables = new HashMap<String, String>();
   private final List<String> jvmArguments = new ArrayList<String>();
   private String javaCommand;
-
+  private StreamConsumer stdOut = null, stdErr = null;
   private final JarExtractor jarExtractor;
 
   ForkedRunner(JarExtractor jarExtractor) {
@@ -68,6 +68,22 @@ public class ForkedRunner extends Runner<ForkedRunner> {
 
   public ForkedRunner addJvmEnvVariables(Map<String, String> map) {
     jvmEnvVariables.putAll(map);
+    return this;
+  }
+
+  /**
+   * Subscribe to the standard output. By default output is {@link System.out}
+   */
+  public ForkedRunner setStdOut(@Nullable StreamConsumer stream) {
+    this.stdOut = stream;
+    return this;
+  }
+
+  /**
+   * Subscribe to the error output. By default output is {@link System.err}
+   */
+  public ForkedRunner setStdErr(@Nullable StreamConsumer stream) {
+    this.stdErr = stream;
     return this;
   }
 
@@ -108,9 +124,16 @@ public class ForkedRunner extends Runner<ForkedRunner> {
   }
 
   private void fork(Command command) {
-    int status = CommandExecutor.create().execute(command, ONE_DAY_IN_MILLISECONDS);
+    if (stdOut == null) {
+      stdOut = new PrintStreamConsumer(System.out);
+    }
+    if (stdErr == null) {
+      stdErr = new PrintStreamConsumer(System.err);
+    }
+    int status = CommandExecutor.create().execute(command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS);
     if (status != 0) {
       throw new IllegalStateException("TODO");
     }
   }
+
 }

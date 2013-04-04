@@ -25,12 +25,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 /**
  * Synchronously execute a native command line. It's much more limited than the Apache Commons Exec library.
@@ -109,15 +104,6 @@ class CommandExecutor {
     }
   }
 
-  /**
-   * Execute command and display error and output streams in log.
-   * Method {@link #execute(Command, StreamConsumer, StreamConsumer, long)} is preferable,
-   * when fine-grained control of output of command required.
-   */
-  int execute(Command command, long timeoutMilliseconds) {
-    return execute(command, new DefaultConsumer(), new DefaultConsumer(), timeoutMilliseconds);
-  }
-
   private void closeStreams(Process process) {
     if (process != null) {
       IOUtils.closeQuietly(process.getInputStream());
@@ -179,17 +165,6 @@ class CommandExecutor {
 
     public Exception getException() {
       return exception;
-    }
-  }
-
-
-  interface StreamConsumer {
-    void consumeLine(String line);
-  }
-
-  private static class DefaultConsumer implements StreamConsumer {
-    public void consumeLine(String line) {
-      System.out.println(line);
     }
   }
 }
