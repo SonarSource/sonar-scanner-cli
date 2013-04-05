@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.codehaus.sonar-plugins</groupId>
@@ -25,8 +26,9 @@
 
   <modules>
     <module>sonar-runner-api</module>
-    <module>sonar-runner-impl</module>
+    <module>sonar-runner-batch</module>
     <module>sonar-runner-dist</module>
+    <module>sonar-runner-impl</module>
   </modules>
 
   <organization>
@@ -46,7 +48,6 @@
     <connection>scm:git:git@github.com:SonarSource/sonar-runner.git</connection>
     <developerConnection>scm:git:git@github.com:SonarSource/sonar-runner.git</developerConnection>
     <url>https://github.com/SonarSource/sonar-runner</url>
-    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
@@ -55,7 +56,7 @@
   </issueManagement>
 
   <properties>
-    <sonar.buildVersion>3.5-RC3</sonar.buildVersion>
+    <sonar.buildVersion>3.5</sonar.buildVersion>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
   </properties>
 
@@ -94,4 +95,45 @@
     </profile>
   </profiles>
  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>2.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+      </dependency>
+      <dependency>
+        <groupId>org.easytesting</groupId>
+        <artifactId>fest-assert</artifactId>
+        <version>1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>1.9.5</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.7</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>1.7.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
