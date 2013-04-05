@@ -52,9 +52,7 @@ class CommandExecutor {
     StreamGobbler errorGobbler = null;
     try {
       ProcessBuilder builder = new ProcessBuilder(command.toStrings());
-      if (command.directory() != null) {
-        builder.directory(command.directory());
-      }
+      builder.directory(command.directory());
       builder.environment().putAll(command.envVariables());
       process = builder.start();
 
@@ -63,13 +61,8 @@ class CommandExecutor {
       outputGobbler.start();
       errorGobbler.start();
 
-      final Process finalProcess = process;
       executorService = Executors.newSingleThreadExecutor();
-      Future<Integer> ft = executorService.submit(new Callable<Integer>() {
-        public Integer call() throws Exception {
-          return finalProcess.waitFor();
-        }
-      });
+      Future<Integer> ft = executeProcess(executorService, process);
       int exitCode = ft.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
       waitUntilFinish(outputGobbler);
       waitUntilFinish(errorGobbler);
@@ -91,11 +84,19 @@ class CommandExecutor {
       waitUntilFinish(outputGobbler);
       waitUntilFinish(errorGobbler);
       closeStreams(process);
-
       if (executorService != null) {
         executorService.shutdown();
       }
     }
+  }
+
+  private Future<Integer> executeProcess(ExecutorService executorService, Process process) {
+    final Process finalProcess = process;
+    return executorService.submit(new Callable<Integer>() {
+      public Integer call() throws InterruptedException {
+        return finalProcess.waitFor();
+      }
+    });
   }
 
   private void verifyGobbler(Command command, StreamGobbler gobbler, String type) {

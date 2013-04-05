@@ -19,6 +19,8 @@
  */
 package org.sonar.runner.api;
 
+import org.apache.commons.io.IOUtils;
+
 import java.util.Scanner;
 
 /**
@@ -40,7 +42,7 @@ public enum RunnerVersion {
     try {
       this.version = scanner.next();
     } finally {
-      scanner.close();
+      IOUtils.closeQuietly(scanner);
     }
   }
 }
