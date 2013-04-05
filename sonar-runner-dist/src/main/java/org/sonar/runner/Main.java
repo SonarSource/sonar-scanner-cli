@@ -19,10 +19,7 @@
  */
 package org.sonar.runner;
 
-import org.sonar.runner.api.EmbeddedRunner;
 import org.sonar.runner.impl.Logs;
-
-import java.util.Properties;
 
 /**
  * Arguments :
@@ -40,40 +37,46 @@ public class Main {
 
   public static void main(String[] args) {
     Cli cli = new Cli().parse(args);
-    new Main(cli).execute();
+    Main main = new Main(new Exit(), cli, new Conf(cli), new RunnerFactory());
+    main.execute();
   }
 
+  private final Exit exit;
   private final Cli cli;
+  private final Conf conf;
+  private final RunnerFactory runnerFactory;
 
-  Main(Cli cli) {
+  Main(Exit exit, Cli cli, Conf conf, RunnerFactory runnerFactory) {
+    this.exit = exit;
     this.cli = cli;
+    this.conf = conf;
+    this.runnerFactory = runnerFactory;
   }
 
   void execute() {
     SystemInfo.print();
     if (!cli.isDisplayVersionOnly()) {
-      int status = doExecute(new Conf(cli));
-      System.exit(status);
+      int status = executeTask();
+      exit.exit(status);
     }
   }
 
-  private int doExecute(Conf conf) {
-    if (cli.isDisplayStackTrace()) {
-      Logs.info("Error stacktraces are turned on.");
-    }
+  private int executeTask() {
     Stats stats = new Stats().start();
     try {
-      Properties properties = conf.load();
-      EmbeddedRunner.create().addProperties(properties).execute();
-     // Logs.info("Work directory: " + runner.getWorkDir().getCanonicalPath());
+      if (cli.isDisplayStackTrace()) {
+        Logs.info("Error stacktraces are turned on.");
+      }
+      runnerFactory.create(conf.properties()).execute();
+      // Logs.info("Work directory: " + runner.getWorkDir().getCanonicalPath());
 
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
       showError("Error during Sonar runner execution", e, cli.isDisplayStackTrace());
-      return 1;
+      return Exit.ERROR;
     }
     displayExecutionResult(stats, "SUCCESS");
-    return 0;
+    return Exit.SUCCESS;
   }
 
   private void displayExecutionResult(Stats stats, String resultMsg) {

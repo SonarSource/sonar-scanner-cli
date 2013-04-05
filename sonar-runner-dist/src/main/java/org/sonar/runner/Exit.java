@@ -19,24 +19,11 @@
  */
 package org.sonar.runner;
 
-import org.junit.Test;
+class Exit {
+  static final int SUCCESS = 0;
+  static final int ERROR = 1;
 
-import static org.fest.assertions.Assertions.assertThat;
-
-public class SystemInfoTest {
-  @Test
-  public void test_java() {
-    assertThat(SystemInfo.java()).matches("Java .* \\((32|64)-bit\\)");
-  }
-
-  @Test
-  public void test_os() {
-    assertThat(SystemInfo.os()).isNotEmpty();
-  }
-
-  @Test
-  public void should_print() {
-    SystemInfo.print();
-    // should mock output
+  void exit(int status) {
+    System.exit(status);
   }
 }

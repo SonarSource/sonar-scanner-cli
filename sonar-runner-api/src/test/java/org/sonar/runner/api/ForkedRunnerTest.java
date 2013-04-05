@@ -93,6 +93,7 @@ public class ForkedRunnerTest {
     runner.setStdOut(mock(StreamConsumer.class));
     runner.setStdErr(mock(StreamConsumer.class));
 
+    assertThat(runner.jvmArguments()).contains("-Xmx512m");
     runner.execute();
 
     verify(commandExecutor).execute(argThat(new ArgumentMatcher<Command>() {

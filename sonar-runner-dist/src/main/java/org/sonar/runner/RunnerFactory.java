@@ -19,24 +19,24 @@
  */
 package org.sonar.runner;
 
-import org.junit.Test;
+import org.sonar.runner.api.EmbeddedRunner;
+import org.sonar.runner.api.ForkedRunner;
+import org.sonar.runner.api.Runner;
 
-import static org.fest.assertions.Assertions.assertThat;
+import java.util.Properties;
 
-public class SystemInfoTest {
-  @Test
-  public void test_java() {
-    assertThat(SystemInfo.java()).matches("Java .* \\((32|64)-bit\\)");
-  }
+class RunnerFactory {
 
-  @Test
-  public void test_os() {
-    assertThat(SystemInfo.os()).isNotEmpty();
-  }
+  Runner create(Properties props) {
+    Runner runner;
+    if ("fork".equals(props.getProperty("sonarRunner.mode"))) {
+      String jvmArgs = props.getProperty("sonarRunner.fork.jvmArgs", "");
+      runner = ForkedRunner.create().addJvmArguments(jvmArgs.split(" "));
 
-  @Test
-  public void should_print() {
-    SystemInfo.print();
-    // should mock output
+    } else {
+      runner = EmbeddedRunner.create();
+    }
+    runner.addProperties(props);
+    return runner;
   }
 }

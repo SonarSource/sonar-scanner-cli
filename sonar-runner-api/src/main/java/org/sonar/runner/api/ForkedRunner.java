@@ -71,6 +71,10 @@ public class ForkedRunner extends Runner<ForkedRunner> {
     return this;
   }
 
+  public List<String> jvmArguments() {
+    return new ArrayList<String>(jvmArguments);
+  }
+
   /**
    * See {@link #addJvmArguments(java.util.List)}
    */

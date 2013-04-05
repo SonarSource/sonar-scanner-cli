@@ -39,7 +39,7 @@ class Conf {
     this.cli = cli;
   }
 
-  Properties load() throws IOException {
+  Properties properties() throws IOException {
     Properties result = new Properties();
     result.putAll(loadGlobalProperties());
     result.putAll(loadProjectProperties());
@@ -47,12 +47,11 @@ class Conf {
     result.putAll(cli.properties());
 
     if (result.containsKey(PROJECT_HOME)) {
-      // the real property of the Sonar Runner is "sonar.projectDir"
+      // the real property of the Sonar Runner is "sonar.projectBaseDir"
       String baseDir = result.getProperty(PROJECT_HOME);
       result.remove(PROJECT_HOME);
       result.put("sonar.projectBaseDir", baseDir);
     }
-
     return result;
   }
 

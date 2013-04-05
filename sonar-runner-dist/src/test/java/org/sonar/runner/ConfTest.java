@@ -32,34 +32,33 @@ import static org.mockito.Mockito.when;
 public class ConfTest {
 
   Properties args = new Properties();
-  Conf conf;
+  Cli cli = mock(Cli.class);
+  Conf conf = new Conf(cli);
 
   @Before
   public void initConf() {
-    Cli cli = mock(Cli.class);
     when(cli.properties()).thenReturn(args);
-    conf = new Conf(cli);
   }
 
   @Test
   public void should_load_global_settings_by_home() throws Exception {
-    File home = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadRunnerSettingsByHome/").toURI());
+    File home = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadRunnerSettingsByHome/").toURI());
     args.setProperty("runner.home", home.getCanonicalPath());
 
-    assertThat(conf.load().get("sonar.host.url")).isEqualTo("http://moon/sonar");
+    assertThat(conf.properties().get("sonar.host.url")).isEqualTo("http://moon/sonar");
   }
 
   @Test
   public void should_not_fail_if_no_home() throws Exception {
-    assertThat(conf.load()).isNotEmpty();
+    assertThat(conf.properties()).isNotEmpty();
   }
 
   @Test
   public void should_load_conf_by_direct_path() throws Exception {
-    File settings = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
+    File settings = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
     args.setProperty("runner.settings", settings.getCanonicalPath());
 
-    assertThat(conf.load().get("sonar.host.url")).isEqualTo("http://other/sonar");
+    assertThat(conf.properties().get("sonar.host.url")).isEqualTo("http://other/sonar");
   }
 
 //  @Test
