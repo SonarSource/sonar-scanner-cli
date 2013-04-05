@@ -28,8 +28,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -66,13 +68,22 @@ class FileDownloader {
         Logs.debug("Download " + fullUrl + " to " + toFile.getAbsolutePath());
       }
       HttpURLConnection connection = newHttpConnection(new URL(fullUrl));
+      int statusCode = connection.getResponseCode();
+      if (statusCode != HttpURLConnection.HTTP_OK) {
+        throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + statusCode);
+      }
       output = new FileOutputStream(toFile, false);
       input = connection.getInputStream();
       IOUtils.copyLarge(input, output);
-    } catch (IOException e) {
+
+    } catch (Exception e) {
+      if (e instanceof ConnectException || e instanceof  UnknownHostException) {
+        Logs.error("Sonar server '" + serverUrl + "' can not be reached");
+      }
       IOUtils.closeQuietly(output);
       FileUtils.deleteQuietly(toFile);
       throw new IllegalStateException("Fail to download: " + fullUrl, e);
+
     } finally {
       IOUtils.closeQuietly(input);
       IOUtils.closeQuietly(output);
@@ -86,13 +97,20 @@ class FileDownloader {
     if (charset == null || "".equals(charset)) {
       charset = "UTF-8";
     }
-    Reader reader = new InputStreamReader(conn.getInputStream(), charset);
+    Reader reader = null;
     try {
       int statusCode = conn.getResponseCode();
       if (statusCode != HttpURLConnection.HTTP_OK) {
         throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + statusCode);
       }
+      reader = new InputStreamReader(conn.getInputStream(), charset);
       return IOUtils.toString(reader);
+    } catch (IOException e) {
+      if (e instanceof ConnectException || e instanceof  UnknownHostException) {
+        Logs.error("Sonar server '" + serverUrl + "' can not be reached");
+      }
+      throw e;
+
     } finally {
       IOUtils.closeQuietly(reader);
       conn.disconnect();
