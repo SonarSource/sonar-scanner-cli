@@ -22,7 +22,7 @@ package org.sonar.runner.api;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.sonar.runner.impl.BatchLauncher;
-import org.sonar.runner.impl.Constants;
+import org.sonar.runner.impl.InternalProperties;
 
 import java.util.List;
 import java.util.Properties;
@@ -48,10 +48,10 @@ public class EmbeddedRunnerTest {
   @Test
   public void should_set_unmasked_packages() {
     EmbeddedRunner runner = EmbeddedRunner.create();
-    assertThat(runner.property(Constants.RUNNER_UNMASKED_PACKAGES, null)).isNull();
+    assertThat(runner.property(InternalProperties.RUNNER_UNMASKED_PACKAGES, null)).isNull();
 
     runner = EmbeddedRunner.create().setUnmaskedPackages("org.apache.ant", "org.ant");
-    assertThat(runner.property(Constants.RUNNER_UNMASKED_PACKAGES, null)).isEqualTo("org.apache.ant,org.ant");
+    assertThat(runner.property(InternalProperties.RUNNER_UNMASKED_PACKAGES, null)).isEqualTo("org.apache.ant,org.ant");
   }
 
   @Test

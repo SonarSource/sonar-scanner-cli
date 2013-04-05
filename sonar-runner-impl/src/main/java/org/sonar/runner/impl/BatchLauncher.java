@@ -34,14 +34,14 @@ public class BatchLauncher {
     if (serverVersion.is35Compatible()) {
       jarFiles = new Jars35(fileDownloader, new JarExtractor()).download();
     } else if (serverVersion.is30Compatible()) {
-      String workDir = properties.getProperty(Constants.RUNNER_WORK_DIR);
+      String workDir = properties.getProperty("sonar.working.directory");
       jarFiles = new Jars30(fileDownloader).download(new File(workDir), new JarExtractor());
     } else {
       throw new IllegalStateException("Sonar " + serverVersion.version()
         + " is not supported. Please upgrade Sonar to version 3.0 or more.");
     }
 
-    String unmaskedPackages = properties.getProperty(Constants.RUNNER_UNMASKED_PACKAGES, "");
+    String unmaskedPackages = properties.getProperty(InternalProperties.RUNNER_UNMASKED_PACKAGES, "");
     IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), unmaskedPackages.split(":"));
     classloader.addFiles(jarFiles);
     delegateExecution(classloader, properties, extensions);

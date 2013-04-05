@@ -41,7 +41,7 @@ public class BatchLauncherMain {
     try {
       props.load(input);
       // just to be clean, do not forward properties that do not make sense in fork mode
-      props.remove(Constants.RUNNER_UNMASKED_PACKAGES);
+      props.remove(InternalProperties.RUNNER_UNMASKED_PACKAGES);
 
     } finally {
       IOUtils.closeQuietly(input);

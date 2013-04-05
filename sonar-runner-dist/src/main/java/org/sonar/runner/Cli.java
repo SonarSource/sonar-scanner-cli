@@ -19,7 +19,7 @@
  */
 package org.sonar.runner;
 
-import org.sonar.runner.impl.Constants;
+import org.sonar.runner.api.RunnerProperties;
 import org.sonar.runner.impl.Logs;
 
 import java.util.Properties;
@@ -53,7 +53,7 @@ class Cli {
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
       if (i == 0 && !arg.startsWith("-")) {
-        props.setProperty(Constants.TASK, arg);
+        props.setProperty(RunnerProperties.TASK, arg);
 
       } else if ("-h".equals(arg) || "--help".equals(arg)) {
         printUsage();

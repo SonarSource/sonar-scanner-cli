@@ -52,9 +52,9 @@ class FileDownloader {
   }
 
   static FileDownloader create(Properties properties) {
-    String serverUrl = properties.getProperty(Constants.HOST_URL);
-    String app = properties.getProperty(Constants.RUNNER_APP);
-    String appVersion = properties.getProperty(Constants.RUNNER_APP_VERSION);
+    String serverUrl = properties.getProperty("sonar.host.url");
+    String app = properties.getProperty(InternalProperties.RUNNER_APP);
+    String appVersion = properties.getProperty(InternalProperties.RUNNER_APP_VERSION);
     return new FileDownloader(serverUrl, app, appVersion);
   }
 

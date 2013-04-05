@@ -1,5 +1,5 @@
 /*
- * Sonar Runner - Implementation
+ * Sonar Runner - API
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,15 +17,10 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.impl;
+package org.sonar.runner.api;
 
-public interface Constants {
-  String HOST_URL = "sonar.host.url";
-  String TASK = "sonar.task";
-  String SOURCE_ENCODING = "sonar.sourceEncoding";
-
-  String RUNNER_APP = "sonarRunner.app";
-  String RUNNER_APP_VERSION = "sonarRunner.appVersion";
-  String RUNNER_UNMASKED_PACKAGES = "sonarRunner.unmaskedPackages";
-  String RUNNER_WORK_DIR = "sonarRunner.workDir";
+class SimpleRunner extends Runner {
+  @Override
+  protected void doExecute() {
+  }
 }

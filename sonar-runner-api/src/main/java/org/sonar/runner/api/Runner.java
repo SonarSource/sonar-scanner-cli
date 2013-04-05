@@ -19,13 +19,9 @@
  */
 package org.sonar.runner.api;
 
-import org.sonar.runner.impl.Constants;
-import org.sonar.runner.impl.Logs;
+import org.sonar.runner.impl.InternalProperties;
 
 import javax.annotation.Nullable;
-
-import java.nio.charset.Charset;
-import java.util.Locale;
 import java.util.Properties;
 
 /**
@@ -36,15 +32,6 @@ public abstract class Runner<T extends Runner> {
   private final Properties properties = new Properties();
 
   protected Runner() {
-    initProperties();
-  }
-
-  private void initProperties() {
-    // default values
-    properties.put(Constants.HOST_URL, "http://localhost:9000");
-    properties.put(Constants.TASK, "scan");
-    properties.put(Constants.RUNNER_APP, "SonarRunner");
-    properties.put(Constants.RUNNER_APP_VERSION, RunnerVersion.version());
   }
 
   public Properties properties() {
@@ -55,12 +42,20 @@ public abstract class Runner<T extends Runner> {
 
   /**
    * Declare Sonar properties, for example sonar.projectKey=>foo.
+   *
+   * @see #setProperty(String, String)
    */
   public T addProperties(Properties p) {
     properties.putAll(p);
     return (T) this;
   }
 
+  /**
+   * Declare a Sonar property.
+   *
+   * @see RunnerProperties
+   * @see ScanProperties
+   */
   public T setProperty(String key, String value) {
     properties.setProperty(key, value);
     return (T) this;
@@ -74,35 +69,39 @@ public abstract class Runner<T extends Runner> {
    * User-agent used in the HTTP requests to the Sonar server
    */
   public T setApp(String app, String version) {
-    setProperty(Constants.RUNNER_APP, app);
-    setProperty(Constants.RUNNER_APP_VERSION, version);
+    setProperty(InternalProperties.RUNNER_APP, app);
+    setProperty(InternalProperties.RUNNER_APP_VERSION, version);
     return (T) this;
   }
 
   public String app() {
-    return property(Constants.RUNNER_APP, null);
+    return property(InternalProperties.RUNNER_APP, null);
   }
 
   public String appVersion() {
-    return property(Constants.RUNNER_APP_VERSION, null);
+    return property(InternalProperties.RUNNER_APP_VERSION, null);
   }
 
   public void execute() {
-    initSourceEncoding();
+    initDefaultValues();
+    new SourceEncoding().init(this);
+    new Dirs().init(this);
     doExecute();
   }
 
-  private void initSourceEncoding() {
-    String sourceEncoding = property(Constants.SOURCE_ENCODING, null);
-    boolean platformDependent = false;
-    if (sourceEncoding == null || sourceEncoding.equals("")) {
-      sourceEncoding = Charset.defaultCharset().name();
-      platformDependent = true;
-      setProperty(Constants.SOURCE_ENCODING, sourceEncoding);
-    }
-    Logs.info("Default locale: \"" + Locale.getDefault() + "\", source code encoding: \"" + sourceEncoding + "\""
-      + (platformDependent ? " (analysis is platform dependent)" : ""));
+  protected abstract void doExecute();
+
+  private void initDefaultValues() {
+    setDefaultValue(RunnerProperties.HOST_URL, "http://localhost:9000");
+    setDefaultValue(RunnerProperties.TASK, "scan");
+    setDefaultValue(InternalProperties.RUNNER_APP, "SonarRunner");
+    setDefaultValue(InternalProperties.RUNNER_APP_VERSION, RunnerVersion.version());
   }
 
-  protected abstract void doExecute();
+  private void setDefaultValue(String key, String value) {
+    if (!properties.containsKey(key)) {
+      setProperty(key, value);
+    }
+  }
+
 }
