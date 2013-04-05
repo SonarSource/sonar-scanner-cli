@@ -77,14 +77,14 @@ class Conf {
 
   private File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
     File settingsFile = null;
-    String runnerHome = props.getProperty(homeKey);
-    if (runnerHome != null && !"".equals(runnerHome)) {
+    String runnerHome = props.getProperty(homeKey, "");
+    if (!"".equals(runnerHome)) {
       settingsFile = new File(runnerHome, relativePathFromHome);
     }
 
     if (settingsFile == null || !settingsFile.exists()) {
-      String settingsPath = props.getProperty(settingsKey);
-      if (settingsPath != null && !"".equals(settingsPath)) {
+      String settingsPath = props.getProperty(settingsKey, "");
+      if (!"".equals(settingsPath)) {
         settingsFile = new File(settingsPath);
       }
     }

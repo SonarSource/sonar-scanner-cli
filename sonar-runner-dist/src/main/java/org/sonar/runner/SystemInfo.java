@@ -23,6 +23,10 @@ import org.sonar.runner.api.RunnerVersion;
 
 class SystemInfo {
 
+  private SystemInfo() {
+    // only static methods
+  }
+
   static void print() {
     System.out.println("Sonar Runner " + RunnerVersion.version());
     System.out.println(java());

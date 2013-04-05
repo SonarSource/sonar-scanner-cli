@@ -124,6 +124,6 @@ class Cli {
     Logs.info(" -h,--help             Display help information");
     Logs.info(" -v,--version          Display version information");
     Logs.info(" -X,--debug            Produce execution debug output");
-    System.exit(0);
+    System.exit(Exit.SUCCESS);
   }
 }
