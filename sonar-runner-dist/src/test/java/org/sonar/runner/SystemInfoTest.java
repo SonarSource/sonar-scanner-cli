@@ -1,5 +1,5 @@
 /*
- * Sonar Runner - API
+ * Sonar Runner - Distribution
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,31 +17,20 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.api;
+package org.sonar.runner;
 
-import java.util.Scanner;
+import org.junit.Test;
 
-/**
- * Version of this sonar-runner API.
- *
- * @since 2.2
- */
-public enum RunnerVersion {
+import static org.fest.assertions.Assertions.assertThat;
 
-  INSTANCE;
-
-  private String version;
-
-  public static String version() {
-    return INSTANCE.version;
+public class SystemInfoTest {
+  @Test
+  public void test_java() {
+    assertThat(SystemInfo.java()).matches("Java .* \\((32|64)-bit\\)");
   }
 
-  private RunnerVersion() {
-    Scanner scanner = new Scanner(getClass().getResourceAsStream("/org/sonar/runner/api/version.txt"), "UTF-8");
-    try {
-      this.version = scanner.next();
-    } finally {
-      scanner.close();
-    }
+  @Test
+  public void test_os() {
+    assertThat(SystemInfo.os()).isNotEmpty();
   }
 }

@@ -20,7 +20,6 @@
 package org.sonar.runner;
 
 import org.sonar.runner.api.EmbeddedRunner;
-import org.sonar.runner.api.RunnerVersion;
 import org.sonar.runner.impl.Logs;
 
 import java.util.Properties;
@@ -51,17 +50,11 @@ public class Main {
   }
 
   void execute() {
-    printSystem();
+    SystemInfo.print();
     if (!cli.isDisplayVersionOnly()) {
       int status = doExecute(new Conf(cli));
       System.exit(status);
     }
-  }
-
-  private void printSystem() {
-    System.out.println("Sonar Runner " + RunnerVersion.version());
-    System.out.println("Java " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
-    System.out.println(System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch"));
   }
 
   private int doExecute(Conf conf) {
@@ -72,15 +65,8 @@ public class Main {
     try {
       Properties properties = conf.load();
       EmbeddedRunner.create().addProperties(properties).execute();
+     // Logs.info("Work directory: " + runner.getWorkDir().getCanonicalPath());
 
-//      Logs.debug("Other system properties:");
-//      Logs.debug("  - sun.arch.data.model: \"" + System.getProperty("sun.arch.data.model") + "\"");
-//      Logs.info("Server: " + runner.getSonarServerURL());
-//      try {
-//        Logs.info("Work directory: " + runner.getWorkDir().getCanonicalPath());
-//      } catch (IOException e) {
-//        throw new RunnerException("Unable to resolve directory", e);
-//      }
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
       showError("Error during Sonar runner execution", e, cli.isDisplayStackTrace());

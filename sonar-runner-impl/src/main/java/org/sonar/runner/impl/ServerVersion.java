@@ -38,6 +38,7 @@ class ServerVersion {
     // Guava Suppliers#memoize() would be great here :D
     if (version == null) {
       version = downloadVersion();
+      Logs.info("Sonar Server " + version);
     }
     return version;
   }
