@@ -32,15 +32,23 @@ public class SourceEncodingTest {
 
   @Test
   public void should_set_default_platform_encoding() throws Exception {
+    runner.setProperty("sonar.task", "scan");
     encoding.init(runner);
     assertThat(runner.property("sonar.sourceEncoding", null)).isEqualTo(Charset.defaultCharset().name());
   }
 
   @Test
   public void should_use_parameterized_encoding() throws Exception {
+    runner.setProperty("sonar.task", "scan");
     runner.setProperty("sonar.sourceEncoding", "THE_ISO_1234");
     encoding.init(runner);
     assertThat(runner.property("sonar.sourceEncoding", null)).isEqualTo("THE_ISO_1234");
   }
 
+  @Test
+  public void should_not_init_encoding_if_not_project_task() throws Exception {
+    runner.setProperty("sonar.task", "views");
+    encoding.init(runner);
+    assertThat(runner.property("sonar.sourceEncoding", null)).isNull();
+  }
 }

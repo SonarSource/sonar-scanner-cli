@@ -29,6 +29,7 @@ public interface ScanProperties {
 
   /**
    * Default task
+   *
    * @see RunnerProperties#TASK
    */
   String SCAN_TASK = "scan";
@@ -80,4 +81,10 @@ public interface ScanProperties {
    * Property used to specify the base directory of the project to analyse. Default is ".".
    */
   String PROJECT_BASEDIR = "sonar.projectBaseDir";
+
+  /**
+   * Encoding of source and test files. By default it's the platform encoding.
+   */
+  String PROJECT_SOURCE_ENCODING = "sonar.sourceEncoding";
+
 }

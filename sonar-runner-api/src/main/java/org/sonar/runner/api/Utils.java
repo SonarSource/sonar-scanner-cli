@@ -21,6 +21,7 @@ package org.sonar.runner.api;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Properties;
 
 class Utils {
   private Utils() {
@@ -41,5 +42,9 @@ class Utils {
       sb.append(delimiter);
     }
     return sb.toString();
+  }
+
+  static boolean taskRequiresProject(Properties props) {
+    return ScanProperties.SCAN_TASK.equals(props.get(RunnerProperties.TASK));
   }
 }

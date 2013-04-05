@@ -78,7 +78,6 @@ public class Main {
 //      Logs.info("Server: " + runner.getSonarServerURL());
 //      try {
 //        Logs.info("Work directory: " + runner.getWorkDir().getCanonicalPath());
-      //Logs.info("Cache directory: " + runner.getCache().getCacheLocation());
 //      } catch (IOException e) {
 //        throw new RunnerException("Unable to resolve directory", e);
 //      }

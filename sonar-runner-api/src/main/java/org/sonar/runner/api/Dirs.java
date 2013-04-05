@@ -26,7 +26,7 @@ import java.io.File;
 class Dirs {
 
   void init(Runner runner) {
-    boolean onProject = ScanProperties.SCAN_TASK.equals(runner.property(RunnerProperties.TASK, null));
+    boolean onProject = Utils.taskRequiresProject(runner.properties());
     if (onProject) {
       initProjectDirs(runner);
     } else {

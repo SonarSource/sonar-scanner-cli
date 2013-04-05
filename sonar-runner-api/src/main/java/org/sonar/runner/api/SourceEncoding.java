@@ -27,15 +27,17 @@ import java.util.Locale;
 class SourceEncoding {
 
   void init(Runner runner) {
-    String sourceEncoding = runner.property(RunnerProperties.SOURCE_ENCODING, "");
-    boolean platformDependent = false;
-    if ("".equals(sourceEncoding)) {
-      sourceEncoding = Charset.defaultCharset().name();
-      platformDependent = true;
-      runner.setProperty(RunnerProperties.SOURCE_ENCODING, sourceEncoding);
+    boolean onProject = Utils.taskRequiresProject(runner.properties());
+    if (onProject) {
+      String sourceEncoding = runner.property(ScanProperties.PROJECT_SOURCE_ENCODING, "");
+      boolean platformDependent = false;
+      if ("".equals(sourceEncoding)) {
+        sourceEncoding = Charset.defaultCharset().name();
+        platformDependent = true;
+        runner.setProperty(ScanProperties.PROJECT_SOURCE_ENCODING, sourceEncoding);
+      }
+      Logs.info("Default locale: \"" + Locale.getDefault() + "\", source code encoding: \"" + sourceEncoding + "\""
+          + (platformDependent ? " (analysis is platform dependent)" : ""));
     }
-    Logs.info("Default locale: \"" + Locale.getDefault() + "\", source code encoding: \"" + sourceEncoding + "\""
-        + (platformDependent ? " (analysis is platform dependent)" : ""));
   }
-
 }

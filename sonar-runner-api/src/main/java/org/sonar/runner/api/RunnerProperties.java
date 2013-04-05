@@ -37,11 +37,6 @@ public interface RunnerProperties {
   String TASK = "sonar.task";
 
   /**
-   * Encoding of source and test files. By default it's the platform encoding.
-   */
-  String SOURCE_ENCODING = "sonar.sourceEncoding";
-
-  /**
    * Working directory containing generated reports and temporary data.
    */
   String WORK_DIR = "sonar.working.directory";

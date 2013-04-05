@@ -21,6 +21,8 @@ package org.sonar.runner.api;
 
 import org.junit.Test;
 
+import java.util.Properties;
+
 import static org.fest.assertions.Assertions.assertThat;
 
 public class UtilsTest {
@@ -29,5 +31,20 @@ public class UtilsTest {
     assertThat(Utils.join(new String[]{}, ",")).isEqualTo("");
     assertThat(Utils.join(new String[]{"foo"}, ",")).isEqualTo("foo");
     assertThat(Utils.join(new String[]{"foo", "bar"}, ",")).isEqualTo("foo,bar");
+  }
+
+  @Test
+  public void task_should_require_project() {
+    Properties props = new Properties();
+    props.setProperty("sonar.task", "scan");
+    assertThat(Utils.taskRequiresProject(props)).isTrue();
+  }
+
+  @Test
+  public void task_should_not_require_project() {
+    Properties props = new Properties();
+    assertThat(Utils.taskRequiresProject(props)).isFalse();
+    props.setProperty("sonar.task", "views");
+    assertThat(Utils.taskRequiresProject(props)).isFalse();
   }
 }
