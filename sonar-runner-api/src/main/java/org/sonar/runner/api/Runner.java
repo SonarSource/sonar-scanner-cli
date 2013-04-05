@@ -43,8 +43,8 @@ public abstract class Runner<T extends Runner> {
     // default values
     properties.put(Constants.HOST_URL, "http://localhost:9000");
     properties.put(Constants.TASK, "scan");
-    properties.put(Constants.PROP_APP, "SonarRunner");
-    properties.put(Constants.PROP_APP_VERSION, RunnerVersion.version());
+    properties.put(Constants.RUNNER_APP, "SonarRunner");
+    properties.put(Constants.RUNNER_APP_VERSION, RunnerVersion.version());
   }
 
   public Properties properties() {
@@ -74,17 +74,17 @@ public abstract class Runner<T extends Runner> {
    * User-agent used in the HTTP requests to the Sonar server
    */
   public T setApp(String app, String version) {
-    setProperty(Constants.PROP_APP, app);
-    setProperty(Constants.PROP_APP_VERSION, version);
+    setProperty(Constants.RUNNER_APP, app);
+    setProperty(Constants.RUNNER_APP_VERSION, version);
     return (T) this;
   }
 
   public String app() {
-    return property(Constants.PROP_APP, null);
+    return property(Constants.RUNNER_APP, null);
   }
 
   public String appVersion() {
-    return property(Constants.PROP_APP_VERSION, null);
+    return property(Constants.RUNNER_APP_VERSION, null);
   }
 
   public void execute() {

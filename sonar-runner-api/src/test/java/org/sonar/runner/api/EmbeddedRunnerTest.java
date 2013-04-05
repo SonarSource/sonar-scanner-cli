@@ -48,10 +48,10 @@ public class EmbeddedRunnerTest {
   @Test
   public void should_set_unmasked_packages() {
     EmbeddedRunner runner = EmbeddedRunner.create();
-    assertThat(runner.property(Constants.UNMASKED_PACKAGES, null)).isNull();
+    assertThat(runner.property(Constants.RUNNER_UNMASKED_PACKAGES, null)).isNull();
 
     runner = EmbeddedRunner.create().setUnmaskedPackages("org.apache.ant", "org.ant");
-    assertThat(runner.property(Constants.UNMASKED_PACKAGES, null)).isEqualTo("org.apache.ant,org.ant");
+    assertThat(runner.property(Constants.RUNNER_UNMASKED_PACKAGES, null)).isEqualTo("org.apache.ant,org.ant");
   }
 
   @Test

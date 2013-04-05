@@ -31,19 +31,19 @@ class Cli {
   private boolean displayStackTrace = false;
   private Properties props = new Properties();
 
-  public boolean isDebugMode() {
+  boolean isDebugMode() {
     return debugMode;
   }
 
-  public boolean isDisplayVersionOnly() {
+  boolean isDisplayVersionOnly() {
     return displayVersionOnly;
   }
 
-  public boolean isDisplayStackTrace() {
+  boolean isDisplayStackTrace() {
     return displayStackTrace;
   }
 
-  public Properties properties() {
+  Properties properties() {
     return props;
   }
 

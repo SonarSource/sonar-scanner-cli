@@ -21,9 +21,11 @@ package org.sonar.runner.impl;
 
 public interface Constants {
   String HOST_URL = "sonar.host.url";
-  String PROP_APP = "sonarRunner.app";
-  String PROP_APP_VERSION = "sonarRunner.appVersion";
-  String UNMASKED_PACKAGES = "sonarRunner.unmaskedPackages";
   String TASK = "sonar.task";
   String SOURCE_ENCODING = "sonar.sourceEncoding";
+
+  String RUNNER_APP = "sonarRunner.app";
+  String RUNNER_APP_VERSION = "sonarRunner.appVersion";
+  String RUNNER_UNMASKED_PACKAGES = "sonarRunner.unmaskedPackages";
+  String RUNNER_WORK_DIR = "sonarRunner.workDir";
 }

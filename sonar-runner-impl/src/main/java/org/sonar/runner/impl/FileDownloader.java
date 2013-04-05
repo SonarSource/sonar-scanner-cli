@@ -32,7 +32,6 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,8 +53,8 @@ class FileDownloader {
 
   static FileDownloader create(Properties properties) {
     String serverUrl = properties.getProperty(Constants.HOST_URL);
-    String app = properties.getProperty(Constants.PROP_APP);
-    String appVersion = properties.getProperty(Constants.PROP_APP_VERSION);
+    String app = properties.getProperty(Constants.RUNNER_APP);
+    String appVersion = properties.getProperty(Constants.RUNNER_APP_VERSION);
     return new FileDownloader(serverUrl, app, appVersion);
   }
 

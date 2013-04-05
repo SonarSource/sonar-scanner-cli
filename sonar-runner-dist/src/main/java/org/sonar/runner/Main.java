@@ -37,7 +37,7 @@ import java.util.Properties;
  *
  * @since 1.0
  */
-public final class Main {
+public class Main {
 
   public static void main(String[] args) {
     Cli cli = new Cli().parse(args);
@@ -59,7 +59,7 @@ public final class Main {
   }
 
   private void printSystem() {
-    System.out.println("Runner " + RunnerVersion.version());
+    System.out.println("Sonar Runner " + RunnerVersion.version());
     System.out.println("Java " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
     System.out.println(System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch"));
   }

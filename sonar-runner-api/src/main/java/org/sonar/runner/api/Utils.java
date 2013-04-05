@@ -23,6 +23,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 class Utils {
+  private Utils() {
+    // only util static methods
+  }
+
   /**
    * Similar to org.apache.commons.lang.StringUtils#join()
    */
