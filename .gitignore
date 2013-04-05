@@ -9,7 +9,7 @@ dependency-reduced-pom.xml
 *.ipr
 .idea/
 
-# Eclipse
+# ---- Eclipse
 .classpath
 .project
 .settings

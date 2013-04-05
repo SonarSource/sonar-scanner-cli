@@ -14,7 +14,6 @@
     <dependency>
       <groupId>org.codehaus.sonar</groupId>
       <artifactId>sonar-home</artifactId>
-      <version>3.5</version>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -61,7 +60,7 @@
                   <version>${pom.version}</version>
                   <type>jar</type>
                   <overWrite>false</overWrite>
-                  <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                  <outputDirectory>${pom.build.outputDirectory}</outputDirectory>
                   <destFileName>sonar-runner-batch.jar</destFileName>
                 </artifactItem>
               </artifactItems>
