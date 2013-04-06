@@ -52,8 +52,8 @@ public class Jars35Test {
     when(jarExtractor.extract("sonar-runner-batch")).thenReturn(batchJar);
     // index of the files to download
     when(connection.downloadString("/batch_bootstrap/index")).thenReturn(
-        "cpd.jar|CA124VADFSDS" + System.lineSeparator() +
-            "squid.jar|34535FSFSDF" + System.lineSeparator()
+        "cpd.jar|CA124VADFSDS\n" +
+            "squid.jar|34535FSFSDF\n"
     );
 
     Jars35 jars35 = new Jars35(fileCache, connection, jarExtractor);
