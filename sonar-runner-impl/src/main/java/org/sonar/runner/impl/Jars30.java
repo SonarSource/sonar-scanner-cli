@@ -27,9 +27,9 @@ import java.util.List;
 
 class Jars30 {
   private static final String BATCH_PATH = "/batch/";
-  private final FileDownloader downloader;
+  private final ServerConnection downloader;
 
-  Jars30(FileDownloader downloader) {
+  Jars30(ServerConnection downloader) {
     this.downloader = downloader;
   }
 

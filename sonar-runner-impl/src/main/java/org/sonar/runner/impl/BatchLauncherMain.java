@@ -27,15 +27,21 @@ import java.util.Collections;
 import java.util.Properties;
 
 public class BatchLauncherMain {
-  public static void main(String[] args) throws IOException {
+  private final BatchLauncher launcher;
+
+  BatchLauncherMain(BatchLauncher l) {
+    this.launcher = l;
+  }
+
+  void execute(String[] args) throws IOException {
     if (args.length == 0) {
       throw new IllegalArgumentException("Missing path to properties file");
     }
     Properties props = loadProperties(args[0]);
-    new BatchLauncher().execute(props, Collections.emptyList());
+    launcher.execute(props, Collections.emptyList());
   }
 
-  private static Properties loadProperties(String arg) throws IOException {
+  private Properties loadProperties(String arg) throws IOException {
     Properties props = new Properties();
     FileInputStream input = new FileInputStream(arg);
     try {
@@ -49,4 +55,7 @@ public class BatchLauncherMain {
     return props;
   }
 
+  public static void main(String[] args) throws IOException {
+    new BatchLauncherMain(new BatchLauncher()).execute(args);
+  }
 }

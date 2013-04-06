@@ -25,6 +25,7 @@ import org.junit.Test;
 import java.io.File;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Fail.fail;
 
 public class JarExtractorTest {
   @Test
@@ -33,5 +34,15 @@ public class JarExtractorTest {
     assertThat(jarFile).isFile().exists();
     assertThat(FileUtils.readFileToString(jarFile, "UTF-8")).isEqualTo("Fake jar for unit tests");
     assertThat(jarFile.toURI().toURL().toString()).doesNotContain("jar:file");
+  }
+
+  @Test
+  public void should_fail_to_extract() throws Exception {
+    try {
+      new JarExtractor().extract("unknown");
+      fail();
+    } catch (IllegalStateException e) {
+      assertThat(e).hasMessage("Fail to extract unknown.jar");
+    }
   }
 }

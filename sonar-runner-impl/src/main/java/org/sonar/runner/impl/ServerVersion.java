@@ -27,11 +27,11 @@ class ServerVersion {
   private static final String[] LESS_THAN_3_0 = {"0", "1", "2"};
   private static final String[] LESS_THAN_3_5 = {"0", "1", "2", "3.0", "3.1", "3.2", "3.3", "3.4"};
 
-  private final FileDownloader fileDownloader;
+  private final ServerConnection serverConnection;
   private String version;
 
-  ServerVersion(FileDownloader fileDownloader) {
-    this.fileDownloader = fileDownloader;
+  ServerVersion(ServerConnection serverConnection) {
+    this.serverConnection = serverConnection;
   }
 
   String version() {
@@ -46,7 +46,7 @@ class ServerVersion {
   private String downloadVersion() {
     String result;
     try {
-      result = fileDownloader.downloadString("/api/server/version");
+      result = serverConnection.downloadString("/api/server/version");
     } catch (IOException e) {
       throw new IllegalStateException("Fail to request server version", e);
     }

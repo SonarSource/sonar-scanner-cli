@@ -26,35 +26,46 @@ import java.util.List;
 import java.util.Properties;
 
 public class BatchLauncher {
+  final String isolatedLauncherClass;
 
-  public void execute(Properties properties, List<Object> extensions) {
-    FileDownloader fileDownloader = FileDownloader.create(properties);
-    ServerVersion serverVersion = new ServerVersion(fileDownloader);
-    List<File> jarFiles;
-    if (serverVersion.is35Compatible()) {
-      jarFiles = new Jars35(fileDownloader, new JarExtractor()).download();
-    } else if (serverVersion.is30Compatible()) {
-      String workDir = properties.getProperty("sonar.working.directory");
-      jarFiles = new Jars30(fileDownloader).download(new File(workDir), new JarExtractor());
-    } else {
-      throw new IllegalStateException("Sonar " + serverVersion.version()
-        + " is not supported. Please upgrade Sonar to version 3.0 or more.");
-    }
-
-    String unmaskedPackages = properties.getProperty(InternalProperties.RUNNER_UNMASKED_PACKAGES, "");
-    IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), unmaskedPackages.split(":"));
-    classloader.addFiles(jarFiles);
-    delegateExecution(classloader, properties, extensions);
+  /**
+   * For unit tests
+   */
+  BatchLauncher(String isolatedLauncherClass) {
+    this.isolatedLauncherClass = isolatedLauncherClass;
   }
 
-  private void delegateExecution(IsolatedClassloader classloader, Properties properties, List<Object> extensions) {
+  public BatchLauncher() {
+    this.isolatedLauncherClass = "org.sonar.runner.batch.IsolatedLauncher";
+  }
+
+  public void execute(Properties props, List<Object> extensions) {
+    ServerConnection serverConnection = ServerConnection.create(props);
+    ServerVersion serverVersion = new ServerVersion(serverConnection);
+    JarDownloader jarDownloader = new JarDownloader(props, serverConnection, serverVersion);
+    doExecute(jarDownloader, props, extensions);
+  }
+
+  /**
+   * @return the {@link IsolatedLauncher} instance for unit tests
+   */
+  Object doExecute(JarDownloader jarDownloader, Properties props, List<Object> extensions) {
+    List<File> jarFiles = jarDownloader.download();
+    String unmaskedPackages = props.getProperty(InternalProperties.RUNNER_UNMASKED_PACKAGES, "");
+    IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), unmaskedPackages.split(":"));
+    classloader.addFiles(jarFiles);
+    return delegateExecution(classloader, props, extensions);
+  }
+
+  private Object delegateExecution(IsolatedClassloader classloader, Properties properties, List<Object> extensions) {
     ClassLoader initialContextClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(classloader);
-      Class<?> launcherClass = classloader.findClass("org.sonar.runner.batch.IsolatedLauncher");
+      Class<?> launcherClass = classloader.loadClass(isolatedLauncherClass);
       Method executeMethod = launcherClass.getMethod("execute", Properties.class, List.class);
       Object launcher = launcherClass.newInstance();
       executeMethod.invoke(launcher, properties, extensions);
+      return launcher;
     } catch (InvocationTargetException e) {
       // Unwrap original exception
       throw new RunnerException("Unable to execute Sonar", e.getTargetException());

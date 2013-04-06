@@ -34,10 +34,10 @@ class Jars35 {
   static final String BATCH_PATH = "/batch/";
 
   private final FileCache fileCache;
-  private final FileDownloader downloader;
+  private final ServerConnection downloader;
   private final JarExtractor jarExtractor;
 
-  Jars35(FileDownloader downloader, JarExtractor jarExtractor) {
+  Jars35(ServerConnection downloader, JarExtractor jarExtractor) {
     this.fileCache = new FileCacheBuilder().setLog(new StandardLog()).build();
     this.downloader = downloader;
     this.jarExtractor = jarExtractor;
@@ -72,9 +72,9 @@ class Jars35 {
   }
 
   private static class JarDownloader implements FileCache.Downloader {
-    private final FileDownloader downloader;
+    private final ServerConnection downloader;
 
-    private JarDownloader(FileDownloader downloader) {
+    private JarDownloader(ServerConnection downloader) {
       this.downloader = downloader;
     }
 

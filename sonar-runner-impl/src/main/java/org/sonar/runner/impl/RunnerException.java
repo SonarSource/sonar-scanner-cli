@@ -17,35 +17,10 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-
 package org.sonar.runner.impl;
 
-/**
- * Exception thrown by the Sonar Runner when something bad happens.
- * 
- * @since 1.2
- */
 public class RunnerException extends RuntimeException {
 
-  private static final long serialVersionUID = 4810407777585753030L;
-
-  /**
-   * See {@link RuntimeException}
-   */
-  public RunnerException(String message) {
-    super(message);
-  }
-
-  /**
-   * See {@link RuntimeException}
-   */
-  public RunnerException(Throwable cause) {
-    super(cause);
-  }
-
-  /**
-   * See {@link RuntimeException}
-   */
   public RunnerException(String message, Throwable cause) {
     super(message, cause);
   }

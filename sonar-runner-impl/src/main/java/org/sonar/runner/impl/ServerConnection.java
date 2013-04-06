@@ -36,8 +36,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class FileDownloader {
-
+class ServerConnection {
 
   static final int CONNECT_TIMEOUT_MILLISECONDS = 30000;
   static final int READ_TIMEOUT_MILLISECONDS = 60000;
@@ -46,16 +45,16 @@ class FileDownloader {
   private final String serverUrl;
   private final String userAgent;
 
-  private FileDownloader(String serverUrl, String app, String appVersion) {
+  private ServerConnection(String serverUrl, String app, String appVersion) {
     this.serverUrl = serverUrl;
     this.userAgent = app + "/" + appVersion;
   }
 
-  static FileDownloader create(Properties properties) {
+  static ServerConnection create(Properties properties) {
     String serverUrl = properties.getProperty("sonar.host.url");
     String app = properties.getProperty(InternalProperties.RUNNER_APP);
     String appVersion = properties.getProperty(InternalProperties.RUNNER_APP_VERSION);
-    return new FileDownloader(serverUrl, app, appVersion);
+    return new ServerConnection(serverUrl, app, appVersion);
   }
 
   void download(String path, File toFile) {
