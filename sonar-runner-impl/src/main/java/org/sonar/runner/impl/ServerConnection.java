@@ -62,9 +62,7 @@ class ServerConnection {
     FileOutputStream output = null;
     String fullUrl = serverUrl + path;
     try {
-      if (Logs.isDebugEnabled()) {
-        Logs.debug("Download " + fullUrl + " to " + toFile.getAbsolutePath());
-      }
+      Logs.debug("Download " + fullUrl + " to " + toFile.getAbsolutePath());
       HttpURLConnection connection = newHttpConnection(new URL(fullUrl));
       int statusCode = connection.getResponseCode();
       if (statusCode != HttpURLConnection.HTTP_OK) {
@@ -136,7 +134,6 @@ class ServerConnection {
     if (contentType == null) {
       return null;
     }
-
     Matcher m = CHARSET_PATTERN.matcher(contentType);
     if (m.find()) {
       return m.group(1).trim().toUpperCase();
