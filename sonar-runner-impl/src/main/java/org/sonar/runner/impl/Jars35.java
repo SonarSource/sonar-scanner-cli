@@ -34,12 +34,21 @@ class Jars35 {
   static final String BATCH_PATH = "/batch/";
 
   private final FileCache fileCache;
-  private final ServerConnection downloader;
+  private final ServerConnection connection;
   private final JarExtractor jarExtractor;
 
-  Jars35(ServerConnection downloader, JarExtractor jarExtractor) {
+  Jars35(ServerConnection conn, JarExtractor jarExtractor) {
     this.fileCache = new FileCacheBuilder().setLog(new StandardLog()).build();
-    this.downloader = downloader;
+    this.connection = conn;
+    this.jarExtractor = jarExtractor;
+  }
+
+  /**
+   * For unit tests
+   */
+  Jars35(FileCache fileCache, ServerConnection conn, JarExtractor jarExtractor) {
+    this.fileCache = fileCache;
+    this.connection = conn;
     this.jarExtractor = jarExtractor;
   }
 
@@ -53,33 +62,33 @@ class Jars35 {
   private List<File> dowloadFiles() {
     try {
       List<File> files = new ArrayList<File>();
-      String libs = downloader.downloadString(BOOTSTRAP_INDEX_PATH);
+      String libs = connection.downloadString(BOOTSTRAP_INDEX_PATH);
       String[] lines = libs.split("[\r\n]+");
-      JarDownloader jarDownloader = new JarDownloader(downloader);
+      BatchFileDownloader batchFileDownloader = new BatchFileDownloader(connection);
       for (String line : lines) {
         line = line.trim();
         if (!"".equals(line)) {
           String[] libAndHash = line.split("\\|");
           String filename = libAndHash[0];
           String hash = libAndHash.length > 0 ? libAndHash[1] : null;
-          files.add(fileCache.get(filename, hash, jarDownloader));
+          files.add(fileCache.get(filename, hash, batchFileDownloader));
         }
       }
       return files;
-    } catch (IOException e) {
-      throw new IllegalStateException("Fail to download libraries", e);
+    } catch (Exception e) {
+      throw new IllegalStateException("Fail to download libraries from server", e);
     }
   }
 
-  private static class JarDownloader implements FileCache.Downloader {
-    private final ServerConnection downloader;
+  static class BatchFileDownloader implements FileCache.Downloader {
+    private final ServerConnection connection;
 
-    private JarDownloader(ServerConnection downloader) {
-      this.downloader = downloader;
+    BatchFileDownloader(ServerConnection conn) {
+      this.connection = conn;
     }
 
     public void download(String filename, File toFile) throws IOException {
-      downloader.download(BATCH_PATH + filename, toFile);
+      connection.download(BATCH_PATH + filename, toFile);
     }
   }
 }

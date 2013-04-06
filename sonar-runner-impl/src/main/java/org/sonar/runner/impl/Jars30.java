@@ -17,7 +17,6 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-
 package org.sonar.runner.impl;
 
 import java.io.File;
@@ -27,10 +26,10 @@ import java.util.List;
 
 class Jars30 {
   private static final String BATCH_PATH = "/batch/";
-  private final ServerConnection downloader;
+  private final ServerConnection connection;
 
-  Jars30(ServerConnection downloader) {
-    this.downloader = downloader;
+  Jars30(ServerConnection conn) {
+    this.connection = conn;
   }
 
   List<File> download(File workDir, JarExtractor jarExtractor) {
@@ -43,17 +42,17 @@ class Jars30 {
   private List<File> downloadFiles(File workDir) {
     try {
       List<File> files = new ArrayList<File>();
-      String libs = downloader.downloadString(BATCH_PATH);
+      String libs = connection.downloadString(BATCH_PATH);
       File dir = new File(workDir, "batch");
       dir.mkdirs();
       for (String lib : libs.split(",")) {
         File file = new File(dir, lib);
-        downloader.download(BATCH_PATH + lib, file);
+        connection.download(BATCH_PATH + lib, file);
         files.add(file);
       }
       return files;
-    } catch (IOException e) {
-      throw new IllegalStateException("Fail to download libraries", e);
+    } catch (Exception e) {
+      throw new IllegalStateException("Fail to download libraries from server", e);
     }
   }
 
