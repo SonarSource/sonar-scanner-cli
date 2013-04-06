@@ -54,22 +54,6 @@ class IsolatedClassloader extends URLClassLoader {
   }
 
   /**
-   * {@inheritDoc} Visibility of a method has been relaxed to public.
-   */
-  @Override
-  public void addURL(URL url) {
-    super.addURL(url);
-  }
-
-  /**
-   * {@inheritDoc} Visibility of a method has been relaxed to public.
-   */
-  @Override
-  public Class<?> findClass(String name) throws ClassNotFoundException {
-    return super.findClass(name);
-  }
-
-  /**
    * @return true, if class can be loaded from parent ClassLoader
    */
   boolean canLoadFromParent(String name) {

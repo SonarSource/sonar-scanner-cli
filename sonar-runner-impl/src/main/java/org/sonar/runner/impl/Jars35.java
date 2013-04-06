@@ -70,7 +70,7 @@ class Jars35 {
         if (!"".equals(line)) {
           String[] libAndHash = line.split("\\|");
           String filename = libAndHash[0];
-          String hash = libAndHash.length > 0 ? libAndHash[1] : null;
+          String hash = libAndHash.length > 0 ? libAndHash[1] : "";
           files.add(fileCache.get(filename, hash, batchFileDownloader));
         }
       }
