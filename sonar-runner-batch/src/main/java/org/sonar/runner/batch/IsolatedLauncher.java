@@ -41,9 +41,9 @@ import java.util.Properties;
 public class IsolatedLauncher {
 
   public void execute(Properties properties, List<Object> extensions) {
-    String task = properties.getProperty("sonar.task");
     ProjectReactor projectReactor = null;
-    if (task == null || "scan".equals(task)) {
+    String task = properties.getProperty("sonar.task", "scan");
+    if ("scan".equals(task)) {
       Properties propsClone = new Properties();
       propsClone.putAll(properties);
       projectReactor = new ProjectReactorBuilder(propsClone).build();
