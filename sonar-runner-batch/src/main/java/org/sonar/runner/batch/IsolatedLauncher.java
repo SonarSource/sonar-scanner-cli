@@ -41,6 +41,10 @@ import java.util.Properties;
 public class IsolatedLauncher {
 
   public void execute(Properties properties, List<Object> extensions) {
+    createBatch(properties, extensions).execute();
+  }
+
+  Batch createBatch(Properties properties, List<Object> extensions) {
     ProjectReactor projectReactor = null;
     String task = properties.getProperty("sonar.task", "scan");
     if ("scan".equals(task)) {
@@ -57,7 +61,7 @@ public class IsolatedLauncher {
     if (projectReactor != null) {
       builder.setProjectReactor(projectReactor);
     }
-    builder.build().execute();
+    return builder.build();
   }
 
   private void initLogging(Properties props) {

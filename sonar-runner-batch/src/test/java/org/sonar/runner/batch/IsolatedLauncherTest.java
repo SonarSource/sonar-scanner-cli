@@ -20,7 +20,9 @@
 package org.sonar.runner.batch;
 
 import org.junit.Test;
+import org.sonar.batch.bootstrapper.Batch;
 
+import java.util.Collections;
 import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -29,6 +31,18 @@ public class IsolatedLauncherTest {
 
   Properties props = new Properties();
   IsolatedLauncher launcher = new IsolatedLauncher();
+
+  @Test
+  public void should_create_batch() {
+    props.setProperty("sonar.projectBaseDir", "src/test/java_sample");
+    props.setProperty("sonar.projectKey", "sample");
+    props.setProperty("sonar.projectName", "Sample");
+    props.setProperty("sonar.projectVersion", "1.0");
+    props.setProperty("sonar.sources", "src");
+    Batch batch = launcher.createBatch(props, Collections.emptyList());
+
+    assertThat(batch).isNotNull();
+  }
 
   @Test
   public void testGetSqlLevel() throws Exception {
