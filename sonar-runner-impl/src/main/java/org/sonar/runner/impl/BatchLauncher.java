@@ -22,6 +22,8 @@ package org.sonar.runner.impl;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Properties;
 
@@ -49,31 +51,38 @@ public class BatchLauncher {
   /**
    * @return the {@link IsolatedLauncher} instance for unit tests
    */
-  Object doExecute(JarDownloader jarDownloader, Properties props, List<Object> extensions) {
-    List<File> jarFiles = jarDownloader.download();
-    String unmaskedPackages = props.getProperty(InternalProperties.RUNNER_UNMASKED_PACKAGES, "");
-    IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), unmaskedPackages.split(":"));
-    classloader.addFiles(jarFiles);
-    return delegateExecution(classloader, props, extensions);
+  Object doExecute(final JarDownloader jarDownloader, final Properties props, final List<Object> extensions) {
+    Object launcher = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+      public Object run() {
+        List<File> jarFiles = jarDownloader.download();
+        String unmaskedPackages = props.getProperty(InternalProperties.RUNNER_UNMASKED_PACKAGES, "");
+        IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), unmaskedPackages.split(":"));
+        classloader.addFiles(jarFiles);
+        return delegateExecution(classloader, props, extensions);
+      }
+
+      private Object delegateExecution(IsolatedClassloader classloader, Properties properties, List<Object> extensions) {
+        ClassLoader initialContextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+          Thread.currentThread().setContextClassLoader(classloader);
+          Class<?> launcherClass = classloader.loadClass(isolatedLauncherClass);
+          Method executeMethod = launcherClass.getMethod("execute", Properties.class, List.class);
+          Object launcher = launcherClass.newInstance();
+          executeMethod.invoke(launcher, properties, extensions);
+          return launcher;
+        } catch (InvocationTargetException e) {
+          // Unwrap original exception
+          throw new RunnerException("Unable to execute Sonar", e.getTargetException());
+        } catch (Exception e) {
+          // Catch all other exceptions, which relates to reflection
+          throw new RunnerException("Unable to execute Sonar", e);
+        } finally {
+          Thread.currentThread().setContextClassLoader(initialContextClassLoader);
+        }
+      }
+    });
+    return launcher;
   }
 
-  private Object delegateExecution(IsolatedClassloader classloader, Properties properties, List<Object> extensions) {
-    ClassLoader initialContextClassLoader = Thread.currentThread().getContextClassLoader();
-    try {
-      Thread.currentThread().setContextClassLoader(classloader);
-      Class<?> launcherClass = classloader.loadClass(isolatedLauncherClass);
-      Method executeMethod = launcherClass.getMethod("execute", Properties.class, List.class);
-      Object launcher = launcherClass.newInstance();
-      executeMethod.invoke(launcher, properties, extensions);
-      return launcher;
-    } catch (InvocationTargetException e) {
-      // Unwrap original exception
-      throw new RunnerException("Unable to execute Sonar", e.getTargetException());
-    } catch (Exception e) {
-      // Catch all other exceptions, which relates to reflection
-      throw new RunnerException("Unable to execute Sonar", e);
-    } finally {
-      Thread.currentThread().setContextClassLoader(initialContextClassLoader);
-    }
-  }
+
 }
