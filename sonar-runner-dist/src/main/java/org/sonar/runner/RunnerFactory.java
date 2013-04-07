@@ -30,8 +30,11 @@ class RunnerFactory {
   Runner create(Properties props) {
     Runner runner;
     if ("fork".equals(props.getProperty("sonarRunner.mode"))) {
+      runner = ForkedRunner.create();
       String jvmArgs = props.getProperty("sonarRunner.fork.jvmArgs", "");
-      runner = ForkedRunner.create().addJvmArguments(jvmArgs.split(" "));
+      if (!"".equals(jvmArgs)) {
+        ((ForkedRunner)runner).addJvmArguments(jvmArgs.split(" "));
+      }
 
     } else {
       runner = EmbeddedRunner.create();

@@ -64,6 +64,18 @@ public class CommandTest {
   }
 
   @Test
+  public void should_ignore_blank_arguments() throws Exception {
+    // ProcessBuilder has strange side-effects where some arguments are blank
+    Command command = Command.builder()
+        .setExecutable("java")
+        .addArguments(null, "", "  ")
+        .addArguments(Arrays.asList(null, "", " "))
+        .build();
+
+    assertThat(command.arguments()).isEmpty();
+  }
+
+  @Test
   public void executable_should_be_required() {
     try {
       Command.builder().build();

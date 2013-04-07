@@ -30,7 +30,7 @@ import static org.fest.assertions.Fail.fail;
 public class JarExtractorTest {
   @Test
   public void test_extract() throws Exception {
-    File jarFile = new JarExtractor().extract("fake");
+    File jarFile = new JarExtractor().extractToTemp("fake");
     assertThat(jarFile).isFile().exists();
     assertThat(FileUtils.readFileToString(jarFile, "UTF-8")).isEqualTo("Fake jar for unit tests");
     assertThat(jarFile.toURI().toURL().toString()).doesNotContain("jar:file");
@@ -39,7 +39,7 @@ public class JarExtractorTest {
   @Test
   public void should_fail_to_extract() throws Exception {
     try {
-      new JarExtractor().extract("unknown");
+      new JarExtractor().extractToTemp("unknown");
       fail();
     } catch (IllegalStateException e) {
       assertThat(e).hasMessage("Fail to extract unknown.jar");

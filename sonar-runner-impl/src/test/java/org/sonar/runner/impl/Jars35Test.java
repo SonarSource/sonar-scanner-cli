@@ -49,7 +49,7 @@ public class Jars35Test {
   @Test
   public void should_download_jar_files() throws Exception {
     File batchJar = temp.newFile("sonar-runner-batch.jar");
-    when(jarExtractor.extract("sonar-runner-batch")).thenReturn(batchJar);
+    when(jarExtractor.extractToTemp("sonar-runner-batch")).thenReturn(batchJar);
     // index of the files to download
     when(connection.downloadString("/batch_bootstrap/index")).thenReturn(
         "cpd.jar|CA124VADFSDS\n" +
@@ -70,7 +70,7 @@ public class Jars35Test {
   @Test
   public void should_fail_to_download_files() throws Exception {
     File batchJar = temp.newFile("sonar-runner-batch.jar");
-    when(jarExtractor.extract("sonar-runner-batch")).thenReturn(batchJar);
+    when(jarExtractor.extractToTemp("sonar-runner-batch")).thenReturn(batchJar);
     // index of the files to download
     when(connection.downloadString("/batch_bootstrap/index")).thenThrow(new IllegalStateException());
 

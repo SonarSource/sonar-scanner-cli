@@ -54,7 +54,7 @@ class Jars35 {
 
   List<File> download() {
     List<File> files = new ArrayList<File>();
-    files.add(jarExtractor.extract("sonar-runner-batch"));
+    files.add(jarExtractor.extractToTemp("sonar-runner-batch"));
     files.addAll(dowloadFiles());
     return files;
   }

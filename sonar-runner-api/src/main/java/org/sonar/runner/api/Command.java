@@ -89,12 +89,15 @@ class Command {
     }
 
     Builder addArguments(String... args) {
-      arguments.addAll(Arrays.asList(args));
-      return this;
+      return addArguments(Arrays.asList(args));
     }
 
     Builder addArguments(List<String> args) {
-      arguments.addAll(args);
+      for (String arg : args) {
+        if (arg!=null && !"".equals(arg.trim())) {
+          arguments.add(arg);
+        }
+      }
       return this;
     }
 

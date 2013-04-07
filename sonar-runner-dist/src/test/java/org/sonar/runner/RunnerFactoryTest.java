@@ -52,4 +52,15 @@ public class RunnerFactoryTest {
     assertThat(runner.properties().get("foo")).isEqualTo("bar");
     assertThat(((ForkedRunner)runner).jvmArguments()).contains("-Xms128m", "-Xmx512m");
   }
+
+  @Test
+    public void should_create_forked_runner_with_jvm_arguments() {
+      props.setProperty("foo", "bar");
+      props.setProperty("sonarRunner.mode", "fork");
+      Runner runner = new RunnerFactory().create(props);
+
+      assertThat(runner).isInstanceOf(ForkedRunner.class);
+      assertThat(runner.properties().get("foo")).isEqualTo("bar");
+      assertThat(((ForkedRunner)runner).jvmArguments()).isEmpty();
+    }
 }

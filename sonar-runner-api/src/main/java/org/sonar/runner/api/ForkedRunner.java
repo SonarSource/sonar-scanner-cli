@@ -19,6 +19,7 @@
  */
 package org.sonar.runner.api;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.sonar.runner.impl.BatchLauncherMain;
 import org.sonar.runner.impl.JarExtractor;
@@ -124,21 +125,27 @@ public class ForkedRunner extends Runner<ForkedRunner> {
 
   @Override
   protected void doExecute() {
-    fork(createCommand());
+    ForkCommand forkCommand = createCommand();
+    try {
+      fork(forkCommand);
+    } finally {
+      deleteTempFiles(forkCommand);
+    }
   }
 
-  private Command createCommand() {
+  ForkCommand createCommand() {
     File propertiesFile = writeProperties();
-    File jarFile = jarExtractor.extract("sonar-runner-impl");
+    File jarFile = jarExtractor.extractToTemp("sonar-runner-impl");
     if (javaExecutable == null) {
       javaExecutable = new Os().thisJavaExe().getAbsolutePath();
     }
-    return Command.builder()
+    Command command = Command.builder()
         .setExecutable(javaExecutable)
         .addEnvVariables(jvmEnvVariables)
         .addArguments(jvmArguments)
         .addArguments("-cp", jarFile.getAbsolutePath(), BatchLauncherMain.class.getName(), propertiesFile.getAbsolutePath())
         .build();
+    return new ForkCommand(command, jarFile, propertiesFile);
   }
 
   private File writeProperties() {
@@ -157,17 +164,33 @@ public class ForkedRunner extends Runner<ForkedRunner> {
     }
   }
 
-  private void fork(Command command) {
+  private void deleteTempFiles(ForkCommand forkCommand) {
+    FileUtils.deleteQuietly(forkCommand.jarFile);
+    FileUtils.deleteQuietly(forkCommand.propertiesFile);
+  }
+
+  private void fork(ForkCommand forkCommand) {
     if (stdOut == null) {
       stdOut = new PrintStreamConsumer(System.out);
     }
     if (stdErr == null) {
       stdErr = new PrintStreamConsumer(System.err);
     }
-    int status = commandExecutor.execute(command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS);
+    int status = commandExecutor.execute(forkCommand.command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS);
     if (status != 0) {
       throw new IllegalStateException("Error status: " + status);
     }
   }
 
+  static class ForkCommand {
+    Command command;
+    File jarFile;
+    File propertiesFile;
+
+    private ForkCommand(Command command, File jarFile, File propertiesFile) {
+      this.command = command;
+      this.jarFile = jarFile;
+      this.propertiesFile = propertiesFile;
+    }
+  }
 }

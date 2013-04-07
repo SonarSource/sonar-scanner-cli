@@ -48,7 +48,7 @@ public class Jars30Test {
   @Test
   public void should_download_jar_files() throws Exception {
     File batchJar = temp.newFile("sonar-runner-batch.jar");
-    when(jarExtractor.extract("sonar-runner-batch")).thenReturn(batchJar);
+    when(jarExtractor.extractToTemp("sonar-runner-batch")).thenReturn(batchJar);
     // index of the files to download
     when(connection.downloadString("/batch/")).thenReturn("cpd.jar,squid.jar");
 
@@ -65,7 +65,7 @@ public class Jars30Test {
   @Test
   public void should_fail_to_download_files() throws Exception {
     File batchJar = temp.newFile("sonar-runner-batch.jar");
-    when(jarExtractor.extract("sonar-runner-batch")).thenReturn(batchJar);
+    when(jarExtractor.extractToTemp("sonar-runner-batch")).thenReturn(batchJar);
     // index of files to download
     when(connection.downloadString("/batch/")).thenReturn("cpd.jar,squid.jar");
     doThrow(new IllegalStateException()).when(connection).download(eq("/batch/squid.jar"), any(File.class));

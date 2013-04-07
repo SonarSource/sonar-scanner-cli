@@ -33,7 +33,7 @@ class Jars30 {
 
   List<File> download(File workDir, JarExtractor jarExtractor) {
     List<File> files = new ArrayList<File>();
-    files.add(jarExtractor.extract("sonar-runner-batch"));
+    files.add(jarExtractor.extractToTemp("sonar-runner-batch"));
     files.addAll(downloadFiles(workDir));
     return files;
   }

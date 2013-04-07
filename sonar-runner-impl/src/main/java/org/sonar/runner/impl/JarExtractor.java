@@ -26,7 +26,7 @@ import java.net.URL;
 
 public class JarExtractor {
 
-  public File extract(String filenameWithoutSuffix) {
+  public File extractToTemp(String filenameWithoutSuffix) {
     String filename = filenameWithoutSuffix + ".jar";
     URL url = getClass().getResource("/" + filename);
     try {

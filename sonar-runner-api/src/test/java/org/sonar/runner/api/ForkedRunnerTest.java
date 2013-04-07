@@ -45,7 +45,7 @@ public class ForkedRunnerTest {
   public TemporaryFolder temp = new TemporaryFolder();
 
   @Test
-  public void should_create() {
+  public void should_create_forked_runner() {
     ForkedRunner runner = ForkedRunner.create();
     assertThat(runner).isNotNull().isInstanceOf(ForkedRunner.class);
   }
@@ -54,7 +54,7 @@ public class ForkedRunnerTest {
   public void should_print_to_standard_outputs_by_default() throws IOException {
     JarExtractor jarExtractor = mock(JarExtractor.class);
     final File jar = temp.newFile();
-    when(jarExtractor.extract("sonar-runner-impl")).thenReturn(jar);
+    when(jarExtractor.extractToTemp("sonar-runner-impl")).thenReturn(jar);
 
     CommandExecutor commandExecutor = mock(CommandExecutor.class);
     ForkedRunner runner = new ForkedRunner(jarExtractor, commandExecutor);
@@ -76,10 +76,34 @@ public class ForkedRunnerTest {
   }
 
   @Test
+  public void properties_should_be_written_in_temp_file() throws Exception {
+    JarExtractor jarExtractor = mock(JarExtractor.class);
+    final File jar = temp.newFile();
+    when(jarExtractor.extractToTemp("sonar-runner-impl")).thenReturn(jar);
+
+    ForkedRunner runner = new ForkedRunner(jarExtractor, mock(CommandExecutor.class));
+    runner.setProperty("sonar.dynamicAnalysis", "false");
+    runner.setProperty("sonar.login", "admin");
+    runner.addJvmArguments("-Xmx512m");
+    runner.addJvmEnvVariables(System.getenv());
+    runner.setJvmEnvVariable("SONAR_HOME", "/path/to/sonar");
+
+    ForkedRunner.ForkCommand forkCommand = runner.createCommand();
+
+    Properties properties = new Properties();
+    properties.load(new FileInputStream(forkCommand.propertiesFile));
+    assertThat(properties.size()).isEqualTo(2);
+    assertThat(properties.getProperty("sonar.dynamicAnalysis")).isEqualTo("false");
+    assertThat(properties.getProperty("sonar.login")).isEqualTo("admin");
+    assertThat(properties.getProperty("-Xmx512m")).isNull();
+    assertThat(properties.getProperty("SONAR_HOME")).isNull();
+  }
+
+  @Test
   public void test_java_command() throws IOException {
     JarExtractor jarExtractor = mock(JarExtractor.class);
     final File jar = temp.newFile();
-    when(jarExtractor.extract("sonar-runner-impl")).thenReturn(jar);
+    when(jarExtractor.extractToTemp("sonar-runner-impl")).thenReturn(jar);
 
     CommandExecutor commandExecutor = mock(CommandExecutor.class);
 
@@ -105,28 +129,11 @@ public class ForkedRunnerTest {
         assertThat(command.toStrings()[2]).isEqualTo("-cp");
         assertThat(command.toStrings()[3]).isEqualTo(jar.getAbsolutePath());
         assertThat(command.toStrings()[4]).isEqualTo("org.sonar.runner.impl.BatchLauncherMain");
+        assertThat(command.toStrings()[5]).endsWith(".properties");
 
         // env variables
         assertThat(command.envVariables().size()).isGreaterThan(1);
         assertThat(command.envVariables().get("SONAR_HOME")).isEqualTo("/path/to/sonar");
-
-        // the properties
-        String propsPath = command.toStrings()[5];
-        assertThat(propsPath).endsWith(".properties");
-        Properties properties = new Properties();
-        try {
-          properties.load(new FileInputStream(propsPath));
-        } catch (IOException e) {
-          throw new IllegalStateException(e);
-        }
-        assertThat(properties.size()).isGreaterThan(2);
-        assertThat(properties.getProperty("sonar.dynamicAnalysis")).isEqualTo("false");
-        assertThat(properties.getProperty("sonar.login")).isEqualTo("admin");
-        assertThat(properties.getProperty("-Xmx512m")).isNull();
-        assertThat(properties.getProperty("SONAR_HOME")).isNull();
-        // default values
-        assertThat(properties.getProperty("sonar.task")).isEqualTo("scan");
-        assertThat(properties.getProperty("sonar.host.url")).isEqualTo("http://localhost:9000");
         return true;
       }
     }), any(PrintStreamConsumer.class), any(PrintStreamConsumer.class), anyLong());
