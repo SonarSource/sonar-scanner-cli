@@ -19,17 +19,12 @@
  */
 package org.sonar.runner.impl;
 
+import com.github.kevinsawicki.http.HttpRequest;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.ConnectException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
@@ -58,70 +53,58 @@ class ServerConnection {
   }
 
   void download(String path, File toFile) {
-    InputStream input = null;
-    FileOutputStream output = null;
     String fullUrl = serverUrl + path;
     try {
       Logs.debug("Download " + fullUrl + " to " + toFile.getAbsolutePath());
-      HttpURLConnection connection = newHttpConnection(new URL(fullUrl));
-      int statusCode = connection.getResponseCode();
-      if (statusCode != HttpURLConnection.HTTP_OK) {
-        throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + statusCode);
+      HttpRequest httpRequest = newHttpRequest(new URL(fullUrl));
+      if (!httpRequest.ok()) {
+        throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + httpRequest.code());
       }
-      output = new FileOutputStream(toFile, false);
-      input = connection.getInputStream();
-      IOUtils.copyLarge(input, output);
+      httpRequest.receive(toFile);
 
     } catch (Exception e) {
-      if (e instanceof ConnectException || e instanceof  UnknownHostException) {
+      if (e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException) {
         Logs.error("Sonar server '" + serverUrl + "' can not be reached");
       }
-      IOUtils.closeQuietly(output);
       FileUtils.deleteQuietly(toFile);
       throw new IllegalStateException("Fail to download: " + fullUrl, e);
 
-    } finally {
-      IOUtils.closeQuietly(input);
-      IOUtils.closeQuietly(output);
     }
   }
 
   String downloadString(String path) throws IOException {
     String fullUrl = serverUrl + path;
-    HttpURLConnection conn = newHttpConnection(new URL(fullUrl));
-    String charset = getCharsetFromContentType(conn.getContentType());
-    if (charset == null || "".equals(charset)) {
-      charset = "UTF-8";
-    }
-    Reader reader = null;
+    HttpRequest httpRequest = newHttpRequest(new URL(fullUrl));
     try {
-      int statusCode = conn.getResponseCode();
-      if (statusCode != HttpURLConnection.HTTP_OK) {
-        throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + statusCode);
+      String charset = getCharsetFromContentType(httpRequest.contentType());
+      if (charset == null || "".equals(charset)) {
+        charset = "UTF-8";
       }
-      reader = new InputStreamReader(conn.getInputStream(), charset);
-      return IOUtils.toString(reader);
-    } catch (IOException e) {
-      if (e instanceof ConnectException || e instanceof  UnknownHostException) {
+      if (!httpRequest.ok()) {
+        throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + httpRequest.code());
+      }
+      return httpRequest.body(charset);
+
+    } catch (HttpRequest.HttpRequestException e) {
+      if (e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException) {
         Logs.error("Sonar server '" + serverUrl + "' can not be reached");
       }
       throw e;
 
     } finally {
-      IOUtils.closeQuietly(reader);
-      conn.disconnect();
+      httpRequest.disconnect();
     }
   }
 
-  private HttpURLConnection newHttpConnection(URL url) throws IOException {
-    //TODO send credentials
-    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-    connection.setConnectTimeout(CONNECT_TIMEOUT_MILLISECONDS);
-    connection.setReadTimeout(READ_TIMEOUT_MILLISECONDS);
-    connection.setInstanceFollowRedirects(true);
-    connection.setRequestMethod("GET");
-    connection.setRequestProperty("User-Agent", userAgent);
-    return connection;
+  private HttpRequest newHttpRequest(URL url) {
+    HttpRequest request = HttpRequest.get(url);
+    request.trustAllCerts().trustAllHosts();
+    request.acceptGzipEncoding().uncompress(true);
+    request.connectTimeout(CONNECT_TIMEOUT_MILLISECONDS).readTimeout(READ_TIMEOUT_MILLISECONDS);
+    request.userAgent(userAgent);
+
+    // TODO send credentials
+    return request;
   }
 
   /**

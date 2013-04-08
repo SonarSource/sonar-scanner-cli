@@ -28,6 +28,7 @@ import java.io.File;
 import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Fail.fail;
 
 public class ServerConnectionTest {
 
@@ -60,5 +61,35 @@ public class ServerConnectionTest {
     connection.download("/batch/index.txt", toFile);
 
     assertThat(FileUtils.readFileToString(toFile)).isEqualTo("abcde");
+  }
+
+  @Test
+  public void should_not_download_file_when_host_is_down() throws Exception {
+    Properties props = new Properties();
+    props.setProperty("sonar.host.url", "http://localhost:" + NetworkUtil.getNextAvailablePort());
+
+    ServerConnection connection = ServerConnection.create(props);
+    File toFile = temp.newFile();
+    try {
+      connection.download("/batch/index.txt", toFile);
+      fail();
+    } catch (Exception e) {
+      // success
+    }
+  }
+
+  @Test
+  public void should_not_download_string_when_host_is_down() throws Exception {
+    Properties props = new Properties();
+    props.setProperty("sonar.host.url", "http://localhost:" + NetworkUtil.getNextAvailablePort());
+
+    ServerConnection connection = ServerConnection.create(props);
+    File toFile = temp.newFile();
+    try {
+      connection.download("/batch/index.txt", toFile);
+      fail();
+    } catch (Exception e) {
+      // success
+    }
   }
 }

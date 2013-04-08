@@ -12,6 +12,15 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.github.kevinsawicki</groupId>
+      <artifactId>http-request</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.codehaus.sonar</groupId>
       <artifactId>sonar-home</artifactId>
     </dependency>
@@ -19,11 +28,6 @@
       <groupId>${pom.groupId}</groupId>
       <artifactId>sonar-runner-batch</artifactId>
       <version>${pom.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -93,6 +97,12 @@
             <configuration>
               <createDependencyReducedPom>true</createDependencyReducedPom>
               <minimizeJar>true</minimizeJar>
+              <relocations>
+                <relocation>
+                  <pattern>com.github.kevinsawicki.http</pattern>
+                  <shadedPattern>org.sonar.runner.kevinsawicki</shadedPattern>
+                </relocation>
+              </relocations>
             </configuration>
           </execution>
         </executions>
