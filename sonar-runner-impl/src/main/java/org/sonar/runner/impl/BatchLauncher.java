@@ -29,16 +29,18 @@ import java.util.Properties;
 
 public class BatchLauncher {
   final String isolatedLauncherClass;
+  private final TempCleaning tempCleaning;
 
   /**
    * For unit tests
    */
-  BatchLauncher(String isolatedLauncherClass) {
+  BatchLauncher(String isolatedLauncherClass, TempCleaning tempCleaning) {
     this.isolatedLauncherClass = isolatedLauncherClass;
+    this.tempCleaning = tempCleaning;
   }
 
   public BatchLauncher() {
-    this.isolatedLauncherClass = "org.sonar.runner.batch.IsolatedLauncher";
+    this("org.sonar.runner.batch.IsolatedLauncher", new TempCleaning());
   }
 
   public void execute(Properties props, List<Object> extensions) {
@@ -49,7 +51,7 @@ public class BatchLauncher {
   }
 
   /**
-   * @return the {@link IsolatedLauncher} instance for unit tests
+   * @return the {@link org.sonar.runner.batch.IsolatedLauncher} instance for unit tests
    */
   Object doExecute(final JarDownloader jarDownloader, final Properties props, final List<Object> extensions) {
     Object launcher = AccessController.doPrivileged(new PrivilegedAction<Object>() {
@@ -58,7 +60,9 @@ public class BatchLauncher {
         String unmaskedPackages = props.getProperty(InternalProperties.RUNNER_UNMASKED_PACKAGES, "");
         IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), unmaskedPackages.split(":"));
         classloader.addFiles(jarFiles);
-        return delegateExecution(classloader, props, extensions);
+        Object launcher = delegateExecution(classloader, props, extensions);
+        tempCleaning.clean();
+        return launcher;
       }
 
       private Object delegateExecution(IsolatedClassloader classloader, Properties properties, List<Object> extensions) {

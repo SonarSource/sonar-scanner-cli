@@ -38,7 +38,7 @@ class Utils {
    * This works even if they are separated by whitespace characters (space char, EOL, ...)
    *
    */
-  public static String[] getListFromProperty(Properties properties, String key) {
+  static String[] getListFromProperty(Properties properties, String key) {
     return StringUtils.stripAll(StringUtils.split(properties.getProperty(key, ""), ','));
   }
 

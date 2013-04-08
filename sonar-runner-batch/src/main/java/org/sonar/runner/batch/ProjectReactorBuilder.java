@@ -46,7 +46,7 @@ import java.util.Properties;
  *
  * @since 1.5
  */
-public final class ProjectReactorBuilder {
+class ProjectReactorBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProjectReactorBuilder.class);
 
@@ -113,11 +113,11 @@ public final class ProjectReactorBuilder {
   private Properties properties;
   private File rootProjectWorkDir;
 
-  public ProjectReactorBuilder(Properties properties) {
+  ProjectReactorBuilder(Properties properties) {
     this.properties = properties;
   }
 
-  public ProjectReactor build() {
+  ProjectReactor build() {
     ProjectDefinition rootProject = defineProject(properties, null);
     rootProjectWorkDir = rootProject.getWorkDir();
     defineChildren(rootProject);

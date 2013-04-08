@@ -42,7 +42,8 @@ public class BatchLauncherTest {
 
   @Test
   public void should_download_jars_and_execute_batch() {
-    BatchLauncher launcher = new BatchLauncher(FakeIsolatedLauncher.class.getName());
+    TempCleaning tempCleaning = mock(TempCleaning.class);
+    BatchLauncher launcher = new BatchLauncher(FakeIsolatedLauncher.class.getName(), tempCleaning);
     Properties props = new Properties();
     props.put("foo", "bar");
 
@@ -54,11 +55,12 @@ public class BatchLauncherTest {
     assertThat(isolatedLauncher.props.get("foo")).isEqualTo("bar");
     assertThat(isolatedLauncher.extensions).isSameAs(extensions);
     verify(jarDownloader).download();
+    verify(tempCleaning).clean();
   }
 
   @Test
   public void should_use_isolated_classloader() {
-    BatchLauncher launcher = new BatchLauncher(FakeIsolatedLauncher.class.getName());
+    BatchLauncher launcher = new BatchLauncher(FakeIsolatedLauncher.class.getName(), mock(TempCleaning.class));
     Properties props = new Properties();
 
     // The current classloader in not available -> fail to load FakeIsolatedLauncher

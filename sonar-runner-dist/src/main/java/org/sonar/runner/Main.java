@@ -68,7 +68,6 @@ public class Main {
         Logs.info("Error stacktraces are turned on.");
       }
       runnerFactory.create(conf.properties()).execute();
-      // Logs.info("Work directory: " + runner.getWorkDir().getCanonicalPath());
 
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
