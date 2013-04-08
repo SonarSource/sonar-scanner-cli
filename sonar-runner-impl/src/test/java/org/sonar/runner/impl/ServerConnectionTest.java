@@ -84,9 +84,8 @@ public class ServerConnectionTest {
     props.setProperty("sonar.host.url", "http://localhost:" + NetworkUtil.getNextAvailablePort());
 
     ServerConnection connection = ServerConnection.create(props);
-    File toFile = temp.newFile();
     try {
-      connection.download("/batch/index.txt", toFile);
+      connection.downloadString("/batch/index.txt");
       fail();
     } catch (Exception e) {
       // success

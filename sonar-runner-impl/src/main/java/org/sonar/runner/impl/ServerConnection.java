@@ -39,17 +39,23 @@ class ServerConnection {
 
   private final String serverUrl;
   private final String userAgent;
+  private final String login;
+  private final String password;
 
-  private ServerConnection(String serverUrl, String app, String appVersion) {
+  private ServerConnection(String serverUrl, String app, String appVersion, String login, String password) {
     this.serverUrl = serverUrl;
     this.userAgent = app + "/" + appVersion;
+    this.login = login;
+    this.password = password;
   }
 
   static ServerConnection create(Properties properties) {
     String serverUrl = properties.getProperty("sonar.host.url");
     String app = properties.getProperty(InternalProperties.RUNNER_APP);
     String appVersion = properties.getProperty(InternalProperties.RUNNER_APP_VERSION);
-    return new ServerConnection(serverUrl, app, appVersion);
+    String login = properties.getProperty("sonar.login");
+    String password = properties.getProperty("sonar.password");
+    return new ServerConnection(serverUrl, app, appVersion, login, password);
   }
 
   void download(String path, File toFile) {
@@ -102,8 +108,9 @@ class ServerConnection {
     request.acceptGzipEncoding().uncompress(true);
     request.connectTimeout(CONNECT_TIMEOUT_MILLISECONDS).readTimeout(READ_TIMEOUT_MILLISECONDS);
     request.userAgent(userAgent);
-
-    // TODO send credentials
+    if (login != null) {
+      request.basic(login, password!=null ? password : "");
+    }
     return request;
   }
 
