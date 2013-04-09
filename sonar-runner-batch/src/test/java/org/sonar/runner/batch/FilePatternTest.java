@@ -20,6 +20,7 @@
 package org.sonar.runner.batch;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -75,6 +76,7 @@ public class FilePatternTest {
   }
 
   private String path(File f) throws IOException {
-    return FilenameUtils.separatorsToUnix(f.getCanonicalPath());
+    String s = FilenameUtils.separatorsToUnix(f.getCanonicalPath());
+    return StringUtils.removeEnd(s, "/");
   }
 }
