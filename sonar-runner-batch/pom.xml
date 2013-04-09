@@ -11,7 +11,7 @@
   <name>Sonar Runner - Batch</name>
 
   <properties>
-    <sonarBatchVersion>3.0</sonarBatchVersion>
+    <sonarBatchVersion>3.5</sonarBatchVersion>
   </properties>
 
   <dependencies>
