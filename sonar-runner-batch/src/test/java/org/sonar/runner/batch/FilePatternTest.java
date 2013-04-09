@@ -76,7 +76,6 @@ public class FilePatternTest {
   }
 
   private String path(File f) throws IOException {
-    String s = FilenameUtils.separatorsToUnix(f.getCanonicalPath());
-    return StringUtils.removeEnd(s, "/");
+    return FilenameUtils.separatorsToUnix(f.getCanonicalPath());
   }
 }

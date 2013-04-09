@@ -121,7 +121,7 @@ class FilePattern {
     }
 
     public boolean accept(File file) {
-      return pattern.match(file.getAbsolutePath());
+      return pattern.match(FilenameUtils.separatorsToUnix(file.getAbsolutePath()));
     }
 
     public boolean accept(File file, String filename) {
