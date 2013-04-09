@@ -19,10 +19,12 @@
  */
 package org.sonar.runner.batch;
 
+import org.apache.commons.io.FilenameUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -30,12 +32,14 @@ import static org.fest.assertions.Assertions.assertThat;
 public class FilePatternTest {
 
   File basedir, rootFile, subFile;
+  String basePath;
 
   @Before
   public void init() throws Exception {
     rootFile = new File(getClass().getResource("/org/sonar/runner/batch/FilePatternTest/root.txt").toURI());
     subFile = new File(getClass().getResource("/org/sonar/runner/batch/FilePatternTest/subdir/subfile.txt").toURI());
     basedir = rootFile.getParentFile();
+    basePath = path(basedir);
   }
 
   @Test
@@ -56,17 +60,21 @@ public class FilePatternTest {
 
   @Test
   public void should_list_files_by_absolute_path() throws Exception {
-    assertOnly(new FilePattern().listFiles(basedir, basedir.getCanonicalPath() + "/*.txt"), rootFile);
-    assertOnly(new FilePattern().listFiles(basedir, basedir.getCanonicalPath() + "/**/subdir/*"), subFile);
-    assertOnly(new FilePattern().listFiles(basedir, rootFile.getCanonicalPath()), rootFile);
-    assertOnly(new FilePattern().listFiles(basedir, basedir.getCanonicalPath() + "/*/subfile.txt"), subFile);
-    assertThat(new FilePattern().listFiles(basedir, basedir.getCanonicalPath() + "/**/*.txt")).containsOnly(subFile, rootFile);
-    assertThat(new FilePattern().listFiles(basedir, basedir.getCanonicalPath() + "/ElseWhere/**/*.txt")).isEmpty();
+    assertOnly(new FilePattern().listFiles(basedir, basePath + "/*.txt"), rootFile);
+    assertOnly(new FilePattern().listFiles(basedir, basePath + "/**/subdir/*"), subFile);
+    assertOnly(new FilePattern().listFiles(basedir, path(rootFile)), rootFile);
+    assertOnly(new FilePattern().listFiles(basedir, path(basedir) + "/*/subfile.txt"), subFile);
+    assertThat(new FilePattern().listFiles(basedir, path(basedir) + "/**/*.txt")).containsOnly(subFile, rootFile);
+    assertThat(new FilePattern().listFiles(basedir, path(basedir) + "/ElseWhere/**/*.txt")).isEmpty();
     assertThat(new FilePattern().listFiles(basedir, "/ElseWhere/**/*.txt")).isEmpty();
   }
 
   private void assertOnly(Collection<File> files, File file) throws Exception {
     assertThat(files).hasSize(1);
     assertThat(files.iterator().next().getCanonicalPath()).isEqualTo(file.getCanonicalPath());
+  }
+
+  private String path(File f) throws IOException {
+    return FilenameUtils.separatorsToUnix(f.getCanonicalPath());
   }
 }
