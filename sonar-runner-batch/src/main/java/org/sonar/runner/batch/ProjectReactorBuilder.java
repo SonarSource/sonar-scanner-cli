@@ -22,9 +22,6 @@ package org.sonar.runner.batch;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.AndFileFilter;
-import org.apache.commons.io.filefilter.FileFileFilter;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +29,6 @@ import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.bootstrap.ProjectReactor;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -57,6 +53,7 @@ class ProjectReactorBuilder {
 
   /**
    * New properties, to be consistent with Sonar naming conventions
+   *
    * @since 1.5
    */
   private static final String PROPERTY_SOURCES = "sonar.sources";
@@ -90,7 +87,7 @@ class ProjectReactorBuilder {
    * Array of all mandatory properties required for a project without child.
    */
   private static final String[] MANDATORY_PROPERTIES_FOR_SIMPLE_PROJECT = {PROPERTY_PROJECT_BASEDIR, PROPERTY_PROJECT_KEY, PROPERTY_PROJECT_NAME, PROPERTY_PROJECT_VERSION,
-    PROPERTY_SOURCES};
+      PROPERTY_SOURCES};
 
   /**
    * Array of all mandatory properties required for a project with children.
@@ -126,8 +123,7 @@ class ProjectReactorBuilder {
     File baseDir = new File(properties.getProperty(PROPERTY_PROJECT_BASEDIR));
     if (properties.containsKey(PROPERTY_MODULES)) {
       checkMandatoryProperties(properties, MANDATORY_PROPERTIES_FOR_MULTIMODULE_PROJECT);
-    }
-    else {
+    } else {
       checkMandatoryProperties(properties, MANDATORY_PROPERTIES_FOR_SIMPLE_PROJECT);
     }
     File workDir;
@@ -382,7 +378,7 @@ class ProjectReactorBuilder {
       File sourceFolder = getFileFromPath(path, project.getBaseDir());
       if (sourceFolder.isDirectory()) {
         LOG.warn("/!\\ A multi-module project can't have source folders, so '{}' won't be used for the analysis. " +
-          "If you want to analyse files of this folder, you should create another sub-module and move them inside it.",
+            "If you want to analyse files of this folder, you should create another sub-module and move them inside it.",
             sourceFolder.toString());
       }
     }
@@ -428,8 +424,8 @@ class ProjectReactorBuilder {
     for (Map.Entry<Object, Object> entry : parentProps.entrySet()) {
       String key = (String) entry.getKey();
       if (!childProps.containsKey(key)
-        && !NON_HERITED_PROPERTIES_FOR_CHILD.contains(key)
-        && !isKeyPrefixedByModuleId(key, moduleIds)) {
+          && !NON_HERITED_PROPERTIES_FOR_CHILD.contains(key)
+          && !isKeyPrefixedByModuleId(key, moduleIds)) {
         childProps.put(entry.getKey(), entry.getValue());
       }
     }
@@ -465,7 +461,7 @@ class ProjectReactorBuilder {
       if (!sourceFolder.isDirectory()) {
         LOG.error("Invalid value of " + propName + " for " + moduleRef);
         throw new IllegalStateException("The folder '" + path + "' does not exist for '" + moduleRef +
-          "' (base directory = " + baseDir.getAbsolutePath() + ")");
+            "' (base directory = " + baseDir.getAbsolutePath() + ")");
       }
     }
 
@@ -477,18 +473,6 @@ class ProjectReactorBuilder {
   @VisibleForTesting
   protected static Collection<File> getLibraries(File baseDir, String pattern) {
     return new FilePattern().listFiles(baseDir, pattern);
-  }
-
-  private static File resolvePath(File baseDir, String path) {
-    File file = new File(path);
-    if (!file.isAbsolute()) {
-      try {
-        file = new File(baseDir, path).getCanonicalFile();
-      } catch (IOException e) {
-        throw new IllegalStateException("Unable to resolve path \"" + path + "\"", e);
-      }
-    }
-    return file;
   }
 
   /**
