@@ -447,17 +447,17 @@ public class ProjectReactorBuilderTest {
   @Test
   public void shouldFilterFiles() throws Exception {
     File baseDir = TestUtils.getResource(this.getClass(), "shouldFilterFiles");
-    assertThat(ProjectReactorBuilder.getLibraries(baseDir, "in*.txt").length).isEqualTo(1);
-    assertThat(ProjectReactorBuilder.getLibraries(baseDir, "*.txt").length).isEqualTo(2);
-    assertThat(ProjectReactorBuilder.getLibraries(baseDir.getParentFile(), "shouldFilterFiles/in*.txt").length).isEqualTo(1);
-    assertThat(ProjectReactorBuilder.getLibraries(baseDir.getParentFile(), "shouldFilterFiles/*.txt").length).isEqualTo(2);
+    assertThat(ProjectReactorBuilder.getLibraries(baseDir, "in*.txt")).hasSize(1);
+    assertThat(ProjectReactorBuilder.getLibraries(baseDir, "*.txt")).hasSize(2);
+    assertThat(ProjectReactorBuilder.getLibraries(baseDir.getParentFile(), "shouldFilterFiles/in*.txt")).hasSize(1);
+    assertThat(ProjectReactorBuilder.getLibraries(baseDir.getParentFile(), "shouldFilterFiles/*.txt")).hasSize(2);
   }
 
   @Test
   public void shouldWorkWithAbsolutePath() throws Exception {
     File baseDir = new File("not-exists");
     String absolutePattern = TestUtils.getResource(this.getClass(), "shouldFilterFiles").getAbsolutePath() + "/in*.txt";
-    assertThat(ProjectReactorBuilder.getLibraries(baseDir.getParentFile(), absolutePattern).length).isEqualTo(1);
+    assertThat(ProjectReactorBuilder.getLibraries(baseDir.getParentFile(), absolutePattern)).hasSize(1);
   }
 
   @Test

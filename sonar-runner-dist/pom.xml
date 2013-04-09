@@ -113,8 +113,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>250000</minsize>
-                  <maxsize>300000</maxsize>
+                  <minsize>280000</minsize>
+                  <maxsize>310000</maxsize>
                   <files>
                     <file>${pom.build.directory}/sonar-runner-${pom.version}.zip</file>
                   </files>

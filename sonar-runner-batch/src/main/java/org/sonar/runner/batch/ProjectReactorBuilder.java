@@ -35,11 +35,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
 
 /**
  * Class that creates a Sonar project definition based on a set of properties.
@@ -325,8 +322,8 @@ class ProjectReactorBuilder {
 
       // We need to resolve patterns that may have been used in "sonar.libraries"
       for (String pattern : Utils.getListFromProperty(props, PROPERTY_LIBRARIES)) {
-        File[] files = getLibraries(baseDir, pattern);
-        if (files == null || files.length == 0) {
+        Collection<File> files = getLibraries(baseDir, pattern);
+        if (files.isEmpty()) {
           LOG.error("Invalid value of " + PROPERTY_LIBRARIES + " for " + projectId);
           throw new IllegalStateException("No file matching pattern \"" + pattern + "\" in directory \"" + baseDir + "\"");
         }
@@ -478,23 +475,8 @@ class ProjectReactorBuilder {
    * Returns files matching specified pattern.
    */
   @VisibleForTesting
-  protected static File[] getLibraries(File baseDir, String pattern) {
-    final int i = Math.max(pattern.lastIndexOf('/'), pattern.lastIndexOf('\\'));
-    final String dirPath, filePattern;
-    if (i == -1) {
-      dirPath = ".";
-      filePattern = pattern;
-    } else {
-      dirPath = pattern.substring(0, i);
-      filePattern = pattern.substring(i + 1);
-    }
-    FileFilter fileFilter = new AndFileFilter(FileFileFilter.FILE, new WildcardFileFilter(filePattern));
-    File dir = resolvePath(baseDir, dirPath);
-    File[] files = dir.listFiles(fileFilter);
-    if (files == null) {
-      files = new File[0];
-    }
-    return files;
+  protected static Collection<File> getLibraries(File baseDir, String pattern) {
+    return new FilePattern().listFiles(baseDir, pattern);
   }
 
   private static File resolvePath(File baseDir, String path) {
