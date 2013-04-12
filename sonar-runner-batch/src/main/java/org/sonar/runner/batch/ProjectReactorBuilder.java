@@ -22,6 +22,7 @@ package org.sonar.runner.batch;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.api.batch.bootstrap.ProjectReactor;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -136,8 +138,8 @@ class ProjectReactorBuilder {
     }
 
     ProjectDefinition definition = ProjectDefinition.create().setProperties(properties)
-        .setBaseDir(baseDir)
-        .setWorkDir(workDir);
+      .setBaseDir(baseDir)
+      .setWorkDir(workDir);
     return definition;
   }
 
@@ -319,10 +321,10 @@ class ProjectReactorBuilder {
 
       // We need to resolve patterns that may have been used in "sonar.libraries"
       for (String pattern : Utils.getListFromProperty(props, PROPERTY_LIBRARIES)) {
-        Collection<File> files = getLibraries(baseDir, pattern);
-        if (files.isEmpty()) {
+        File[] files = getLibraries(baseDir, pattern);
+        if (files == null || files.length == 0) {
           LOG.error("Invalid value of " + PROPERTY_LIBRARIES + " for " + projectId);
-          throw new IllegalStateException("No file matching pattern \"" + pattern + "\" in directory \"" + baseDir + "\"");
+          throw new IllegalStateException("No files nor directories matching '" + pattern + "' in directory " + baseDir);
         }
       }
 
@@ -379,8 +381,8 @@ class ProjectReactorBuilder {
       File sourceFolder = getFileFromPath(path, project.getBaseDir());
       if (sourceFolder.isDirectory()) {
         LOG.warn("/!\\ A multi-module project can't have source folders, so '{}' won't be used for the analysis. " +
-            "If you want to analyse files of this folder, you should create another sub-module and move them inside it.",
-            sourceFolder.toString());
+          "If you want to analyse files of this folder, you should create another sub-module and move them inside it.",
+          sourceFolder.toString());
       }
     }
 
@@ -425,8 +427,8 @@ class ProjectReactorBuilder {
     for (Map.Entry<Object, Object> entry : parentProps.entrySet()) {
       String key = (String) entry.getKey();
       if (!childProps.containsKey(key)
-          && !NON_HERITED_PROPERTIES_FOR_CHILD.contains(key)
-          && !isKeyPrefixedByModuleId(key, moduleIds)) {
+        && !NON_HERITED_PROPERTIES_FOR_CHILD.contains(key)
+        && !isKeyPrefixedByModuleId(key, moduleIds)) {
         childProps.put(entry.getKey(), entry.getValue());
       }
     }
@@ -462,7 +464,7 @@ class ProjectReactorBuilder {
       if (!sourceFolder.isDirectory()) {
         LOG.error("Invalid value of " + propName + " for " + moduleRef);
         throw new IllegalStateException("The folder '" + path + "' does not exist for '" + moduleRef +
-            "' (base directory = " + baseDir.getAbsolutePath() + ")");
+          "' (base directory = " + baseDir.getAbsolutePath() + ")");
       }
     }
 
@@ -472,8 +474,39 @@ class ProjectReactorBuilder {
    * Returns files matching specified pattern.
    */
   @VisibleForTesting
-  protected static Collection<File> getLibraries(File baseDir, String pattern) {
-    return new FilePattern().listFiles(baseDir, pattern);
+  protected static File[] getLibraries(File baseDir, String pattern) {
+    final int i = Math.max(pattern.lastIndexOf('/'), pattern.lastIndexOf('\\'));
+    final String dirPath, filePattern;
+    if (i == -1) {
+      dirPath = ".";
+      filePattern = pattern;
+    } else {
+      dirPath = pattern.substring(0, i);
+      filePattern = pattern.substring(i + 1);
+    }
+    List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+    if (pattern.indexOf("*")>=0) {
+      filters.add(FileFileFilter.FILE);
+    }
+    filters.add(new WildcardFileFilter(filePattern));
+    File dir = resolvePath(baseDir, dirPath);
+    File[] files = dir.listFiles((FileFilter) new AndFileFilter(filters));
+    if (files == null) {
+      files = new File[0];
+    }
+    return files;
+  }
+
+  private static File resolvePath(File baseDir, String path) {
+    File file = new File(path);
+    if (!file.isAbsolute()) {
+      try {
+        file = new File(baseDir, path).getCanonicalFile();
+      } catch (IOException e) {
+        throw new IllegalStateException("Unable to resolve path \"" + path + "\"", e);
+      }
+    }
+    return file;
   }
 
   /**

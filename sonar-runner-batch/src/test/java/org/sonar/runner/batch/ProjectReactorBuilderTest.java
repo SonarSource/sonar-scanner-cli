@@ -354,10 +354,19 @@ public class ProjectReactorBuilderTest {
   @Test
   public void shouldFailIfExplicitUnmatchingLibFolder() throws IOException {
     thrown.expect(IllegalStateException.class);
-    thrown.expectMessage("No file matching pattern \"libs/*.txt\" in directory \""
+    thrown.expectMessage("No files nor directories matching 'libs/*.txt' in directory "
         + TestUtils.getResource(this.getClass(), "simple-project-with-unexisting-lib").getAbsolutePath());
 
     loadProjectDefinition("simple-project-with-unexisting-lib");
+  }
+
+  @Test
+  public void shouldGetLibDirectory() throws IOException {
+    ProjectDefinition def = loadProjectDefinition("simple-project-with-lib-dir");
+    assertThat(def.getLibraries()).hasSize(1);
+    File libDir = new File(def.getLibraries().get(0));
+    assertThat(libDir).isDirectory().exists();
+    assertThat(libDir.getName()).isEqualTo("lib");
   }
 
   @Test
@@ -381,8 +390,8 @@ public class ProjectReactorBuilderTest {
   @Test
   public void shouldFailIfExplicitUnmatchingLibFolderOnModule() throws IOException {
     thrown.expect(IllegalStateException.class);
-    thrown.expectMessage("No file matching pattern \"lib/*.jar\" in directory \""
-        + TestUtils.getResource(this.getClass(), "multi-module-with-explicit-unexisting-lib").getAbsolutePath() + File.separator + "module1\"");
+    thrown.expectMessage("No files nor directories matching 'lib/*.jar' in directory "
+        + TestUtils.getResource(this.getClass(), "multi-module-with-explicit-unexisting-lib").getAbsolutePath() + File.separator + "module1");
 
     loadProjectDefinition("multi-module-with-explicit-unexisting-lib");
   }
