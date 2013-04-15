@@ -93,7 +93,7 @@ public abstract class Runner<T extends Runner> {
 
   private void initDefaultValues() {
     setDefaultValue(RunnerProperties.HOST_URL, "http://localhost:9000");
-    setDefaultValue(RunnerProperties.TASK, "scan");
+    //setDefaultValue(RunnerProperties.TASK, "scan");
     setDefaultValue(InternalProperties.RUNNER_APP, "SonarRunner");
     setDefaultValue(InternalProperties.RUNNER_APP_VERSION, RunnerVersion.version());
   }

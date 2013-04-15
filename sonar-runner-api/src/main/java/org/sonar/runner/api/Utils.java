@@ -45,6 +45,7 @@ class Utils {
   }
 
   static boolean taskRequiresProject(Properties props) {
-    return ScanProperties.SCAN_TASK.equals(props.get(RunnerProperties.TASK));
+    Object task = props.get(RunnerProperties.TASK);
+    return task == null || ScanProperties.SCAN_TASK.equals(task);
   }
 }

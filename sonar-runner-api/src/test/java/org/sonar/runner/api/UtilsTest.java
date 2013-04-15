@@ -36,6 +36,8 @@ public class UtilsTest {
   @Test
   public void task_should_require_project() {
     Properties props = new Properties();
+    assertThat(Utils.taskRequiresProject(props)).isTrue();
+
     props.setProperty("sonar.task", "scan");
     assertThat(Utils.taskRequiresProject(props)).isTrue();
   }
@@ -43,7 +45,6 @@ public class UtilsTest {
   @Test
   public void task_should_not_require_project() {
     Properties props = new Properties();
-    assertThat(Utils.taskRequiresProject(props)).isFalse();
     props.setProperty("sonar.task", "views");
     assertThat(Utils.taskRequiresProject(props)).isFalse();
   }
