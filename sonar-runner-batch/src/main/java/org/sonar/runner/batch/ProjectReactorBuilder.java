@@ -485,7 +485,7 @@ class ProjectReactorBuilder {
       filePattern = pattern.substring(i + 1);
     }
     List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
-    if (pattern.indexOf("*")>=0) {
+    if (pattern.indexOf('*')>=0) {
       filters.add(FileFileFilter.FILE);
     }
     filters.add(new WildcardFileFilter(filePattern));
