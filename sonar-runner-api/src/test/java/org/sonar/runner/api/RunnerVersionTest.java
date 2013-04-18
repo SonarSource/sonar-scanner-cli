@@ -28,7 +28,7 @@ public class RunnerVersionTest {
   @Test
   public void should_load_version() {
     String version = RunnerVersion.version();
-    assertThat(version).isNotEmpty().contains(".").endsWith("-SNAPSHOT").doesNotContain("$");
+    assertThat(version).isNotEmpty().contains(".").doesNotContain("$");
   }
 
 }
