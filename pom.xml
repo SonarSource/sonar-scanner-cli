@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.codehaus.sonar-plugins</groupId>
@@ -9,7 +8,7 @@
 
   <groupId>org.codehaus.sonar.runner</groupId>
   <artifactId>sonar-runner</artifactId>
-  <version>2.2-SNAPSHOT</version>
+  <version>2.3-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Sonar Runner</name>
   <url>http://docs.codehaus.org/display/SONAR/Analyzing+with+Sonar+Runner</url>
@@ -48,6 +47,7 @@
     <connection>scm:git:git@github.com:SonarSource/sonar-runner.git</connection>
     <developerConnection>scm:git:git@github.com:SonarSource/sonar-runner.git</developerConnection>
     <url>https://github.com/SonarSource/sonar-runner</url>
+    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
