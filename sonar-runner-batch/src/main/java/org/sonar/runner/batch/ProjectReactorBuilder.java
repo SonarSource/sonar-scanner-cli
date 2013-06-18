@@ -22,7 +22,10 @@ package org.sonar.runner.batch;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.*;
+import org.apache.commons.io.filefilter.AndFileFilter;
+import org.apache.commons.io.filefilter.FileFileFilter;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +36,12 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 /**
  * Class that creates a Sonar project definition based on a set of properties.
@@ -89,7 +96,7 @@ class ProjectReactorBuilder {
    * Array of all mandatory properties required for a project without child.
    */
   private static final String[] MANDATORY_PROPERTIES_FOR_SIMPLE_PROJECT = {
-    PROPERTY_PROJECT_BASEDIR, PROPERTY_PROJECT_KEY, PROPERTY_PROJECT_NAME, PROPERTY_PROJECT_VERSION, PROPERTY_SOURCES
+    PROPERTY_PROJECT_BASEDIR, PROPERTY_PROJECT_KEY, PROPERTY_PROJECT_NAME, PROPERTY_PROJECT_VERSION
   };
 
   /**
@@ -138,8 +145,8 @@ class ProjectReactorBuilder {
     }
 
     ProjectDefinition definition = ProjectDefinition.create().setProperties(properties)
-      .setBaseDir(baseDir)
-      .setWorkDir(workDir);
+        .setBaseDir(baseDir)
+        .setWorkDir(workDir);
     return definition;
   }
 
@@ -382,7 +389,7 @@ class ProjectReactorBuilder {
       if (sourceFolder.isDirectory()) {
         LOG.warn("/!\\ A multi-module project can't have source folders, so '{}' won't be used for the analysis. " +
           "If you want to analyse files of this folder, you should create another sub-module and move them inside it.",
-          sourceFolder.toString());
+            sourceFolder.toString());
       }
     }
 
@@ -485,7 +492,7 @@ class ProjectReactorBuilder {
       filePattern = pattern.substring(i + 1);
     }
     List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
-    if (pattern.indexOf('*')>=0) {
+    if (pattern.indexOf('*') >= 0) {
       filters.add(FileFileFilter.FILE);
     }
     filters.add(new WildcardFileFilter(filePattern));
