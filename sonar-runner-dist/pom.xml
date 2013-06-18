@@ -12,14 +12,14 @@
 
   <dependencies>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>sonar-runner-api</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>sonar-runner-impl</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -88,11 +88,11 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>sonar-runner-${pom.version}</finalName>
+              <finalName>sonar-runner-${project.version}</finalName>
               <appendAssemblyId>false</appendAssemblyId>
               <escapeString>\</escapeString>
               <descriptors>
-                <descriptor>${pom.basedir}/assembly.xml</descriptor>
+                <descriptor>${project.basedir}/assembly.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
@@ -115,7 +115,7 @@
                   <minsize>280000</minsize>
                   <maxsize>310000</maxsize>
                   <files>
-                    <file>${pom.build.directory}/sonar-runner-${pom.version}.zip</file>
+                    <file>${project.build.directory}/sonar-runner-${project.version}.zip</file>
                   </files>
                 </requireFilesSize>
               </rules>

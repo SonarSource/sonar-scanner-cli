@@ -24,9 +24,9 @@
       <artifactId>sonar-home</artifactId>
     </dependency>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>sonar-runner-batch</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -69,12 +69,12 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>${pom.groupId}</groupId>
+                  <groupId>${project.groupId}</groupId>
                   <artifactId>sonar-runner-batch</artifactId>
-                  <version>${pom.version}</version>
+                  <version>${project.version}</version>
                   <type>jar</type>
                   <overWrite>false</overWrite>
-                  <outputDirectory>${pom.build.outputDirectory}</outputDirectory>
+                  <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                   <destFileName>sonar-runner-batch.jar</destFileName>
                 </artifactItem>
               </artifactItems>
