@@ -33,14 +33,14 @@ import java.util.List;
  */
 class IsolatedClassloader extends URLClassLoader {
 
-  private final String[] unmaskedPackages;
+  private final String[][] maskRules;
 
   /**
    * The parent classloader is used only for loading classes and resources in unmasked packages
    */
-  IsolatedClassloader(ClassLoader parent, String... unmaskedPackages) {
+  IsolatedClassloader(ClassLoader parent, String[][] maskRules) {
     super(new URL[0], parent);
-    this.unmaskedPackages = unmaskedPackages;
+    this.maskRules = maskRules;
   }
 
   void addFiles(List<File> files) {
@@ -57,9 +57,9 @@ class IsolatedClassloader extends URLClassLoader {
    * @return true, if class can be loaded from parent ClassLoader
    */
   boolean canLoadFromParent(String name) {
-    for (String pkg : unmaskedPackages) {
-      if (name.startsWith(pkg + ".")) {
-        return true;
+    for (String[] maskRule : maskRules) {
+      if (name.startsWith(maskRule[1])) {
+        return "UNMASK".equals(maskRule[0]);
       }
     }
     return false;

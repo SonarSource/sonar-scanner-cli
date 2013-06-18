@@ -36,6 +36,7 @@ public class EmbeddedRunner extends Runner<EmbeddedRunner> {
 
   private final BatchLauncher batchLauncher;
   private final List<Object> extensions = new ArrayList<Object>();
+  private final static String MASK_RULES_PROP = "sonarRunner.maskRules";
 
   EmbeddedRunner(BatchLauncher bl) {
     this.batchLauncher = bl;
@@ -49,12 +50,42 @@ public class EmbeddedRunner extends Runner<EmbeddedRunner> {
   }
 
   /**
-   * Sonar is executed in an almost fully isolated classloader. The unmasked packages
-   * define the classes of the client application that are visible from Sonar classloader. They
-   * relate to the extensions provided by {@link #setUnmaskedPackages(String...)}.
+   * Sonar is executed in an almost fully isolated classloader (mask everything by default). his method allow to unmask some classes based on
+   * a prefix of their fully qualified name. They relate to the extensions provided by {@link #addExtensions(Object...)}.
+   * Complex mask/unmask rules can be defined by chaining several ordered calls to {@link #unmask(String)} and {@link #mask(String)}.
+   * Registered mask/unmask rules are considered in their registration order and as soon as a matching prefix is found
+   * the class is masked/unmasked accordingly.
+   * If no matching prefix can be found then by default class is masked.
    */
+  public EmbeddedRunner unmask(String fqcnPrefix) {
+    return addMaskRule("UNMASK", fqcnPrefix);
+  }
+
+  /**
+   * @see EmbeddedRunner#unmask(String)
+   */
+  public EmbeddedRunner mask(String fqcnPrefix) {
+    return addMaskRule("MASK", fqcnPrefix);
+  }
+
+  private EmbeddedRunner addMaskRule(String type, String fqcnPrefix) {
+    String existingRules = property(MASK_RULES_PROP, "");
+    if (!"".equals(existingRules)) {
+      existingRules += ",";
+    }
+    existingRules += type + "|" + fqcnPrefix;
+    return setProperty(MASK_RULES_PROP, existingRules);
+  }
+
+  /**
+   * @deprecated since 2.3 use {@link #setUnmaskedClassRegexp(String)}
+   */
+  @Deprecated
   public EmbeddedRunner setUnmaskedPackages(String... packages) {
-    return setProperty("sonarRunner.unmaskedPackages", Utils.join(packages, ","));
+    for (String packagePrefix : packages) {
+      unmask(packagePrefix + ".");
+    }
+    return this;
   }
 
   public EmbeddedRunner addExtensions(Object... objects) {

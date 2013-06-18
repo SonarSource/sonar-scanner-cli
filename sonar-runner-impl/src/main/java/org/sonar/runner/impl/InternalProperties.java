@@ -22,5 +22,5 @@ package org.sonar.runner.impl;
 public interface InternalProperties {
   String RUNNER_APP = "sonarRunner.app";
   String RUNNER_APP_VERSION = "sonarRunner.appVersion";
-  String RUNNER_UNMASKED_PACKAGES = "sonarRunner.unmaskedPackages";
+  String RUNNER_MASK_RULES = "sonarRunner.maskRules";
 }

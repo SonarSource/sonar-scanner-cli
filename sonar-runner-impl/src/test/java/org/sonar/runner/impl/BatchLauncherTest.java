@@ -48,7 +48,7 @@ public class BatchLauncherTest {
     props.put("foo", "bar");
 
     // Unmask the current classloader in order to access FakeIsolatedLauncher
-    props.put(InternalProperties.RUNNER_UNMASKED_PACKAGES, "org.sonar.runner.impl");
+    props.put(InternalProperties.RUNNER_MASK_RULES, "UNMASK|org.sonar.runner.impl.");
     List<Object> extensions = new ArrayList<Object>();
 
     FakeIsolatedLauncher isolatedLauncher = (FakeIsolatedLauncher) launcher.doExecute(jarDownloader, props, extensions);
@@ -64,7 +64,7 @@ public class BatchLauncherTest {
     Properties props = new Properties();
 
     // The current classloader in not available -> fail to load FakeIsolatedLauncher
-    props.put(InternalProperties.RUNNER_UNMASKED_PACKAGES, "");
+    props.put(InternalProperties.RUNNER_MASK_RULES, "");
     try {
       launcher.doExecute(jarDownloader, props, Collections.emptyList());
       fail();

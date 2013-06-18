@@ -48,10 +48,23 @@ public class EmbeddedRunnerTest {
   @Test
   public void should_set_unmasked_packages() {
     EmbeddedRunner runner = EmbeddedRunner.create();
-    assertThat(runner.property(InternalProperties.RUNNER_UNMASKED_PACKAGES, null)).isNull();
+    assertThat(runner.property(InternalProperties.RUNNER_MASK_RULES, null)).isNull();
 
     runner = EmbeddedRunner.create().setUnmaskedPackages("org.apache.ant", "org.ant");
-    assertThat(runner.property(InternalProperties.RUNNER_UNMASKED_PACKAGES, null)).isEqualTo("org.apache.ant,org.ant");
+    assertThat(runner.property(InternalProperties.RUNNER_MASK_RULES, null)).isEqualTo("UNMASK|org.apache.ant.,UNMASK|org.ant.");
+  }
+
+  @Test
+  public void should_set_mask_rules() {
+    EmbeddedRunner runner = EmbeddedRunner.create();
+    assertThat(runner.property(InternalProperties.RUNNER_MASK_RULES, null)).isNull();
+
+    runner = EmbeddedRunner.create()
+        .unmask("org.slf4j.Logger")
+        .mask("org.slf4j.")
+        .mask("ch.qos.logback.")
+        .unmask("");
+    assertThat(runner.property(InternalProperties.RUNNER_MASK_RULES, null)).isEqualTo("UNMASK|org.slf4j.Logger,MASK|org.slf4j.,MASK|ch.qos.logback.,UNMASK|");
   }
 
   @Test
@@ -68,10 +81,12 @@ public class EmbeddedRunnerTest {
   public void should_set_properties() {
     EmbeddedRunner runner = EmbeddedRunner.create();
     runner.setProperty("sonar.projectKey", "foo");
-    runner.addProperties(new Properties() {{
-      setProperty("sonar.login", "admin");
-      setProperty("sonar.password", "gniark");
-    }});
+    runner.addProperties(new Properties() {
+      {
+        setProperty("sonar.login", "admin");
+        setProperty("sonar.password", "gniark");
+      }
+    });
 
     assertThat(runner.property("sonar.projectKey", null)).isEqualTo("foo");
     assertThat(runner.property("sonar.login", null)).isEqualTo("admin");

@@ -57,8 +57,15 @@ public class BatchLauncher {
     Object launcher = AccessController.doPrivileged(new PrivilegedAction<Object>() {
       public Object run() {
         List<File> jarFiles = jarDownloader.download();
-        String unmaskedPackages = props.getProperty(InternalProperties.RUNNER_UNMASKED_PACKAGES, "");
-        IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), unmaskedPackages.split(":"));
+        String maskRulesProp = props.getProperty(InternalProperties.RUNNER_MASK_RULES, null);
+        String[] maskRulesConcat = maskRulesProp != null ? maskRulesProp.split(",") : new String[0];
+        String[][] maskRules = new String[maskRulesConcat.length][2];
+        for (int i = 0; i < maskRulesConcat.length; i++) {
+          String[] splitted = maskRulesConcat[i].split("\\|");
+          maskRules[i][0] = splitted[0];
+          maskRules[i][1] = splitted.length > 1 ? splitted[1] : "";
+        }
+        IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), maskRules);
         classloader.addFiles(jarFiles);
         Object launcher = delegateExecution(classloader, props, extensions);
         tempCleaning.clean();
@@ -87,6 +94,5 @@ public class BatchLauncher {
     });
     return launcher;
   }
-
 
 }
