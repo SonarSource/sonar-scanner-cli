@@ -178,7 +178,7 @@ public class ForkedRunner extends Runner<ForkedRunner> {
     }
     int status = commandExecutor.execute(forkCommand.command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS);
     if (status != 0) {
-      throw new IllegalStateException("Error status: " + status);
+      throw new IllegalStateException("Error status [command: " + forkCommand.command + "]: " + status);
     }
   }
 
