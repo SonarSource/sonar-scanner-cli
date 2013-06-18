@@ -48,7 +48,7 @@ public class IsolatedLauncher {
   Batch createBatch(Properties properties, List<Object> extensions) {
     ProjectReactor projectReactor = null;
     initLogging(properties);
-    EnvironmentInformation env = new EnvironmentInformation(properties.getProperty("sonarRunner.userAgent"), properties.getProperty("sonarRunner.userAgentVersion"));
+    EnvironmentInformation env = new EnvironmentInformation(properties.getProperty("sonarRunner.app"), properties.getProperty("sonarRunner.appVersion"));
     Batch.Builder builder = Batch.builder()
         .setEnvironment(env)
         .addComponents(extensions);
@@ -60,7 +60,7 @@ public class IsolatedLauncher {
       projectReactor = new ProjectReactorBuilder(propsClone).build();
     } else {
       // only on sonar 3.5+... in theory
-      builder.setGlobalProperties((Map)properties);
+      builder.setGlobalProperties((Map) properties);
     }
 
     if (projectReactor != null) {
