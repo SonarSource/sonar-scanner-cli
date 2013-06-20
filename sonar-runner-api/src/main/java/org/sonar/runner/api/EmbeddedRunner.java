@@ -50,8 +50,8 @@ public class EmbeddedRunner extends Runner<EmbeddedRunner> {
   }
 
   /**
-   * Sonar is executed in an almost fully isolated classloader (mask everything by default). his method allow to unmask some classes based on
-   * a prefix of their fully qualified name. They relate to the extensions provided by {@link #addExtensions(Object...)}.
+   * Sonar is executed in an almost fully isolated classloader (mask everything by default). This method allows to unmask some classes based on
+   * a prefix of their fully qualified name. It is related to the extensions provided by {@link #addExtensions(Object...)}.
    * Complex mask/unmask rules can be defined by chaining several ordered calls to {@link #unmask(String)} and {@link #mask(String)}.
    * Registered mask/unmask rules are considered in their registration order and as soon as a matching prefix is found
    * the class is masked/unmasked accordingly.
@@ -78,7 +78,7 @@ public class EmbeddedRunner extends Runner<EmbeddedRunner> {
   }
 
   /**
-   * @deprecated since 2.3 use {@link #setUnmaskedClassRegexp(String)}
+   * @deprecated since 2.3 use {@link #unmask(String)}
    */
   @Deprecated
   public EmbeddedRunner setUnmaskedPackages(String... packages) {
