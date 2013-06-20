@@ -22,6 +22,7 @@ package org.sonar.runner.api;
 import org.sonar.runner.impl.InternalProperties;
 
 import javax.annotation.Nullable;
+
 import java.util.Properties;
 
 /**
@@ -93,7 +94,6 @@ public abstract class Runner<T extends Runner> {
 
   private void initDefaultValues() {
     setDefaultValue(RunnerProperties.HOST_URL, "http://localhost:9000");
-    //setDefaultValue(RunnerProperties.TASK, "scan");
     setDefaultValue(InternalProperties.RUNNER_APP, "SonarRunner");
     setDefaultValue(InternalProperties.RUNNER_APP_VERSION, RunnerVersion.version());
   }

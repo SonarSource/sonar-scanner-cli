@@ -36,7 +36,7 @@ public class EmbeddedRunner extends Runner<EmbeddedRunner> {
 
   private final BatchLauncher batchLauncher;
   private final List<Object> extensions = new ArrayList<Object>();
-  private final static String MASK_RULES_PROP = "sonarRunner.maskRules";
+  private static final String MASK_RULES_PROP = "sonarRunner.maskRules";
 
   EmbeddedRunner(BatchLauncher bl) {
     this.batchLauncher = bl;
