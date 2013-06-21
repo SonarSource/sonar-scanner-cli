@@ -32,12 +32,12 @@ import java.io.PrintStream;
 import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Fail.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 public class ForkedRunnerTest {
 
@@ -138,5 +138,27 @@ public class ForkedRunnerTest {
       }
     }), any(PrintStreamConsumer.class), any(PrintStreamConsumer.class), anyLong());
 
+  }
+
+  @Test
+  public void test_failure_of_java_command() throws IOException {
+    JarExtractor jarExtractor = mock(JarExtractor.class);
+    final File jar = temp.newFile();
+    when(jarExtractor.extractToTemp("sonar-runner-impl")).thenReturn(jar);
+    StreamConsumer out = mock(StreamConsumer.class);
+    StreamConsumer err = mock(StreamConsumer.class);
+    CommandExecutor commandExecutor = mock(CommandExecutor.class);
+    when(commandExecutor.execute(any(Command.class), eq(out), eq(err), anyLong())).thenReturn(3);
+
+    ForkedRunner runner = new ForkedRunner(jarExtractor, commandExecutor);
+    runner.setStdOut(out);
+    runner.setStdErr(err);
+
+    try {
+      runner.execute();
+      fail();
+    } catch (IllegalStateException e) {
+      assertThat(e.getMessage()).matches("Error status \\[command: .*java.*\\]");
+    }
   }
 }
