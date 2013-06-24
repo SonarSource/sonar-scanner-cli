@@ -27,13 +27,13 @@ import java.util.Properties;
 
 class RunnerFactory {
 
-  Runner create(Properties props) {
-    Runner runner;
+  Runner<?> create(Properties props) {
+    Runner<?> runner;
     if ("fork".equals(props.getProperty("sonarRunner.mode"))) {
       runner = ForkedRunner.create();
       String jvmArgs = props.getProperty("sonarRunner.fork.jvmArgs", "");
       if (!"".equals(jvmArgs)) {
-        ((ForkedRunner)runner).addJvmArguments(jvmArgs.split(" "));
+        ((ForkedRunner) runner).addJvmArguments(jvmArgs.split(" "));
       }
 
     } else {
