@@ -19,27 +19,20 @@
  */
 package org.sonar.runner.batch;
 
-import org.apache.commons.lang.StringUtils;
+import org.junit.Test;
 
-import java.util.Properties;
+import static org.fest.assertions.Assertions.assertThat;
 
-/**
- * Public utility that can be used by consumers of the Sonar Runner.
- */
-class Utils {
+public class VersionUtilsTest {
 
-  private Utils() {
-    // only static methods
-  }
-
-  /**
-   * Transforms a comma-separated list String property in to a array of trimmed strings.
-   *
-   * This works even if they are separated by whitespace characters (space char, EOL, ...)
-   *
-   */
-  static String[] getListFromProperty(Properties properties, String key) {
-    return StringUtils.stripAll(StringUtils.split(properties.getProperty(key, ""), ','));
+  @Test
+  public void testIsLessThan3_7() {
+    assertThat(VersionUtils.isLessThan37("2.5")).isTrue();
+    assertThat(VersionUtils.isLessThan37("3.0")).isTrue();
+    assertThat(VersionUtils.isLessThan37("3.0.1")).isTrue();
+    assertThat(VersionUtils.isLessThan37("3.6")).isTrue();
+    assertThat(VersionUtils.isLessThan37("3.7")).isFalse();
+    assertThat(VersionUtils.isLessThan37("4.0")).isFalse();
   }
 
 }

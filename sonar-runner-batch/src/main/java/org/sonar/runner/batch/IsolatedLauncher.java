@@ -41,11 +41,11 @@ import java.util.Properties;
  */
 public class IsolatedLauncher {
 
-  public void execute(Properties properties, List<Object> extensions) {
-    createBatch(properties, extensions).execute();
+  public void execute(String sonarVersion, Properties properties, List<Object> extensions) {
+    createBatch(sonarVersion, properties, extensions).execute();
   }
 
-  Batch createBatch(Properties properties, List<Object> extensions) {
+  Batch createBatch(String sonarVersion, Properties properties, List<Object> extensions) {
     ProjectReactor projectReactor = null;
     initLogging(properties);
     EnvironmentInformation env = new EnvironmentInformation(properties.getProperty("sonarRunner.app"), properties.getProperty("sonarRunner.appVersion"));
@@ -54,18 +54,16 @@ public class IsolatedLauncher {
         .addComponents(extensions);
 
     String task = properties.getProperty("sonar.task", "scan");
-    if ("scan".equals(task)) {
+    if (VersionUtils.isLessThan37(sonarVersion) && "scan".equals(task)) {
       Properties propsClone = new Properties();
       propsClone.putAll(properties);
       projectReactor = new ProjectReactorBuilder(propsClone).build();
+      builder.setProjectReactor(projectReactor);
     } else {
       // only on sonar 3.5+... in theory
       builder.setGlobalProperties((Map) properties);
     }
 
-    if (projectReactor != null) {
-      builder.setProjectReactor(projectReactor);
-    }
     return builder.build();
   }
 

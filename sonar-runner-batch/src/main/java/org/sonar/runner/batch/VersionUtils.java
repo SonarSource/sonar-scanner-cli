@@ -19,27 +19,24 @@
  */
 package org.sonar.runner.batch;
 
-import org.apache.commons.lang.StringUtils;
+class VersionUtils {
 
-import java.util.Properties;
+  private static final String[] LESS_THAN_3_7 = {"0", "1", "2", "3.0", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6"};
 
-/**
- * Public utility that can be used by consumers of the Sonar Runner.
- */
-class Utils {
-
-  private Utils() {
-    // only static methods
+  static boolean isLessThan37(String version) {
+    return inVersions(version, LESS_THAN_3_7);
   }
 
-  /**
-   * Transforms a comma-separated list String property in to a array of trimmed strings.
-   *
-   * This works even if they are separated by whitespace characters (space char, EOL, ...)
-   *
-   */
-  static String[] getListFromProperty(Properties properties, String key) {
-    return StringUtils.stripAll(StringUtils.split(properties.getProperty(key, ""), ','));
+  private static boolean inVersions(String version, String[] versions) {
+    for (String s : versions) {
+      if (isVersion(version, s)) {
+        return true;
+      }
+    }
+    return false;
   }
 
+  private static boolean isVersion(String version, String prefix) {
+    return version.startsWith(prefix + ".") || version.equals(prefix);
+  }
 }

@@ -1,5 +1,5 @@
 /*
- * Sonar Runner - Batch
+ * SonarQube Runner - Batch
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -47,7 +47,9 @@ import java.util.Properties;
  * Class that creates a Sonar project definition based on a set of properties.
  *
  * @since 1.5
+ * @deprecated since 2.3. Moved to SonarQube batch 3.7. Will be deleted when SonarQube reunner will require SonarQube 3.7+.
  */
+@Deprecated
 class ProjectReactorBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProjectReactorBuilder.class);
