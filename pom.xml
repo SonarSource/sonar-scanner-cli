@@ -56,7 +56,7 @@
   </issueManagement>
 
   <properties>
-    <sonar.buildVersion>3.6-RC4</sonar.buildVersion>
+    <sonar.buildVersion>3.5</sonar.buildVersion>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
   </properties>
 
@@ -132,7 +132,7 @@
       <dependency>
         <groupId>org.codehaus.sonar</groupId>
         <artifactId>sonar-home</artifactId>
-        <version>${sonar.buildVersion}</version>
+        <version>3.5</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

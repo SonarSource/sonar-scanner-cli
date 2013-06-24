@@ -25,6 +25,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
+import org.sonar.api.batch.bootstrap.ProjectReactor;
 import org.sonar.api.utils.SonarException;
 import org.sonar.batch.bootstrapper.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
@@ -45,13 +46,26 @@ public class IsolatedLauncher {
   }
 
   Batch createBatch(Properties properties, List<Object> extensions) {
+    ProjectReactor projectReactor = null;
     initLogging(properties);
     EnvironmentInformation env = new EnvironmentInformation(properties.getProperty("sonarRunner.app"), properties.getProperty("sonarRunner.appVersion"));
     Batch.Builder builder = Batch.builder()
         .setEnvironment(env)
         .addComponents(extensions);
 
-    builder.setBootstrapProperties((Map) properties);
+    String task = properties.getProperty("sonar.task", "scan");
+    if ("scan".equals(task)) {
+      Properties propsClone = new Properties();
+      propsClone.putAll(properties);
+      projectReactor = new ProjectReactorBuilder(propsClone).build();
+    } else {
+      // only on sonar 3.5+... in theory
+      builder.setGlobalProperties((Map) properties);
+    }
+
+    if (projectReactor != null) {
+      builder.setProjectReactor(projectReactor);
+    }
     return builder.build();
   }
 

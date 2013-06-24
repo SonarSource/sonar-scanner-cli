@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Distribution
+ * Sonar Runner - Batch
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,29 +17,29 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner;
+package org.sonar.runner.batch;
 
-import org.sonar.runner.api.EmbeddedRunner;
-import org.sonar.runner.api.ForkedRunner;
-import org.sonar.runner.api.Runner;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Properties;
 
-class RunnerFactory {
+/**
+ * Public utility that can be used by consumers of the Sonar Runner.
+ */
+class Utils {
 
-  Runner create(Properties props) {
-    Runner runner;
-    if ("fork".equals(props.getProperty("sonarRunner.mode"))) {
-      runner = ForkedRunner.create();
-      String jvmArgs = props.getProperty("sonarRunner.fork.jvmArgs", "");
-      if (!"".equals(jvmArgs)) {
-        ((ForkedRunner)runner).addJvmArguments(jvmArgs.split(" "));
-      }
-
-    } else {
-      runner = EmbeddedRunner.create();
-    }
-    runner.addProperties(props);
-    return runner;
+  private Utils() {
+    // only static methods
   }
+
+  /**
+   * Transforms a comma-separated list String property in to a array of trimmed strings.
+   *
+   * This works even if they are separated by whitespace characters (space char, EOL, ...)
+   *
+   */
+  static String[] getListFromProperty(Properties properties, String key) {
+    return StringUtils.stripAll(StringUtils.split(properties.getProperty(key, ""), ','));
+  }
+
 }
