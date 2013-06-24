@@ -25,7 +25,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Synchronously execute a native command line. It's much more limited than the Apache Commons Exec library.
@@ -45,7 +50,7 @@ class CommandExecutor {
     return INSTANCE;
   }
 
-  int execute(Command command, StreamConsumer stdOut, StreamConsumer stdErr, long timeoutMilliseconds) {
+  int execute(Command command, StreamConsumer stdOut, StreamConsumer stdErr, long timeoutMilliseconds, ProcessMonitor processMonitor) {
     ExecutorService executorService = null;
     Process process = null;
     StreamGobbler outputGobbler = null;
@@ -62,8 +67,12 @@ class CommandExecutor {
       errorGobbler.start();
 
       executorService = Executors.newSingleThreadExecutor();
-      Future<Integer> ft = executeProcess(executorService, process);
-      int exitCode = ft.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+      final Future<Integer> futureTask = executeProcess(executorService, process);
+      if (processMonitor != null) {
+        monitorProcess(processMonitor, executorService, process);
+      }
+
+      int exitCode = futureTask.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
       waitUntilFinish(outputGobbler);
       waitUntilFinish(errorGobbler);
       verifyGobbler(command, outputGobbler, "stdOut");
@@ -88,6 +97,24 @@ class CommandExecutor {
         executorService.shutdown();
       }
     }
+  }
+
+  private void monitorProcess(final ProcessMonitor processMonitor, final ExecutorService executor, final Process process) {
+    new Thread() {
+      @Override
+      public void run() {
+        while (!executor.isTerminated()) {
+          if (processMonitor.stop()) {
+            process.destroy();
+          }
+          try {
+            Thread.sleep(100);
+          } catch (InterruptedException e) {
+            // ignore
+          }
+        }
+      }
+    }.start();
   }
 
   private Future<Integer> executeProcess(ExecutorService executorService, Process process) {

@@ -25,7 +25,6 @@ import org.sonar.runner.impl.BatchLauncherMain;
 import org.sonar.runner.impl.JarExtractor;
 
 import javax.annotation.Nullable;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -43,6 +42,7 @@ import java.util.Map;
 public class ForkedRunner extends Runner<ForkedRunner> {
 
   private static final int ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
+  private static final int TERMINATED_STATUS = 143;
 
   private final Map<String, String> jvmEnvVariables = new HashMap<String, String>();
   private final List<String> jvmArguments = new ArrayList<String>();
@@ -51,9 +51,16 @@ public class ForkedRunner extends Runner<ForkedRunner> {
   private final JarExtractor jarExtractor;
   private final CommandExecutor commandExecutor;
 
-  ForkedRunner(JarExtractor jarExtractor, CommandExecutor commandExecutor) {
+  private ProcessMonitor processMonitor;
+
+  ForkedRunner(JarExtractor jarExtractor, CommandExecutor commandExecutor, ProcessMonitor processMonitor) {
     this.jarExtractor = jarExtractor;
     this.commandExecutor = commandExecutor;
+    this.processMonitor = processMonitor;
+  }
+
+  ForkedRunner(JarExtractor jarExtractor, CommandExecutor commandExecutor) {
+    this(jarExtractor, commandExecutor, null);
   }
 
   /**
@@ -61,6 +68,13 @@ public class ForkedRunner extends Runner<ForkedRunner> {
    */
   public static ForkedRunner create() {
     return new ForkedRunner(new JarExtractor(), CommandExecutor.create());
+  }
+
+  /**
+   * Create new instance. Never return null.
+   */
+  public static ForkedRunner create(ProcessMonitor processMonitor) {
+    return new ForkedRunner(new JarExtractor(), CommandExecutor.create(), processMonitor);
   }
 
   /**
@@ -140,11 +154,11 @@ public class ForkedRunner extends Runner<ForkedRunner> {
       javaExecutable = new Os().thisJavaExe().getAbsolutePath();
     }
     Command command = Command.builder()
-        .setExecutable(javaExecutable)
-        .addEnvVariables(jvmEnvVariables)
-        .addArguments(jvmArguments)
-        .addArguments("-cp", jarFile.getAbsolutePath(), BatchLauncherMain.class.getName(), propertiesFile.getAbsolutePath())
-        .build();
+      .setExecutable(javaExecutable)
+      .addEnvVariables(jvmEnvVariables)
+      .addArguments(jvmArguments)
+      .addArguments("-cp", jarFile.getAbsolutePath(), BatchLauncherMain.class.getName(), propertiesFile.getAbsolutePath())
+      .build();
     return new ForkCommand(command, jarFile, propertiesFile);
   }
 
@@ -176,8 +190,11 @@ public class ForkedRunner extends Runner<ForkedRunner> {
     if (stdErr == null) {
       stdErr = new PrintStreamConsumer(System.err);
     }
-    int status = commandExecutor.execute(forkCommand.command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS);
-    if (status != 0) {
+    int status = commandExecutor.execute(forkCommand.command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS, processMonitor);
+
+    if (status == TERMINATED_STATUS) {
+       stdOut.consumeLine(String.format("Sonar runner terminated with exit code %d", status));
+    } else if (status != 0) {
       throw new IllegalStateException("Error status [command: " + forkCommand.command + "]: " + status);
     }
   }

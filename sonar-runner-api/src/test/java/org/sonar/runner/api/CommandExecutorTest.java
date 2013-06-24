@@ -32,8 +32,13 @@ import java.io.IOException;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 public class CommandExecutorTest {
+
+  public static final ProcessMonitor ACTIVITY_CONTROLLER = mock(ProcessMonitor.class);
+
+  public static final int PROCESS_TERMINATED_CODE = 143;
 
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
@@ -68,7 +73,7 @@ public class CommandExecutorTest {
       }
     };
     Command command = Command.builder().setExecutable(getScript("output")).setDirectory(workDir).build();
-    int exitCode = CommandExecutor.create().execute(command, stdOutConsumer, stdErrConsumer, 1000L);
+    int exitCode = CommandExecutor.create().execute(command, stdOutConsumer, stdErrConsumer, 1000L, ACTIVITY_CONTROLLER);
     assertThat(exitCode).isEqualTo(0);
 
     String stdOut = stdOutBuilder.toString();
@@ -84,7 +89,7 @@ public class CommandExecutorTest {
     Command command = Command.builder().setExecutable(getScript("output")).setDirectory(workDir).build();
     thrown.expect(CommandException.class);
     thrown.expectMessage("Error inside stdOut stream");
-    CommandExecutor.create().execute(command, BAD_CONSUMER, NOP_CONSUMER, 1000L);
+    CommandExecutor.create().execute(command, BAD_CONSUMER, NOP_CONSUMER, 1000L, ACTIVITY_CONTROLLER);
   }
 
   @Test
@@ -92,7 +97,7 @@ public class CommandExecutorTest {
     Command command = Command.builder().setExecutable(getScript("output")).setDirectory(workDir).build();
     thrown.expect(CommandException.class);
     thrown.expectMessage("Error inside stdErr stream");
-    CommandExecutor.create().execute(command, NOP_CONSUMER, BAD_CONSUMER, 1000L);
+    CommandExecutor.create().execute(command, NOP_CONSUMER, BAD_CONSUMER, 1000L, ACTIVITY_CONTROLLER);
   }
 
   private static final StreamConsumer NOP_CONSUMER = new StreamConsumer() {
@@ -115,7 +120,7 @@ public class CommandExecutorTest {
         .addArguments("1")
         .setEnvVariable("ENVVAR", "2")
         .build();
-    int exitCode = CommandExecutor.create().execute(command, stdout, stderr, 1000L);
+    int exitCode = CommandExecutor.create().execute(command, stdout, stderr, 1000L, ACTIVITY_CONTROLLER);
     assertThat(exitCode).isEqualTo(0);
     File logFile = new File(workDir, "echo.log");
     assertThat(logFile).exists();
@@ -131,7 +136,7 @@ public class CommandExecutorTest {
     long start = System.currentTimeMillis();
     try {
       Command command = Command.builder().setExecutable(executable).setDirectory(workDir).build();
-      CommandExecutor.create().execute(command, stdout, stderr, 300L);
+      CommandExecutor.create().execute(command, stdout, stderr, 300L, ACTIVITY_CONTROLLER);
       fail();
     } catch (CommandException e) {
       long duration = System.currentTimeMillis() - start;
@@ -142,10 +147,29 @@ public class CommandExecutorTest {
   }
 
   @Test
+  public void test_should_stop_if_requested() throws Exception {
+
+    String executable = getScript("forever");
+    Command command = Command.builder().setExecutable(executable).setDirectory(workDir).build();
+
+    final long start = System.currentTimeMillis();
+    int result = CommandExecutor.create().execute(command, stdout, stderr, 2000L, new ProcessMonitor() {
+      @Override
+      public boolean stop() {
+        // kill after 1 seconds
+        return System.currentTimeMillis() - start > 1000;
+      }
+    });
+
+    assertThat(System.currentTimeMillis() - start).isGreaterThan(1000);
+    assertThat(result).isEqualTo(PROCESS_TERMINATED_CODE);
+  }
+
+  @Test
   public void should_fail_if_script_not_found() {
     thrown.expect(CommandException.class);
     Command command = Command.builder().setExecutable("notfound").setDirectory(workDir).build();
-    CommandExecutor.create().execute(command, stdout, stderr, 1000L);
+    CommandExecutor.create().execute(command, stdout, stderr, 1000L, ACTIVITY_CONTROLLER);
   }
 
   private static String getScript(String name) throws IOException {
