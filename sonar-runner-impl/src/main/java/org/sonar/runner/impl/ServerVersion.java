@@ -1,5 +1,5 @@
 /*
- * Sonar Runner - Implementation
+ * SonarQube Runner - Implementation
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,7 +17,6 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-
 package org.sonar.runner.impl;
 
 import java.io.IOException;
@@ -38,7 +37,7 @@ class ServerVersion {
     // Guava Suppliers#memoize() would be great here :D
     if (version == null) {
       version = downloadVersion();
-      Logs.info("Sonar Server " + version);
+      Logs.info("SonarQube Server " + version);
     }
     return version;
   }

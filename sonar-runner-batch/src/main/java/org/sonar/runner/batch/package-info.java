@@ -1,5 +1,5 @@
 /*
- * Sonar Runner - Batch
+ * SonarQube Runner - Batch
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *

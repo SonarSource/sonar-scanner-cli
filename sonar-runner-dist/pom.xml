@@ -8,7 +8,7 @@
 
   <artifactId>sonar-runner-dist</artifactId>
   <packaging>jar</packaging>
-  <name>Sonar Runner - Distribution</name>
+  <name>SonarQube Runner - Distribution</name>
 
   <dependencies>
     <dependency>

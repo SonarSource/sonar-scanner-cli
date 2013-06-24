@@ -7,7 +7,7 @@
   </parent>
 
   <artifactId>sonar-runner-impl</artifactId>
-  <name>Sonar Runner - Implementation</name>
+  <name>SonarQube Runner - Implementation</name>
 
   <dependencies>
     <dependency>

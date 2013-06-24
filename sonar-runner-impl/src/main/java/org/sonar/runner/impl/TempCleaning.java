@@ -1,5 +1,5 @@
 /*
- * Sonar Runner - Implementation
+ * SonarQube Runner - Implementation
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *

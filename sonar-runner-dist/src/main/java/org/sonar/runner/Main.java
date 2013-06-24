@@ -1,5 +1,5 @@
 /*
- * Sonar Runner - Distribution
+ * SonarQube Runner - Distribution
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -106,7 +106,7 @@ public class Main {
         }
       }
       Logs.error("");
-      Logs.error("To see the full stack trace of the errors, re-run Sonar Runner with the -e switch.");
+      Logs.error("To see the full stack trace of the errors, re-run SonarQube Runner with the -e switch.");
       if (!cli.isDebugMode()) {
         suggestDebugMode();
       }
@@ -114,7 +114,7 @@ public class Main {
   }
 
   private void suggestDebugMode() {
-    Logs.error("Re-run Sonar Runner using the -X switch to enable full debug logging.");
+    Logs.error("Re-run SonarQube Runner using the -X switch to enable full debug logging.");
   }
 
 

@@ -1,5 +1,5 @@
 /*
- * Sonar Runner - Distribution
+ * SonarQube Runner - Distribution
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -28,7 +28,7 @@ class SystemInfo {
   }
 
   static void print() {
-    System.out.println("Sonar Runner " + RunnerVersion.version());
+    System.out.println("SonarQube Runner " + RunnerVersion.version());
     System.out.println(java());
     System.out.println(os());
   }

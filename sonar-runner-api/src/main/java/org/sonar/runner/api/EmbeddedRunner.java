@@ -1,5 +1,5 @@
 /*
- * Sonar Runner - API
+ * SonarQube Runner - API
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *

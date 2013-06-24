@@ -7,7 +7,7 @@
   </parent>
 
   <artifactId>sonar-runner-api</artifactId>
-  <name>Sonar Runner - API</name>
+  <name>SonarQube Runner - API</name>
 
   <dependencies>
     <!-- Dependencies with scope "compile" are shaded and removed from transitive dependencies-->

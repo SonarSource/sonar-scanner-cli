@@ -7,7 +7,7 @@
   </parent>
 
   <artifactId>sonar-runner-batch</artifactId>
-  <name>Sonar Runner - Batch</name>
+  <name>SonarQube Runner - Batch</name>
 
   <properties>
     <sonarBatchVersion>3.7-SNAPSHOT</sonarBatchVersion>

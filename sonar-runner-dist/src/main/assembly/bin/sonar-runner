@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Sonar Runner Startup Script for Unix
+# SonarQube Runner Startup Script for Unix
 #
 # Optional ENV vars:
 #   SONAR_RUNNER_HOME - location of runner's installed home dir
