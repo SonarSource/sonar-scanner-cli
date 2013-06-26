@@ -37,6 +37,6 @@ class VersionUtils {
   }
 
   private static boolean isVersion(String version, String prefix) {
-    return version.startsWith(prefix + ".") || version.equals(prefix);
+    return version.startsWith(prefix) || version.equals(prefix);
   }
 }

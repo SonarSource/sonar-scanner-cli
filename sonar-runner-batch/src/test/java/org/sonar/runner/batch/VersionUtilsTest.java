@@ -31,6 +31,7 @@ public class VersionUtilsTest {
     assertThat(VersionUtils.isLessThan37("3.0")).isTrue();
     assertThat(VersionUtils.isLessThan37("3.0.1")).isTrue();
     assertThat(VersionUtils.isLessThan37("3.6")).isTrue();
+    assertThat(VersionUtils.isLessThan37("3.6-SNAPSHOT")).isTrue();
     assertThat(VersionUtils.isLessThan37("3.7")).isFalse();
     assertThat(VersionUtils.isLessThan37("4.0")).isFalse();
   }
