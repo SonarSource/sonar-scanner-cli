@@ -38,8 +38,6 @@ public class CommandExecutorTest {
 
   public static final ProcessMonitor ACTIVITY_CONTROLLER = mock(ProcessMonitor.class);
 
-  public static final int PROCESS_TERMINATED_CODE = 143;
-
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
@@ -162,7 +160,7 @@ public class CommandExecutorTest {
     });
 
     assertThat(System.currentTimeMillis() - start).isGreaterThan(1000);
-    assertThat(result).isEqualTo(PROCESS_TERMINATED_CODE);
+    assertThat(result).isNotEqualTo(0);
   }
 
   @Test

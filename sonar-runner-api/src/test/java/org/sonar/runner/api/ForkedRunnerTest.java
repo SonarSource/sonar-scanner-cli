@@ -19,6 +19,7 @@
  */
 package org.sonar.runner.api;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -46,11 +47,16 @@ public class ForkedRunnerTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
-  private ProcessMonitor processMonitor = mock(ProcessMonitor.class);
+  private ProcessMonitor processMonitor;
 
   private final StreamConsumer out = mock(StreamConsumer.class);
 
   private final StreamConsumer err = mock(StreamConsumer.class);
+
+  @Before
+  public void prepare() {
+    processMonitor = mock(ProcessMonitor.class);
+  }
 
   @Test
   public void should_create_forked_runner() {
@@ -184,10 +190,11 @@ public class ForkedRunnerTest {
   @Test
   public void test_runner_was_requested_to_stop() throws Exception {
 
+    when(processMonitor.stop()).thenReturn(true);
     ForkedRunner runner = new ForkedRunner(createMockExtractor(), createMockRunnerWithExecutionStatus(143), processMonitor);
     runner.setStdOut(out);
     runner.setStdErr(err);
     runner.execute();
-    verify(out).consumeLine("Sonar runner terminated with exit code 143");
+    verify(out).consumeLine("SonarQube Runner was stopped [status=143]");
   }
 }

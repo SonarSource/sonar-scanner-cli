@@ -25,6 +25,7 @@ import org.sonar.runner.impl.BatchLauncherMain;
 import org.sonar.runner.impl.JarExtractor;
 
 import javax.annotation.Nullable;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -42,7 +43,6 @@ import java.util.Map;
 public class ForkedRunner extends Runner<ForkedRunner> {
 
   private static final int ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
-  private static final int TERMINATED_STATUS = 143;
 
   private final Map<String, String> jvmEnvVariables = new HashMap<String, String>();
   private final List<String> jvmArguments = new ArrayList<String>();
@@ -154,11 +154,11 @@ public class ForkedRunner extends Runner<ForkedRunner> {
       javaExecutable = new Os().thisJavaExe().getAbsolutePath();
     }
     Command command = Command.builder()
-      .setExecutable(javaExecutable)
-      .addEnvVariables(jvmEnvVariables)
-      .addArguments(jvmArguments)
-      .addArguments("-cp", jarFile.getAbsolutePath(), BatchLauncherMain.class.getName(), propertiesFile.getAbsolutePath())
-      .build();
+        .setExecutable(javaExecutable)
+        .addEnvVariables(jvmEnvVariables)
+        .addArguments(jvmArguments)
+        .addArguments("-cp", jarFile.getAbsolutePath(), BatchLauncherMain.class.getName(), propertiesFile.getAbsolutePath())
+        .build();
     return new ForkCommand(command, jarFile, propertiesFile);
   }
 
@@ -191,11 +191,13 @@ public class ForkedRunner extends Runner<ForkedRunner> {
       stdErr = new PrintStreamConsumer(System.err);
     }
     int status = commandExecutor.execute(forkCommand.command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS, processMonitor);
-
-    if (status == TERMINATED_STATUS) {
-       stdOut.consumeLine(String.format("Sonar runner terminated with exit code %d", status));
-    } else if (status != 0) {
-      throw new IllegalStateException("Error status [command: " + forkCommand.command + "]: " + status);
+    if (status != 0) {
+      if (processMonitor.stop()) {
+        stdOut.consumeLine(String.format("SonarQube Runner was stopped [status=%s]", status));
+      }
+      else {
+        throw new IllegalStateException("Error status [command: " + forkCommand.command + "]: " + status);
+      }
     }
   }
 
