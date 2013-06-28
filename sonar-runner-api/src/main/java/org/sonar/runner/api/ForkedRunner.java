@@ -53,7 +53,7 @@ public class ForkedRunner extends Runner<ForkedRunner> {
 
   private ProcessMonitor processMonitor;
 
-  ForkedRunner(JarExtractor jarExtractor, CommandExecutor commandExecutor, ProcessMonitor processMonitor) {
+  ForkedRunner(JarExtractor jarExtractor, CommandExecutor commandExecutor, @Nullable ProcessMonitor processMonitor) {
     this.jarExtractor = jarExtractor;
     this.commandExecutor = commandExecutor;
     this.processMonitor = processMonitor;
@@ -192,7 +192,7 @@ public class ForkedRunner extends Runner<ForkedRunner> {
     }
     int status = commandExecutor.execute(forkCommand.command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS, processMonitor);
     if (status != 0) {
-      if (processMonitor.stop()) {
+      if (processMonitor != null && processMonitor.stop()) {
         stdOut.consumeLine(String.format("SonarQube Runner was stopped [status=%s]", status));
       }
       else {

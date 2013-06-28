@@ -23,6 +23,9 @@ class VersionUtils {
 
   private static final String[] LESS_THAN_3_7 = {"0", "1", "2", "3.0", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6"};
 
+  private VersionUtils() {
+  }
+
   static boolean isLessThan37(String version) {
     return inVersions(version, LESS_THAN_3_7);
   }

@@ -21,6 +21,8 @@ package org.sonar.runner.api;
 
 import org.apache.commons.io.IOUtils;
 
+import javax.annotation.Nullable;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +52,7 @@ class CommandExecutor {
     return INSTANCE;
   }
 
-  int execute(Command command, StreamConsumer stdOut, StreamConsumer stdErr, long timeoutMilliseconds, ProcessMonitor processMonitor) {
+  int execute(Command command, StreamConsumer stdOut, StreamConsumer stdErr, long timeoutMilliseconds, @Nullable ProcessMonitor processMonitor) {
     ExecutorService executorService = null;
     Process process = null;
     StreamGobbler outputGobbler = null;
