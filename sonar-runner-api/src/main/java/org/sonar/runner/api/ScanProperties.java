@@ -39,6 +39,7 @@ public interface ScanProperties {
    */
   String PROJECT_KEY = "sonar.projectKey";
 
+
   String PROJECT_NAME = "sonar.projectName";
 
   String PROJECT_VERSION = "sonar.projectVersion";
@@ -65,9 +66,7 @@ public interface ScanProperties {
 
   /**
    * Optional comma-separated list of paths to libraries. Example : <code>path/to/library/*.jar,path/to/specific/library/myLibrary.jar,parent/*.jar</code>
-   * @deprecated since 2.3 and Sonar 3.7. Use sonar.java.classpath instead.
    */
-  @Deprecated
   String PROJECT_LIBRARIES = "sonar.libraries";
 
   String PROJECT_LANGUAGE = "sonar.language";
