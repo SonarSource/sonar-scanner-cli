@@ -41,8 +41,15 @@ class ServerConnection {
   private final String userAgent;
 
   private ServerConnection(String serverUrl, String app, String appVersion) {
-    this.serverUrl = serverUrl;
+    this.serverUrl = removeEndSlash(serverUrl);
     this.userAgent = app + "/" + appVersion;
+  }
+
+  private String removeEndSlash(String url) {
+    if (url == null) {
+      return null;
+    }
+    return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
   }
 
   static ServerConnection create(Properties properties) {

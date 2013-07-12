@@ -63,6 +63,20 @@ public class ServerConnectionTest {
     assertThat(FileUtils.readFileToString(toFile)).isEqualTo("abcde");
   }
 
+  // SONARPLUGINS-3061
+  @Test
+  public void should_support_trailing_slash() throws Exception {
+    httpServer.setMockResponseData("abcde");
+    Properties props = new Properties();
+    props.setProperty("sonar.host.url", httpServer.url() + "/");
+
+    ServerConnection connection = ServerConnection.create(props);
+    File toFile = temp.newFile();
+    connection.download("/batch/index.txt", toFile);
+
+    assertThat(FileUtils.readFileToString(toFile)).isEqualTo("abcde");
+  }
+
   @Test
   public void should_not_download_file_when_host_is_down() throws Exception {
     Properties props = new Properties();

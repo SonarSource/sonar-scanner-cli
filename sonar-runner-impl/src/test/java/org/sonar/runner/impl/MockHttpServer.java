@@ -22,6 +22,7 @@ package org.sonar.runner.impl;
 import org.apache.commons.io.IOUtils;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
@@ -58,6 +59,10 @@ class MockHttpServer {
     Handler handler = new AbstractHandler() {
 
       public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException {
+        // SONARPLUGINS-3061
+        if (target.startsWith("//")) {
+          throw new HttpException(404, "Not found");
+        }
         Request baseRequest = request instanceof Request ? (Request) request : HttpConnection.getCurrentConnection().getRequest();
         setResponseBody(getMockResponseData());
         setRequestBody(IOUtils.toString(baseRequest.getInputStream()));
