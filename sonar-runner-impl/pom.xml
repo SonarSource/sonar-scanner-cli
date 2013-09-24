@@ -101,6 +101,14 @@
                   <pattern>com.github.kevinsawicki.http</pattern>
                   <shadedPattern>org.sonar.runner.kevinsawicki</shadedPattern>
                 </relocation>
+                <relocation>
+                  <pattern>org.apache.commons.io</pattern>
+                  <shadedPattern>org.sonar.runner.commonsio</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.sonar.home</pattern>
+                  <shadedPattern>org.sonar.runner.home</shadedPattern>
+                </relocation>
               </relocations>
             </configuration>
           </execution>
