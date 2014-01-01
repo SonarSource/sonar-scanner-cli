@@ -4,7 +4,7 @@ Sonar Runner
 This is the Sonar Runner plugin
 
 Project homepage:
-http://docs.codehaus.org/display/SONAR/Analyzing+with+Sonar+Runner
+http://docs.codehaus.org/display/SONAR/Analyzing+with+SonarQube+Runner
 
 Issue tracking:
 http://jira.codehaus.org/browse/SONARPLUGINS/component/14640
