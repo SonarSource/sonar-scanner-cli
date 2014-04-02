@@ -186,6 +186,10 @@ public class ForkedRunner extends Runner<ForkedRunner> {
   private void fork(ForkCommand forkCommand) {
     if (stdOut == null) {
       stdOut = new PrintStreamConsumer(System.out);
+      stdOut = new PrintStreamConsumer(System.out);
+      stdOut = new PrintStreamConsumer(System.out);
+      stdOut = new PrintStreamConsumer(System.out);
+      stdOut = new PrintStreamConsumer(System.out);
     }
     if (stdErr == null) {
       stdErr = new PrintStreamConsumer(System.err);

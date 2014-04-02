@@ -61,8 +61,7 @@ public class ServerVersionTest {
   public void test_2_x() throws Exception {
     when(connection.downloadString("/api/server/version")).thenReturn("2.10");
     assertThat(version.version()).isEqualTo("2.10");
-    assertThat(version.is30Compatible()).isFalse();
-    assertThat(version.is35Compatible()).isFalse();
+    assertThat(version.is37Compatible()).isFalse();
     verify(connection, times(1)).downloadString("/api/server/version");
   }
 
@@ -70,8 +69,7 @@ public class ServerVersionTest {
   public void test_3_0() throws Exception {
     when(connection.downloadString("/api/server/version")).thenReturn("3.0");
     assertThat(version.version()).isEqualTo("3.0");
-    assertThat(version.is30Compatible()).isTrue();
-    assertThat(version.is35Compatible()).isFalse();
+    assertThat(version.is37Compatible()).isFalse();
     verify(connection, times(1)).downloadString("/api/server/version");
   }
 
@@ -79,26 +77,7 @@ public class ServerVersionTest {
   public void test_3_1() throws Exception {
     when(connection.downloadString("/api/server/version")).thenReturn("3.1");
     assertThat(version.version()).isEqualTo("3.1");
-    assertThat(version.is30Compatible()).isTrue();
-    assertThat(version.is35Compatible()).isFalse();
-    verify(connection, times(1)).downloadString("/api/server/version");
-  }
-
-  @Test
-  public void test_3_5() throws Exception {
-    when(connection.downloadString("/api/server/version")).thenReturn("3.5");
-    assertThat(version.version()).isEqualTo("3.5");
-    assertThat(version.is30Compatible()).isTrue();
-    assertThat(version.is35Compatible()).isTrue();
-    verify(connection, times(1)).downloadString("/api/server/version");
-  }
-
-  @Test
-  public void test_3_5_1() throws Exception {
-    when(connection.downloadString("/api/server/version")).thenReturn("3.5.1");
-    assertThat(version.version()).isEqualTo("3.5.1");
-    assertThat(version.is30Compatible()).isTrue();
-    assertThat(version.is35Compatible()).isTrue();
+    assertThat(version.is37Compatible()).isFalse();
     verify(connection, times(1)).downloadString("/api/server/version");
   }
 
@@ -106,8 +85,23 @@ public class ServerVersionTest {
   public void test_3_6() throws Exception {
     when(connection.downloadString("/api/server/version")).thenReturn("3.6");
     assertThat(version.version()).isEqualTo("3.6");
-    assertThat(version.is30Compatible()).isTrue();
-    assertThat(version.is35Compatible()).isTrue();
+    assertThat(version.is37Compatible()).isFalse();
+    verify(connection, times(1)).downloadString("/api/server/version");
+  }
+
+  @Test
+  public void test_3_7() throws Exception {
+    when(connection.downloadString("/api/server/version")).thenReturn("3.7");
+    assertThat(version.version()).isEqualTo("3.7");
+    assertThat(version.is37Compatible()).isTrue();
+    verify(connection, times(1)).downloadString("/api/server/version");
+  }
+
+  @Test
+  public void test_3_7_1() throws Exception {
+    when(connection.downloadString("/api/server/version")).thenReturn("3.7.1");
+    assertThat(version.version()).isEqualTo("3.7.1");
+    assertThat(version.is37Compatible()).isTrue();
     verify(connection, times(1)).downloadString("/api/server/version");
   }
 
@@ -115,8 +109,7 @@ public class ServerVersionTest {
   public void test_4_0() throws Exception {
     when(connection.downloadString("/api/server/version")).thenReturn("4.0");
     assertThat(version.version()).isEqualTo("4.0");
-    assertThat(version.is30Compatible()).isTrue();
-    assertThat(version.is35Compatible()).isTrue();
+    assertThat(version.is37Compatible()).isTrue();
     verify(connection, times(1)).downloadString("/api/server/version");
   }
 }

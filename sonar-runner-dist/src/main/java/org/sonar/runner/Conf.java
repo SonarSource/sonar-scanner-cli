@@ -97,6 +97,10 @@ class Conf {
       Properties properties = new Properties();
       in = new FileInputStream(file);
       properties.load(in);
+      // Trim properties
+      for (String propKey : properties.stringPropertyNames()) {
+        properties.setProperty(propKey, properties.getProperty(propKey).trim());
+      }
       return properties;
 
     } catch (Exception e) {

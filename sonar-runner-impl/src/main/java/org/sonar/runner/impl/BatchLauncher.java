@@ -46,7 +46,7 @@ public class BatchLauncher {
   public void execute(Properties props, List<Object> extensions) {
     ServerConnection serverConnection = ServerConnection.create(props);
     ServerVersion serverVersion = new ServerVersion(serverConnection);
-    JarDownloader jarDownloader = new JarDownloader(props, serverConnection, serverVersion);
+    JarDownloader jarDownloader = new JarDownloader(serverConnection, serverVersion);
     doExecute(jarDownloader, serverVersion, props, extensions);
   }
 
@@ -68,7 +68,7 @@ public class BatchLauncher {
   Object doExecute(final JarDownloader jarDownloader, final ServerVersion serverVersion, final Properties props, final List<Object> extensions) {
     Object launcher = AccessController.doPrivileged(new PrivilegedAction<Object>() {
       public Object run() {
-        List<File> jarFiles = jarDownloader.download();
+        List<File> jarFiles = jarDownloader.checkVersionAndDownload();
         String[][] maskRules = getMaskRules(props);
         IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), maskRules);
         classloader.addFiles(jarFiles);

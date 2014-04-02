@@ -54,7 +54,7 @@ public class BatchLauncherTest {
     FakeIsolatedLauncher isolatedLauncher = (FakeIsolatedLauncher) launcher.doExecute(jarDownloader, mock(ServerVersion.class), props, extensions);
     assertThat(isolatedLauncher.props.get("foo")).isEqualTo("bar");
     assertThat(isolatedLauncher.extensions).isSameAs(extensions);
-    verify(jarDownloader).download();
+    verify(jarDownloader).checkVersionAndDownload();
     verify(tempCleaning).clean();
   }
 

@@ -23,8 +23,7 @@ import java.io.IOException;
 
 class ServerVersion {
 
-  private static final String[] LESS_THAN_3_0 = {"0", "1", "2"};
-  private static final String[] LESS_THAN_3_5 = {"0", "1", "2", "3.0", "3.1", "3.2", "3.3", "3.4"};
+  private static final String[] LESS_THAN_3_7 = {"0", "1", "2", "3.0", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6"};
 
   private final ServerConnection serverConnection;
   private String version;
@@ -55,12 +54,8 @@ class ServerVersion {
     return result;
   }
 
-  boolean is30Compatible() {
-    return !inVersions(version(), LESS_THAN_3_0);
-  }
-
-  boolean is35Compatible() {
-    return !inVersions(version(), LESS_THAN_3_5);
+  boolean is37Compatible() {
+    return !inVersions(version(), LESS_THAN_3_7);
   }
 
   private static boolean inVersions(String version, String[] versions) {

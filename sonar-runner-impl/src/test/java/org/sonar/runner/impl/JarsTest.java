@@ -22,6 +22,7 @@ package org.sonar.runner.impl;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.sonar.home.cache.FileCache;
 
 import java.io.File;
 import java.util.List;
@@ -30,17 +31,17 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-public class Jars30Test {
+public class JarsTest {
 
   ServerConnection connection = mock(ServerConnection.class);
   JarExtractor jarExtractor = mock(JarExtractor.class);
+  FileCache fileCache = mock(FileCache.class);
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
@@ -50,33 +51,43 @@ public class Jars30Test {
     File batchJar = temp.newFile("sonar-runner-batch.jar");
     when(jarExtractor.extractToTemp("sonar-runner-batch")).thenReturn(batchJar);
     // index of the files to download
-    when(connection.downloadString("/batch/")).thenReturn("cpd.jar,squid.jar");
+    when(connection.downloadString("/batch_bootstrap/index")).thenReturn(
+        "cpd.jar|CA124VADFSDS\n" +
+            "squid.jar|34535FSFSDF\n"
+    );
 
-    Jars30 jars30 = new Jars30(connection);
-    List<File> files = jars30.download(temp.newFolder(), jarExtractor);
+    Jars jars35 = new Jars(fileCache, connection, jarExtractor);
+    List<File> files = jars35.download();
 
     assertThat(files).isNotNull();
-    verify(connection, times(1)).downloadString("/batch/");
-    verify(connection, times(1)).download(eq("/batch/cpd.jar"), any(File.class));
-    verify(connection, times(1)).download(eq("/batch/squid.jar"), any(File.class));
+    verify(connection, times(1)).downloadString("/batch_bootstrap/index");
     verifyNoMoreInteractions(connection);
+    verify(fileCache, times(1)).get(eq("cpd.jar"), eq("CA124VADFSDS"), any(FileCache.Downloader.class));
+    verify(fileCache, times(1)).get(eq("squid.jar"), eq("34535FSFSDF"), any(FileCache.Downloader.class));
+    verifyNoMoreInteractions(fileCache);
   }
 
   @Test
   public void should_fail_to_download_files() throws Exception {
     File batchJar = temp.newFile("sonar-runner-batch.jar");
     when(jarExtractor.extractToTemp("sonar-runner-batch")).thenReturn(batchJar);
-    // index of files to download
-    when(connection.downloadString("/batch/")).thenReturn("cpd.jar,squid.jar");
-    doThrow(new IllegalStateException()).when(connection).download(eq("/batch/squid.jar"), any(File.class));
+    // index of the files to download
+    when(connection.downloadString("/batch_bootstrap/index")).thenThrow(new IllegalStateException());
 
-    Jars30 jars30 = new Jars30(connection);
+    Jars jars35 = new Jars(fileCache, connection, jarExtractor);
     try {
-      jars30.download(temp.newFolder(), jarExtractor);
+      jars35.download();
       fail();
     } catch (RuntimeException e) {
       assertThat(e).hasMessage("Fail to download libraries from server");
     }
+  }
 
+  @Test
+  public void test_jar_downloader() throws Exception {
+    Jars.BatchFileDownloader downloader = new Jars.BatchFileDownloader(connection);
+    File toFile = temp.newFile();
+    downloader.download("squid.jar", toFile);
+    verify(connection).download("/batch/squid.jar", toFile);
   }
 }

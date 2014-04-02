@@ -38,35 +38,25 @@ public class JarDownloaderTest {
   ServerConnection serverConnection = mock(ServerConnection.class);
   ServerVersion serverVersion = mock(ServerVersion.class);
   Properties props = new Properties();
-  JarDownloader downloader = spy(new JarDownloader(props, serverConnection, serverVersion));
+  JarDownloader downloader = spy(new JarDownloader(serverConnection, serverVersion));
 
   @Test
-  public void should_download_3_5_jar_files() {
-    when(serverVersion.is35Compatible()).thenReturn(true);
-    doReturn(new ArrayList()).when(downloader).download35();
-    List<File> jarFiles = downloader.download();
-    assertThat(jarFiles).isNotNull();
-  }
-
-  @Test
-  public void should_download_3_0_jar_files() {
-    when(serverVersion.is35Compatible()).thenReturn(false);
-    when(serverVersion.is30Compatible()).thenReturn(true);
-    doReturn(new ArrayList()).when(downloader).download30();
-    List<File> jarFiles = downloader.download();
+  public void should_download_3_7_jar_files() {
+    when(serverVersion.is37Compatible()).thenReturn(true);
+    doReturn(new ArrayList()).when(downloader).download();
+    List<File> jarFiles = downloader.checkVersionAndDownload();
     assertThat(jarFiles).isNotNull();
   }
 
   @Test
   public void should_fail_if_2_x() {
     when(serverVersion.version()).thenReturn("2.10");
-    when(serverVersion.is30Compatible()).thenReturn(false);
-    when(serverVersion.is35Compatible()).thenReturn(false);
+    when(serverVersion.is37Compatible()).thenReturn(false);
     try {
-      downloader.download();
+      downloader.checkVersionAndDownload();
       fail();
     } catch (IllegalStateException e) {
-      assertThat(e).hasMessage("Sonar 2.10 is not supported. Please upgrade Sonar to version 3.0 or more.");
+      assertThat(e).hasMessage("SonarQube 2.10 is not supported. Please upgrade SonarQube to version 3.7 or more.");
     }
   }
 }

@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class Jars35 {
+class Jars {
   private static final String BOOTSTRAP_INDEX_PATH = "/batch_bootstrap/index";
   static final String BATCH_PATH = "/batch/";
 
@@ -36,7 +36,7 @@ class Jars35 {
   private final ServerConnection connection;
   private final JarExtractor jarExtractor;
 
-  Jars35(ServerConnection conn, JarExtractor jarExtractor) {
+  Jars(ServerConnection conn, JarExtractor jarExtractor) {
     this.fileCache = new FileCacheBuilder().setLog(new StandardLog()).build();
     this.connection = conn;
     this.jarExtractor = jarExtractor;
@@ -45,7 +45,7 @@ class Jars35 {
   /**
    * For unit tests
    */
-  Jars35(FileCache fileCache, ServerConnection conn, JarExtractor jarExtractor) {
+  Jars(FileCache fileCache, ServerConnection conn, JarExtractor jarExtractor) {
     this.fileCache = fileCache;
     this.connection = conn;
     this.jarExtractor = jarExtractor;

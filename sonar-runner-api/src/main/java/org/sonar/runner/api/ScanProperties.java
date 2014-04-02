@@ -39,6 +39,11 @@ public interface ScanProperties {
    */
   String PROJECT_KEY = "sonar.projectKey";
 
+  /**
+   * Used to define the exact key of each module. If {@link #PROJECT_KEY} is used instead on a module, then final key of the module will be <parent module key>:<PROJECT_KEY>.
+   * @since SonarQube 4.1
+   */
+  String MODULE_KEY = "sonar.moduleKey";
 
   String PROJECT_NAME = "sonar.projectName";
 
