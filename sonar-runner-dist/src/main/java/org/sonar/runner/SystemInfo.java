@@ -31,15 +31,19 @@ class SystemInfo {
     System.out.println("SonarQube Runner " + RunnerVersion.version());
     System.out.println(java());
     System.out.println(os());
+    String runnerOpts = System.getenv("SONAR_RUNNER_OPTS");
+    if (runnerOpts != null) {
+      System.out.println("SONAR_RUNNER_OPTS=" + runnerOpts);
+    }
   }
 
   static String java() {
     StringBuilder sb = new StringBuilder();
     sb
-        .append("Java ")
-        .append(System.getProperty("java.version"))
-        .append(" ")
-        .append(System.getProperty("java.vendor"));
+      .append("Java ")
+      .append(System.getProperty("java.version"))
+      .append(" ")
+      .append(System.getProperty("java.vendor"));
     String bits = System.getProperty("sun.arch.data.model");
     if ("32".equals(bits) || "64".equals(bits)) {
       sb.append(" (").append(bits).append("-bit)");
@@ -50,11 +54,11 @@ class SystemInfo {
   static String os() {
     StringBuilder sb = new StringBuilder();
     sb
-        .append(System.getProperty("os.name"))
-        .append(" ")
-        .append(System.getProperty("os.version"))
-        .append(" ")
-        .append(System.getProperty("os.arch"));
+      .append(System.getProperty("os.name"))
+      .append(" ")
+      .append(System.getProperty("os.version"))
+      .append(" ")
+      .append(System.getProperty("os.arch"));
     return sb.toString();
   }
 }
