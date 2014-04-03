@@ -20,7 +20,9 @@
 package org.sonar.runner;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.util.Properties;
@@ -30,6 +32,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ConfTest {
+
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
 
   Properties args = new Properties();
   Cli cli = mock(Cli.class);
@@ -61,20 +66,41 @@ public class ConfTest {
     assertThat(conf.properties().get("sonar.prop")).isEqualTo("otherValue");
   }
 
-  // @Test
-  // public void shouldLoadCompleteConfiguration() throws Exception {
-  // File runnerHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/runner").toURI());
-  // File projectHome = new File(getClass().getResource("/org/sonar/runner/MainTest/shouldLoadCompleteConfiguration/project").toURI());
-  // Main main = new Main();
-  // Properties args = main.parseArguments(new String[] {
-  // "-D", "runner.home=" + runnerHome.getCanonicalPath(),
-  // "-D", "project.home=" + projectHome.getCanonicalPath()
-  // });
-  // main.loadProperties(args);
-  //
-  // assertThat(main.projectProperties.getProperty("project.prop")).isEqualTo("foo");
-  // assertThat(main.projectProperties.getProperty("overridden.prop")).isEqualTo("project scope");
-  // assertThat(main.globalProperties.getProperty("global.prop")).isEqualTo("jdbc:mysql:localhost/sonar");
-  // }
+  @Test
+  public void shouldLoadCompleteConfiguration() throws Exception {
+    File runnerHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadCompleteConfiguration/runner").toURI());
+    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadCompleteConfiguration/project").toURI());
+    args.setProperty("runner.home", runnerHome.getCanonicalPath());
+    args.setProperty("project.home", projectHome.getCanonicalPath());
+
+    Properties properties = conf.properties();
+
+    assertThat(properties.getProperty("project.prop")).isEqualTo("foo");
+    assertThat(properties.getProperty("overridden.prop")).isEqualTo("project scope");
+    assertThat(properties.getProperty("global.prop")).isEqualTo("jdbc:mysql:localhost/sonar");
+  }
+
+  @Test
+  public void shouldLoadModuleConfiguration() throws Exception {
+    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadModuleConfiguration/project").toURI());
+    args.setProperty("project.home", projectHome.getCanonicalPath());
+
+    Properties properties = conf.properties();
+
+    assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
+    assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
+  }
+
+  @Test
+  public void shouldSupportSettingBaseDirFromCli() throws Exception {
+    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadModuleConfiguration/project").toURI());
+    args.setProperty("project.home", temp.newFolder().getCanonicalPath());
+    args.setProperty("sonar.projectBaseDir", projectHome.getCanonicalPath());
+
+    Properties properties = conf.properties();
+
+    assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
+    assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
+  }
 
 }

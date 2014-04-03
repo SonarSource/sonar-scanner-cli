@@ -94,7 +94,7 @@ public abstract class Runner<T extends Runner> {
 
   private void initDefaultValues() {
     setDefaultValue(RunnerProperties.HOST_URL, "http://localhost:9000");
-    setDefaultValue(InternalProperties.RUNNER_APP, "SonarRunner");
+    setDefaultValue(InternalProperties.RUNNER_APP, "SonarQubeRunner");
     setDefaultValue(InternalProperties.RUNNER_APP_VERSION, RunnerVersion.version());
   }
 
