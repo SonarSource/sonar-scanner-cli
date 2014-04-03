@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -37,6 +38,7 @@ class Conf {
   private static final String PROPERTY_MODULES = "sonar.modules";
   private static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
   private static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
+  private static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
 
   private final Cli cli;
 
@@ -66,7 +68,8 @@ class Conf {
 
   private Properties loadProjectProperties() throws IOException {
     Properties cliProps = cli.properties();
-    File rootSettingsFile = locatePropertiesFile(cliProps, cliProps.containsKey(PROPERTY_PROJECT_BASEDIR) ? PROPERTY_PROJECT_BASEDIR : PROJECT_HOME, "sonar-project.properties",
+    File rootSettingsFile = locatePropertiesFile(cliProps, cliProps.containsKey(PROPERTY_PROJECT_BASEDIR) ? PROPERTY_PROJECT_BASEDIR : PROJECT_HOME,
+      SONAR_PROJECT_PROPERTIES_FILENAME,
       PROJECT_SETTINGS);
     if (rootSettingsFile != null && rootSettingsFile.isFile() && rootSettingsFile.exists()) {
       Logs.info("Project configuration file: " + rootSettingsFile.getAbsolutePath());
@@ -126,6 +129,7 @@ class Conf {
       }
     } else if (moduleProps.containsKey(PROPERTY_PROJECT_CONFIG_FILE)) {
       baseDir = loadPropsFile(parentBaseDir, moduleProps, moduleId);
+      setProjectBaseDir(baseDir, moduleProps, moduleId);
       moduleProps.remove(PROPERTY_PROJECT_CONFIG_FILE);
     } else {
       baseDir = new File(parentBaseDir, moduleId);
@@ -138,7 +142,7 @@ class Conf {
 
   private static void setProjectBaseDir(File baseDir, Properties childProps, String moduleId) {
     if (!baseDir.isDirectory()) {
-      throw new IllegalStateException("The base directory of the module '" + moduleId + "' does not exist: " + baseDir.getAbsolutePath());
+      throw new IllegalStateException(MessageFormat.format("The base directory of the module ''{0}'' does not exist: {1}", moduleId, baseDir.getAbsolutePath()));
     }
     childProps.put(PROPERTY_PROJECT_BASEDIR, baseDir.getAbsolutePath());
   }
@@ -222,7 +226,7 @@ class Conf {
   }
 
   private void tryToFindAndLoadPropsFile(File baseDir, Properties moduleProps, String moduleId) {
-    File propertyFile = new File(baseDir, "sonar-project.properties");
+    File propertyFile = new File(baseDir, SONAR_PROJECT_PROPERTIES_FILENAME);
     if (propertyFile.isFile()) {
       Properties propsFromFile = toProperties(propertyFile);
       for (Entry<Object, Object> entry : propsFromFile.entrySet()) {

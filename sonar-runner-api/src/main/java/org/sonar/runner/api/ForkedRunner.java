@@ -154,11 +154,11 @@ public class ForkedRunner extends Runner<ForkedRunner> {
       javaExecutable = new Os().thisJavaExe().getAbsolutePath();
     }
     Command command = Command.builder()
-        .setExecutable(javaExecutable)
-        .addEnvVariables(jvmEnvVariables)
-        .addArguments(jvmArguments)
-        .addArguments("-cp", jarFile.getAbsolutePath(), BatchLauncherMain.class.getName(), propertiesFile.getAbsolutePath())
-        .build();
+      .setExecutable(javaExecutable)
+      .addEnvVariables(jvmEnvVariables)
+      .addArguments(jvmArguments)
+      .addArguments("-cp", jarFile.getAbsolutePath(), BatchLauncherMain.class.getName(), propertiesFile.getAbsolutePath())
+      .build();
     return new ForkCommand(command, jarFile, propertiesFile);
   }
 
@@ -185,10 +185,6 @@ public class ForkedRunner extends Runner<ForkedRunner> {
 
   private void fork(ForkCommand forkCommand) {
     if (stdOut == null) {
-      stdOut = new PrintStreamConsumer(System.out);
-      stdOut = new PrintStreamConsumer(System.out);
-      stdOut = new PrintStreamConsumer(System.out);
-      stdOut = new PrintStreamConsumer(System.out);
       stdOut = new PrintStreamConsumer(System.out);
     }
     if (stdErr == null) {
