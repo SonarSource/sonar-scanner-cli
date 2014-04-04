@@ -23,4 +23,5 @@ public interface InternalProperties {
   String RUNNER_APP = "sonarRunner.app";
   String RUNNER_APP_VERSION = "sonarRunner.appVersion";
   String RUNNER_MASK_RULES = "sonarRunner.maskRules";
+  String RUNNER_DUMP_TO_FILE = "sonarRunner.dumpToFile";
 }

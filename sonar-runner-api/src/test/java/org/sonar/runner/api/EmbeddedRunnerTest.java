@@ -19,11 +19,16 @@
  */
 package org.sonar.runner.api;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentMatcher;
 import org.sonar.runner.impl.BatchLauncher;
 import org.sonar.runner.impl.InternalProperties;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -33,6 +38,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class EmbeddedRunnerTest {
+
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
+
   @Test
   public void should_create() {
     assertThat(EmbeddedRunner.create()).isNotNull().isInstanceOf(EmbeddedRunner.class);
@@ -60,10 +69,10 @@ public class EmbeddedRunnerTest {
     assertThat(runner.property(InternalProperties.RUNNER_MASK_RULES, null)).isNull();
 
     runner = EmbeddedRunner.create()
-        .unmask("org.slf4j.Logger")
-        .mask("org.slf4j.")
-        .mask("ch.qos.logback.")
-        .unmask("");
+      .unmask("org.slf4j.Logger")
+      .mask("org.slf4j.")
+      .mask("ch.qos.logback.")
+      .unmask("");
     assertThat(runner.property(InternalProperties.RUNNER_MASK_RULES, null)).isEqualTo("UNMASK|org.slf4j.Logger,MASK|org.slf4j.,MASK|ch.qos.logback.,UNMASK|");
   }
 
@@ -114,6 +123,22 @@ public class EmbeddedRunnerTest {
         return ((List) o).contains(fakeExtension);
       }
     }));
+  }
+
+  @Test
+  public void should_launch_in_simulation_mode() throws IOException {
+    File dump = temp.newFile();
+
+    BatchLauncher batchLauncher = mock(BatchLauncher.class);
+    EmbeddedRunner runner = new EmbeddedRunner(batchLauncher);
+    runner.setProperty("sonar.projectKey", "foo");
+    runner.setProperty("sonarRunner.dumpToFile", dump.getAbsolutePath());
+    runner.execute();
+
+    Properties props = new Properties();
+    props.load(new FileInputStream(dump));
+
+    assertThat(props.getProperty("sonar.projectKey")).isEqualTo("foo");
   }
 
   static class FakeExtension {
