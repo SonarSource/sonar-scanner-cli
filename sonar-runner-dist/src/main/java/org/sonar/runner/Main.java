@@ -35,12 +35,6 @@ import org.sonar.runner.impl.Logs;
  */
 public class Main {
 
-  public static void main(String[] args) {
-    Cli cli = new Cli().parse(args);
-    Main main = new Main(new Exit(), cli, new Conf(cli), new RunnerFactory());
-    main.execute();
-  }
-
   private final Exit exit;
   private final Cli cli;
   private final Conf conf;
@@ -51,6 +45,12 @@ public class Main {
     this.cli = cli;
     this.conf = conf;
     this.runnerFactory = runnerFactory;
+  }
+
+  public static void main(String[] args) {
+    Cli cli = new Cli().parse(args);
+    Main main = new Main(new Exit(), cli, new Conf(cli), new RunnerFactory());
+    main.execute();
   }
 
   void execute() {
@@ -99,8 +99,8 @@ public class Main {
         Logs.error(e.getMessage());
         String previousMsg = "";
         for (Throwable cause = e.getCause(); cause != null
-            && cause.getMessage() != null
-            && !cause.getMessage().equals(previousMsg); cause = cause.getCause()) {
+          && cause.getMessage() != null
+          && !cause.getMessage().equals(previousMsg); cause = cause.getCause()) {
           Logs.error("Caused by: " + cause.getMessage());
           previousMsg = cause.getMessage();
         }
@@ -116,6 +116,5 @@ public class Main {
   private void suggestDebugMode() {
     Logs.error("Re-run SonarQube Runner using the -X switch to enable full debug logging.");
   }
-
 
 }

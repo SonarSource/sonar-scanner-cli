@@ -40,6 +40,10 @@ import java.util.Properties;
  */
 public class IsolatedLauncher {
 
+  private static final String WARN = "WARN";
+  private static final String DEBUG = "DEBUG";
+  private static final String FALSE = "false";
+
   public void execute(String sonarVersion, Properties properties, List<Object> extensions) {
     createBatch(sonarVersion, properties, extensions).execute();
   }
@@ -60,7 +64,7 @@ public class IsolatedLauncher {
     jc.setContext(context);
     context.reset();
     InputStream input = Batch.class.getResourceAsStream("/org/sonar/batch/logback.xml");
-    System.setProperty("ROOT_LOGGER_LEVEL", isDebug(props) ? "DEBUG" : "INFO");
+    System.setProperty("ROOT_LOGGER_LEVEL", isDebug(props) ? DEBUG : "INFO");
     context.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(props));
     context.putProperty("SQL_RESULTS_LOGGER_LEVEL", getSqlResultsLevel(props));
     try {
@@ -76,18 +80,18 @@ public class IsolatedLauncher {
 
   @VisibleForTesting
   protected boolean isDebug(Properties props) {
-    return Boolean.parseBoolean(props.getProperty("sonar.verbose", "false"));
+    return Boolean.parseBoolean(props.getProperty("sonar.verbose", FALSE));
   }
 
   @VisibleForTesting
   protected static String getSqlLevel(Properties props) {
-    boolean showSql = "true".equals(props.getProperty("sonar.showSql", "false"));
-    return showSql ? "DEBUG" : "WARN";
+    boolean showSql = "true".equals(props.getProperty("sonar.showSql", FALSE));
+    return showSql ? DEBUG : WARN;
   }
 
   @VisibleForTesting
   protected static String getSqlResultsLevel(Properties props) {
-    boolean showSql = "true".equals(props.getProperty("sonar.showSqlResults", "false"));
-    return showSql ? "DEBUG" : "WARN";
+    boolean showSql = "true".equals(props.getProperty("sonar.showSqlResults", FALSE));
+    return showSql ? DEBUG : WARN;
   }
 }

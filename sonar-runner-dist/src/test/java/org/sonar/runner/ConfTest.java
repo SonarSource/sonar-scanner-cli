@@ -92,6 +92,18 @@ public class ConfTest {
   }
 
   @Test
+  public void shouldLoadModuleConfigurationOverrideBasedir() throws Exception {
+    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());
+    args.setProperty("project.home", projectHome.getCanonicalPath());
+
+    Properties properties = conf.properties();
+
+    assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
+    assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
+    assertThat(properties.getProperty("module3.sonar.projectName")).isEqualTo("Module 3");
+  }
+
+  @Test
   public void shouldSupportSettingBaseDirFromCli() throws Exception {
     File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadModuleConfiguration/project").toURI());
     args.setProperty("project.home", temp.newFolder().getCanonicalPath());

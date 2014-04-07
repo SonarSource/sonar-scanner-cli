@@ -194,8 +194,7 @@ public class ForkedRunner extends Runner<ForkedRunner> {
     if (status != 0) {
       if (processMonitor != null && processMonitor.stop()) {
         stdOut.consumeLine(String.format("SonarQube Runner was stopped [status=%s]", status));
-      }
-      else {
+      } else {
         throw new IllegalStateException("Error status [command: " + forkCommand.command + "]: " + status);
       }
     }

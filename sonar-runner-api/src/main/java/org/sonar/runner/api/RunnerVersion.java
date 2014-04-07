@@ -32,10 +32,6 @@ public enum RunnerVersion {
 
   private String version;
 
-  public static String version() {
-    return INSTANCE.version;
-  }
-
   private RunnerVersion() {
     Scanner scanner = new Scanner(getClass().getResourceAsStream("/org/sonar/runner/api/version.txt"), "UTF-8");
     try {
@@ -44,4 +40,9 @@ public enum RunnerVersion {
       scanner.close();
     }
   }
+
+  public static String version() {
+    return INSTANCE.version;
+  }
+
 }

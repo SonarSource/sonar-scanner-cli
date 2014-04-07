@@ -27,12 +27,15 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class ServerConnection {
 
+  private static final String SONAR_SERVER_CAN_NOT_BE_REACHED = "Sonar server ''{0}'' can not be reached";
+  private static final String STATUS_RETURNED_BY_URL_IS_INVALID = "Status returned by url : ''{0}'' is invalid : {1}";
   static final int CONNECT_TIMEOUT_MILLISECONDS = 30000;
   static final int READ_TIMEOUT_MILLISECONDS = 60000;
   private static final Pattern CHARSET_PATTERN = Pattern.compile("(?i)\\bcharset=\\s*\"?([^\\s;\"]*)");
@@ -65,13 +68,13 @@ class ServerConnection {
       Logs.debug("Download " + fullUrl + " to " + toFile.getAbsolutePath());
       HttpRequest httpRequest = newHttpRequest(new URL(fullUrl));
       if (!httpRequest.ok()) {
-        throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + httpRequest.code());
+        throw new IOException(MessageFormat.format(STATUS_RETURNED_BY_URL_IS_INVALID, fullUrl, httpRequest.code()));
       }
       httpRequest.receive(toFile);
 
     } catch (Exception e) {
       if (e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException) {
-        Logs.error("Sonar server '" + serverUrl + "' can not be reached");
+        Logs.error(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED, serverUrl));
       }
       FileUtils.deleteQuietly(toFile);
       throw new IllegalStateException("Fail to download: " + fullUrl, e);
@@ -88,13 +91,13 @@ class ServerConnection {
         charset = "UTF-8";
       }
       if (!httpRequest.ok()) {
-        throw new IOException("Status returned by url : '" + fullUrl + "' is invalid : " + httpRequest.code());
+        throw new IOException(MessageFormat.format(STATUS_RETURNED_BY_URL_IS_INVALID, fullUrl, httpRequest.code()));
       }
       return httpRequest.body(charset);
 
     } catch (HttpRequest.HttpRequestException e) {
       if (e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException) {
-        Logs.error("Sonar server '" + serverUrl + "' can not be reached");
+        Logs.error(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED, serverUrl));
       }
       throw e;
 

@@ -25,3 +25,4 @@
 package org.sonar.runner.batch;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+

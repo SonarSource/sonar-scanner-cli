@@ -66,7 +66,7 @@ public class BatchLauncher {
    * @return the {@link org.sonar.runner.batch.IsolatedLauncher} instance for unit tests
    */
   Object doExecute(final JarDownloader jarDownloader, final ServerVersion serverVersion, final Properties props, final List<Object> extensions) {
-    Object launcher = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+    return AccessController.doPrivileged(new PrivilegedAction<Object>() {
       public Object run() {
         List<File> jarFiles = jarDownloader.checkVersionAndDownload();
         String[][] maskRules = getMaskRules(props);
@@ -97,7 +97,6 @@ public class BatchLauncher {
         }
       }
     });
-    return launcher;
   }
 
 }
