@@ -55,7 +55,7 @@ goto run
 
 :cleanSonarRunnerHome
 @REM If the property has a trailing backslash, remove it
-if %SONAR_RUNNER_HOME:~-1%==\ set SONAR_RUNNER_HOME=%SONAR_RUNNER_HOME:~0,-1%
+if "%SONAR_RUNNER_HOME:~-1%"=="\" set SONAR_RUNNER_HOME=%SONAR_RUNNER_HOME:~0,-1%
 
 @REM Check if the provided SONAR_RUNNER_HOME is a valid install dir
 IF EXIST "%SONAR_RUNNER_HOME%\lib\sonar-runner-dist-${project.version}.jar" goto run
