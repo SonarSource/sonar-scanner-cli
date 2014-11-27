@@ -92,6 +92,19 @@ public class ConfTest {
   }
 
   @Test
+  public void shouldSupportDeepModuleConfigurationInRoot() throws Exception {
+    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldSupportDeepModuleConfigurationInRoot/project").toURI());
+    args.setProperty("project.home", projectHome.getCanonicalPath());
+
+    Properties properties = conf.properties();
+
+    assertThat(properties.getProperty("1.sonar.projectName")).isEqualTo("Module 1");
+    assertThat(properties.getProperty("11.sonar.projectName")).isEqualTo("Module 11");
+    assertThat(properties.getProperty("12.sonar.projectName")).isEqualTo("Module 12");
+    assertThat(properties.getProperty("2.sonar.projectName")).isEqualTo("Module 2");
+  }
+
+  @Test
   public void shouldLoadModuleConfigurationOverrideBasedir() throws Exception {
     File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());
     args.setProperty("project.home", projectHome.getCanonicalPath());
