@@ -97,7 +97,7 @@ class Conf {
     File parentBaseDir = new File(parentProps.getProperty(PROPERTY_PROJECT_BASEDIR));
     if (parentProps.containsKey(PROPERTY_MODULES)) {
       for (String module : getListFromProperty(parentProps, PROPERTY_MODULES)) {
-        Properties moduleProps = extractModuleProperties(module, projectProps);
+        Properties moduleProps = extractModuleProperties(module, parentProps);
         moduleProps = loadChildConfigFile(parentBaseDir, moduleProps, module);
 
         // the child project may have children as well

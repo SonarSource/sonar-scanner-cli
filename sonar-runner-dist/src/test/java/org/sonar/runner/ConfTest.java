@@ -99,8 +99,8 @@ public class ConfTest {
     Properties properties = conf.properties();
 
     assertThat(properties.getProperty("1.sonar.projectName")).isEqualTo("Module 1");
-    assertThat(properties.getProperty("11.sonar.projectName")).isEqualTo("Module 11");
-    assertThat(properties.getProperty("12.sonar.projectName")).isEqualTo("Module 12");
+    assertThat(properties.getProperty("1.11.sonar.projectName")).isEqualTo("Module 11");
+    assertThat(properties.getProperty("1.12.sonar.projectName")).isEqualTo("Module 12");
     assertThat(properties.getProperty("2.sonar.projectName")).isEqualTo("Module 2");
   }
 
