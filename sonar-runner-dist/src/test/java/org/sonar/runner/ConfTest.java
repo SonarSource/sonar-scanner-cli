@@ -100,8 +100,12 @@ public class ConfTest {
 
     assertThat(properties.getProperty("1.sonar.projectName")).isEqualTo("Module 1");
     assertThat(properties.getProperty("1.11.sonar.projectName")).isEqualTo("Module 11");
+    assertThat(properties.getProperty("1.11.111.sonar.projectName")).isEqualTo("Module 111");
     assertThat(properties.getProperty("1.12.sonar.projectName")).isEqualTo("Module 12");
     assertThat(properties.getProperty("2.sonar.projectName")).isEqualTo("Module 2");
+
+    // SONARUNNER-125
+    assertThat(properties.getProperty("11.111.sonar.projectName")).isNull();
   }
 
   @Test

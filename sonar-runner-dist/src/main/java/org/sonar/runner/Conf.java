@@ -101,7 +101,7 @@ class Conf {
         moduleProps = loadChildConfigFile(parentBaseDir, moduleProps, module);
 
         // the child project may have children as well
-        loadModulesProperties(moduleProps, projectProps, module + ".");
+        loadModulesProperties(moduleProps, projectProps, prefix + module + ".");
         // and finally add this child properties to global props
         merge(projectProps, prefix, module, moduleProps);
       }
