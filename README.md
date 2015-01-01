@@ -1,13 +1,10 @@
-Sonar Runner
+SonarQube Runner [![Build Status](https://travis-ci.org/SonarSource/sonar-runner.svg?branch=master)](https://travis-ci.org/SonarSource/sonar-runner)
 =========================
 
-This is the Sonar Runner plugin
+Bootstrapper of code analysis
 
-Project homepage:
-http://docs.codehaus.org/display/SONAR/Analyzing+with+SonarQube+Runner
+Documentation:
+http://docs.sonarqube.org/display/SONAR/Analyzing+with+SonarQube+Runner
 
-Issue tracking:
-http://jira.codehaus.org/browse/SONARPLUGINS/component/14640
-
-CI builds:
-https://sonarplugins.ci.cloudbees.com/job/sonar-runner/
+Issue Tracker:
+http://jira.codehaus.org/browse/SONARUNNER
