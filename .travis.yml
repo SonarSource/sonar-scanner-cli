@@ -7,3 +7,9 @@ jdk:
 script: mvn clean install
 
 install: true
+
+sudo: false
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
