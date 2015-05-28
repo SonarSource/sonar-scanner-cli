@@ -19,44 +19,27 @@
  */
 package org.sonar.runner.impl;
 
-import org.junit.Test;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.Fail.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 public class JarDownloaderTest {
 
   ServerConnection serverConnection = mock(ServerConnection.class);
-  ServerVersion serverVersion = mock(ServerVersion.class);
   Properties props = new Properties();
-  JarDownloader downloader = spy(new JarDownloader(serverConnection, serverVersion));
+  JarDownloader downloader = spy(new JarDownloader(serverConnection));
 
   @Test
-  public void should_download_3_7_jar_files() {
-    when(serverVersion.is37Compatible()).thenReturn(true);
+  public void should_download_jar_files() {
     doReturn(new ArrayList()).when(downloader).download();
-    List<File> jarFiles = downloader.checkVersionAndDownload();
+    List<File> jarFiles = downloader.download();
     assertThat(jarFiles).isNotNull();
-  }
-
-  @Test
-  public void should_fail_if_2_x() {
-    when(serverVersion.version()).thenReturn("2.10");
-    when(serverVersion.is37Compatible()).thenReturn(false);
-    try {
-      downloader.checkVersionAndDownload();
-      fail();
-    } catch (IllegalStateException e) {
-      assertThat(e).hasMessage("SonarQube 2.10 is not supported. Please upgrade SonarQube to version 3.7 or more.");
-    }
   }
 }

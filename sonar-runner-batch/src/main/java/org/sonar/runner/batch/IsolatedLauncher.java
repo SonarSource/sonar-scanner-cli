@@ -23,16 +23,15 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.google.common.annotations.VisibleForTesting;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.utils.SonarException;
 import org.sonar.batch.bootstrapper.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
-
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * This class is executed within the classloader provided by the server. It contains the installed plugins and
@@ -44,11 +43,11 @@ public class IsolatedLauncher {
   private static final String DEBUG = "DEBUG";
   private static final String FALSE = "false";
 
-  public void execute(String sonarVersion, Properties properties, List<Object> extensions) {
-    createBatch(sonarVersion, properties, extensions).execute();
+  public void execute(Properties properties, List<Object> extensions) {
+    createBatch(properties, extensions).execute();
   }
 
-  Batch createBatch(String sonarVersion, Properties properties, List<Object> extensions) {
+  Batch createBatch(Properties properties, List<Object> extensions) {
     initLogging(properties);
     EnvironmentInformation env = new EnvironmentInformation(properties.getProperty("sonarRunner.app"), properties.getProperty("sonarRunner.appVersion"));
     return Batch.builder()
