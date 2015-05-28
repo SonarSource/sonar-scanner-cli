@@ -19,6 +19,10 @@
  */
 package org.sonar.runner.impl;
 
+import org.sonar.home.cache.PersistentCacheBuilder;
+
+import org.sonar.home.cache.PersistentCache;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,9 +48,19 @@ public class BatchLauncher {
   }
 
   public void execute(Properties props, List<Object> extensions) {
-    ServerConnection serverConnection = ServerConnection.create(props);
+    ServerConnection serverConnection = ServerConnection.create(props, getCache(props));
     JarDownloader jarDownloader = new JarDownloader(serverConnection);
     doExecute(jarDownloader, props, extensions);
+  }
+
+  private static PersistentCache getCache(Properties props) {
+    PersistentCacheBuilder builder = new PersistentCacheBuilder();
+
+    if ("true".equals(props.getProperty("sonar.forceUpdate"))) {
+      builder.forceUpdate(true);
+    }
+
+    return builder.build();
   }
 
   private static String[][] getMaskRules(final Properties props) {

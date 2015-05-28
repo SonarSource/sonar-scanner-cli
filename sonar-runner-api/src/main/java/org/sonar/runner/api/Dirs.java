@@ -19,7 +19,6 @@
  */
 package org.sonar.runner.api;
 
-import org.apache.commons.io.FileUtils;
 import org.sonar.runner.impl.Logs;
 
 import java.io.File;
@@ -54,7 +53,7 @@ class Dirs {
         workDir = new File(projectDir, path);
       }
     }
-    FileUtils.deleteQuietly(workDir);
+    Utils.deleteQuietly(workDir);
     runner.setProperty(RunnerProperties.WORK_DIR, workDir.getAbsolutePath());
     Logs.info("Work directory: " + workDir.getAbsolutePath());
   }

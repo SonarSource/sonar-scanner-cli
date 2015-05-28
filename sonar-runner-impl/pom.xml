@@ -24,6 +24,10 @@
       <artifactId>sonar-home</artifactId>
     </dependency>
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>sonar-runner-batch</artifactId>
       <version>${project.version}</version>

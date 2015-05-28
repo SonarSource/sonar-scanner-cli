@@ -19,12 +19,17 @@
  */
 package org.sonar.runner.impl;
 
+import org.junit.Before;
+import org.sonar.home.cache.PersistentCacheBuilder;
+import org.sonar.home.cache.PersistentCache;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -38,14 +43,21 @@ public class ServerConnectionTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
+  private PersistentCache cache = null;
+
+  @Before
+  public void setUp() {
+    cache = new PersistentCacheBuilder().setSonarHome(temp.getRoot().toPath()).build();
+  }
+
   @Test
   public void should_download_to_string() throws Exception {
     httpServer.setMockResponseData("abcde");
     Properties props = new Properties();
     props.setProperty("sonar.host.url", httpServer.url());
 
-    ServerConnection connection = ServerConnection.create(props);
-    String response = connection.downloadString("/batch/index.txt");
+    ServerConnection connection = ServerConnection.create(props, cache);
+    String response = connection.downloadStringCache("/batch/index.txt");
 
     assertThat(response).isEqualTo("abcde");
   }
@@ -56,11 +68,50 @@ public class ServerConnectionTest {
     Properties props = new Properties();
     props.setProperty("sonar.host.url", httpServer.url());
 
-    ServerConnection connection = ServerConnection.create(props);
+    ServerConnection connection = ServerConnection.create(props, cache);
     File toFile = temp.newFile();
     connection.download("/batch/index.txt", toFile);
 
     assertThat(FileUtils.readFileToString(toFile)).isEqualTo("abcde");
+  }
+  
+  @Test
+  public void should_cache_jar_list() throws Exception {
+    File cacheDir = new File(temp.getRoot(), "ws_cache");
+    httpServer.setMockResponseData("abcde");
+    Properties props = new Properties();
+    props.setProperty("sonar.host.url", httpServer.url() + "/");
+    props.setProperty("sonar.analysis.mode", "preview");
+    
+    assertThat(cacheDir.list().length).isEqualTo(0);
+    ServerConnection connection = ServerConnection.create(props, cache);
+    String str = connection.downloadStringCache("/batch/index.txt");
+    
+    assertThat(str).isEqualTo("abcde");
+    assertThat(cacheDir.list().length).isEqualTo(2);
+    
+    httpServer.setMockResponseData("never requested");
+    str = connection.downloadStringCache("/batch/index.txt");
+    assertThat(str).isEqualTo("abcde");
+  }
+  
+  @Test
+  public void should_not_cache_not_preview() throws Exception {
+    File cacheDir = new File(temp.getRoot(), "ws_cache");
+    httpServer.setMockResponseData("abcde");
+    Properties props = new Properties();
+    props.setProperty("sonar.host.url", httpServer.url() + "/");
+    
+    assertThat(cacheDir.list().length).isEqualTo(0);
+    ServerConnection connection = ServerConnection.create(props, cache);
+    String str = connection.downloadStringCache("/batch/index.txt");
+    
+    assertThat(str).isEqualTo("abcde");
+    assertThat(cacheDir.list().length).isEqualTo(0);
+    
+    httpServer.setMockResponseData("request2");
+    str = connection.downloadStringCache("/batch/index.txt");
+    assertThat(str).isEqualTo("request2");
   }
 
   // SONARPLUGINS-3061
@@ -70,7 +121,7 @@ public class ServerConnectionTest {
     Properties props = new Properties();
     props.setProperty("sonar.host.url", httpServer.url() + "/");
 
-    ServerConnection connection = ServerConnection.create(props);
+    ServerConnection connection = ServerConnection.create(props, cache);
     File toFile = temp.newFile();
     connection.download("/batch/index.txt", toFile);
 
@@ -82,7 +133,7 @@ public class ServerConnectionTest {
     Properties props = new Properties();
     props.setProperty("sonar.host.url", "http://localhost:" + NetworkUtil.getNextAvailablePort());
 
-    ServerConnection connection = ServerConnection.create(props);
+    ServerConnection connection = ServerConnection.create(props, cache);
     File toFile = temp.newFile();
     try {
       connection.download("/batch/index.txt", toFile);
@@ -97,9 +148,9 @@ public class ServerConnectionTest {
     Properties props = new Properties();
     props.setProperty("sonar.host.url", "http://localhost:" + NetworkUtil.getNextAvailablePort());
 
-    ServerConnection connection = ServerConnection.create(props);
+    ServerConnection connection = ServerConnection.create(props, cache);
     try {
-      connection.downloadString("/batch/index.txt");
+      connection.downloadStringCache("/batch/index.txt");
       fail();
     } catch (Exception e) {
       // success

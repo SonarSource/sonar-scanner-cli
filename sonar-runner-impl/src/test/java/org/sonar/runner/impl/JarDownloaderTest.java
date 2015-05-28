@@ -38,7 +38,7 @@ public class JarDownloaderTest {
 
   @Test
   public void should_download_jar_files() {
-    doReturn(new ArrayList()).when(downloader).download();
+    doReturn(new ArrayList<File>()).when(downloader).download();
     List<File> jarFiles = downloader.download();
     assertThat(jarFiles).isNotNull();
   }

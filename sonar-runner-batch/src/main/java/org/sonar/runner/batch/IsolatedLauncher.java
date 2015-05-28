@@ -23,11 +23,13 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.google.common.annotations.VisibleForTesting;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.commons.io.IOUtils;
+
 import org.slf4j.LoggerFactory;
 import org.sonar.api.utils.SonarException;
 import org.sonar.batch.bootstrapper.Batch;
@@ -62,18 +64,15 @@ public class IsolatedLauncher {
     JoranConfigurator jc = new JoranConfigurator();
     jc.setContext(context);
     context.reset();
-    InputStream input = Batch.class.getResourceAsStream("/org/sonar/batch/logback.xml");
-    System.setProperty("ROOT_LOGGER_LEVEL", isDebug(props) ? DEBUG : "INFO");
-    context.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(props));
-    context.putProperty("SQL_RESULTS_LOGGER_LEVEL", getSqlResultsLevel(props));
-    try {
+    try (InputStream input = Batch.class.getResourceAsStream("/org/sonar/batch/logback.xml")) {
+      System.setProperty("ROOT_LOGGER_LEVEL", isDebug(props) ? DEBUG : "INFO");
+      context.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(props));
+      context.putProperty("SQL_RESULTS_LOGGER_LEVEL", getSqlResultsLevel(props));
       jc.doConfigure(input);
-
     } catch (JoranException e) {
       throw new SonarException("can not initialize logging", e);
-
-    } finally {
-      IOUtils.closeQuietly(input);
+    } catch (IOException e1) {
+      throw new SonarException("couldn't close resource", e1);
     }
   }
 

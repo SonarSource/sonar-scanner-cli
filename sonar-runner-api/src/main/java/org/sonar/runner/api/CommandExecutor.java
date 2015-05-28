@@ -19,8 +19,6 @@
  */
 package org.sonar.runner.api;
 
-import org.apache.commons.io.IOUtils;
-
 import javax.annotation.Nullable;
 
 import java.io.BufferedReader;
@@ -136,10 +134,10 @@ class CommandExecutor {
 
   private void closeStreams(Process process) {
     if (process != null) {
-      IOUtils.closeQuietly(process.getInputStream());
-      IOUtils.closeQuietly(process.getInputStream());
-      IOUtils.closeQuietly(process.getOutputStream());
-      IOUtils.closeQuietly(process.getErrorStream());
+      Utils.closeQuietly(process.getInputStream());
+      Utils.closeQuietly(process.getInputStream());
+      Utils.closeQuietly(process.getOutputStream());
+      Utils.closeQuietly(process.getErrorStream());
     }
   }
 
@@ -167,9 +165,8 @@ class CommandExecutor {
 
     @Override
     public void run() {
-      InputStreamReader isr = new InputStreamReader(is);
-      BufferedReader br = new BufferedReader(isr);
-      try {
+      try (InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isr)) {
         String line;
         while ((line = br.readLine()) != null) {
           consumeLine(line);
@@ -177,9 +174,6 @@ class CommandExecutor {
       } catch (IOException ioe) {
         exception = ioe;
 
-      } finally {
-        IOUtils.closeQuietly(br);
-        IOUtils.closeQuietly(isr);
       }
     }
 

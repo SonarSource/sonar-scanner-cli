@@ -19,8 +19,6 @@
  */
 package org.sonar.runner.impl;
 
-import org.apache.commons.io.IOUtils;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -43,15 +41,12 @@ public class BatchLauncherMain {
 
   private Properties loadProperties(String arg) throws IOException {
     Properties props = new Properties();
-    FileInputStream input = new FileInputStream(arg);
-    try {
+    try (FileInputStream input = new FileInputStream(arg)) {
       props.load(input);
       // just to be clean, do not forward properties that do not make sense in fork mode
       props.remove(InternalProperties.RUNNER_MASK_RULES);
-
-    } finally {
-      IOUtils.closeQuietly(input);
     }
+
     return props;
   }
 
