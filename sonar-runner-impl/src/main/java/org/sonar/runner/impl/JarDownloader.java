@@ -24,22 +24,9 @@ import java.util.List;
 
 class JarDownloader {
   private final ServerConnection serverConnection;
-  private final ServerVersion serverVersion;
 
-  JarDownloader(ServerConnection conn, ServerVersion version) {
+  JarDownloader(ServerConnection conn) {
     this.serverConnection = conn;
-    this.serverVersion = version;
-  }
-
-  List<File> checkVersionAndDownload() {
-    List<File> jarFiles;
-    if (serverVersion.is37Compatible()) {
-      jarFiles = download();
-    } else {
-      throw new IllegalStateException("SonarQube " + serverVersion.version()
-        + " is not supported. Please upgrade SonarQube to version 3.7 or more.");
-    }
-    return jarFiles;
   }
 
   List<File> download() {

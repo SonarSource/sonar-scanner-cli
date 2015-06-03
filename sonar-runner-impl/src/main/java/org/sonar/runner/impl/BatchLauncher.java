@@ -45,9 +45,8 @@ public class BatchLauncher {
 
   public void execute(Properties props, List<Object> extensions) {
     ServerConnection serverConnection = ServerConnection.create(props);
-    ServerVersion serverVersion = new ServerVersion(serverConnection);
-    JarDownloader jarDownloader = new JarDownloader(serverConnection, serverVersion);
-    doExecute(jarDownloader, serverVersion, props, extensions);
+    JarDownloader jarDownloader = new JarDownloader(serverConnection);
+    doExecute(jarDownloader, props, extensions);
   }
 
   private static String[][] getMaskRules(final Properties props) {
@@ -65,33 +64,35 @@ public class BatchLauncher {
   /**
    * @return the {@link org.sonar.runner.batch.IsolatedLauncher} instance for unit tests
    */
-  Object doExecute(final JarDownloader jarDownloader, final ServerVersion serverVersion, final Properties props, final List<Object> extensions) {
+  Object doExecute(final JarDownloader jarDownloader, final Properties props, final List<Object> extensions) {
     return AccessController.doPrivileged(new PrivilegedAction<Object>() {
       public Object run() {
-        List<File> jarFiles = jarDownloader.checkVersionAndDownload();
+        List<File> jarFiles = jarDownloader.download();
+        Logs.debug("Create isolated classloader...");
         String[][] maskRules = getMaskRules(props);
         IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), maskRules);
         classloader.addFiles(jarFiles);
-        Object launcher = delegateExecution(classloader, serverVersion.version(), props, extensions);
+        Object launcher = delegateExecution(classloader, props, extensions);
         tempCleaning.clean();
         return launcher;
       }
 
-      private Object delegateExecution(IsolatedClassloader classloader, String sonarVersion, Properties properties, List<Object> extensions) {
+      private Object delegateExecution(IsolatedClassloader classloader, Properties properties, List<Object> extensions) {
         ClassLoader initialContextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
           Thread.currentThread().setContextClassLoader(classloader);
           Class<?> launcherClass = classloader.loadClass(isolatedLauncherClass);
-          Method executeMethod = launcherClass.getMethod("execute", String.class, Properties.class, List.class);
+          Method executeMethod = launcherClass.getMethod("execute", Properties.class, List.class);
           Object launcher = launcherClass.newInstance();
-          executeMethod.invoke(launcher, sonarVersion, properties, extensions);
+          Logs.debug("Start IsolatedLauncher");
+          executeMethod.invoke(launcher, properties, extensions);
           return launcher;
         } catch (InvocationTargetException e) {
           // Unwrap original exception
           throw new RunnerException("Unable to execute Sonar", e.getTargetException());
         } catch (Exception e) {
           // Catch all other exceptions, which relates to reflection
-          throw new RunnerException("Unable to execute Sonar", e);
+          throw new RunnerException("Unable to execute SonarQube", e);
         } finally {
           Thread.currentThread().setContextClassLoader(initialContextClassLoader);
         }

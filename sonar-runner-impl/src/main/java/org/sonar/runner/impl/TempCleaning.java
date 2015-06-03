@@ -19,13 +19,12 @@
  */
 package org.sonar.runner.impl;
 
+import java.io.File;
+import java.util.Collection;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AgeFileFilter;
 import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
-
-import java.io.File;
-import java.util.Collection;
 
 /**
  * The file sonar-runner-batch.jar is locked by the classloader on Windows and can't be dropped at the end of the execution.
@@ -48,14 +47,16 @@ class TempCleaning {
   }
 
   void clean() {
+    Logs.debug("Start temp cleaning...");
     long cutoff = System.currentTimeMillis() - ONE_DAY_IN_MILLISECONDS;
     Collection<File> files = FileUtils.listFiles(tempDir, new AndFileFilter(
-        new PrefixFileFilter("sonar-runner-batch"),
-        new AgeFileFilter(cutoff)
-    ), null);
+      new PrefixFileFilter("sonar-runner-batch"),
+      new AgeFileFilter(cutoff)
+      ), null);
 
     for (File file : files) {
       FileUtils.deleteQuietly(file);
     }
+    Logs.debug("Temp cleaning done");
   }
 }

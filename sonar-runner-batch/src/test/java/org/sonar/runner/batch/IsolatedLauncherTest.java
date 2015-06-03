@@ -19,11 +19,10 @@
  */
 package org.sonar.runner.batch;
 
-import org.junit.Test;
-import org.sonar.batch.bootstrapper.Batch;
-
 import java.util.Collections;
 import java.util.Properties;
+import org.junit.Test;
+import org.sonar.batch.bootstrapper.Batch;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -39,7 +38,7 @@ public class IsolatedLauncherTest {
     props.setProperty("sonar.projectName", "Sample");
     props.setProperty("sonar.projectVersion", "1.0");
     props.setProperty("sonar.sources", "src");
-    Batch batch = launcher.createBatch("3.5", props, Collections.emptyList());
+    Batch batch = launcher.createBatch(props, Collections.emptyList());
 
     assertThat(batch).isNotNull();
   }

@@ -19,13 +19,12 @@
  */
 package org.sonar.runner.impl;
 
-import org.junit.Test;
-import org.sonar.runner.batch.IsolatedLauncher;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import org.junit.Test;
+import org.sonar.runner.batch.IsolatedLauncher;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
@@ -51,10 +50,10 @@ public class BatchLauncherTest {
     props.put(InternalProperties.RUNNER_MASK_RULES, "UNMASK|org.sonar.runner.impl.");
     List<Object> extensions = new ArrayList<Object>();
 
-    FakeIsolatedLauncher isolatedLauncher = (FakeIsolatedLauncher) launcher.doExecute(jarDownloader, mock(ServerVersion.class), props, extensions);
+    FakeIsolatedLauncher isolatedLauncher = (FakeIsolatedLauncher) launcher.doExecute(jarDownloader, props, extensions);
     assertThat(isolatedLauncher.props.get("foo")).isEqualTo("bar");
     assertThat(isolatedLauncher.extensions).isSameAs(extensions);
-    verify(jarDownloader).checkVersionAndDownload();
+    verify(jarDownloader).download();
     verify(tempCleaning).clean();
   }
 
@@ -66,7 +65,7 @@ public class BatchLauncherTest {
     // The current classloader in not available -> fail to load FakeIsolatedLauncher
     props.put(InternalProperties.RUNNER_MASK_RULES, "");
     try {
-      launcher.doExecute(jarDownloader, mock(ServerVersion.class), props, Collections.emptyList());
+      launcher.doExecute(jarDownloader, props, Collections.emptyList());
       fail();
     } catch (RunnerException e) {
       // success
@@ -86,7 +85,7 @@ public class BatchLauncherTest {
     Properties props = new Properties();
     List<Object> extensions = Collections.emptyList();
     BatchLauncher launcher = spy(new BatchLauncher());
-    doReturn(new Object()).when(launcher).doExecute(any(JarDownloader.class), any(ServerVersion.class), eq(props), eq(extensions));
+    doReturn(new Object()).when(launcher).doExecute(any(JarDownloader.class), eq(props), eq(extensions));
 
     launcher.execute(props, extensions);
 
@@ -96,10 +95,8 @@ public class BatchLauncherTest {
   public static class FakeIsolatedLauncher {
     public Properties props = null;
     public List<Object> extensions = null;
-    private String sonarVersion;
 
-    public void execute(String sonarVersion, Properties props, List<Object> extensions) {
-      this.sonarVersion = sonarVersion;
+    public void execute(Properties props, List<Object> extensions) {
       this.props = props;
       this.extensions = extensions;
     }
