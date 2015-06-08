@@ -19,7 +19,6 @@
  */
 package org.sonar.runner.api;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,6 +28,7 @@ import org.junit.rules.TestName;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -122,7 +122,7 @@ public class CommandExecutorTest {
     assertThat(exitCode).isEqualTo(0);
     File logFile = new File(workDir, "echo.log");
     assertThat(logFile).exists();
-    String log = FileUtils.readFileToString(logFile);
+    String log = new String(Files.readAllBytes(logFile.toPath()));
     assertThat(log).contains(workDir.getAbsolutePath());
     assertThat(log).contains("Parameter: 1");
     assertThat(log).contains("Environment variable: 2");

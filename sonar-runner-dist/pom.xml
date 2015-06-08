@@ -52,6 +52,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
+          <excludes>
+            <exclude>org/sonar/runner/commonsio/*</exclude>
+            </excludes>
           <archive>
             <manifest>
               <addClasspath>false</addClasspath>
@@ -113,7 +116,7 @@
               <rules>
                 <requireFilesSize>
                   <minsize>279000</minsize>
-                  <maxsize>300000</maxsize>
+                  <maxsize>350000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonar-runner-${project.version}.zip</file>
                   </files>

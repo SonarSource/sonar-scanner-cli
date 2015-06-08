@@ -19,6 +19,7 @@
  */
 package org.sonar.runner.impl;
 
+import org.sonar.home.cache.PersistentCache;
 import com.github.kevinsawicki.http.HttpRequest;
 import org.apache.commons.io.FileUtils;
 
@@ -29,6 +30,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,9 +45,14 @@ class ServerConnection {
   private final String serverUrl;
   private final String userAgent;
 
-  private ServerConnection(String serverUrl, String app, String appVersion) {
+  private final PersistentCache wsCache;
+  private final boolean isModePreview;
+
+  private ServerConnection(String serverUrl, String app, String appVersion, boolean preview, PersistentCache cache) {
     this.serverUrl = removeEndSlash(serverUrl);
     this.userAgent = app + "/" + appVersion;
+    this.wsCache = cache;
+    this.isModePreview = preview;
   }
 
   private String removeEndSlash(String url) {
@@ -55,11 +62,42 @@ class ServerConnection {
     return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
   }
 
-  static ServerConnection create(Properties properties) {
+  static ServerConnection create(Properties properties, PersistentCache cache) {
     String serverUrl = properties.getProperty("sonar.host.url");
     String app = properties.getProperty(InternalProperties.RUNNER_APP);
     String appVersion = properties.getProperty(InternalProperties.RUNNER_APP_VERSION);
-    return new ServerConnection(serverUrl, app, appVersion);
+    String analysisMode = properties.getProperty("sonar.analysis.mode");
+    boolean preview = "preview".equalsIgnoreCase(analysisMode);
+
+    return new ServerConnection(serverUrl, app, appVersion, preview, cache);
+  }
+
+  private class StringDownloader implements Callable<String> {
+    private String url;
+
+    StringDownloader(String url) {
+      this.url = url;
+    }
+
+    @Override
+    public String call() throws Exception {
+      HttpRequest httpRequest = null;
+      try {
+        httpRequest = newHttpRequest(new URL(url));
+        String charset = getCharsetFromContentType(httpRequest.contentType());
+        if (charset == null || "".equals(charset)) {
+          charset = "UTF-8";
+        }
+        if (!httpRequest.ok()) {
+          throw new IOException(MessageFormat.format(STATUS_RETURNED_BY_URL_IS_INVALID, url, httpRequest.code()));
+        }
+        return httpRequest.body(charset);
+      } finally {
+        if (httpRequest != null) {
+          httpRequest.disconnect();
+        }
+      }
+    }
   }
 
   void download(String path, File toFile) {
@@ -78,31 +116,22 @@ class ServerConnection {
       }
       FileUtils.deleteQuietly(toFile);
       throw new IllegalStateException("Fail to download: " + fullUrl, e);
-
     }
   }
 
-  String downloadString(String path) throws IOException {
+  String downloadStringCache(String path) throws Exception {
     String fullUrl = serverUrl + path;
-    HttpRequest httpRequest = newHttpRequest(new URL(fullUrl));
     try {
-      String charset = getCharsetFromContentType(httpRequest.contentType());
-      if (charset == null || "".equals(charset)) {
-        charset = "UTF-8";
+      if (isModePreview) {
+        return wsCache.getString(serverUrl, new StringDownloader(fullUrl));
+      } else {
+        return new StringDownloader(fullUrl).call();
       }
-      if (!httpRequest.ok()) {
-        throw new IOException(MessageFormat.format(STATUS_RETURNED_BY_URL_IS_INVALID, fullUrl, httpRequest.code()));
-      }
-      return httpRequest.body(charset);
-
     } catch (HttpRequest.HttpRequestException e) {
       if (e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException) {
         Logs.error(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED, serverUrl));
       }
       throw e;
-
-    } finally {
-      httpRequest.disconnect();
     }
   }
 

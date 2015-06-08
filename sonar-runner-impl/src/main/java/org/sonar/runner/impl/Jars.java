@@ -19,13 +19,14 @@
  */
 package org.sonar.runner.impl;
 
+import org.sonar.home.cache.FileCache;
+import org.sonar.home.cache.FileCacheBuilder;
+import org.sonar.home.log.StandardLog;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.sonar.home.cache.FileCache;
-import org.sonar.home.cache.FileCacheBuilder;
-import org.sonar.home.log.StandardLog;
 
 class Jars {
   private static final String BOOTSTRAP_INDEX_PATH = "/batch_bootstrap/index";
@@ -62,7 +63,7 @@ class Jars {
     try {
       List<File> files = new ArrayList<File>();
       Logs.debug("Get bootstrap index...");
-      String libs = connection.downloadString(BOOTSTRAP_INDEX_PATH);
+      String libs = connection.downloadStringCache(BOOTSTRAP_INDEX_PATH);
       Logs.debug("Get bootstrap completed");
       String[] lines = libs.split("[\r\n]+");
       BatchFileDownloader batchFileDownloader = new BatchFileDownloader(connection);

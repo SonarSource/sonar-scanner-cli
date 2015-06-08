@@ -21,16 +21,24 @@ package org.sonar.runner.api;
 
 import org.junit.Test;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 
+import static org.mockito.Mockito.verify;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doThrow;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class UtilsTest {
   @Test
   public void should_join_strings() {
-    assertThat(Utils.join(new String[]{}, ",")).isEqualTo("");
-    assertThat(Utils.join(new String[]{"foo"}, ",")).isEqualTo("foo");
-    assertThat(Utils.join(new String[]{"foo", "bar"}, ",")).isEqualTo("foo,bar");
+    assertThat(Utils.join(new String[] {}, ",")).isEqualTo("");
+    assertThat(Utils.join(new String[] {"foo"}, ",")).isEqualTo("foo");
+    assertThat(Utils.join(new String[] {"foo", "bar"}, ",")).isEqualTo("foo,bar");
   }
 
   @Test
@@ -47,5 +55,45 @@ public class UtilsTest {
     Properties props = new Properties();
     props.setProperty("sonar.task", "views");
     assertThat(Utils.taskRequiresProject(props)).isFalse();
+  }
+
+  @Test
+  public void close_quietly() throws IOException {
+    Closeable c = mock(Closeable.class);
+    doThrow(IOException.class).when(c).close();
+    Utils.closeQuietly(c);
+    verify(c).close();
+  }
+  
+  @Test
+  public void close_quietly_null() throws IOException {
+    Utils.closeQuietly(null);
+  }
+
+  @Test
+  public void delete_non_empty_directory() throws IOException {
+    /*-
+     * Create test structure:
+     * tmp 
+     *   |-folder1
+     *        |- file1
+     *        |- folder2
+     *             |- file2
+     */
+    Path tmpDir = Files.createTempDirectory("junit");
+    Path folder1 = tmpDir.resolve("folder1");
+    Files.createDirectories(folder1);
+    Path file1 = folder1.resolve("file1");
+    Files.write(file1, "test1".getBytes());
+
+    Path folder2 = folder1.resolve("folder2");
+    Files.createDirectories(folder2);
+    Path file2 = folder1.resolve("file2");
+    Files.write(file2, "test2".getBytes());
+
+    // delete it
+    assertThat(tmpDir.toFile()).exists();
+    Utils.deleteQuietly(tmpDir.toFile());
+    assertThat(tmpDir.toFile()).doesNotExist();
   }
 }

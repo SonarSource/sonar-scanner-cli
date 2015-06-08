@@ -19,7 +19,6 @@
  */
 package org.sonar.runner.api;
 
-import org.apache.commons.io.FilenameUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -54,7 +53,8 @@ public class DirsTest {
 
     File workDir = new File(runner.property("sonar.working.directory", null));
     assertThat(workDir).isNotNull();
-    assertThat(FilenameUtils.separatorsToUnix(workDir.getCanonicalPath())).contains("generated/reports");
+    //separators from windows to unix
+    assertThat(workDir.getCanonicalPath().replace("\\", "/")).contains("generated/reports");
   }
 
   @Test
