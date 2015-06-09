@@ -25,7 +25,7 @@ import java.io.File;
 
 class Dirs {
 
-  void init(Runner runner) {
+  void init(Runner<?> runner) {
     boolean onProject = Utils.taskRequiresProject(runner.properties());
     if (onProject) {
       initProjectDirs(runner);
@@ -34,7 +34,7 @@ class Dirs {
     }
   }
 
-  private void initProjectDirs(Runner runner) {
+  private void initProjectDirs(Runner<?> runner) {
     String path = runner.property(ScanProperties.PROJECT_BASEDIR, ".");
     File projectDir = new File(path);
     if (!projectDir.isDirectory()) {
@@ -61,7 +61,7 @@ class Dirs {
   /**
    * Non-scan task
    */
-  private void initTaskDirs(Runner runner) {
+  private void initTaskDirs(Runner<?> runner) {
     String path = runner.property(RunnerProperties.WORK_DIR, ".");
     File workDir = new File(path);
     runner.setProperty(RunnerProperties.WORK_DIR, workDir.getAbsolutePath());

@@ -28,7 +28,7 @@ import static org.fest.assertions.Assertions.assertThat;
 public class SourceEncodingTest {
 
   SourceEncoding encoding = new SourceEncoding();
-  Runner runner = new SimpleRunner();
+  Runner<?> runner = new SimpleRunner();
 
   @Test
   public void should_set_default_platform_encoding() throws Exception {

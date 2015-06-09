@@ -29,7 +29,7 @@ import static org.fest.assertions.Assertions.assertThat;
 
 public class DirsTest {
 
-  Runner runner = new SimpleRunner();
+  Runner<?> runner = new SimpleRunner();
   Dirs dirs = new Dirs();
 
   @Rule

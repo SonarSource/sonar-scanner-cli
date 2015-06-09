@@ -26,7 +26,7 @@ import java.util.Locale;
 
 class SourceEncoding {
 
-  void init(Runner runner) {
+  void init(Runner<?> runner) {
     boolean onProject = Utils.taskRequiresProject(runner.properties());
     if (onProject) {
       String sourceEncoding = runner.property(ScanProperties.PROJECT_SOURCE_ENCODING, "");
