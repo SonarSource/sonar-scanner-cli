@@ -28,8 +28,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;

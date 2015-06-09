@@ -19,7 +19,7 @@
  */
 package org.sonar.runner.api;
 
-class SimpleRunner extends Runner {
+class SimpleRunner extends Runner<SimpleRunner> {
   @Override
   protected void doExecute() {
   }

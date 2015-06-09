@@ -35,7 +35,7 @@ public class RunnerFactoryTest {
   @Test
   public void should_create_embedded_runner_by_default() {
     props.setProperty("foo", "bar");
-    Runner runner = new RunnerFactory().create(props);
+    Runner<?> runner = new RunnerFactory().create(props);
 
     assertThat(runner).isInstanceOf(EmbeddedRunner.class);
     assertThat(runner.properties().get("foo")).isEqualTo("bar");
@@ -46,7 +46,7 @@ public class RunnerFactoryTest {
     props.setProperty("foo", "bar");
     props.setProperty("sonarRunner.mode", "fork");
     props.setProperty("sonarRunner.fork.jvmArgs", "-Xms128m -Xmx512m");
-    Runner runner = new RunnerFactory().create(props);
+    Runner<?> runner = new RunnerFactory().create(props);
 
     assertThat(runner).isInstanceOf(ForkedRunner.class);
     assertThat(runner.properties().get("foo")).isEqualTo("bar");
@@ -57,7 +57,7 @@ public class RunnerFactoryTest {
     public void should_create_forked_runner_with_jvm_arguments() {
       props.setProperty("foo", "bar");
       props.setProperty("sonarRunner.mode", "fork");
-      Runner runner = new RunnerFactory().create(props);
+      Runner<?> runner = new RunnerFactory().create(props);
 
       assertThat(runner).isInstanceOf(ForkedRunner.class);
       assertThat(runner.properties().get("foo")).isEqualTo("bar");

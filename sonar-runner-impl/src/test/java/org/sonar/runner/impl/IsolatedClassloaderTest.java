@@ -19,6 +19,8 @@
  */
 package org.sonar.runner.impl;
 
+import java.io.IOException;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,7 +32,7 @@ public class IsolatedClassloaderTest {
   public ExpectedException thrown = ExpectedException.none();
 
   @Test
-  public void should_restrict_loading_from_parent() throws Exception {
+  public void should_restrict_loading_from_parent() throws IOException {
     ClassLoader parentClassloader = getClass().getClassLoader();
     IsolatedClassloader classLoader = new IsolatedClassloader(parentClassloader, new String[][] {new String[] {"UNMASK", "org.apache.ant."}});
 
@@ -39,10 +41,11 @@ public class IsolatedClassloaderTest {
 
     assertThat(classLoader.canLoadFromParent("org.apache.ant.Foo")).isTrue();
     assertThat(classLoader.canLoadFromParent("org.apache.ant.project.Project")).isTrue();
+    classLoader.close();
   }
 
   @Test
-  public void should_use_isolated_system_classloader_when_parent_is_excluded() throws ClassNotFoundException {
+  public void should_use_isolated_system_classloader_when_parent_is_excluded() throws ClassNotFoundException, IOException {
     thrown.expect(ClassNotFoundException.class);
     thrown.expectMessage("org.junit.Test");
     ClassLoader parent = getClass().getClassLoader();
@@ -51,14 +54,16 @@ public class IsolatedClassloaderTest {
     // JUnit is available in the parent classloader (classpath used to execute this test) but not in the core JVM
     assertThat(classLoader.loadClass("java.lang.String", false)).isNotNull();
     classLoader.loadClass("org.junit.Test", false);
+    classLoader.close();
   }
 
   @Test
-  public void should_find_in_parent_when_matches_unmasked_packages() throws ClassNotFoundException {
+  public void should_find_in_parent_when_matches_unmasked_packages() throws ClassNotFoundException, IOException {
     ClassLoader parent = getClass().getClassLoader();
     IsolatedClassloader classLoader = new IsolatedClassloader(parent, new String[][] {new String[] {"UNMASK", "org.junit."}});
 
     // JUnit is available in the parent classloader (classpath used to execute this test) but not in the core JVM
     assertThat(classLoader.loadClass("org.junit.Test", false)).isNotNull();
+    classLoader.close();
   }
 }

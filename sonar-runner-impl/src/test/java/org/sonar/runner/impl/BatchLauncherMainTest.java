@@ -50,7 +50,7 @@ public class BatchLauncherMainTest {
     }), argThat(new ArgumentMatcher<List<Object>>() {
       @Override
       public boolean matches(Object o) {
-        return ((List) o).isEmpty();
+        return ((List<?>) o).isEmpty();
       }
     }));
   }
