@@ -56,7 +56,7 @@ public class BatchLauncher {
   private static PersistentCache getCache(Properties props) {
     PersistentCacheBuilder builder = new PersistentCacheBuilder();
 
-    if ("true".equals(props.getProperty("sonar.forceUpdate"))) {
+    if (!"true".equals(props.getProperty("sonar.enableHttpCache"))) {
       builder.forceUpdate(true);
     }
 
