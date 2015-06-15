@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - API
+ * SonarQube Runner - Batch API
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,22 +17,13 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.api;
+package org.sonar.runner.batch;
 
+import java.util.List;
 import java.util.Properties;
 
-class SimpleRunner extends Runner {
-  @Override
-  protected void doExecute(Properties props) {
-  }
-
-  @Override
-  protected void doStart() {
-    
-  }
-
-  @Override
-  protected void doStop() {
-    
-  }
+public interface IsolatedLauncher {
+  void start(Properties properties, List<Object> extensions);
+  void stop();
+  void execute(Properties properties);
 }

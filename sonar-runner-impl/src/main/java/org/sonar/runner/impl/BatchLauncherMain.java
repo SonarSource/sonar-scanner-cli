@@ -19,16 +19,18 @@
  */
 package org.sonar.runner.impl;
 
+import org.sonar.runner.batch.IsolatedLauncher;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Properties;
 
 public class BatchLauncherMain {
-  private final BatchLauncher launcher;
+  private final IsolatedLauncherFactory launcherFactory;
 
-  BatchLauncherMain(BatchLauncher l) {
-    this.launcher = l;
+  BatchLauncherMain(IsolatedLauncherFactory factory) {
+    this.launcherFactory = factory;
   }
 
   void execute(String[] args) throws IOException {
@@ -36,10 +38,13 @@ public class BatchLauncherMain {
       throw new IllegalArgumentException("Missing path to properties file");
     }
     Properties props = loadProperties(args[0]);
-    launcher.execute(props, Collections.emptyList());
+    IsolatedLauncher launcher = launcherFactory.createLauncher(props);
+    launcher.start(props, Collections.emptyList());
+    launcher.execute(props);
+    launcher.stop();
   }
 
-  private Properties loadProperties(String arg) throws IOException {
+  private static Properties loadProperties(String arg) throws IOException {
     Properties props = new Properties();
     try (FileInputStream input = new FileInputStream(arg)) {
       props.load(input);
@@ -51,6 +56,6 @@ public class BatchLauncherMain {
   }
 
   public static void main(String[] args) throws IOException {
-    new BatchLauncherMain(new BatchLauncher()).execute(args);
+    new BatchLauncherMain(new IsolatedLauncherFactory()).execute(args);
   }
 }

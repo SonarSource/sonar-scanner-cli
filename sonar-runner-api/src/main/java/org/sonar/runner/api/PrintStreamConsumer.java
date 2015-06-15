@@ -34,6 +34,7 @@ public class PrintStreamConsumer implements StreamConsumer {
     this.output = output;
   }
 
+  @Override
   public void consumeLine(String line) {
     output.println(line);
   }

@@ -19,6 +19,9 @@
  */
 package org.sonar.runner.api;
 
+import org.mockito.Mockito;
+
+import org.mockito.ArgumentCaptor;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -99,13 +102,13 @@ public class ForkedRunnerTest {
     JarExtractor jarExtractor = createMockExtractor();
 
     ForkedRunner runner = new ForkedRunner(jarExtractor, mock(CommandExecutor.class), any(ProcessMonitor.class));
-    runner.setProperty("sonar.dynamicAnalysis", "false");
-    runner.setProperty("sonar.login", "admin");
+    runner.setGlobalProperty("sonar.dynamicAnalysis", "false");
+    runner.setGlobalProperty("sonar.login", "admin");
     runner.addJvmArguments("-Xmx512m");
     runner.addJvmEnvVariables(System.getenv());
     runner.setJvmEnvVariable("SONAR_HOME", "/path/to/sonar");
 
-    ForkedRunner.ForkCommand forkCommand = runner.createCommand();
+    ForkedRunner.ForkCommand forkCommand = runner.createCommand(runner.globalProperties());
 
     Properties properties = new Properties();
     properties.load(new FileInputStream(forkCommand.propertiesFile));
@@ -115,7 +118,21 @@ public class ForkedRunnerTest {
     assertThat(properties.getProperty("-Xmx512m")).isNull();
     assertThat(properties.getProperty("SONAR_HOME")).isNull();
   }
+  
+  @Test
+  public void should_merge_properties() throws IOException {
+    JarExtractor jarExtractor = createMockExtractor();
+    ForkedRunner runner = new ForkedRunner(jarExtractor, mock(CommandExecutor.class), null);
 
+    ForkedRunner spy = Mockito.spy(runner);
+    spy.setGlobalProperty("sonar.login", "admin");
+    spy.execute();
+    // generated analysis properties should have been added
+    ArgumentCaptor<Properties> properties = ArgumentCaptor.forClass(Properties.class);
+    verify(spy).writeProperties(properties.capture());
+    assertThat(properties.getValue().keySet()).contains("sonar.working.directory", "sonar.host.url", "sonar.sourceEncoding", "sonar.login");
+  }
+  
   @Test
   public void test_java_command() throws IOException {
     JarExtractor jarExtractor = mock(JarExtractor.class);
@@ -126,8 +143,8 @@ public class ForkedRunnerTest {
 
     ForkedRunner runner = new ForkedRunner(jarExtractor, commandExecutor);
     runner.setJavaExecutable("java");
-    runner.setProperty("sonar.dynamicAnalysis", "false");
-    runner.setProperty("sonar.login", "admin");
+    runner.setGlobalProperty("sonar.dynamicAnalysis", "false");
+    runner.setGlobalProperty("sonar.login", "admin");
     runner.addJvmArguments("-Xmx512m");
     runner.addJvmEnvVariables(System.getenv());
     runner.setJvmEnvVariable("SONAR_HOME", "/path/to/sonar");

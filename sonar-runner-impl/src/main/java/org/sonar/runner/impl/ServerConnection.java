@@ -55,7 +55,7 @@ class ServerConnection {
     this.isModePreview = preview;
   }
 
-  private String removeEndSlash(String url) {
+  private static String removeEndSlash(String url) {
     if (url == null) {
       return null;
     }

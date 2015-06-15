@@ -84,7 +84,7 @@ class Conf {
     return new Properties();
   }
 
-  private void initRootProjectBaseDir(Properties cliProps, Properties rootProps) {
+  private static void initRootProjectBaseDir(Properties cliProps, Properties rootProps) {
     if (!cliProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
       String baseDir = cliProps.getProperty(PROJECT_HOME);
       rootProps.put(PROPERTY_PROJECT_BASEDIR, baseDir);
@@ -109,7 +109,7 @@ class Conf {
 
   }
 
-  private void merge(Properties projectProps, String prefix, String module, Properties moduleProps) {
+  private static void merge(Properties projectProps, String prefix, String module, Properties moduleProps) {
     for (Map.Entry<Object, Object> entry : moduleProps.entrySet()) {
       projectProps.put(prefix + module + "." + entry.getKey(), entry.getValue());
     }
@@ -160,7 +160,7 @@ class Conf {
     return moduleProps;
   }
 
-  private File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
+  private static File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
     File settingsFile = null;
     String runnerHome = props.getProperty(homeKey, "");
     if (!"".equals(runnerHome)) {
@@ -225,7 +225,7 @@ class Conf {
     }
   }
 
-  private void tryToFindAndLoadPropsFile(File baseDir, Properties moduleProps, String moduleId) {
+  private static void tryToFindAndLoadPropsFile(File baseDir, Properties moduleProps, String moduleId) {
     File propertyFile = new File(baseDir, SONAR_PROJECT_PROPERTIES_FILENAME);
     if (propertyFile.isFile()) {
       Properties propsFromFile = toProperties(propertyFile);

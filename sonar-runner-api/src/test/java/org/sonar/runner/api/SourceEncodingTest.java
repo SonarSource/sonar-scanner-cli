@@ -22,33 +22,33 @@ package org.sonar.runner.api;
 import org.junit.Test;
 
 import java.nio.charset.Charset;
+import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
 
 public class SourceEncodingTest {
 
-  SourceEncoding encoding = new SourceEncoding();
-  Runner<?> runner = new SimpleRunner();
+  Properties p = new Properties();
 
   @Test
   public void should_set_default_platform_encoding() throws Exception {
-    runner.setProperty("sonar.task", "scan");
-    encoding.init(runner);
-    assertThat(runner.property("sonar.sourceEncoding", null)).isEqualTo(Charset.defaultCharset().name());
+    p.setProperty("sonar.task", "scan");
+    SourceEncoding.init(p);
+    assertThat(p.getProperty("sonar.sourceEncoding", null)).isEqualTo(Charset.defaultCharset().name());
   }
 
   @Test
   public void should_use_parameterized_encoding() throws Exception {
-    runner.setProperty("sonar.task", "scan");
-    runner.setProperty("sonar.sourceEncoding", "THE_ISO_1234");
-    encoding.init(runner);
-    assertThat(runner.property("sonar.sourceEncoding", null)).isEqualTo("THE_ISO_1234");
+    p.setProperty("sonar.task", "scan");
+    p.setProperty("sonar.sourceEncoding", "THE_ISO_1234");
+    SourceEncoding.init(p);
+    assertThat(p.getProperty("sonar.sourceEncoding", null)).isEqualTo("THE_ISO_1234");
   }
 
   @Test
   public void should_not_init_encoding_if_not_project_task() throws Exception {
-    runner.setProperty("sonar.task", "views");
-    encoding.init(runner);
-    assertThat(runner.property("sonar.sourceEncoding", null)).isNull();
+    p.setProperty("sonar.task", "views");
+    SourceEncoding.init(p);
+    assertThat(p.getProperty("sonar.sourceEncoding", null)).isNull();
   }
 }

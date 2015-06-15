@@ -19,19 +19,22 @@
  */
 package org.sonar.runner.api;
 
+import org.junit.Before;
+import org.sonar.runner.batch.IsolatedLauncher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentMatcher;
-import org.sonar.runner.impl.BatchLauncher;
+import org.sonar.runner.impl.IsolatedLauncherFactory;
 import org.sonar.runner.impl.InternalProperties;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
 
+import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -47,6 +50,18 @@ public class EmbeddedRunnerTest {
     assertThat(EmbeddedRunner.create()).isNotNull().isInstanceOf(EmbeddedRunner.class);
   }
 
+  private IsolatedLauncherFactory batchLauncher;
+  private IsolatedLauncher launcher;
+  private EmbeddedRunner runner;
+
+  @Before
+  public void setUp() {
+    batchLauncher = mock(IsolatedLauncherFactory.class);
+    launcher = mock(IsolatedLauncher.class);
+    when(batchLauncher.createLauncher(any(Properties.class))).thenReturn(launcher);
+    runner = new EmbeddedRunner(batchLauncher);
+  }
+
   @Test
   public void test_app() {
     EmbeddedRunner runner = EmbeddedRunner.create().setApp("Eclipse", "3.1");
@@ -57,23 +72,23 @@ public class EmbeddedRunnerTest {
   @Test
   public void should_set_unmasked_packages() {
     EmbeddedRunner runner = EmbeddedRunner.create();
-    assertThat(runner.property(InternalProperties.RUNNER_MASK_RULES, null)).isNull();
+    assertThat(runner.globalProperty(InternalProperties.RUNNER_MASK_RULES, null)).isNull();
 
     runner = EmbeddedRunner.create().setUnmaskedPackages("org.apache.ant", "org.ant");
-    assertThat(runner.property(InternalProperties.RUNNER_MASK_RULES, null)).isEqualTo("UNMASK|org.apache.ant.,UNMASK|org.ant.");
+    assertThat(runner.globalProperty(InternalProperties.RUNNER_MASK_RULES, null)).isEqualTo("UNMASK|org.apache.ant.,UNMASK|org.ant.");
   }
 
   @Test
   public void should_set_mask_rules() {
     EmbeddedRunner runner = EmbeddedRunner.create();
-    assertThat(runner.property(InternalProperties.RUNNER_MASK_RULES, null)).isNull();
+    assertThat(runner.globalProperty(InternalProperties.RUNNER_MASK_RULES, null)).isNull();
 
     runner = EmbeddedRunner.create()
       .unmask("org.slf4j.Logger")
       .mask("org.slf4j.")
       .mask("ch.qos.logback.")
       .unmask("");
-    assertThat(runner.property(InternalProperties.RUNNER_MASK_RULES, null)).isEqualTo("UNMASK|org.slf4j.Logger,MASK|org.slf4j.,MASK|ch.qos.logback.,UNMASK|");
+    assertThat(runner.globalProperty(InternalProperties.RUNNER_MASK_RULES, null)).isEqualTo("UNMASK|org.slf4j.Logger,MASK|org.slf4j.,MASK|ch.qos.logback.,UNMASK|");
   }
 
   @Test
@@ -89,38 +104,76 @@ public class EmbeddedRunnerTest {
   @Test
   public void should_set_properties() {
     EmbeddedRunner runner = EmbeddedRunner.create();
-    runner.setProperty("sonar.projectKey", "foo");
-    runner.addProperties(new Properties() {
+    runner.setGlobalProperty("sonar.projectKey", "foo");
+    runner.addGlobalProperties(new Properties() {
       {
         setProperty("sonar.login", "admin");
         setProperty("sonar.password", "gniark");
       }
     });
 
-    assertThat(runner.property("sonar.projectKey", null)).isEqualTo("foo");
-    assertThat(runner.property("sonar.login", null)).isEqualTo("admin");
-    assertThat(runner.property("sonar.password", null)).isEqualTo("gniark");
-    assertThat(runner.property("not.set", "this_is_default")).isEqualTo("this_is_default");
+    assertThat(runner.globalProperty("sonar.projectKey", null)).isEqualTo("foo");
+    assertThat(runner.globalProperty("sonar.login", null)).isEqualTo("admin");
+    assertThat(runner.globalProperty("sonar.password", null)).isEqualTo("gniark");
+    assertThat(runner.globalProperty("not.set", "this_is_default")).isEqualTo("this_is_default");
   }
 
   @Test
   public void should_launch_batch() {
-    BatchLauncher batchLauncher = mock(BatchLauncher.class);
-    EmbeddedRunner runner = new EmbeddedRunner(batchLauncher);
     final FakeExtension fakeExtension = new FakeExtension();
     runner.addExtensions(fakeExtension);
-    runner.setProperty("sonar.projectKey", "foo");
-    runner.execute();
+    runner.setGlobalProperty("sonar.projectKey", "foo");
+    runner.start();
+    runner.runAnalysis(new Properties());
+    runner.stop();
 
-    verify(batchLauncher).execute(argThat(new ArgumentMatcher<Properties>() {
+    verify(batchLauncher).createLauncher(argThat(new ArgumentMatcher<Properties>() {
       @Override
       public boolean matches(Object o) {
         return "foo".equals(((Properties) o).getProperty("sonar.projectKey"));
       }
-    }), argThat(new ArgumentMatcher<List<Object>>() {
+    }));
+
+    // it should have added a few properties to analysisProperties
+    final String[] mustHaveKeys = {"sonar.working.directory", "sonar.sourceEncoding", "sonar.projectBaseDir"};
+
+    verify(launcher).execute(argThat(new ArgumentMatcher<Properties>() {
       @Override
       public boolean matches(Object o) {
-        return ((List) o).contains(fakeExtension);
+        Properties m = (Properties) o;
+        for (String s : mustHaveKeys) {
+          if (!m.containsKey(s)) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }));
+  }
+
+  @Test
+  public void should_launch_batch_analysisProperties() {
+    final FakeExtension fakeExtension = new FakeExtension();
+    runner.addExtensions(fakeExtension);
+    runner.setGlobalProperty("sonar.projectKey", "foo");
+    runner.start();
+
+    Properties analysisProperties = new Properties();
+    analysisProperties.put("sonar.projectKey", "value1");
+    runner.runAnalysis(analysisProperties);
+    runner.stop();
+
+    verify(batchLauncher).createLauncher(argThat(new ArgumentMatcher<Properties>() {
+      @Override
+      public boolean matches(Object o) {
+        return "foo".equals(((Properties) o).getProperty("sonar.projectKey"));
+      }
+    }));
+
+    verify(launcher).execute(argThat(new ArgumentMatcher<Properties>() {
+      @Override
+      public boolean matches(Object o) {
+        return "value1".equals(((Properties) o).getProperty("sonar.projectKey"));
       }
     }));
   }
@@ -128,12 +181,13 @@ public class EmbeddedRunnerTest {
   @Test
   public void should_launch_in_simulation_mode() throws IOException {
     File dump = temp.newFile();
+    Properties p = new Properties();
 
-    BatchLauncher batchLauncher = mock(BatchLauncher.class);
-    EmbeddedRunner runner = new EmbeddedRunner(batchLauncher);
-    runner.setProperty("sonar.projectKey", "foo");
-    runner.setProperty("sonarRunner.dumpToFile", dump.getAbsolutePath());
-    runner.execute();
+    p.setProperty("sonar.projectKey", "foo");
+    p.setProperty("sonarRunner.dumpToFile", dump.getAbsolutePath());
+    runner.start();
+    runner.runAnalysis(p);
+    runner.stop();
 
     Properties props = new Properties();
     props.load(new FileInputStream(dump));

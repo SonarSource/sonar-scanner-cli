@@ -10,10 +10,16 @@
   <name>SonarQube Runner - Batch</name>
 
   <properties>
-    <sonarBatchVersion>3.7</sonarBatchVersion>
+    <sonarBatchVersion>4.4</sonarBatchVersion>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>sonar-runner-batch-interface</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>

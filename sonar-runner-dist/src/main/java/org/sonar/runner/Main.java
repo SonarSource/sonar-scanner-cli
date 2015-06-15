@@ -19,6 +19,14 @@
  */
 package org.sonar.runner;
 
+import org.sonar.runner.api.Runner;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
+
 import org.sonar.runner.impl.Logs;
 
 /**
@@ -39,6 +47,8 @@ public class Main {
   private final Cli cli;
   private final Conf conf;
   private final RunnerFactory runnerFactory;
+  private Runner<?> runner;
+  private BufferedReader inputReader;
 
   Main(Exit exit, Cli cli, Conf conf, RunnerFactory runnerFactory) {
     this.exit = exit;
@@ -48,37 +58,67 @@ public class Main {
   }
 
   public static void main(String[] args) {
-    Cli cli = new Cli().parse(args);
-    Main main = new Main(new Exit(), cli, new Conf(cli), new RunnerFactory());
+    Exit exit = new Exit();
+    Cli cli = new Cli(exit).parse(args);
+    cli.verify();
+    Main main = new Main(exit, cli, new Conf(cli), new RunnerFactory());
     main.execute();
   }
 
   void execute() {
-    SystemInfo.print();
-    if (!cli.isDisplayVersionOnly()) {
-      int status = executeTask();
-      exit.exit(status);
-    }
-  }
-
-  private int executeTask() {
     Stats stats = new Stats().start();
-    try {
-      if (cli.isDisplayStackTrace()) {
-        Logs.info("Error stacktraces are turned on.");
-      }
-      runnerFactory.create(conf.properties()).execute();
 
+    try {
+      Properties p = conf.properties();
+      init(p);
+      runner.start();
+
+      runAnalysis(stats, p);
+
+      if(cli.isInteractive()) {
+        while (waitForUser()) {
+          stats = new Stats().start();
+          runAnalysis(stats, p);
+        } 
+      }
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
       showError("Error during Sonar runner execution", e, cli.isDisplayStackTrace());
-      return Exit.ERROR;
+      exit.exit(Exit.ERROR);
     }
-    displayExecutionResult(stats, "SUCCESS");
-    return Exit.SUCCESS;
+
+    runner.stop();
+    exit.exit(Exit.SUCCESS);
   }
 
-  private void displayExecutionResult(Stats stats, String resultMsg) {
+  private void init(Properties p) throws IOException {
+    SystemInfo.print();
+    if (cli.isDisplayVersionOnly()) {
+      exit.exit(Exit.SUCCESS);
+    }
+
+    if (cli.isDisplayStackTrace()) {
+      Logs.info("Error stacktraces are turned on.");
+    }
+
+    runner = runnerFactory.create(p);
+  }
+
+  private void runAnalysis(Stats stats, Properties p) {
+    runner.runAnalysis(p);
+    displayExecutionResult(stats, "SUCCESS");
+  }
+
+  private boolean waitForUser() throws IOException {
+    if (inputReader == null) {
+      inputReader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+    }
+    Logs.info("<Press enter to restart analysis>");
+
+    return inputReader.readLine() != null;
+  }
+
+  private static void displayExecutionResult(Stats stats, String resultMsg) {
     Logs.info("------------------------------------------------------------------------");
     Logs.info("EXECUTION " + resultMsg);
     Logs.info("------------------------------------------------------------------------");
@@ -113,7 +153,7 @@ public class Main {
     }
   }
 
-  private void suggestDebugMode() {
+  private static void suggestDebugMode() {
     Logs.error("Re-run SonarQube Runner using the -X switch to enable full debug logging.");
   }
 

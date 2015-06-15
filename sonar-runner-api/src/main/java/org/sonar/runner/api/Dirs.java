@@ -22,28 +22,32 @@ package org.sonar.runner.api;
 import org.sonar.runner.impl.Logs;
 
 import java.io.File;
+import java.util.Properties;
 
 class Dirs {
+  private Dirs() {
 
-  void init(Runner<?> runner) {
-    boolean onProject = Utils.taskRequiresProject(runner.properties());
+  }
+
+  static void init(Properties p) {
+    boolean onProject = Utils.taskRequiresProject(p);
     if (onProject) {
-      initProjectDirs(runner);
+      initProjectDirs(p);
     } else {
-      initTaskDirs(runner);
+      initTaskDirs(p);
     }
   }
 
-  private void initProjectDirs(Runner<?> runner) {
-    String path = runner.property(ScanProperties.PROJECT_BASEDIR, ".");
+  private static void initProjectDirs(Properties p) {
+    String path = p.getProperty(ScanProperties.PROJECT_BASEDIR, ".");
     File projectDir = new File(path);
     if (!projectDir.isDirectory()) {
       throw new IllegalStateException("Project home must be an existing directory: " + path);
     }
-    runner.setProperty(ScanProperties.PROJECT_BASEDIR, projectDir.getAbsolutePath());
+    p.setProperty(ScanProperties.PROJECT_BASEDIR, projectDir.getAbsolutePath());
 
     File workDir;
-    path = runner.property(RunnerProperties.WORK_DIR, "");
+    path = p.getProperty(RunnerProperties.WORK_DIR, "");
     if ("".equals(path.trim())) {
       workDir = new File(projectDir, ".sonar");
 
@@ -54,16 +58,16 @@ class Dirs {
       }
     }
     Utils.deleteQuietly(workDir);
-    runner.setProperty(RunnerProperties.WORK_DIR, workDir.getAbsolutePath());
+    p.setProperty(RunnerProperties.WORK_DIR, workDir.getAbsolutePath());
     Logs.info("Work directory: " + workDir.getAbsolutePath());
   }
 
   /**
    * Non-scan task
    */
-  private void initTaskDirs(Runner<?> runner) {
-    String path = runner.property(RunnerProperties.WORK_DIR, ".");
+  private static void initTaskDirs(Properties p) {
+    String path = p.getProperty(RunnerProperties.WORK_DIR, ".");
     File workDir = new File(path);
-    runner.setProperty(RunnerProperties.WORK_DIR, workDir.getAbsolutePath());
+    p.setProperty(RunnerProperties.WORK_DIR, workDir.getAbsolutePath());
   }
 }

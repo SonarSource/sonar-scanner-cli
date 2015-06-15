@@ -39,14 +39,28 @@ import org.sonar.batch.bootstrapper.EnvironmentInformation;
  * This class is executed within the classloader provided by the server. It contains the installed plugins and
  * the same version of sonar-batch as the server.
  */
-public class IsolatedLauncher {
+public class BatchIsolatedLauncher implements IsolatedLauncher {
 
   private static final String WARN = "WARN";
   private static final String DEBUG = "DEBUG";
   private static final String FALSE = "false";
 
-  public void execute(Properties properties, List<Object> extensions) {
-    createBatch(properties, extensions).execute();
+  private Batch batch = null;
+
+  @Override
+  public void start(Properties globalProperties, List<Object> extensions) {
+    batch = createBatch(globalProperties, extensions);
+    batch.start();
+  }
+
+  @Override
+  public void stop() {
+    batch.stop();
+  }
+
+  @Override
+  public void execute(Properties properties) {
+    batch.executeTask((Map) properties);
   }
 
   Batch createBatch(Properties properties, List<Object> extensions) {

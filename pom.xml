@@ -26,6 +26,7 @@
   <modules>
     <module>sonar-runner-api</module>
     <module>sonar-runner-batch</module>
+    <module>sonar-runner-batch-interface</module>
     <module>sonar-runner-dist</module>
     <module>sonar-runner-impl</module>
   </modules>

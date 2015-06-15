@@ -19,17 +19,29 @@
  */
 package org.sonar.runner;
 
-import org.junit.Test;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 
+import org.junit.Test;
 import static org.fest.assertions.Assertions.assertThat;
 
 
 public class StatsTest {
 
   @Test
-  public void shouldPrintStats() {
+  public void shouldPrintStats() throws UnsupportedEncodingException {
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(output));
     new Stats().start().stop();
-    //TODO mock Logs
+
+    String out = output.toString("UTF-8");
+    String[] lines = out.split("\n");
+    
+    assertThat(lines).hasSize(2);
+    
+    assertThat(lines[0]).startsWith("Total time: ");
+    assertThat(lines[1]).startsWith("Final Memory: ");
   }
 
   @Test

@@ -19,11 +19,14 @@
  */
 package org.sonar.runner.api;
 
-import org.sonar.runner.impl.BatchLauncher;
+import org.sonar.runner.batch.IsolatedLauncher;
+import org.sonar.runner.impl.IsolatedLauncherFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Implementation of {@link Runner} that is executed in the same JVM. The application can inject
@@ -34,19 +37,20 @@ import java.util.List;
  */
 public class EmbeddedRunner extends Runner<EmbeddedRunner> {
 
-  private final BatchLauncher batchLauncher;
+  private final IsolatedLauncherFactory launcherFactory;
+  private IsolatedLauncher launcher;
   private final List<Object> extensions = new ArrayList<Object>();
   private static final String MASK_RULES_PROP = "sonarRunner.maskRules";
 
-  EmbeddedRunner(BatchLauncher bl) {
-    this.batchLauncher = bl;
+  EmbeddedRunner(IsolatedLauncherFactory bl) {
+    this.launcherFactory = bl;
   }
 
   /**
    * Create a new instance.
    */
   public static EmbeddedRunner create() {
-    return new EmbeddedRunner(new BatchLauncher());
+    return new EmbeddedRunner(new IsolatedLauncherFactory());
   }
 
   /**
@@ -69,12 +73,12 @@ public class EmbeddedRunner extends Runner<EmbeddedRunner> {
   }
 
   private EmbeddedRunner addMaskRule(String type, String fqcnPrefix) {
-    String existingRules = property(MASK_RULES_PROP, "");
+    String existingRules = globalProperty(MASK_RULES_PROP, "");
     if (!"".equals(existingRules)) {
       existingRules += ",";
     }
     existingRules += type + "|" + fqcnPrefix;
-    return setProperty(MASK_RULES_PROP, existingRules);
+    return setGlobalProperty(MASK_RULES_PROP, existingRules);
   }
 
   /**
@@ -98,7 +102,18 @@ public class EmbeddedRunner extends Runner<EmbeddedRunner> {
   }
 
   @Override
-  protected void doExecute() {
-    batchLauncher.execute(properties(), extensions);
+  protected void doStart() {
+    launcher = launcherFactory.createLauncher(globalProperties());
+    launcher.start(globalProperties(), extensions);
+  }
+
+  @Override
+  protected void doStop() {
+    launcher.stop();
+  }
+
+  @Override
+  protected void doExecute(Properties analysisProperties) {
+    launcher.execute(analysisProperties);
   }
 }

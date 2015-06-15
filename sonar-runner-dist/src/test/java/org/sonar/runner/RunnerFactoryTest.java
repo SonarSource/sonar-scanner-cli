@@ -38,7 +38,7 @@ public class RunnerFactoryTest {
     Runner<?> runner = new RunnerFactory().create(props);
 
     assertThat(runner).isInstanceOf(EmbeddedRunner.class);
-    assertThat(runner.properties().get("foo")).isEqualTo("bar");
+    assertThat(runner.globalProperties().get("foo")).isEqualTo("bar");
   }
 
   @Test
@@ -49,8 +49,8 @@ public class RunnerFactoryTest {
     Runner<?> runner = new RunnerFactory().create(props);
 
     assertThat(runner).isInstanceOf(ForkedRunner.class);
-    assertThat(runner.properties().get("foo")).isEqualTo("bar");
-    assertThat(((ForkedRunner)runner).jvmArguments()).contains("-Xms128m", "-Xmx512m");
+    assertThat(runner.globalProperties().get("foo")).isEqualTo("bar");
+    assertThat(((ForkedRunner) runner).jvmArguments()).contains("-Xms128m", "-Xmx512m");
   }
 
   @Test
@@ -60,7 +60,10 @@ public class RunnerFactoryTest {
       Runner<?> runner = new RunnerFactory().create(props);
 
       assertThat(runner).isInstanceOf(ForkedRunner.class);
-      assertThat(runner.properties().get("foo")).isEqualTo("bar");
-      assertThat(((ForkedRunner)runner).jvmArguments()).isEmpty();
-    }
+      assertThat(runner.globalProperties().get("foo")).isEqualTo("bar");
+
+    assertThat(runner).isInstanceOf(ForkedRunner.class);
+    assertThat(runner.globalProperties().get("foo")).isEqualTo("bar");
+    assertThat(((ForkedRunner) runner).jvmArguments()).isEmpty();
+  }
 }

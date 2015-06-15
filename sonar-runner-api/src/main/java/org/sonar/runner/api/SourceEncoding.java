@@ -23,21 +23,24 @@ import org.sonar.runner.impl.Logs;
 
 import java.nio.charset.Charset;
 import java.util.Locale;
+import java.util.Properties;
 
 class SourceEncoding {
-
-  void init(Runner<?> runner) {
-    boolean onProject = Utils.taskRequiresProject(runner.properties());
+  private SourceEncoding() {
+    
+  }
+  static void init(Properties p) {
+    boolean onProject = Utils.taskRequiresProject(p);
     if (onProject) {
-      String sourceEncoding = runner.property(ScanProperties.PROJECT_SOURCE_ENCODING, "");
+      String sourceEncoding = p.getProperty(ScanProperties.PROJECT_SOURCE_ENCODING, "");
       boolean platformDependent = false;
       if ("".equals(sourceEncoding)) {
         sourceEncoding = Charset.defaultCharset().name();
         platformDependent = true;
-        runner.setProperty(ScanProperties.PROJECT_SOURCE_ENCODING, sourceEncoding);
+        p.setProperty(ScanProperties.PROJECT_SOURCE_ENCODING, sourceEncoding);
       }
       Logs.info("Default locale: \"" + Locale.getDefault() + "\", source code encoding: \"" + sourceEncoding + "\""
-          + (platformDependent ? " (analysis is platform dependent)" : ""));
+        + (platformDependent ? " (analysis is platform dependent)" : ""));
     }
   }
 }

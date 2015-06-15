@@ -15,12 +15,7 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>sonar-runner-impl</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-            <groupId>*</groupId>
-            <artifactId>*</artifactId>
-        </exclusion>
-    </exclusions>
+
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>

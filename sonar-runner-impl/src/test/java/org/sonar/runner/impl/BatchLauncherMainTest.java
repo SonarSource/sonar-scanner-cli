@@ -19,14 +19,17 @@
  */
 package org.sonar.runner.impl;
 
+import org.sonar.runner.batch.IsolatedLauncher;
+
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import java.io.File;
 import java.net.URL;
-import java.util.List;
 import java.util.Properties;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static org.fest.assertions.Fail.fail;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -34,23 +37,21 @@ import static org.mockito.Mockito.verify;
 
 public class BatchLauncherMainTest {
 
-  BatchLauncher launcher = mock(BatchLauncher.class);
+  IsolatedLauncherFactory launcherFactory = mock(IsolatedLauncherFactory.class);
 
   @Test
   public void should_load_properties_and_execute() throws Exception {
     URL url = getClass().getResource("/org/sonar/runner/impl/BatchLauncherMainTest/props.properties");
-    BatchLauncherMain main = new BatchLauncherMain(launcher);
-    main.execute(new String[]{new File(url.toURI()).getAbsolutePath()});
+    when(launcherFactory.createLauncher(any(Properties.class))).thenReturn(mock(IsolatedLauncher.class));
 
-    verify(launcher).execute(argThat(new ArgumentMatcher<Properties>() {
+    BatchLauncherMain main = new BatchLauncherMain(launcherFactory);
+    new File(url.toURI()).getAbsolutePath();
+    main.execute(new String[] {new File(url.toURI()).getAbsolutePath()});
+
+    verify(launcherFactory).createLauncher(argThat(new ArgumentMatcher<Properties>() {
       @Override
       public boolean matches(Object o) {
         return ((Properties) o).get("sonar.login").equals("foo");
-      }
-    }), argThat(new ArgumentMatcher<List<Object>>() {
-      @Override
-      public boolean matches(Object o) {
-        return ((List<?>) o).isEmpty();
       }
     }));
   }
@@ -58,7 +59,7 @@ public class BatchLauncherMainTest {
   @Test
   public void should_fail_if_missing_path_to_properties_file() {
     try {
-      BatchLauncherMain main = new BatchLauncherMain(launcher);
+      BatchLauncherMain main = new BatchLauncherMain(launcherFactory);
       main.execute(new String[0]);
       fail();
     } catch (Exception e) {
@@ -69,8 +70,8 @@ public class BatchLauncherMainTest {
   @Test
   public void should_fail_if_properties_file_does_not_exist() {
     try {
-      BatchLauncherMain main = new BatchLauncherMain(launcher);
-      main.execute(new String[]{"unknown/file.properties"});
+      BatchLauncherMain main = new BatchLauncherMain(launcherFactory);
+      main.execute(new String[] {"unknown/file.properties"});
       fail();
     } catch (Exception e) {
       // success

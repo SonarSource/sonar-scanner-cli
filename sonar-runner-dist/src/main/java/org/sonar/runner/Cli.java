@@ -29,7 +29,13 @@ class Cli {
   private boolean debugMode = false;
   private boolean displayVersionOnly = false;
   private boolean displayStackTrace = false;
+  private boolean interactive = false;
   private Properties props = new Properties();
+  private Exit exit;
+
+  public Cli(Exit exit) {
+    this.exit = exit;
+  }
 
   boolean isDebugMode() {
     return debugMode;
@@ -41,6 +47,10 @@ class Cli {
 
   boolean isDisplayStackTrace() {
     return displayStackTrace;
+  }
+
+  boolean isInteractive() {
+    return interactive;
   }
 
   Properties properties() {
@@ -82,11 +92,21 @@ class Cli {
         arg = arg.substring(2);
         appendPropertyTo(arg, props);
 
+      } else if ("-i".equals(arg) || "--interactive".equals(arg)) {
+        interactive = true;
+
       } else {
         printError("Unrecognized option: " + arg);
       }
     }
+
     return this;
+  }
+
+  public void verify() {
+    if ("fork".equals(props.getProperty("sonarRunner.mode")) && isInteractive()) {
+      printError("Cannot run interactively in fork mode.");
+    }
   }
 
   private void reset() {
@@ -96,7 +116,7 @@ class Cli {
     displayVersionOnly = false;
   }
 
-  private void appendPropertyTo(String arg, Properties props) {
+  private static void appendPropertyTo(String arg, Properties props) {
     final String key, value;
     int j = arg.indexOf('=');
     if (j == -1) {
@@ -124,6 +144,7 @@ class Cli {
     Logs.info(" -h,--help             Display help information");
     Logs.info(" -v,--version          Display version information");
     Logs.info(" -X,--debug            Produce execution debug output");
-    System.exit(Exit.SUCCESS);
+    Logs.info(" -i,--interactive      Run interactively - not valid in fork mode");
+    exit.exit(Exit.SUCCESS);
   }
 }

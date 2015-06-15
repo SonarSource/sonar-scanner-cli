@@ -19,13 +19,16 @@
  */
 package org.sonar.runner;
 
-import org.junit.Test;
+import static org.mockito.Mockito.mock;
 
+import static org.mockito.Mockito.verify;
+
+import org.junit.Test;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class CliTest {
-
-  Cli cli = new Cli();
+  Exit exit = mock(Exit.class);
+  Cli cli = new Cli(exit);
 
   @Test
   public void should_parse_empty_arguments() {
@@ -42,6 +45,13 @@ public class CliTest {
     assertThat(cli.properties().get("foo")).isEqualTo("bar");
     assertThat(cli.properties().get("hello")).isEqualTo("world");
     assertThat(cli.properties().get("boolean")).isEqualTo("true");
+  }
+  
+  @Test
+  public void dont_allow_interactive_fork() {
+    cli.parse(new String[]{"-i", "-DsonarRunner.mode=fork"});
+    cli.verify();
+    verify(exit).exit(Exit.SUCCESS);
   }
 
   @Test

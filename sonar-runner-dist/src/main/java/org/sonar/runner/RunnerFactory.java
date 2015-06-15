@@ -27,19 +27,19 @@ import java.util.Properties;
 
 class RunnerFactory {
 
-  Runner<?> create(Properties props) {
+  Runner create(Properties props) {
     Runner<?> runner;
     if ("fork".equals(props.getProperty("sonarRunner.mode"))) {
       runner = ForkedRunner.create();
       String jvmArgs = props.getProperty("sonarRunner.fork.jvmArgs", "");
       if (!"".equals(jvmArgs)) {
-        ((ForkedRunner)runner).addJvmArguments(jvmArgs.split(" "));
+        ((ForkedRunner) runner).addJvmArguments(jvmArgs.split(" "));
       }
 
     } else {
       runner = EmbeddedRunner.create();
     }
-    runner.addProperties(props);
+    runner.addGlobalProperties(props);
     return runner;
   }
 }

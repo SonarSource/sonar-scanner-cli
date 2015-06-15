@@ -80,7 +80,9 @@ class CommandExecutor {
       return exitCode;
 
     } catch (TimeoutException te) {
-      process.destroy();
+      if (process != null) {
+        process.destroy();
+      }
       throw new CommandException("Timeout exceeded: " + timeoutMilliseconds + " ms", command, te);
 
     } catch (CommandException e) {
@@ -120,6 +122,7 @@ class CommandExecutor {
   private Future<Integer> executeProcess(ExecutorService executorService, Process process) {
     final Process finalProcess = process;
     return executorService.submit(new Callable<Integer>() {
+      @Override
       public Integer call() throws InterruptedException {
         return finalProcess.waitFor();
       }

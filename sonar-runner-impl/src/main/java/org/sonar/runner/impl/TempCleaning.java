@@ -28,7 +28,7 @@ import org.apache.commons.io.filefilter.PrefixFileFilter;
 
 /**
  * The file sonar-runner-batch.jar is locked by the classloader on Windows and can't be dropped at the end of the execution.
- * See {@link BatchLauncher}
+ * See {@link IsolatedLauncherFactory}
  */
 class TempCleaning {
   static final int ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
