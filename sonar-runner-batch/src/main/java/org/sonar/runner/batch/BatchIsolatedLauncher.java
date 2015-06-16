@@ -19,18 +19,19 @@
  */
 package org.sonar.runner.batch;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
+import org.sonar.home.log.LogListener;
+import org.picocontainer.annotations.Nullable;
 import com.google.common.annotations.VisibleForTesting;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.slf4j.LoggerFactory;
 import org.sonar.api.utils.SonarException;
 import org.sonar.batch.bootstrapper.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
@@ -49,7 +50,12 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
 
   @Override
   public void start(Properties globalProperties, List<Object> extensions) {
-    batch = createBatch(globalProperties, extensions);
+    start(globalProperties, extensions, null);
+  }
+
+  @Override
+  public void start(Properties globalProperties, List<Object> extensions, @Nullable LogListener logListener) {
+    batch = createBatch(globalProperties, extensions, logListener);
     batch.start();
   }
 
@@ -63,47 +69,38 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
     batch.executeTask((Map) properties);
   }
 
-  Batch createBatch(Properties properties, List<Object> extensions) {
-    initLogging(properties);
+  Batch createBatch(Properties properties, List<Object> extensions, @Nullable LogListener logListener) {
     EnvironmentInformation env = new EnvironmentInformation(properties.getProperty("sonarRunner.app"), properties.getProperty("sonarRunner.appVersion"));
-    return Batch.builder()
+    Batch.Builder builder = Batch.builder()
       .setEnvironment(env)
       .addComponents(extensions)
-      .setBootstrapProperties((Map) properties)
-      .build();
-  }
+      .setBootstrapProperties((Map) properties);
 
-  private void initLogging(Properties props) {
-    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-    JoranConfigurator jc = new JoranConfigurator();
-    jc.setContext(context);
-    context.reset();
-    try (InputStream input = Batch.class.getResourceAsStream("/org/sonar/batch/logback.xml")) {
-      System.setProperty("ROOT_LOGGER_LEVEL", isDebug(props) ? DEBUG : "INFO");
-      context.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(props));
-      context.putProperty("SQL_RESULTS_LOGGER_LEVEL", getSqlResultsLevel(props));
-      jc.doConfigure(input);
-    } catch (JoranException e) {
-      throw new SonarException("can not initialize logging", e);
-    } catch (IOException e1) {
-      throw new SonarException("couldn't close resource", e1);
+    if (logListener != null) {
+      builder.setLogListener(logListener);
     }
+
+    return builder.build();
   }
 
-  @VisibleForTesting
-  protected boolean isDebug(Properties props) {
-    return Boolean.parseBoolean(props.getProperty("sonar.verbose", FALSE));
+  /**
+   * This method exists for backward compatibility with SonarQube < 5.2. 
+   */
+  @Override
+  public void executeOldVersion(Properties properties, List<Object> extensions) {
+    createBatch(properties, extensions, null).execute();
   }
 
-  @VisibleForTesting
-  protected static String getSqlLevel(Properties props) {
-    boolean showSql = "true".equals(props.getProperty("sonar.showSql", FALSE));
-    return showSql ? DEBUG : WARN;
-  }
-
-  @VisibleForTesting
-  protected static String getSqlResultsLevel(Properties props) {
-    boolean showSql = "true".equals(props.getProperty("sonar.showSqlResults", FALSE));
-    return showSql ? DEBUG : WARN;
+  @Override
+  public String getVersion() {
+    InputStream is = this.getClass().getClassLoader().getResourceAsStream("sq-version.txt");
+    if (is == null) {
+      return null;
+    }
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+      return br.readLine();
+    } catch (IOException e) {
+      return null;
+    }
   }
 }

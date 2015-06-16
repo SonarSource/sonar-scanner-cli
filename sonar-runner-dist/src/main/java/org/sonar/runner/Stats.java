@@ -19,6 +19,8 @@
  */
 package org.sonar.runner;
 
+import org.sonar.runner.impl.Logs;
+
 class Stats {
   private long startTime;
 
@@ -32,12 +34,12 @@ class Stats {
 
   Stats stop() {
     long stopTime = System.currentTimeMillis() - startTime;
-    System.out.println("Total time: " + formatTime(stopTime));
+    Logs.info("Total time: " + formatTime(stopTime));
 
     System.gc();
     Runtime r = Runtime.getRuntime();
     long mb = 1024L * 1024;
-    System.out.println("Final Memory: " + (r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb + "M");
+    Logs.info("Final Memory: " + (r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb + "M");
 
     return this;
   }

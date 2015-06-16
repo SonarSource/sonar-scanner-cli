@@ -19,6 +19,9 @@
  */
 package org.sonar.runner.api;
 
+import org.sonar.home.log.LogListener;
+
+import org.sonar.runner.impl.Logs;
 import org.sonar.runner.impl.InternalProperties;
 
 import javax.annotation.Nullable;
@@ -30,7 +33,6 @@ import java.util.Properties;
  * @since 2.2
  */
 public abstract class Runner<T extends Runner> {
-
   private final Properties globalProperties = new Properties();
 
   protected Runner() {
@@ -40,6 +42,16 @@ public abstract class Runner<T extends Runner> {
     Properties clone = new Properties();
     clone.putAll(globalProperties);
     return clone;
+  }
+  
+  /**
+   * Set a log stream. All log events will be redirected to the listener.
+   * By default, all logs are sent to stdout, except for logs of ERROR level, which are sent to stderr.
+   * If null is given, the default is behavior is set.
+   */
+  public T setLogListener(LogListener stream) {
+    Logs.setListener(stream);
+    return (T) this;
   }
 
   /**
@@ -93,7 +105,7 @@ public abstract class Runner<T extends Runner> {
     if (dumpToFile != null) {
       File dumpFile = new File(dumpToFile);
       Utils.writeProperties(dumpFile, copy);
-      System.out.println("Simulation mode. Configuration written to " + dumpFile.getAbsolutePath());
+      Logs.info("Simulation mode. Configuration written to " + dumpFile.getAbsolutePath());
     } else {
       doExecute(copy);
     }

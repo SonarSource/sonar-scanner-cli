@@ -40,8 +40,12 @@ public class BatchLauncherMain {
     Properties props = loadProperties(args[0]);
     IsolatedLauncher launcher = launcherFactory.createLauncher(props);
     launcher.start(props, Collections.emptyList());
-    launcher.execute(props);
-    launcher.stop();
+    try {
+      launcher.execute(props);
+    } finally {
+      //persistit has non-daemon threads that need to be stopped or the jvm w'ont quit
+      launcher.stop();
+    }
   }
 
   private static Properties loadProperties(String arg) throws IOException {

@@ -33,11 +33,21 @@ import java.nio.file.SimpleFileVisitor;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
-import java.nio.file.attribute.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 class Utils {
   private Utils() {
     // only util static methods
+  }
+  
+  static boolean isAtLeast52(String version) {
+    //it can be snapshot (5.2-SNAPSHOT)
+    if(version == null) {
+      return false;
+    }
+    
+    int endIndex = Math.min(3, version.length());
+    return Double.parseDouble(version.substring(0, endIndex)) >= 5.2;
   }
 
   /**

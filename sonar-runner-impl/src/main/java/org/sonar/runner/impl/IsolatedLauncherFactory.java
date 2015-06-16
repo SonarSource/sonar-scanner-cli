@@ -69,7 +69,7 @@ public class IsolatedLauncherFactory {
   }
 
   private static void addIsolatedLauncherMaskRule(Properties props) {
-    String unmask = "UNMASK|org.sonar.runner.batch.IsolatedLauncher";
+    String unmask = "UNMASK|org.sonar.runner.batch.IsolatedLauncher,UNMASK|org.sonar.home.log.LogListener";
     String currentRules = (String) props.get(InternalProperties.RUNNER_MASK_RULES);
 
     if (currentRules == null) {

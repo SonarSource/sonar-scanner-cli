@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch API
+ * SonarQube Runner - Batch Interface
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -19,11 +19,21 @@
  */
 package org.sonar.runner.batch;
 
+import org.sonar.home.log.LogListener;
+
 import java.util.List;
 import java.util.Properties;
 
 public interface IsolatedLauncher {
   void start(Properties properties, List<Object> extensions);
+
+  void start(Properties properties, List<Object> extensions, LogListener logListener);
+
   void stop();
+
   void execute(Properties properties);
+
+  void executeOldVersion(Properties properties, List<Object> extensions);
+
+  String getVersion();
 }

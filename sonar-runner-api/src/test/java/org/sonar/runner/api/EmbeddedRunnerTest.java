@@ -31,8 +31,11 @@ import org.sonar.runner.impl.InternalProperties;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Matchers.any;
 import static org.fest.assertions.Assertions.assertThat;
@@ -58,6 +61,7 @@ public class EmbeddedRunnerTest {
   public void setUp() {
     batchLauncher = mock(IsolatedLauncherFactory.class);
     launcher = mock(IsolatedLauncher.class);
+    when(launcher.getVersion()).thenReturn("5.2");
     when(batchLauncher.createLauncher(any(Properties.class))).thenReturn(launcher);
     runner = new EmbeddedRunner(batchLauncher);
   }
@@ -67,6 +71,48 @@ public class EmbeddedRunnerTest {
     EmbeddedRunner runner = EmbeddedRunner.create().setApp("Eclipse", "3.1");
     assertThat(runner.app()).isEqualTo("Eclipse");
     assertThat(runner.appVersion()).isEqualTo("3.1");
+  }
+  
+  @Test
+  public void test_back_compatibility() {
+    when(launcher.getVersion()).thenReturn("4.5");
+    
+    final FakeExtension fakeExtension = new FakeExtension();
+    List<Object> extensionList = new LinkedList<>();
+    extensionList.add(fakeExtension);
+    
+    Properties analysisProps = new Properties();
+    analysisProps.put("sonar.dummy", "summy");
+    
+    runner.addExtensions(fakeExtension);
+    runner.setGlobalProperty("sonar.projectKey", "foo");
+    runner.start();
+    runner.runAnalysis(analysisProps);
+    runner.stop();
+
+    verify(batchLauncher).createLauncher(argThat(new ArgumentMatcher<Properties>() {
+      @Override
+      public boolean matches(Object o) {
+        return "foo".equals(((Properties) o).getProperty("sonar.projectKey"));
+      }
+    }));
+
+    // it should have added a few properties to analysisProperties, and have merged global props
+    final String[] mustHaveKeys = {"sonar.working.directory", "sonar.sourceEncoding", "sonar.projectBaseDir",
+      "sonar.projectKey", "sonar.dummy"};
+
+    verify(launcher).executeOldVersion(argThat(new ArgumentMatcher<Properties>() {
+      @Override
+      public boolean matches(Object o) {
+        Properties m = (Properties) o;
+        for (String s : mustHaveKeys) {
+          if (!m.containsKey(s)) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }), eq(extensionList));
   }
 
   @Test

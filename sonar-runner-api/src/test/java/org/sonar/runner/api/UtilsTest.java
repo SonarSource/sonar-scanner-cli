@@ -42,6 +42,16 @@ public class UtilsTest {
   }
 
   @Test
+  public void parse_version() {
+    assertThat(Utils.isAtLeast52("5.2")).isTrue();
+    assertThat(Utils.isAtLeast52(null)).isFalse();
+    assertThat(Utils.isAtLeast52("52")).isTrue();
+    assertThat(Utils.isAtLeast52("5.0")).isFalse();
+    assertThat(Utils.isAtLeast52("6.0.0")).isTrue();
+    assertThat(Utils.isAtLeast52("5.2-SNAPSHOT")).isTrue();
+  }
+
+  @Test
   public void task_should_require_project() {
     Properties props = new Properties();
     assertThat(Utils.taskRequiresProject(props)).isTrue();
@@ -64,7 +74,7 @@ public class UtilsTest {
     Utils.closeQuietly(c);
     verify(c).close();
   }
-  
+
   @Test
   public void close_quietly_null() throws IOException {
     Utils.closeQuietly(null);

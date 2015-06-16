@@ -10,7 +10,7 @@
   <name>SonarQube Runner - Batch</name>
 
   <properties>
-    <sonarBatchVersion>4.4</sonarBatchVersion>
+    <sonarBatchVersion>5.2-SNAPSHOT</sonarBatchVersion>
   </properties>
 
   <dependencies>

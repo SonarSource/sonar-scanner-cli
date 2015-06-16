@@ -40,7 +40,6 @@ public class OsTest {
 
   @Test
   public void testUsedJavaExe() throws Exception {
-    System.out.println(System.getProperty("java.io.tmpdir"));
     File javaExe = new Os().thisJavaExe();
     assertThat(javaExe).isNotNull().isFile().exists();
     assertThat(javaExe.getName()).contains("java");

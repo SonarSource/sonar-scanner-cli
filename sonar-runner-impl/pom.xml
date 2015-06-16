@@ -123,6 +123,11 @@
                 <relocation>
                   <pattern>org.sonar.home</pattern>
                   <shadedPattern>org.sonar.runner.home</shadedPattern>
+                  <!--  shared between sonar-runner-api, sonar-runner-impl and sonar-batch -->
+                   <excludes>
+                    <exclude>org.sonar.home.log.LogListener</exclude>
+                    <exclude>org.sonar.home.log.LogListener$Level</exclude>
+                   </excludes>
                 </relocation>
               </relocations>
             </configuration>

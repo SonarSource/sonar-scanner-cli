@@ -19,6 +19,7 @@
  */
 package org.sonar.runner.impl;
 
+import org.sonar.home.log.LogListener;
 import org.junit.Before;
 import org.sonar.runner.batch.IsolatedLauncher;
 
@@ -101,6 +102,19 @@ public class IsolatedLauncherFactoryTest {
     @Override
     public void execute(Properties properties) {
       FakeIsolatedLauncher.props = properties;
+    }
+
+    @Override
+    public void start(Properties properties, List<Object> extensions, LogListener logListener) {
+    }
+
+    @Override
+    public void executeOldVersion(Properties properties, List<Object> extensions) {
+    }
+
+    @Override
+    public String getVersion() {
+      return null;
     }
   }
 }
