@@ -3,10 +3,9 @@
 set -euo pipefail
 
 function installTravisTools {
-  curl -sSL https://raw.githubusercontent.com/dgageot/travis-utils/master/install.sh | sh
-  source /tmp/travis-utils/utils.sh
+  curl -sSL https://raw.githubusercontent.com/sonarsource/travis-utils/v2.1/install.sh | bash
 }
 
 installTravisTools
-build_green_sonarqube_snapshot
+travis_build_green_sonarqube_snapshot
 mvn verify -B -e -V
