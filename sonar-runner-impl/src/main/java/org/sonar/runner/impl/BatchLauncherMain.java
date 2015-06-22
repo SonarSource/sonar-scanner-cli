@@ -43,7 +43,7 @@ public class BatchLauncherMain {
     try {
       launcher.execute(props);
     } finally {
-      //persistit has non-daemon threads that need to be stopped or the jvm w'ont quit
+      // try to still exit cleanly
       launcher.stop();
     }
   }
@@ -59,7 +59,13 @@ public class BatchLauncherMain {
     return props;
   }
 
-  public static void main(String[] args) throws IOException {
-    new BatchLauncherMain(new IsolatedLauncherFactory()).execute(args);
+  public static void main(String[] args) {
+    try {
+      new BatchLauncherMain(new IsolatedLauncherFactory()).execute(args);
+    } catch (Exception e) {
+      e.printStackTrace(System.err);
+      // make sure non-daemon threads don't hang app
+      System.exit(1);
+    }
   }
 }
