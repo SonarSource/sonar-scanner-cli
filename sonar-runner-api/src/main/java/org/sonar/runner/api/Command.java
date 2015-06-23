@@ -94,7 +94,7 @@ class Command {
 
     Builder addArguments(List<String> args) {
       for (String arg : args) {
-        if (arg!=null && !"".equals(arg.trim())) {
+        if (arg != null && !"".equals(arg.trim())) {
           arguments.add(arg);
         }
       }

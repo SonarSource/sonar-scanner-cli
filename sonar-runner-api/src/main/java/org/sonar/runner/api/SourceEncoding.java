@@ -27,8 +27,9 @@ import java.util.Properties;
 
 class SourceEncoding {
   private SourceEncoding() {
-    
+
   }
+
   static void init(Properties p) {
     boolean onProject = Utils.taskRequiresProject(p);
     if (onProject) {

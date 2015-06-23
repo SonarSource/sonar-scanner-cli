@@ -200,20 +200,10 @@ public class ForkedRunner extends Runner<ForkedRunner> {
 
   private void fork(ForkCommand forkCommand) {
     if (stdOut == null) {
-      stdOut = new StreamConsumer() {
-        @Override
-        public void consumeLine(String line) {
-          Logs.info(line);
-        }
-      };
+      stdOut = new OutConsumer();
     }
     if (stdErr == null) {
-      stdErr = new StreamConsumer() {
-        @Override
-        public void consumeLine(String line) {
-          Logs.error(line);
-        }
-      };
+      stdErr = new ErrConsumer();
     }
 
     int status = commandExecutor.execute(forkCommand.command, stdOut, stdErr, ONE_DAY_IN_MILLISECONDS, processMonitor);
@@ -225,6 +215,19 @@ public class ForkedRunner extends Runner<ForkedRunner> {
       }
     }
   }
+  
+  private static class OutConsumer implements StreamConsumer {
+    @Override
+    public void consumeLine(String line) {
+      Logs.info(line);
+    }
+  };
+  private static class ErrConsumer implements StreamConsumer {
+    @Override
+    public void consumeLine(String line) {
+      Logs.error(line);
+    }
+  };
 
   static class ForkCommand {
     Command command;

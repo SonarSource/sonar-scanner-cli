@@ -40,7 +40,6 @@ import java.util.Properties;
 public class EmbeddedRunner extends Runner<EmbeddedRunner> {
   private final IsolatedLauncherFactory launcherFactory;
   private IsolatedLauncher launcher;
-  private String sqVersion;
   private final List<Object> extensions = new ArrayList<Object>();
   private static final String MASK_RULES_PROP = "sonarRunner.maskRules";
 

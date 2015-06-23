@@ -32,7 +32,7 @@ import java.util.Properties;
 /**
  * @since 2.2
  */
-public abstract class Runner<T extends Runner> {
+public abstract class Runner<T extends Runner<?>> {
   private final Properties globalProperties = new Properties();
 
   protected Runner() {

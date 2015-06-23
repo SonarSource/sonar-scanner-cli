@@ -39,13 +39,13 @@ class Utils {
   private Utils() {
     // only util static methods
   }
-  
+
   static boolean isAtLeast52(String version) {
-    //it can be snapshot (5.2-SNAPSHOT)
-    if(version == null) {
+    // it can be snapshot (5.2-SNAPSHOT)
+    if (version == null) {
       return false;
     }
-    
+
     int endIndex = Math.min(3, version.length());
     return Double.parseDouble(version.substring(0, endIndex)) >= 5.2;
   }
@@ -81,34 +81,41 @@ class Utils {
 
   static void deleteQuietly(File f) {
     try {
-      Files.walkFileTree(f.toPath(), new DeleteFileVisitor());
+      Files.walkFileTree(f.toPath(), new DeleteQuietlyFileVisitor());
     } catch (IOException e) {
       // ignore
     }
   }
 
-  private static class DeleteFileVisitor extends SimpleFileVisitor<Path> {
+  private static class DeleteQuietlyFileVisitor extends SimpleFileVisitor<Path> {
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-      Files.delete(file);
-      return FileVisitResult.CONTINUE;
-    }
-
-    @Override
-    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-      Files.delete(file);
-      return FileVisitResult.CONTINUE;
-    }
-
-    @Override
-    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-      if (exc == null) {
-        Files.delete(dir);
-        return FileVisitResult.CONTINUE;
-      } else {
-        // directory iteration failed; propagate exception
-        throw exc;
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+      try {
+        Files.delete(file);
+      } catch (IOException e) {
+        // ignore
       }
+      return FileVisitResult.CONTINUE;
+    }
+
+    @Override
+    public FileVisitResult visitFileFailed(Path file, IOException exc) {
+      try {
+        Files.delete(file);
+      } catch (IOException e) {
+        // ignore
+      }
+      return FileVisitResult.CONTINUE;
+    }
+
+    @Override
+    public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+      try {
+        Files.delete(dir);
+      } catch (IOException e) {
+        // ignore
+      }
+      return FileVisitResult.CONTINUE;
     }
   }
 

@@ -63,7 +63,7 @@ public class BatchLauncherMain {
     try {
       new BatchLauncherMain(new IsolatedLauncherFactory()).execute(args);
     } catch (Exception e) {
-      e.printStackTrace(System.err);
+      Logs.error(e.getMessage(), e);
       // make sure non-daemon threads don't hang app
       System.exit(1);
     }

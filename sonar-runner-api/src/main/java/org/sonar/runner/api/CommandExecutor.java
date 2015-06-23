@@ -131,13 +131,13 @@ class CommandExecutor {
     });
   }
 
-  private void verifyGobbler(Command command, StreamGobbler gobbler, String type) {
+  private static void verifyGobbler(Command command, StreamGobbler gobbler, String type) {
     if (gobbler.getException() != null) {
       throw new CommandException("Error inside " + type + " stream", command, gobbler.getException());
     }
   }
 
-  private void closeStreams(Process process) {
+  private static void closeStreams(Process process) {
     if (process != null) {
       Utils.closeQuietly(process.getInputStream());
       Utils.closeQuietly(process.getInputStream());
@@ -146,7 +146,7 @@ class CommandExecutor {
     }
   }
 
-  private void waitUntilFinish(StreamGobbler thread) {
+  private static void waitUntilFinish(StreamGobbler thread) {
     if (thread != null) {
       try {
         thread.join();

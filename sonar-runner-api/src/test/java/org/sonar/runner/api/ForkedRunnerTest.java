@@ -31,11 +31,9 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentMatcher;
 import org.sonar.runner.impl.JarExtractor;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -91,16 +89,16 @@ public class ForkedRunnerTest {
 
     ArgumentCaptor<StreamConsumer> arg1 = ArgumentCaptor.forClass(StreamConsumer.class);
     ArgumentCaptor<StreamConsumer> arg2 = ArgumentCaptor.forClass(StreamConsumer.class);
-    
+
     verify(commandExecutor).execute(any(Command.class), arg1.capture(), arg2.capture(), anyLong(), any(ProcessMonitor.class));
     arg1.getValue().consumeLine("test1");
     arg2.getValue().consumeLine("test2");
-    
+
     verify(listener).log("test1", Level.INFO);
     verify(listener).log("test2", Level.ERROR);
     verifyNoMoreInteractions(listener);
   }
-  
+
   @Test
   public void should_print_to_consumers_by_default() throws IOException {
     final List<String> printedLines = new LinkedList<>();
@@ -119,7 +117,7 @@ public class ForkedRunnerTest {
     runner.execute();
 
     verify(commandExecutor).execute(any(Command.class), eq(consumer), eq(consumer), anyLong(),
-        any(ProcessMonitor.class));
+      any(ProcessMonitor.class));
   }
 
   @Test
@@ -143,7 +141,7 @@ public class ForkedRunnerTest {
     assertThat(properties.getProperty("-Xmx512m")).isNull();
     assertThat(properties.getProperty("SONAR_HOME")).isNull();
   }
-  
+
   @Test
   public void should_merge_properties() throws IOException {
     JarExtractor jarExtractor = createMockExtractor();
@@ -157,7 +155,7 @@ public class ForkedRunnerTest {
     verify(spy).writeProperties(properties.capture());
     assertThat(properties.getValue().keySet()).contains("sonar.working.directory", "sonar.host.url", "sonar.sourceEncoding", "sonar.login");
   }
-  
+
   @Test
   public void test_java_command() throws IOException {
     JarExtractor jarExtractor = mock(JarExtractor.class);

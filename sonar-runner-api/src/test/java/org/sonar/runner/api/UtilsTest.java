@@ -47,6 +47,8 @@ public class UtilsTest {
     assertThat(Utils.isAtLeast52(null)).isFalse();
     assertThat(Utils.isAtLeast52("52")).isTrue();
     assertThat(Utils.isAtLeast52("5.0")).isFalse();
+    assertThat(Utils.isAtLeast52("")).isFalse();
+    assertThat(Utils.isAtLeast52("trash")).isFalse();
     assertThat(Utils.isAtLeast52("6.0.0")).isTrue();
     assertThat(Utils.isAtLeast52("5.2-SNAPSHOT")).isTrue();
   }
