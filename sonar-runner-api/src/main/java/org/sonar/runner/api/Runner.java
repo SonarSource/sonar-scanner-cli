@@ -20,7 +20,6 @@
 package org.sonar.runner.api;
 
 import org.sonar.home.log.LogListener;
-
 import org.sonar.runner.impl.Logs;
 import org.sonar.runner.impl.InternalProperties;
 
@@ -43,14 +42,14 @@ public abstract class Runner<T extends Runner<?>> {
     clone.putAll(globalProperties);
     return clone;
   }
-  
+
   /**
    * Set a log stream. All log events will be redirected to the listener.
    * By default, all logs are sent to stdout, except for logs of ERROR level, which are sent to stderr.
    * If null is given, the default is behavior is set.
    */
   public T setLogListener(LogListener stream) {
-    Logs.setListener(stream);
+    Logs.setListener(new LogListenerAdapter(stream));
     return (T) this;
   }
 
@@ -152,5 +151,32 @@ public abstract class Runner<T extends Runner<?>> {
       setGlobalProperty(key, value);
     }
   }
-
+  
+  private class LogListenerAdapter implements org.sonar.home.log.LogListener {
+    private LogListener adaptedListener;
+    
+    LogListenerAdapter(LogListener listener) {
+      this.adaptedListener = listener;
+    }
+    
+    @Override
+    public void log(String msg, org.sonar.home.log.LogListener.Level level) {
+      this.adaptedListener.log(msg, translate(level));
+    }
+    private LogListener.Level translate(org.sonar.home.log.LogListener.Level level) {
+      switch(level) {
+        case ERROR:
+          return LogListener.Level.ERROR;
+        case WARN:
+          return LogListener.Level.WARN;
+        case INFO:
+          return LogListener.Level.INFO;
+        case DEBUG:
+          default:
+          return LogListener.Level.DEBUG;
+        case TRACE:
+          return LogListener.Level.TRACE;
+      }
+    }
+  }
 }

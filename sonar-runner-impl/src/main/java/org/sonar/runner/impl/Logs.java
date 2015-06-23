@@ -20,7 +20,6 @@
 package org.sonar.runner.impl;
 
 import org.sonar.home.log.LogListener.Level;
-
 import org.sonar.home.log.LogListener;
 
 import javax.annotation.Nullable;
@@ -28,8 +27,8 @@ import javax.annotation.Nullable;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Logs {
@@ -94,6 +93,9 @@ public class Logs {
     listener.log(msg, level);
   }
 
+  /**
+   * This is recreated every time to be sure we use the current {@link System#err} and {@link System#out}.
+   */
   private static Map<Level, PrintStream> getDefaultFwdMap() {
     Map<Level, PrintStream> map = new EnumMap<>(Level.class);
 
@@ -102,14 +104,14 @@ public class Logs {
     map.put(Level.INFO, System.out);
     map.put(Level.DEBUG, System.out);
     map.put(Level.TRACE, System.out);
-    return map;
+    return Collections.unmodifiableMap(map);
   }
 
   private static class PrintStreamLogListener implements LogListener {
     Map<Level, PrintStream> forwardMap;
 
     PrintStreamLogListener(Map<Level, PrintStream> forwardMap) {
-      this.forwardMap = new HashMap<>(forwardMap);
+      this.forwardMap = new EnumMap<>(forwardMap);
     }
 
     @Override

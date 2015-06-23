@@ -47,7 +47,11 @@ class Utils {
     }
 
     int endIndex = Math.min(3, version.length());
-    return Double.parseDouble(version.substring(0, endIndex)) >= 5.2;
+    try {
+      return Double.parseDouble(version.substring(0, endIndex)) >= 5.2;
+    } catch (NumberFormatException e) {
+      return false;
+    }
   }
 
   /**

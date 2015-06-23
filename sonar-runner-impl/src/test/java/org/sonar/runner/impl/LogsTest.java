@@ -36,8 +36,8 @@ public class LogsTest {
   private static final String EXPECTED_INFO = "INFO: info\n";
   private static final String EXPECTED_ERROR = "ERROR: error\n";
 
-  private ByteArrayOutputStream recordedSystemOut = new ByteArrayOutputStream();
-  private ByteArrayOutputStream recordedSystemErr = new ByteArrayOutputStream();
+  private ByteArrayOutputStream recordedSystemOut;
+  private ByteArrayOutputStream recordedSystemErr;
 
   @Before
   public void restoreDefault() {
@@ -50,7 +50,7 @@ public class LogsTest {
     Logs.setDebugEnabled(false);
     Logs.setListener(null);
   }
-
+  
   @Test
   public void testNull() throws UnsupportedEncodingException {
     Logs.setListener(null);
