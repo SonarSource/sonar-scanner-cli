@@ -43,15 +43,15 @@ import org.sonar.runner.impl.Logs;
  */
 public class Main {
 
-  private final Exit exit;
+  private final Shutdown shutdown;
   private final Cli cli;
   private final Conf conf;
   private final RunnerFactory runnerFactory;
   private Runner<?> runner;
   private BufferedReader inputReader;
 
-  Main(Exit exit, Cli cli, Conf conf, RunnerFactory runnerFactory) {
-    this.exit = exit;
+  Main(Shutdown shutdown, Cli cli, Conf conf, RunnerFactory runnerFactory) {
+    this.shutdown = shutdown;
     this.cli = cli;
     this.conf = conf;
     this.runnerFactory = runnerFactory;
@@ -59,9 +59,10 @@ public class Main {
 
   public static void main(String[] args) {
     Exit exit = new Exit();
+    Shutdown shutdown = new Shutdown(exit);
     Cli cli = new Cli(exit).parse(args);
     cli.verify();
-    Main main = new Main(exit, cli, new Conf(cli), new RunnerFactory());
+    Main main = new Main(shutdown, cli, new Conf(cli), new RunnerFactory());
     main.execute();
   }
 
@@ -84,17 +85,17 @@ public class Main {
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
       showError("Error during Sonar runner execution", e, cli.isDisplayStackTrace());
-      exit.exit(Exit.ERROR);
+      shutdown.exit(Exit.ERROR);
     }
 
     runner.stop();
-    exit.exit(Exit.SUCCESS);
+    shutdown.exit(Exit.SUCCESS);
   }
 
   private void init(Properties p) throws IOException {
     SystemInfo.print();
     if (cli.isDisplayVersionOnly()) {
-      exit.exit(Exit.SUCCESS);
+      shutdown.exit(Exit.SUCCESS);
     }
 
     if (cli.isDisplayStackTrace()) {
@@ -113,9 +114,18 @@ public class Main {
     if (inputReader == null) {
       inputReader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
     }
+    
+    shutdown.signalReady(true);
+    if(shutdown.shouldExit()) {
+      //exit before displaying message
+      return false;
+    }
+    
     Logs.info("<Press enter to restart analysis>");
-
-    return inputReader.readLine() != null;
+    String line = inputReader.readLine(); 
+    shutdown.signalReady(false);
+    
+    return line != null;
   }
 
   private static void displayExecutionResult(Stats stats, String resultMsg) {

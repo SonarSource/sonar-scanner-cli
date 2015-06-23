@@ -30,7 +30,6 @@ import org.sonar.runner.api.Runner;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -44,7 +43,7 @@ import static org.mockito.Mockito.when;
 public class MainTest {
 
   @Mock
-  private Exit exit;
+  private Shutdown exit;
   @Mock
   private Cli cli;
   @Mock
