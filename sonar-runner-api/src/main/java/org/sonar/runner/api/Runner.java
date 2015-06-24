@@ -19,7 +19,6 @@
  */
 package org.sonar.runner.api;
 
-import org.sonar.home.log.LogListener;
 import org.sonar.runner.impl.Logs;
 import org.sonar.runner.impl.InternalProperties;
 
