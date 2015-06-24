@@ -32,9 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Before;
 
 public class LogsTest {
-  private static final String EXPECTED_DEBUG = "DEBUG: debug\n";
-  private static final String EXPECTED_INFO = "INFO: info\n";
-  private static final String EXPECTED_ERROR = "ERROR: error\n";
+  private static final String EXPECTED_DEBUG = "DEBUG: debug" + System.lineSeparator();
+  private static final String EXPECTED_INFO = "INFO: info" + System.lineSeparator();
+  private static final String EXPECTED_ERROR = "ERROR: error" + System.lineSeparator();
 
   private ByteArrayOutputStream recordedSystemOut;
   private ByteArrayOutputStream recordedSystemErr;
