@@ -19,29 +19,26 @@
  */
 package org.sonar.runner.api;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Properties;
 import org.junit.Before;
-import org.sonar.runner.batch.IsolatedLauncher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentMatcher;
+import org.sonar.home.cache.Logger;
+import org.sonar.runner.batch.IsolatedLauncher;
 import org.sonar.runner.impl.IsolatedLauncherFactory;
-import org.sonar.runner.impl.InternalProperties;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.any;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class EmbeddedRunnerTest {
 
@@ -50,7 +47,7 @@ public class EmbeddedRunnerTest {
 
   @Test
   public void should_create() {
-    assertThat(EmbeddedRunner.create()).isNotNull().isInstanceOf(EmbeddedRunner.class);
+    assertThat(EmbeddedRunner.create(mock(LogOutput.class))).isNotNull().isInstanceOf(EmbeddedRunner.class);
   }
 
   private IsolatedLauncherFactory batchLauncher;
@@ -63,28 +60,23 @@ public class EmbeddedRunnerTest {
     launcher = mock(IsolatedLauncher.class);
     when(launcher.getVersion()).thenReturn("5.2");
     when(batchLauncher.createLauncher(any(Properties.class))).thenReturn(launcher);
-    runner = new EmbeddedRunner(batchLauncher);
+    runner = new EmbeddedRunner(batchLauncher, mock(Logger.class), mock(LogOutput.class));
   }
 
   @Test
   public void test_app() {
-    EmbeddedRunner runner = EmbeddedRunner.create().setApp("Eclipse", "3.1");
+    EmbeddedRunner runner = EmbeddedRunner.create(mock(LogOutput.class)).setApp("Eclipse", "3.1");
     assertThat(runner.app()).isEqualTo("Eclipse");
     assertThat(runner.appVersion()).isEqualTo("3.1");
   }
-  
+
   @Test
   public void test_back_compatibility() {
     when(launcher.getVersion()).thenReturn("4.5");
-    
-    final FakeExtension fakeExtension = new FakeExtension();
-    List<Object> extensionList = new LinkedList<>();
-    extensionList.add(fakeExtension);
-    
+
     Properties analysisProps = new Properties();
     analysisProps.put("sonar.dummy", "summy");
-    
-    runner.addExtensions(fakeExtension);
+
     runner.setGlobalProperty("sonar.projectKey", "foo");
     runner.start();
     runner.runAnalysis(analysisProps);
@@ -112,44 +104,12 @@ public class EmbeddedRunnerTest {
         }
         return true;
       }
-    }), eq(extensionList));
-  }
-
-  @Test
-  public void should_set_unmasked_packages() {
-    EmbeddedRunner runner = EmbeddedRunner.create();
-    assertThat(runner.globalProperty(InternalProperties.RUNNER_MASK_RULES, null)).isNull();
-
-    runner = EmbeddedRunner.create().setUnmaskedPackages("org.apache.ant", "org.ant");
-    assertThat(runner.globalProperty(InternalProperties.RUNNER_MASK_RULES, null)).isEqualTo("UNMASK|org.apache.ant.,UNMASK|org.ant.");
-  }
-
-  @Test
-  public void should_set_mask_rules() {
-    EmbeddedRunner runner = EmbeddedRunner.create();
-    assertThat(runner.globalProperty(InternalProperties.RUNNER_MASK_RULES, null)).isNull();
-
-    runner = EmbeddedRunner.create()
-      .unmask("org.slf4j.Logger")
-      .mask("org.slf4j.")
-      .mask("ch.qos.logback.")
-      .unmask("");
-    assertThat(runner.globalProperty(InternalProperties.RUNNER_MASK_RULES, null)).isEqualTo("UNMASK|org.slf4j.Logger,MASK|org.slf4j.,MASK|ch.qos.logback.,UNMASK|");
-  }
-
-  @Test
-  public void should_add_extensions() {
-    EmbeddedRunner runner = EmbeddedRunner.create();
-    assertThat(runner.extensions()).isEmpty();
-
-    FakeExtension fakeExtension = new FakeExtension();
-    runner.addExtensions(fakeExtension);
-    assertThat(runner.extensions()).containsExactly(fakeExtension);
+    }));
   }
 
   @Test
   public void should_set_properties() {
-    EmbeddedRunner runner = EmbeddedRunner.create();
+    EmbeddedRunner runner = EmbeddedRunner.create(mock(LogOutput.class));
     runner.setGlobalProperty("sonar.projectKey", "foo");
     runner.addGlobalProperties(new Properties() {
       {
@@ -166,8 +126,6 @@ public class EmbeddedRunnerTest {
 
   @Test
   public void should_launch_batch() {
-    final FakeExtension fakeExtension = new FakeExtension();
-    runner.addExtensions(fakeExtension);
     runner.setGlobalProperty("sonar.projectKey", "foo");
     runner.start();
     runner.runAnalysis(new Properties());
@@ -199,8 +157,6 @@ public class EmbeddedRunnerTest {
 
   @Test
   public void should_launch_batch_analysisProperties() {
-    final FakeExtension fakeExtension = new FakeExtension();
-    runner.addExtensions(fakeExtension);
     runner.setGlobalProperty("sonar.projectKey", "foo");
     runner.start();
 
@@ -241,6 +197,29 @@ public class EmbeddedRunnerTest {
     assertThat(props.getProperty("sonar.projectKey")).isEqualTo("foo");
   }
 
-  static class FakeExtension {
+  @Test
+  public void should_set_default_platform_encoding() throws Exception {
+    Properties p = new Properties();
+    p.setProperty("sonar.task", "scan");
+    runner.initSourceEncoding(p);
+    assertThat(p.getProperty("sonar.sourceEncoding", null)).isEqualTo(Charset.defaultCharset().name());
   }
+
+  @Test
+  public void should_use_parameterized_encoding() throws Exception {
+    Properties p = new Properties();
+    p.setProperty("sonar.task", "scan");
+    p.setProperty("sonar.sourceEncoding", "THE_ISO_1234");
+    runner.initSourceEncoding(p);
+    assertThat(p.getProperty("sonar.sourceEncoding", null)).isEqualTo("THE_ISO_1234");
+  }
+
+  @Test
+  public void should_not_init_encoding_if_not_project_task() throws Exception {
+    Properties p = new Properties();
+    p.setProperty("sonar.task", "views");
+    runner.initSourceEncoding(p);
+    assertThat(p.getProperty("sonar.sourceEncoding", null)).isNull();
+  }
+
 }

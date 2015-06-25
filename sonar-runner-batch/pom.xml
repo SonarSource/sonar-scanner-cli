@@ -21,12 +21,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>0.9.15</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.codehaus.sonar</groupId>
       <artifactId>sonar-batch</artifactId>
       <version>${sonarBatchVersion}</version>

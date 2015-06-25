@@ -19,17 +19,19 @@
  */
 package org.sonar.runner.api;
 
-import org.sonar.runner.impl.Logs;
-
 import java.io.File;
 import java.util.Properties;
+import org.sonar.home.cache.Logger;
 
 class Dirs {
-  private Dirs() {
 
+  private final Logger logger;
+
+  Dirs(Logger logger) {
+    this.logger = logger;
   }
 
-  static void init(Properties p) {
+  void init(Properties p) {
     boolean onProject = Utils.taskRequiresProject(p);
     if (onProject) {
       initProjectDirs(p);
@@ -38,7 +40,7 @@ class Dirs {
     }
   }
 
-  private static void initProjectDirs(Properties p) {
+  private void initProjectDirs(Properties p) {
     String path = p.getProperty(ScanProperties.PROJECT_BASEDIR, ".");
     File projectDir = new File(path);
     if (!projectDir.isDirectory()) {
@@ -59,7 +61,7 @@ class Dirs {
     }
     Utils.deleteQuietly(workDir);
     p.setProperty(RunnerProperties.WORK_DIR, workDir.getAbsolutePath());
-    Logs.info("Work directory: " + workDir.getAbsolutePath());
+    logger.info("Work directory: " + workDir.getAbsolutePath());
   }
 
   /**

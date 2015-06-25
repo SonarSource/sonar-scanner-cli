@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch Interface
+ * SonarQube Runner - CLI - Distribution
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,19 +17,34 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.batch;
+package org.sonar.runner.cli;
 
 import java.util.Properties;
+import org.sonar.runner.api.EmbeddedRunner;
+import org.sonar.runner.api.LogOutput;
 
-public interface IsolatedLauncher {
+class RunnerFactory {
 
-  void start(Properties properties, LogOutput logOutput);
+  EmbeddedRunner create(Properties props) {
+    return EmbeddedRunner.create(new LogOutput() {
 
-  void stop();
+      @Override
+      public void log(String formattedMessage, Level level) {
+        switch (level) {
+          case TRACE:
+          case DEBUG:
+            Logs.debug(formattedMessage);
+            break;
+          case ERROR:
+            Logs.error(formattedMessage);
+            break;
+          case INFO:
+          case WARN:
+          default:
+            Logs.info(formattedMessage);
+        }
+      }
+    }).addGlobalProperties(props);
+  }
 
-  void execute(Properties properties);
-
-  void executeOldVersion(Properties properties);
-
-  String getVersion();
 }

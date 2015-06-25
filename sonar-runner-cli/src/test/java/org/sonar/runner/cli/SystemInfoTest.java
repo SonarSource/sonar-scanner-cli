@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch Interface
+ * SonarQube Runner - CLI - Distribution
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,19 +17,27 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.batch;
+package org.sonar.runner.cli;
 
-import java.util.Properties;
+import org.junit.Test;
+import org.sonar.runner.cli.SystemInfo;
 
-public interface IsolatedLauncher {
+import static org.fest.assertions.Assertions.assertThat;
 
-  void start(Properties properties, LogOutput logOutput);
+public class SystemInfoTest {
+  @Test
+  public void test_java() {
+    assertThat(SystemInfo.java()).matches("Java .* \\((32|64)-bit\\)");
+  }
 
-  void stop();
+  @Test
+  public void test_os() {
+    assertThat(SystemInfo.os()).isNotEmpty();
+  }
 
-  void execute(Properties properties);
-
-  void executeOldVersion(Properties properties);
-
-  String getVersion();
+  @Test
+  public void should_print() {
+    SystemInfo.print();
+    // should mock output
+  }
 }

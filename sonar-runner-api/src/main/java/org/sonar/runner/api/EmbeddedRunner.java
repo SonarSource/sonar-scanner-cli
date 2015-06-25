@@ -19,110 +19,202 @@
  */
 package org.sonar.runner.api;
 
-import org.sonar.home.log.LogListener;
-
-import org.sonar.runner.impl.Logs;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.util.Locale;
+import java.util.Properties;
+import javax.annotation.Nullable;
+import org.sonar.home.cache.Logger;
 import org.sonar.runner.batch.IsolatedLauncher;
+import org.sonar.runner.impl.InternalProperties;
 import org.sonar.runner.impl.IsolatedLauncherFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-
 /**
- * Implementation of {@link Runner} that is executed in the same JVM. The application can inject
- * some extensions into Sonar IoC container (see {@link #addExtensions(Object...)}. It can be
- * used for example in the Maven Sonar plugin to register Maven components like MavenProject
- * or MavenPluginExecutor.
+ * Entry point to run SonarQube analysis programmatically.
  * @since 2.2
  */
-public class EmbeddedRunner extends Runner<EmbeddedRunner> {
+public class EmbeddedRunner {
   private final IsolatedLauncherFactory launcherFactory;
   private IsolatedLauncher launcher;
-  private final List<Object> extensions = new ArrayList<Object>();
-  private static final String MASK_RULES_PROP = "sonarRunner.maskRules";
+  private final LogOutput logOutput;
+  private final Properties globalProperties = new Properties();
+  private final Logger logger;
 
-  EmbeddedRunner(IsolatedLauncherFactory bl) {
+  EmbeddedRunner(IsolatedLauncherFactory bl, Logger logger, LogOutput logOutput) {
+    this.logger = logger;
     this.launcherFactory = bl;
+    this.logOutput = logOutput;
+  }
+
+  public static EmbeddedRunner create(final LogOutput logOutput) {
+    Logger logger = new Logger() {
+
+      @Override
+      public void warn(String msg) {
+        logOutput.log(msg, LogOutput.Level.WARN);
+      }
+
+      @Override
+      public void info(String msg) {
+        logOutput.log(msg, LogOutput.Level.INFO);
+      }
+
+      @Override
+      public void error(String msg, Throwable t) {
+        StringWriter errors = new StringWriter();
+        t.printStackTrace(new PrintWriter(errors));
+        logOutput.log(msg + "\n" + errors.toString(), LogOutput.Level.ERROR);
+      }
+
+      @Override
+      public void error(String msg) {
+        logOutput.log(msg, LogOutput.Level.ERROR);
+      }
+
+      @Override
+      public void debug(String msg) {
+        logOutput.log(msg, LogOutput.Level.DEBUG);
+      }
+    };
+    return new EmbeddedRunner(new IsolatedLauncherFactory(logger), logger, logOutput);
+  }
+
+  public Properties globalProperties() {
+    Properties clone = new Properties();
+    clone.putAll(globalProperties);
+    return clone;
   }
 
   /**
-   * Create a new instance.
+   * Declare Sonar properties, for example sonar.projectKey=>foo.
+   *
+   * @see #setProperty(String, String)
    */
-  public static EmbeddedRunner create() {
-    return new EmbeddedRunner(new IsolatedLauncherFactory());
-  }
-
-  public static EmbeddedRunner create(LogListener logListener) {
-    Logs.setListener(logListener);
-    return new EmbeddedRunner(new IsolatedLauncherFactory());
+  public EmbeddedRunner addGlobalProperties(Properties p) {
+    globalProperties.putAll(p);
+    return this;
   }
 
   /**
-   * Sonar is executed in an almost fully isolated classloader (mask everything by default). This method allows to unmask some classes based on
-   * a prefix of their fully qualified name. It is related to the extensions provided by {@link #addExtensions(Object...)}.
-   * Complex mask/unmask rules can be defined by chaining several ordered calls to {@link #unmask(String)} and {@link #mask(String)}.
-   * Registered mask/unmask rules are considered in their registration order and as soon as a matching prefix is found
-   * the class is masked/unmasked accordingly.
-   * If no matching prefix can be found then by default class is masked.
+   * Declare a SonarQube property.
+   *
+   * @see RunnerProperties
+   * @see ScanProperties
    */
-  public EmbeddedRunner unmask(String fqcnPrefix) {
-    return addMaskRule("UNMASK", fqcnPrefix);
+  public EmbeddedRunner setGlobalProperty(String key, String value) {
+    globalProperties.setProperty(key, value);
+    return this;
+  }
+
+  public String globalProperty(String key, @Nullable String defaultValue) {
+    return globalProperties.getProperty(key, defaultValue);
   }
 
   /**
-   * @see EmbeddedRunner#unmask(String)
+   * User-agent used in the HTTP requests to the SonarQube server
    */
-  public EmbeddedRunner mask(String fqcnPrefix) {
-    return addMaskRule("MASK", fqcnPrefix);
+  public EmbeddedRunner setApp(String app, String version) {
+    setGlobalProperty(InternalProperties.RUNNER_APP, app);
+    setGlobalProperty(InternalProperties.RUNNER_APP_VERSION, version);
+    return this;
   }
 
-  private EmbeddedRunner addMaskRule(String type, String fqcnPrefix) {
-    String existingRules = globalProperty(MASK_RULES_PROP, "");
-    if (!"".equals(existingRules)) {
-      existingRules += ",";
+  public String app() {
+    return globalProperty(InternalProperties.RUNNER_APP, null);
+  }
+
+  public String appVersion() {
+    return globalProperty(InternalProperties.RUNNER_APP_VERSION, null);
+  }
+
+  public void runAnalysis(Properties analysisProperties) {
+    Properties copy = new Properties();
+    copy.putAll(analysisProperties);
+    initAnalysisProperties(copy);
+
+    String dumpToFile = copy.getProperty(InternalProperties.RUNNER_DUMP_TO_FILE);
+    if (dumpToFile != null) {
+      File dumpFile = new File(dumpToFile);
+      Utils.writeProperties(dumpFile, copy);
+      logger.info("Simulation mode. Configuration written to " + dumpFile.getAbsolutePath());
+    } else {
+      doExecute(copy);
     }
-    existingRules += type + "|" + fqcnPrefix;
-    return setGlobalProperty(MASK_RULES_PROP, existingRules);
+  }
+
+  public void start() {
+    initGlobalDefaultValues();
+    doStart();
+  }
+
+  public void stop() {
+    doStop();
   }
 
   /**
-   * @deprecated since 2.3 use {@link #unmask(String)}
+   * @deprecated since 2.5 use {@link #start()}, {@link #runAnalysis(Properties)} and then {@link #stop()}
    */
   @Deprecated
-  public EmbeddedRunner setUnmaskedPackages(String... packages) {
-    for (String packagePrefix : packages) {
-      unmask(packagePrefix + ".");
+  public final void execute() {
+    start();
+    runAnalysis(new Properties());
+    stop();
+  }
+
+  private void initGlobalDefaultValues() {
+    setGlobalDefaultValue(RunnerProperties.HOST_URL, "http://localhost:9000");
+    setGlobalDefaultValue(InternalProperties.RUNNER_APP, "SonarQubeRunner");
+    setGlobalDefaultValue(InternalProperties.RUNNER_APP_VERSION, RunnerVersion.version());
+  }
+
+  private void initAnalysisProperties(Properties p) {
+    initSourceEncoding(p);
+    new Dirs(logger).init(p);
+  }
+
+  void initSourceEncoding(Properties p) {
+    boolean onProject = Utils.taskRequiresProject(p);
+    if (onProject) {
+      String sourceEncoding = p.getProperty(ScanProperties.PROJECT_SOURCE_ENCODING, "");
+      boolean platformDependent = false;
+      if ("".equals(sourceEncoding)) {
+        sourceEncoding = Charset.defaultCharset().name();
+        platformDependent = true;
+        p.setProperty(ScanProperties.PROJECT_SOURCE_ENCODING, sourceEncoding);
+      }
+      logger.info("Default locale: \"" + Locale.getDefault() + "\", source code encoding: \"" + sourceEncoding + "\""
+        + (platformDependent ? " (analysis is platform dependent)" : ""));
     }
-    return this;
   }
 
-  public EmbeddedRunner addExtensions(Object... objects) {
-    extensions.addAll(Arrays.asList(objects));
-    return this;
+  private void setGlobalDefaultValue(String key, String value) {
+    if (!globalProperties.containsKey(key)) {
+      setGlobalProperty(key, value);
+    }
   }
 
-  List<Object> extensions() {
-    return extensions;
-  }
-
-  @Override
   protected void doStart() {
     launcher = launcherFactory.createLauncher(globalProperties());
     if (Utils.isAtLeast52(launcher.getVersion())) {
-      launcher.start(globalProperties(), extensions, Logs.getListener());
+      launcher.start(globalProperties(), new org.sonar.runner.batch.LogOutput() {
+
+        @Override
+        public void log(String formattedMessage, Level level) {
+          logOutput.log(formattedMessage, LogOutput.Level.valueOf(level.name()));
+        }
+
+      });
     }
   }
 
-  @Override
   protected void doStop() {
     if (Utils.isAtLeast52(launcher.getVersion())) {
       launcher.stop();
     }
   }
 
-  @Override
   protected void doExecute(Properties analysisProperties) {
     if (Utils.isAtLeast52(launcher.getVersion())) {
       launcher.execute(analysisProperties);
@@ -130,7 +222,7 @@ public class EmbeddedRunner extends Runner<EmbeddedRunner> {
       Properties prop = new Properties();
       prop.putAll(globalProperties());
       prop.putAll(analysisProperties);
-      launcher.executeOldVersion(prop, extensions);
+      launcher.executeOldVersion(prop);
     }
   }
 }

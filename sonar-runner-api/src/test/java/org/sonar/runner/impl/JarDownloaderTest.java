@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch Interface
+ * SonarQube Runner - API
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,19 +17,30 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.batch;
+package org.sonar.runner.impl;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import org.junit.Test;
+import org.sonar.home.cache.Logger;
 
-public interface IsolatedLauncher {
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
-  void start(Properties properties, LogOutput logOutput);
+public class JarDownloaderTest {
 
-  void stop();
+  ServerConnection serverConnection = mock(ServerConnection.class);
+  Properties props = new Properties();
+  JarDownloader downloader = spy(new JarDownloader(serverConnection, mock(Logger.class)));
 
-  void execute(Properties properties);
-
-  void executeOldVersion(Properties properties);
-
-  String getVersion();
+  @Test
+  public void should_download_jar_files() {
+    doReturn(new ArrayList<File>()).when(downloader).download();
+    List<File> jarFiles = downloader.download();
+    assertThat(jarFiles).isNotNull();
+  }
 }

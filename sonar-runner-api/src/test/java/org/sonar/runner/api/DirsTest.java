@@ -19,14 +19,15 @@
  */
 package org.sonar.runner.api;
 
+import java.io.File;
+import java.util.Properties;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.io.File;
-import java.util.Properties;
+import org.sonar.home.cache.Logger;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class DirsTest {
 
@@ -38,7 +39,7 @@ public class DirsTest {
   @Test
   public void should_init_default_task_work_dir() throws Exception {
     p.setProperty("sonar.task", "views");
-    Dirs.init(p);
+    new Dirs(mock(Logger.class)).init(p);
 
     File workDir = new File(p.getProperty(RunnerProperties.WORK_DIR, null));
     assertThat(workDir).isNotNull().isDirectory();
@@ -49,7 +50,7 @@ public class DirsTest {
   public void should_use_parameterized_task_work_dir() throws Exception {
     p.setProperty("sonar.task", "views");
     p.setProperty(RunnerProperties.WORK_DIR, "generated/reports");
-    Dirs.init(p);
+    new Dirs(mock(Logger.class)).init(p);
 
     File workDir = new File(p.getProperty(RunnerProperties.WORK_DIR, null));
     assertThat(workDir).isNotNull();
@@ -60,7 +61,7 @@ public class DirsTest {
   @Test
   public void should_init_default_project_dirs() throws Exception {
     p.setProperty("sonar.task", "scan");
-    Dirs.init(p);
+    new Dirs(mock(Logger.class)).init(p);
 
     File projectDir = new File(p.getProperty(ScanProperties.PROJECT_BASEDIR, null));
     File workDir = new File(p.getProperty(RunnerProperties.WORK_DIR, null));
@@ -79,7 +80,7 @@ public class DirsTest {
     p.setProperty("sonar.task", "scan");
     p.setProperty(RunnerProperties.WORK_DIR, "relative/path");
     p.setProperty(ScanProperties.PROJECT_BASEDIR, initialProjectDir.getAbsolutePath());
-    Dirs.init(p);
+    new Dirs(mock(Logger.class)).init(p);
 
     File projectDir = new File(p.getProperty(ScanProperties.PROJECT_BASEDIR, null));
     File workDir = new File(p.getProperty(RunnerProperties.WORK_DIR, null));

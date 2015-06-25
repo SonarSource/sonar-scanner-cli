@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch Interface
+ * SonarQube Runner - CLI - Distribution
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,19 +17,25 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.batch;
+package org.sonar.runner.cli;
 
 import java.util.Properties;
+import org.junit.Test;
+import org.sonar.runner.api.EmbeddedRunner;
 
-public interface IsolatedLauncher {
+import static org.fest.assertions.Assertions.assertThat;
 
-  void start(Properties properties, LogOutput logOutput);
+public class RunnerFactoryTest {
 
-  void stop();
+  Properties props = new Properties();
 
-  void execute(Properties properties);
+  @Test
+  public void should_create_embedded_runner() {
+    props.setProperty("foo", "bar");
+    EmbeddedRunner runner = new RunnerFactory().create(props);
 
-  void executeOldVersion(Properties properties);
+    assertThat(runner).isInstanceOf(EmbeddedRunner.class);
+    assertThat(runner.globalProperties().get("foo")).isEqualTo("bar");
+  }
 
-  String getVersion();
 }

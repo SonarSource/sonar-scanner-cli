@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch
+ * SonarQube Runner - API
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,28 +17,29 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.batch;
+package org.sonar.runner.impl;
 
-import java.util.Properties;
+import java.io.IOException;
+import org.junit.Rule;
 import org.junit.Test;
-import org.sonar.batch.bootstrapper.Batch;
+import org.junit.rules.ExpectedException;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class IsolatedLauncherTest {
-
-  Properties props = new Properties();
-  BatchIsolatedLauncher launcher = new BatchIsolatedLauncher();
+public class IsolatedClassloaderTest {
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Test
-  public void should_create_batch() {
-    props.setProperty("sonar.projectBaseDir", "src/test/java_sample");
-    props.setProperty("sonar.projectKey", "sample");
-    props.setProperty("sonar.projectName", "Sample");
-    props.setProperty("sonar.projectVersion", "1.0");
-    props.setProperty("sonar.sources", "src");
-    Batch batch = launcher.createBatch(props, null);
+  public void should_use_isolated_system_classloader_when_parent_is_excluded() throws ClassNotFoundException, IOException {
+    thrown.expect(ClassNotFoundException.class);
+    thrown.expectMessage("org.junit.Test");
+    ClassLoader parent = getClass().getClassLoader();
+    IsolatedClassloader classLoader = new IsolatedClassloader(parent);
 
-    assertThat(batch).isNotNull();
+    // JUnit is available in the parent classloader (classpath used to execute this test) but not in the core JVM
+    assertThat(classLoader.loadClass("java.lang.String", false)).isNotNull();
+    classLoader.loadClass("org.junit.Test", false);
+    classLoader.close();
   }
 }

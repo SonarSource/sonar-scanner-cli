@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch Interface
+ * SonarQube Runner - API
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,19 +17,38 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.batch;
+package org.sonar.runner.impl;
 
-import java.util.Properties;
+import org.junit.rules.ExternalResource;
 
-public interface IsolatedLauncher {
+public class MockHttpServerInterceptor extends ExternalResource {
 
-  void start(Properties properties, LogOutput logOutput);
+  private MockHttpServer server;
 
-  void stop();
+  @Override
+  protected final void before() throws Throwable {
+    server = new MockHttpServer();
+    server.start();
+  }
 
-  void execute(Properties properties);
+  @Override
+  protected void after() {
+    server.stop();
+  }
 
-  void executeOldVersion(Properties properties);
+  public void setMockResponseData(String data) {
+    server.setMockResponseData(data);
+  }
 
-  String getVersion();
+  public void setMockResponseStatus(int status) {
+    server.setMockResponseStatus(status);
+  }
+
+  public String url() {
+    return server.getUrl();
+  }
+
+  public int getPort() {
+    return server.getPort();
+  }
 }

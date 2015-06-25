@@ -19,17 +19,15 @@
  */
 package org.sonar.runner.batch;
 
-import java.util.Properties;
+/**
+ * Allow to redirect batch logs to a custom output. By defaults logs are written to System.out
+ * @since 5.2
+ */
+public interface LogOutput {
 
-public interface IsolatedLauncher {
+  void log(String formattedMessage, Level level);
 
-  void start(Properties properties, LogOutput logOutput);
-
-  void stop();
-
-  void execute(Properties properties);
-
-  void executeOldVersion(Properties properties);
-
-  String getVersion();
+  enum Level {
+    ERROR, WARN, INFO, DEBUG, TRACE;
+  }
 }

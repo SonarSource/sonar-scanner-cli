@@ -11,24 +11,36 @@
 
   <dependencies>
     <!-- Dependencies with scope "compile" are shaded and removed from transitive dependencies-->
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>sonar-runner-impl</artifactId>
-      <version>${project.version}</version>
-
+        <dependency>
+      <groupId>com.github.kevinsawicki</groupId>
+      <artifactId>http-request</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <scope>provided</scope>
     </dependency>
-
-    <!-- Unit tests -->
     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <scope>test</scope>
+      <groupId>org.codehaus.sonar</groupId>
+      <artifactId>sonar-home</artifactId>
     </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>sonar-runner-batch</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>sonar-runner-batch-interface</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- unit tests -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -42,6 +54,23 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+    <groupId>org.assertj</groupId>
+    <artifactId>assertj-core</artifactId>
+    <version>1.7.1</version>
+    <scope>test</scope>
+  </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.1.25</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -81,12 +110,12 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>${project.groupId}</groupId>
-                  <artifactId>sonar-runner-impl</artifactId>
+                  <artifactId>sonar-runner-batch</artifactId>
                   <version>${project.version}</version>
                   <type>jar</type>
                   <overWrite>false</overWrite>
                   <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-                  <destFileName>sonar-runner-impl.jar</destFileName>
+                  <destFileName>sonar-runner-batch.jar</destFileName>
                 </artifactItem>
               </artifactItems>
               <overWriteReleases>true</overWriteReleases>
@@ -107,6 +136,20 @@
             <configuration>
               <createDependencyReducedPom>true</createDependencyReducedPom>
               <minimizeJar>true</minimizeJar>
+              <relocations>
+                <relocation>
+                  <pattern>com.github.kevinsawicki.http</pattern>
+                  <shadedPattern>org.sonar.runner.kevinsawicki</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.apache.commons.io</pattern>
+                  <shadedPattern>org.sonar.runner.commonsio</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.sonar.home</pattern>
+                  <shadedPattern>org.sonar.runner.home</shadedPattern>
+                </relocation>
+              </relocations>
             </configuration>
           </execution>
         </executions>
@@ -120,7 +163,7 @@
           <instructions>
             <Import-Package>!*</Import-Package>
             <Export-Package>!.,org.sonar.runner.api</Export-Package>
-            <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
+            <Bundle-RequiredExecutionEnvironment>JavaSE-1.7</Bundle-RequiredExecutionEnvironment>
           </instructions>
         </configuration>
         <executions>

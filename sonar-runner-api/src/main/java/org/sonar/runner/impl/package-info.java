@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch Interface
+ * SonarQube Runner - API
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,19 +17,6 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.batch;
+@javax.annotation.ParametersAreNonnullByDefault
+package org.sonar.runner.impl;
 
-import java.util.Properties;
-
-public interface IsolatedLauncher {
-
-  void start(Properties properties, LogOutput logOutput);
-
-  void stop();
-
-  void execute(Properties properties);
-
-  void executeOldVersion(Properties properties);
-
-  String getVersion();
-}

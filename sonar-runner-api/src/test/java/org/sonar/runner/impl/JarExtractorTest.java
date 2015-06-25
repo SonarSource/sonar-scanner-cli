@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch
+ * SonarQube Runner - API
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,28 +17,32 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.batch;
+package org.sonar.runner.impl;
 
-import java.util.Properties;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.sonar.batch.bootstrapper.Batch;
+
+import java.io.File;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Fail.fail;
 
-public class IsolatedLauncherTest {
-
-  Properties props = new Properties();
-  BatchIsolatedLauncher launcher = new BatchIsolatedLauncher();
+public class JarExtractorTest {
+  @Test
+  public void test_extract() throws Exception {
+    File jarFile = new JarExtractor().extractToTemp("fake");
+    assertThat(jarFile).isFile().exists();
+    assertThat(FileUtils.readFileToString(jarFile, "UTF-8")).isEqualTo("Fake jar for unit tests");
+    assertThat(jarFile.toURI().toURL().toString()).doesNotContain("jar:file");
+  }
 
   @Test
-  public void should_create_batch() {
-    props.setProperty("sonar.projectBaseDir", "src/test/java_sample");
-    props.setProperty("sonar.projectKey", "sample");
-    props.setProperty("sonar.projectName", "Sample");
-    props.setProperty("sonar.projectVersion", "1.0");
-    props.setProperty("sonar.sources", "src");
-    Batch batch = launcher.createBatch(props, null);
-
-    assertThat(batch).isNotNull();
+  public void should_fail_to_extract() throws Exception {
+    try {
+      new JarExtractor().extractToTemp("unknown");
+      fail();
+    } catch (IllegalStateException e) {
+      assertThat(e).hasMessage("Fail to extract unknown.jar");
+    }
   }
 }

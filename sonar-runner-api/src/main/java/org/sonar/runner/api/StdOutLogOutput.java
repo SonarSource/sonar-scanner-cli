@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch Interface
+ * SonarQube Runner - API
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,19 +17,12 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.batch;
+package org.sonar.runner.api;
 
-import java.util.Properties;
+public class StdOutLogOutput implements LogOutput {
 
-public interface IsolatedLauncher {
-
-  void start(Properties properties, LogOutput logOutput);
-
-  void stop();
-
-  void execute(Properties properties);
-
-  void executeOldVersion(Properties properties);
-
-  String getVersion();
+  @Override
+  public void log(String formattedMessage, org.sonar.runner.api.LogOutput.Level level) {
+    System.out.println(level.name() + ": " + formattedMessage);
+  }
 }

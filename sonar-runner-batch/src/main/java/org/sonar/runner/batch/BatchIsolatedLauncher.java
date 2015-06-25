@@ -19,22 +19,17 @@
  */
 package org.sonar.runner.batch;
 
-import org.sonar.home.log.LogListener;
-import org.picocontainer.annotations.Nullable;
-import com.google.common.annotations.VisibleForTesting;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import org.sonar.api.utils.SonarException;
+import org.picocontainer.annotations.Nullable;
 import org.sonar.batch.bootstrapper.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
+import org.sonar.batch.bootstrapper.LogOutput;
 
 /**
  * This class is executed within the classloader provided by the server. It contains the installed plugins and
@@ -42,20 +37,11 @@ import org.sonar.batch.bootstrapper.EnvironmentInformation;
  */
 public class BatchIsolatedLauncher implements IsolatedLauncher {
 
-  private static final String WARN = "WARN";
-  private static final String DEBUG = "DEBUG";
-  private static final String FALSE = "false";
-
   private Batch batch = null;
 
   @Override
-  public void start(Properties globalProperties, List<Object> extensions) {
-    start(globalProperties, extensions, null);
-  }
-
-  @Override
-  public void start(Properties globalProperties, List<Object> extensions, @Nullable LogListener logListener) {
-    batch = createBatch(globalProperties, extensions, logListener);
+  public void start(Properties globalProperties, org.sonar.runner.batch.LogOutput logOutput) {
+    batch = createBatch(globalProperties, logOutput);
     batch.start();
   }
 
@@ -69,15 +55,21 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
     batch.executeTask((Map) properties);
   }
 
-  Batch createBatch(Properties properties, List<Object> extensions, @Nullable LogListener logListener) {
+  Batch createBatch(Properties properties, @Nullable final org.sonar.runner.batch.LogOutput logOutput) {
     EnvironmentInformation env = new EnvironmentInformation(properties.getProperty("sonarRunner.app"), properties.getProperty("sonarRunner.appVersion"));
     Batch.Builder builder = Batch.builder()
       .setEnvironment(env)
-      .addComponents(extensions)
       .setBootstrapProperties((Map) properties);
 
-    if (logListener != null) {
-      builder.setLogListener(logListener);
+    if (logOutput != null) {
+      builder.setLogOutput(new LogOutput() {
+
+        @Override
+        public void log(String formattedMessage, Level level) {
+          logOutput.log(formattedMessage, org.sonar.runner.batch.LogOutput.Level.valueOf(level.name()));
+        }
+
+      });
     }
 
     return builder.build();
@@ -87,8 +79,8 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
    * This method exists for backward compatibility with SonarQube < 5.2. 
    */
   @Override
-  public void executeOldVersion(Properties properties, List<Object> extensions) {
-    createBatch(properties, extensions, null).execute();
+  public void executeOldVersion(Properties properties) {
+    createBatch(properties, null).execute();
   }
 
   @Override

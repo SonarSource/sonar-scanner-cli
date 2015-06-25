@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - Batch Interface
+ * SonarQube Runner - API
  * Copyright (C) 2011 SonarSource
  * dev@sonar.codehaus.org
  *
@@ -17,19 +17,25 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.batch;
+package org.sonar.runner.impl;
 
-import java.util.Properties;
+import org.apache.commons.io.FileUtils;
 
-public interface IsolatedLauncher {
+import java.io.File;
+import java.net.URL;
 
-  void start(Properties properties, LogOutput logOutput);
+public class JarExtractor {
 
-  void stop();
-
-  void execute(Properties properties);
-
-  void executeOldVersion(Properties properties);
-
-  String getVersion();
+  public File extractToTemp(String filenameWithoutSuffix) {
+    String filename = filenameWithoutSuffix + ".jar";
+    URL url = getClass().getResource("/" + filename);
+    try {
+      File copy = File.createTempFile(filenameWithoutSuffix, ".jar");
+      FileUtils.copyURLToFile(url, copy);
+      return copy;
+    } catch (Exception e) {
+      throw new IllegalStateException("Fail to extract " + filename, e);
+    }
+  }
 }
+
