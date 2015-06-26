@@ -29,7 +29,6 @@ import java.util.Properties;
 import org.picocontainer.annotations.Nullable;
 import org.sonar.batch.bootstrapper.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
-import org.sonar.batch.bootstrapper.LogOutput;
 
 /**
  * This class is executed within the classloader provided by the server. It contains the installed plugins and
@@ -62,14 +61,8 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
       .setBootstrapProperties((Map) properties);
 
     if (logOutput != null) {
-      builder.setLogOutput(new LogOutput() {
-
-        @Override
-        public void log(String formattedMessage, Level level) {
-          logOutput.log(formattedMessage, org.sonar.runner.batch.LogOutput.Level.valueOf(level.name()));
-        }
-
-      });
+      // Do that is a separate class to avoid NoClassDefFoundError for org/sonar/batch/bootstrapper/LogOutput
+      Compatibility.setLogOutputFor5dot2(builder, logOutput);
     }
 
     return builder.build();

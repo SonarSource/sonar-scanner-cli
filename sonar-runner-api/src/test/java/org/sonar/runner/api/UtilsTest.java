@@ -19,19 +19,17 @@
  */
 package org.sonar.runner.api;
 
-import org.junit.Test;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
+import org.junit.Test;
 
-import static org.mockito.Mockito.verify;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doThrow;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class UtilsTest {
   @Test
@@ -39,18 +37,6 @@ public class UtilsTest {
     assertThat(Utils.join(new String[] {}, ",")).isEqualTo("");
     assertThat(Utils.join(new String[] {"foo"}, ",")).isEqualTo("foo");
     assertThat(Utils.join(new String[] {"foo", "bar"}, ",")).isEqualTo("foo,bar");
-  }
-
-  @Test
-  public void parse_version() {
-    assertThat(Utils.isAtLeast52("5.2")).isTrue();
-    assertThat(Utils.isAtLeast52(null)).isFalse();
-    assertThat(Utils.isAtLeast52("52")).isTrue();
-    assertThat(Utils.isAtLeast52("5.0")).isFalse();
-    assertThat(Utils.isAtLeast52("")).isFalse();
-    assertThat(Utils.isAtLeast52("trash")).isFalse();
-    assertThat(Utils.isAtLeast52("6.0.0")).isTrue();
-    assertThat(Utils.isAtLeast52("5.2-SNAPSHOT")).isTrue();
   }
 
   @Test

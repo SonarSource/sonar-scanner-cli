@@ -30,6 +30,7 @@ import org.sonar.home.cache.Logger;
 import org.sonar.runner.batch.IsolatedLauncher;
 import org.sonar.runner.impl.InternalProperties;
 import org.sonar.runner.impl.IsolatedLauncherFactory;
+import org.sonar.runner.impl.VersionUtils;
 
 /**
  * Entry point to run SonarQube analysis programmatically.
@@ -197,7 +198,7 @@ public class EmbeddedRunner {
 
   protected void doStart() {
     launcher = launcherFactory.createLauncher(globalProperties());
-    if (Utils.isAtLeast52(launcher.getVersion())) {
+    if (VersionUtils.isAtLeast52(launcher.getVersion())) {
       launcher.start(globalProperties(), new org.sonar.runner.batch.LogOutput() {
 
         @Override
@@ -210,13 +211,13 @@ public class EmbeddedRunner {
   }
 
   protected void doStop() {
-    if (Utils.isAtLeast52(launcher.getVersion())) {
+    if (VersionUtils.isAtLeast52(launcher.getVersion())) {
       launcher.stop();
     }
   }
 
   protected void doExecute(Properties analysisProperties) {
-    if (Utils.isAtLeast52(launcher.getVersion())) {
+    if (VersionUtils.isAtLeast52(launcher.getVersion())) {
       launcher.execute(analysisProperties);
     } else {
       Properties prop = new Properties();

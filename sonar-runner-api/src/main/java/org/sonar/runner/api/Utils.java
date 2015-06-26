@@ -19,8 +19,6 @@
  */
 package org.sonar.runner.api;
 
-import javax.annotation.Nullable;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,28 +28,15 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
-import java.nio.file.attribute.BasicFileAttributes;
+import javax.annotation.Nullable;
 
 class Utils {
   private Utils() {
     // only util static methods
-  }
-
-  static boolean isAtLeast52(String version) {
-    // it can be snapshot (5.2-SNAPSHOT)
-    if (version == null) {
-      return false;
-    }
-
-    int endIndex = Math.min(3, version.length());
-    try {
-      return Double.parseDouble(version.substring(0, endIndex)) >= 5.2;
-    } catch (NumberFormatException e) {
-      return false;
-    }
   }
 
   /**
