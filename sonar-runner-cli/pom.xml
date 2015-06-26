@@ -6,7 +6,7 @@
     <version>2.5-SNAPSHOT</version>
   </parent>
 
-  <artifactId>sonar-runner-cli</artifactId>
+  <artifactId>sonar-runner-dist</artifactId>
   <packaging>jar</packaging>
   <name>SonarQube Runner - CLI - Distribution</name>
 
