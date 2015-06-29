@@ -19,6 +19,7 @@
  */
 package org.sonar.runner.cli;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,7 +77,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_fail_on_error() {
+  public void should_stop_on_error() {
     EmbeddedRunner runner = mock(EmbeddedRunner.class);
     doThrow(new IllegalStateException("Error")).when(runner).runAnalysis(any(Properties.class));
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
@@ -84,7 +85,27 @@ public class MainTest {
     Main main = new Main(exit, cli, conf, runnerFactory);
     main.execute();
 
+    verify(runner).stop();
     verify(exit).exit(Exit.ERROR);
+  }
+
+  @Test
+  public void should_not_stop_on_error_in_interactive_mode() throws Exception {
+    EmbeddedRunner runner = mock(EmbeddedRunner.class);
+    doThrow(new IllegalStateException("Error")).when(runner).runAnalysis(any(Properties.class));
+    when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
+    when(cli.isInteractive()).thenReturn(true);
+
+    Main main = new Main(exit, cli, conf, runnerFactory);
+    BufferedReader inputReader = mock(BufferedReader.class);
+    when(inputReader.readLine()).thenReturn("");
+    when(exit.shouldExit()).thenReturn(false).thenReturn(true);
+    main.setInputReader(inputReader);
+    main.execute();
+
+    verify(runner, times(2)).runAnalysis(any(Properties.class));
+    verify(runner).stop();
+    verify(exit).exit(Exit.SUCCESS);
   }
 
   @Test

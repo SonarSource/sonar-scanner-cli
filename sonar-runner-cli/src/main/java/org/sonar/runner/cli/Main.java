@@ -71,13 +71,10 @@ public class Main {
       init(p);
       runner.start();
 
-      runAnalysis(stats, p);
-
       if (cli.isInteractive()) {
-        while (waitForUser()) {
-          stats = new Stats().start();
-          runAnalysis(stats, p);
-        }
+        interactiveLoop(p);
+      } else {
+        runAnalysis(stats, p);
       }
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
@@ -87,6 +84,18 @@ public class Main {
 
     runner.stop();
     shutdown.exit(Exit.SUCCESS);
+  }
+
+  private void interactiveLoop(Properties p) throws IOException {
+    do {
+      Stats stats = new Stats().start();
+      try {
+        runAnalysis(stats, p);
+      } catch (Exception e) {
+        displayExecutionResult(stats, "FAILURE");
+        showError("Error during Sonar runner execution", e, cli.isDisplayStackTrace());
+      }
+    } while (waitForUser());
   }
 
   private void init(Properties p) throws IOException {
@@ -118,11 +127,17 @@ public class Main {
       return false;
     }
 
-    Logs.info("<Press enter to restart analysis>");
+    System.out.println("");
+    System.out.println("<Press enter to restart analysis or Ctrl+C to exit the interactive mode>");
     String line = inputReader.readLine();
     shutdown.signalReady(false);
 
     return line != null;
+  }
+
+  // Visible for testing
+  void setInputReader(BufferedReader inputReader) {
+    this.inputReader = inputReader;
   }
 
   private static void displayExecutionResult(Stats stats, String resultMsg) {

@@ -30,7 +30,6 @@ class Shutdown {
   private boolean exiting = false;
   private Object lock = new Object();
   private Exit exit;
-  private Thread t;
 
   Shutdown(Exit exit) {
     this(exit, DEFAULT_MAX_WAIT);
@@ -51,7 +50,6 @@ class Shutdown {
 
   void signalReady(boolean ready) {
     synchronized (lock) {
-      System.out.println("READY: " + ready);
       this.isReady = ready;
       lock.notifyAll();
     }
