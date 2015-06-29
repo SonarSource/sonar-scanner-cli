@@ -144,7 +144,7 @@ class Cli {
     Logs.info(" -h,--help             Display help information");
     Logs.info(" -v,--version          Display version information");
     Logs.info(" -X,--debug            Produce execution debug output");
-    Logs.info(" -i,--interactive      Run interactively - not valid in fork mode");
+    Logs.info(" -i,--interactive      Run interactively");
     exit.exit(Exit.SUCCESS);
   }
 }
