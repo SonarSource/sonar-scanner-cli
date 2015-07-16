@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<BugCollection version="3.0.1" sequence="0" timestamp="1432107278000" analysisTimestamp="1437046750473" release="">
+  <Project>
+    <Jar>/home/duartem/git/sonar-tests-core/it-sonar-runner/projects/java-bytecode/src/HasFindbugsViolation.java</Jar>
+    <Jar>/home/duartem/git/sonar-tests-core/it-sonar-runner/projects/java-bytecode/build/classes/HasFindbugsViolation.class</Jar>
+    <AuxClasspathEntry>/home/duartem/git/sonar-tests-core/it-sonar-runner/projects/java-bytecode/build/classes</AuxClasspathEntry>
+    <AuxClasspathEntry>/home/duartem/git/sonar-tests-core/it-sonar-runner/projects/java-bytecode/lib/deprecated.jar</AuxClasspathEntry>
+    <AuxClasspathEntry>/home/duartem/git/sonar-tests-core/it-sonar-runner/projects/java-bytecode/.sonar/findbugs/annotations.jar</AuxClasspathEntry>
+    <AuxClasspathEntry>/home/duartem/git/sonar-tests-core/it-sonar-runner/projects/java-bytecode/.sonar/findbugs/jsr305.jar</AuxClasspathEntry>
+    <WrkDir>/home/duartem/git/sonar-tests-core/it-sonar-runner/projects/java-bytecode/.sonar</WrkDir>
+  </Project>
+  <BugInstance type="DM_EXIT" priority="2" rank="16" abbrev="Dm" category="BAD_PRACTICE" instanceHash="fc6ac81278eca1b0ea92d10f13e0a9e9" instanceOccurrenceNum="0" instanceOccurrenceMax="0" cweid="382">
+    <ShortMessage>Method invokes System.exit(...)</ShortMessage>
+    <LongMessage>HasFindbugsViolation.use() invokes System.exit(...), which shuts down the entire virtual machine</LongMessage>
+    <Class classname="HasFindbugsViolation" primary="true">
+      <SourceLine classname="HasFindbugsViolation" start="1" end="12" sourcefile="HasFindbugsViolation.java" sourcepath="HasFindbugsViolation.java">
+        <Message>At HasFindbugsViolation.java:[lines 1-12]</Message>
+      </SourceLine>
+      <Message>In class HasFindbugsViolation</Message>
+    </Class>
+    <Method classname="HasFindbugsViolation" name="use" signature="()V" isStatic="false" primary="true">
+      <SourceLine classname="HasFindbugsViolation" start="6" end="8" startBytecode="0" endBytecode="65" sourcefile="HasFindbugsViolation.java" sourcepath="HasFindbugsViolation.java"/>
+      <Message>In method HasFindbugsViolation.use()</Message>
+    </Method>
+    <SourceLine classname="HasFindbugsViolation" primary="true" start="7" end="7" startBytecode="12" endBytecode="12" sourcefile="HasFindbugsViolation.java" sourcepath="HasFindbugsViolation.java">
+      <Message>At HasFindbugsViolation.java:[line 7]</Message>
+    </SourceLine>
+  </BugInstance>
+  <BugCategory category="BAD_PRACTICE">
+    <Description>Bad practice</Description>
+  </BugCategory>
+  <BugPattern type="DM_EXIT" abbrev="Dm" category="BAD_PRACTICE" cweid="382">
+    <ShortDescription>Method invokes System.exit(...)</ShortDescription>
+    <Details><![CDATA[
+
+  <p> Invoking System.exit shuts down the entire Java virtual machine. This
+   should only been done when it is appropriate. Such calls make it
+   hard or impossible for your code to be invoked by other code.
+   Consider throwing a RuntimeException instead.</p>
+
+    ]]></Details>
+  </BugPattern>
+  <BugCode abbrev="Dm">
+    <Description>Dubious method used</Description>
+  </BugCode>
+  <Errors errors="0" missingClasses="0"></Errors>
+  <FindBugsSummary timestamp="Wed, 20 May 2015 09:34:38 +0200" total_classes="1" referenced_classes="13" total_bugs="1" total_size="11" num_packages="1" java_version="1.7.0_79" vm_version="24.79-b02" cpu_seconds="3.30" clock_seconds="1.10" peak_mbytes="227.75" alloc_mbytes="3538.00" gc_seconds="0.02" priority_2="1">
+    <FileStats path="HasFindbugsViolation.java" bugCount="1" size="11" bugHash="74a612ed42a469c4b358a80c33515967"/>
+    <PackageStats package="" total_bugs="1" total_types="1" total_size="11" priority_2="1">
+      <ClassStats class="HasFindbugsViolation" sourceFile="HasFindbugsViolation.java" interface="false" size="11" bugs="1" priority_2="1"/>
+    </PackageStats>
+    <FindBugsProfile>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.ClassInfoAnalysisEngine" totalMilliseconds="224" invocations="320" avgMicrosecondsPerInvocation="700" maxMicrosecondsPerInvocation="17955" standardDeviationMircosecondsPerInvocation="1606"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.FieldItemSummary" totalMilliseconds="67" invocations="13" avgMicrosecondsPerInvocation="5161" maxMicrosecondsPerInvocation="13026" standardDeviationMircosecondsPerInvocation="5212"/>
+      <ClassProfile name="edu.umd.cs.findbugs.OpcodeStack$JumpInfoFactory" totalMilliseconds="57" invocations="56" avgMicrosecondsPerInvocation="1018" maxMicrosecondsPerInvocation="4755" standardDeviationMircosecondsPerInvocation="939"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.FindNoSideEffectMethods" totalMilliseconds="41" invocations="13" avgMicrosecondsPerInvocation="3202" maxMicrosecondsPerInvocation="12613" standardDeviationMircosecondsPerInvocation="3864"/>
+      <ClassProfile name="edu.umd.cs.findbugs.util.TopologicalSort" totalMilliseconds="36" invocations="288" avgMicrosecondsPerInvocation="127" maxMicrosecondsPerInvocation="1297" standardDeviationMircosecondsPerInvocation="215"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.ClassDataAnalysisEngine" totalMilliseconds="34" invocations="321" avgMicrosecondsPerInvocation="105" maxMicrosecondsPerInvocation="458" standardDeviationMircosecondsPerInvocation="52"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.MethodGenFactory" totalMilliseconds="28" invocations="3" avgMicrosecondsPerInvocation="9462" maxMicrosecondsPerInvocation="27862" standardDeviationMircosecondsPerInvocation="13010"/>
+      <ClassProfile name="edu.umd.cs.findbugs.classfile.engine.bcel.JavaClassAnalysisEngine" totalMilliseconds="25" invocations="28" avgMicrosecondsPerInvocation="925" maxMicrosecondsPerInvocation="11951" standardDeviationMircosecondsPerInvocation="2278"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.NoteDirectlyRelevantTypeQualifiers" totalMilliseconds="23" invocations="13" avgMicrosecondsPerInvocation="1779" maxMicrosecondsPerInvocation="5478" standardDeviationMircosecondsPerInvocation="1779"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.FunctionsThatMightBeMistakenForProcedures" totalMilliseconds="22" invocations="13" avgMicrosecondsPerInvocation="1761" maxMicrosecondsPerInvocation="5446" standardDeviationMircosecondsPerInvocation="1973"/>
+      <ClassProfile name="edu.umd.cs.findbugs.detect.BuildStringPassthruGraph" totalMilliseconds="17" invocations="13" avgMicrosecondsPerInvocation="1358" maxMicrosecondsPerInvocation="3601" standardDeviationMircosecondsPerInvocation="1349"/>
+    </FindBugsProfile>
+  </FindBugsSummary>
+  <ClassFeatures></ClassFeatures>
+  <History></History>
+</BugCollection>

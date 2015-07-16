@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Java Bytecode" default="all" basedir="." xmlns:sonar="antlib:org.sonar.ant">
+
+  <property name="lib.dir" value="../ant-libs"/>
+
+  <property name="build.dir" value="build"/>
+
+  <property name="classes.dir" value="${build.dir}/classes"/>
+
+  <path id="classpath">
+    <fileset dir="./lib" includes="*.jar" />
+  </path>
+
+  <target name="clean" description="Remove all files created by the build process.">
+    <delete dir="${build.dir}" />
+  </target>
+
+  <target name="init">
+    <mkdir dir="${build.dir}" />
+    <mkdir dir="${classes.dir}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <javac destdir="${classes.dir}" classpathref="classpath" fork="true" debug="true" includeAntRuntime="false">
+      <src path="src"/>
+    </javac>
+  </target>
+
+  <target name="all"
+          depends="clean,compile" />
+
+</project>

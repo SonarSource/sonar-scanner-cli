@@ -1,0 +1,1 @@
+File to be sure that SVN keeps this "empty" directory

@@ -13,7 +13,7 @@
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <useProjectArtifact>true</useProjectArtifact>
       <excludes>
-        <exclude>org.codehaus.sonar.runner:sonar-runner-api</exclude>
+        <exclude>org.sonarsource.sonar-runner:sonar-runner-api</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
