@@ -7,4 +7,4 @@ Documentation:
 http://docs.sonarqube.org/display/SONAR/Analyzing+with+SonarQube+Runner
 
 Issue Tracker:
-http://jira.codehaus.org/browse/SONARUNNER
+http://jira.sonarsource.com/browse/SONARUNNER
