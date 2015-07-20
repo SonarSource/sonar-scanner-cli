@@ -50,11 +50,6 @@ public class IsolatedLauncherFactory {
 
   private PersistentCache getCache(Properties props) {
     PersistentCacheBuilder builder = new PersistentCacheBuilder(logger);
-
-    if (!"true".equals(props.getProperty("sonar.enableHttpCache"))) {
-      builder.forceUpdate(true);
-    }
-
     return builder.build();
   }
 

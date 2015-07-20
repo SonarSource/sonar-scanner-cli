@@ -19,8 +19,13 @@
  */
 package org.sonar.runner.impl;
 
+import com.github.kevinsawicki.http.HttpRequest;
+
 import java.io.File;
+import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Properties;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,7 +34,6 @@ import org.junit.rules.TemporaryFolder;
 import org.sonar.home.cache.Logger;
 import org.sonar.home.cache.PersistentCache;
 import org.sonar.home.cache.PersistentCacheBuilder;
-
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
 import static org.mockito.Mockito.mock;
@@ -81,6 +85,7 @@ public class ServerConnectionTest {
     Properties props = new Properties();
     props.setProperty("sonar.host.url", httpServer.url() + "/");
     props.setProperty("sonar.analysis.mode", "preview");
+    props.setProperty("sonar.enableOffline", "true");
 
     assertThat(cacheDir.list().length).isEqualTo(0);
     ServerConnection connection = ServerConnection.create(props, cache, mock(Logger.class));
@@ -89,9 +94,36 @@ public class ServerConnectionTest {
     assertThat(str).isEqualTo("abcde");
     assertThat(cacheDir.list().length).isEqualTo(2);
 
-    httpServer.setMockResponseData("never requested");
+    httpServer.after();
     str = connection.downloadStringCache("/batch/index.txt");
     assertThat(str).isEqualTo("abcde");
+  }
+  
+  @Test
+  public void should_throw_connection_exception_() throws IOException {
+    File cacheDir = new File(temp.getRoot(), "ws_cache");
+    httpServer.setMockResponseData("abcde");
+    Properties props = new Properties();
+    props.setProperty("sonar.host.url", httpServer.url() + "/");
+
+    assertThat(cacheDir.list().length).isEqualTo(0);
+    ServerConnection connection = ServerConnection.create(props, cache, mock(Logger.class));
+    String str = connection.downloadStringCache("/batch/index.txt");
+    assertThat(str).isEqualTo("abcde");
+    
+    httpServer.after();
+    
+    try {
+      connection.downloadStringCache("/batch/index.txt");
+      fail("exception expected");
+    } catch(HttpRequest.HttpRequestException e) {
+      //expected
+      assertThat(e.getCause()).isInstanceOf(ConnectException.class);
+      
+      //cache never used
+      assertThat(cacheDir.list().length).isEqualTo(0);
+    }
+    
   }
 
   @Test

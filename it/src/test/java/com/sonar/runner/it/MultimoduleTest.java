@@ -28,7 +28,6 @@ import org.sonar.wsclient.services.ResourceQuery;
 import java.io.File;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 public class MultimoduleTest extends RunnerTestCase {
 
