@@ -31,7 +31,7 @@
     <dependency>
       <groupId>com.sonarsource.orchestrator</groupId>
       <artifactId>sonar-orchestrator</artifactId>
-      <version>3.3-SNAPSHOT</version>
+      <version>3.3</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -52,7 +52,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
+
   <build>
     <pluginManagement>
       <plugins>

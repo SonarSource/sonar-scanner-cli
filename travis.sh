@@ -3,27 +3,24 @@
 set -euo pipefail
 
 function installTravisTools {
-  curl -sSL https://raw.githubusercontent.com/sonarsource/travis-utils/v13/install.sh | bash
+  curl -sSL https://raw.githubusercontent.com/sonarsource/travis-utils/v14/install.sh | bash
   source /tmp/travis-utils/env.sh
-}
-
-function buildSnapshotDependencies {
-  travis_build "SonarSource/sonar-orchestrator" "0fe60edd0978300334ecc9101e4c10bcb05516d0"
-  travis_build_green "SonarSource/sonarqube" "master"
 }
 
 case "$TESTS" in
 
 CI)
   installTravisTools
-  buildSnapshotDependencies
+
+  travis_build_green "SonarSource/sonarqube" "master"
 
   mvn verify -B -e -V
   ;;
 
 IT-DEV)
   installTravisTools
-  buildSnapshotDependencies
+
+  travis_build_green "SonarSource/sonarqube" "master"
 
   mvn install -Dsource.skip=true -Denforcer.skip=true -Danimal.sniffer.skip=true -Dmaven.test.skip=true
 
