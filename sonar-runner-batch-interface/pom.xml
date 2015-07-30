@@ -9,11 +9,4 @@
   <artifactId>sonar-runner-batch-interface</artifactId>
   <name>SonarQube Runner - Batch Interface</name>
   
-  <dependencies>
-    <dependency>
-      <groupId>org.codehaus.sonar</groupId>
-      <artifactId>sonar-home</artifactId>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
 </project>

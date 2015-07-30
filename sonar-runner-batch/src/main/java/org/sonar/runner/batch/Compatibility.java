@@ -19,11 +19,11 @@
  */
 package org.sonar.runner.batch;
 
+import org.sonar.api.issue.Issue;
 import org.sonar.batch.bootstrapper.Batch;
 import org.sonar.batch.bootstrapper.LogOutput;
 
 public class Compatibility {
-
   private Compatibility() {
     // Utility class
   }
@@ -39,4 +39,34 @@ public class Compatibility {
     });
   }
 
+  static org.sonar.batch.bootstrapper.IssueListener getBatchIssueListener(IssueListener listener) {
+    return new IssueListenerAdapter(listener);
+  }
+
+  static class IssueListenerAdapter implements org.sonar.batch.bootstrapper.IssueListener {
+    private IssueListener listener;
+
+    public IssueListenerAdapter(IssueListener listener) {
+      this.listener = listener;
+    }
+
+    @Override
+    public void handle(Issue issue) {
+      listener.handle(transformIssue(issue));
+    }
+
+    private static IssueListener.Issue transformIssue(Issue batchIssue) {
+      IssueListener.Issue newIssue = new IssueListener.Issue();
+      newIssue.setAssignee(batchIssue.assignee());
+      newIssue.setComponentKey(batchIssue.componentKey());
+      newIssue.setKey(batchIssue.key());
+      newIssue.setResolution(batchIssue.resolution());
+      newIssue.setRule(batchIssue.ruleKey().toString());
+      newIssue.setMessage(batchIssue.message());
+      newIssue.setNew(batchIssue.isNew());
+      newIssue.setLine(batchIssue.line());
+      
+      return newIssue;
+    }
+  }
 }

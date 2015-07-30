@@ -19,11 +19,17 @@
  */
 package org.sonar.runner.api;
 
+import org.sonar.runner.api.EmbeddedRunner.IssueListenerAdapter;
+
+import java.awt.geom.IllegalPathStateException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,7 +38,6 @@ import org.mockito.ArgumentMatcher;
 import org.sonar.home.cache.Logger;
 import org.sonar.runner.batch.IsolatedLauncher;
 import org.sonar.runner.impl.IsolatedLauncherFactory;
-
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -153,6 +158,40 @@ public class EmbeddedRunnerTest {
         return true;
       }
     }));
+  }
+
+  @Test
+  public void test_issue_adapter() {
+    final List<Issue> issuesRecorded = new LinkedList<>();
+    IssueListener apiIssueListener = new IssueListener() {
+      @Override
+      public void handle(Issue issue) {
+        issuesRecorded.add(issue);
+      }
+    };
+    IssueListenerAdapter adapter = new IssueListenerAdapter(apiIssueListener);
+
+    org.sonar.runner.batch.IssueListener.Issue batchIssue = new org.sonar.runner.batch.IssueListener.Issue();
+    batchIssue.setAssignee("assignee");
+    adapter.handle(batchIssue);
+
+    assertThat(issuesRecorded).hasSize(1);
+    assertThat(issuesRecorded.get(0).getAssignee()).isEqualTo("assignee");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void reject_issue_listener_old_version() {
+    when(launcher.getVersion()).thenReturn("4.5");
+    launch_with_issue_listener();
+  }
+
+  @Test
+  public void launch_with_issue_listener() {
+    runner.start();
+    runner.runAnalysis(mock(Properties.class), mock(IssueListener.class));
+    runner.stop();
+
+    verify(launcher).execute(any(Properties.class), any(org.sonar.runner.batch.IssueListener.class));
   }
 
   @Test

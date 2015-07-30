@@ -54,6 +54,12 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
     batch.executeTask((Map) properties);
   }
 
+  @Override
+  public void execute(Properties properties, IssueListener listener) {
+    org.sonar.batch.bootstrapper.IssueListener batchIssueListener = Compatibility.getBatchIssueListener(listener);
+    batch.executeTask((Map) properties, batchIssueListener);
+  }
+
   Batch createBatch(Properties properties, @Nullable final org.sonar.runner.batch.LogOutput logOutput) {
     EnvironmentInformation env = new EnvironmentInformation(properties.getProperty("sonarRunner.app"), properties.getProperty("sonarRunner.appVersion"));
     Batch.Builder builder = Batch.builder()

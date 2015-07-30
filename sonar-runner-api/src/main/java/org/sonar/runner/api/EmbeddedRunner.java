@@ -23,9 +23,12 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.security.InvalidParameterException;
 import java.util.Locale;
 import java.util.Properties;
+
 import javax.annotation.Nullable;
+
 import org.sonar.home.cache.Logger;
 import org.sonar.runner.batch.IsolatedLauncher;
 import org.sonar.runner.impl.InternalProperties;
@@ -50,35 +53,7 @@ public class EmbeddedRunner {
   }
 
   public static EmbeddedRunner create(final LogOutput logOutput) {
-    Logger logger = new Logger() {
-
-      @Override
-      public void warn(String msg) {
-        logOutput.log(msg, LogOutput.Level.WARN);
-      }
-
-      @Override
-      public void info(String msg) {
-        logOutput.log(msg, LogOutput.Level.INFO);
-      }
-
-      @Override
-      public void error(String msg, Throwable t) {
-        StringWriter errors = new StringWriter();
-        t.printStackTrace(new PrintWriter(errors));
-        logOutput.log(msg + "\n" + errors.toString(), LogOutput.Level.ERROR);
-      }
-
-      @Override
-      public void error(String msg) {
-        logOutput.log(msg, LogOutput.Level.ERROR);
-      }
-
-      @Override
-      public void debug(String msg) {
-        logOutput.log(msg, LogOutput.Level.DEBUG);
-      }
-    };
+    Logger logger = new LoggerAdapter(logOutput);
     return new EmbeddedRunner(new IsolatedLauncherFactory(logger), logger, logOutput);
   }
 
@@ -131,6 +106,10 @@ public class EmbeddedRunner {
   }
 
   public void runAnalysis(Properties analysisProperties) {
+    runAnalysis(analysisProperties, null);
+  }
+
+  public void runAnalysis(Properties analysisProperties, @Nullable IssueListener issueListener) {
     Properties copy = new Properties();
     copy.putAll(analysisProperties);
     initAnalysisProperties(copy);
@@ -141,7 +120,7 @@ public class EmbeddedRunner {
       Utils.writeProperties(dumpFile, copy);
       logger.info("Simulation mode. Configuration written to " + dumpFile.getAbsolutePath());
     } else {
-      doExecute(copy);
+      doExecute(copy, issueListener);
     }
   }
 
@@ -216,14 +195,85 @@ public class EmbeddedRunner {
     }
   }
 
-  protected void doExecute(Properties analysisProperties) {
+  protected void doExecute(Properties analysisProperties, @Nullable IssueListener issueListener) {
     if (VersionUtils.isAtLeast52(launcher.getVersion())) {
-      launcher.execute(analysisProperties);
+      if (issueListener != null) {
+        launcher.execute(analysisProperties, new IssueListenerAdapter(issueListener));
+      } else {
+        launcher.execute(analysisProperties);
+      }
     } else {
+      if (issueListener != null) {
+        throw new InvalidParameterException("Issue listeners not supported in current version: " + launcher.getVersion());
+      }
       Properties prop = new Properties();
       prop.putAll(globalProperties());
       prop.putAll(analysisProperties);
       launcher.executeOldVersion(prop);
     }
   }
+
+  static class IssueListenerAdapter implements org.sonar.runner.batch.IssueListener {
+    private IssueListener apiIssueListener;
+
+    public IssueListenerAdapter(IssueListener apiIssueListener) {
+      this.apiIssueListener = apiIssueListener;
+    }
+
+    @Override
+    public void handle(org.sonar.runner.batch.IssueListener.Issue issue) {
+      apiIssueListener.handle(transformIssue(issue));
+    }
+
+    private static org.sonar.runner.api.Issue transformIssue(org.sonar.runner.batch.IssueListener.Issue batchIssue) {
+      org.sonar.runner.api.Issue.Builder issueBuilder = org.sonar.runner.api.Issue.builder();
+
+      issueBuilder.setAssignee(batchIssue.getAssignee());
+      issueBuilder.setComponentKey(batchIssue.getComponentKey());
+      issueBuilder.setKey(batchIssue.getKey());
+      issueBuilder.setLine(batchIssue.getLine());
+      issueBuilder.setMessage(batchIssue.getMessage());
+      issueBuilder.setNew(batchIssue.isNew());
+      issueBuilder.setResolution(batchIssue.getResolution());
+      issueBuilder.setRule(batchIssue.getRule());
+      issueBuilder.setStatus(batchIssue.getStatus());
+
+      return issueBuilder.build();
+    }
+  }
+
+  private static class LoggerAdapter implements Logger {
+    private LogOutput logOutput;
+
+    LoggerAdapter(LogOutput logOutput) {
+      this.logOutput = logOutput;
+    }
+
+    @Override
+    public void warn(String msg) {
+      logOutput.log(msg, LogOutput.Level.WARN);
+    }
+
+    @Override
+    public void info(String msg) {
+      logOutput.log(msg, LogOutput.Level.INFO);
+    }
+
+    @Override
+    public void error(String msg, Throwable t) {
+      StringWriter errors = new StringWriter();
+      t.printStackTrace(new PrintWriter(errors));
+      logOutput.log(msg + "\n" + errors.toString(), LogOutput.Level.ERROR);
+    }
+
+    @Override
+    public void error(String msg) {
+      logOutput.log(msg, LogOutput.Level.ERROR);
+    }
+
+    @Override
+    public void debug(String msg) {
+      logOutput.log(msg, LogOutput.Level.DEBUG);
+    }
+  };
 }

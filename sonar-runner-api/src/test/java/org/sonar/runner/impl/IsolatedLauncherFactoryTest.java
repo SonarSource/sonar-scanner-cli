@@ -19,13 +19,15 @@
  */
 package org.sonar.runner.impl;
 
+import org.sonar.runner.batch.IssueListener;
+
 import java.util.Properties;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.sonar.home.cache.Logger;
 import org.sonar.runner.batch.IsolatedLauncher;
 import org.sonar.runner.batch.LogOutput;
-
 import static org.fest.assertions.Fail.fail;
 import static org.mockito.Mockito.mock;
 
@@ -55,6 +57,7 @@ public class IsolatedLauncherFactoryTest {
 
   public static class FakeIsolatedLauncher implements IsolatedLauncher {
     public static Properties props = null;
+    public static IssueListener listener = null;
 
     @Override
     public void start(Properties properties, LogOutput logger) {
@@ -76,6 +79,12 @@ public class IsolatedLauncherFactoryTest {
     @Override
     public String getVersion() {
       return null;
+    }
+
+    @Override
+    public void execute(Properties properties, IssueListener listener) {
+      FakeIsolatedLauncher.props = properties;
+      FakeIsolatedLauncher.listener = listener;
     }
   }
 }
