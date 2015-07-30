@@ -139,7 +139,8 @@ class ServerConnection {
     try {
       return downloadString(fullUrl, isCacheEnable);
     } catch (HttpRequest.HttpRequestException e) {
-      if (e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException) {
+      if (e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException ||
+        e.getCause() instanceof java.net.SocketTimeoutException) {
         if (isCacheEnable) {
           return fallbackToCache(fullUrl, e);
         }
