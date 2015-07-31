@@ -71,11 +71,18 @@ class ServerConnection {
     String serverUrl = properties.getProperty("sonar.host.url");
     String app = properties.getProperty(InternalProperties.RUNNER_APP);
     String appVersion = properties.getProperty(InternalProperties.RUNNER_APP_VERSION);
-    String analysisMode = properties.getProperty("sonar.analysis.mode");
-    String enableOffline = properties.getProperty("sonar.enableOffline");
-    boolean enableCache = "preview".equalsIgnoreCase(analysisMode) && "true".equals(enableOffline);
+    boolean enableCache = isCacheEnabled(properties);
 
     return new ServerConnection(serverUrl, app, appVersion, enableCache, cache, logger);
+  }
+
+  private static boolean isCacheEnabled(Properties properties) {
+    String analysisMode = properties.getProperty("sonar.analysis.mode");
+    String enableOffline = properties.getProperty("sonar.enableOffline");
+    boolean isPreview = "preview".equalsIgnoreCase(analysisMode) || "quick".equalsIgnoreCase(analysisMode) ||
+      "incremental".equalsIgnoreCase(analysisMode);
+
+    return isPreview && "true".equals(enableOffline);
   }
 
   /**

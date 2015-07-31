@@ -86,7 +86,7 @@ public class ServerConnectionTest {
     httpServer.setMockResponseData("abcde");
     Properties props = new Properties();
     props.setProperty("sonar.host.url", httpServer.url() + "/");
-    props.setProperty("sonar.analysis.mode", "preview");
+    props.setProperty("sonar.analysis.mode", "quick");
     props.setProperty("sonar.enableOffline", "true");
 
     assertThat(cacheDir.list().length).isEqualTo(0);

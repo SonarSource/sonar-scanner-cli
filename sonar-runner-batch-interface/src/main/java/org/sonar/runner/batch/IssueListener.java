@@ -19,8 +19,6 @@
  */
 package org.sonar.runner.batch;
 
-import java.util.Date;
-
 public interface IssueListener {
   void handle(Issue issue);
 

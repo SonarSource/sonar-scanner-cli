@@ -21,8 +21,6 @@ package org.sonar.runner.api;
 
 import javax.annotation.concurrent.Immutable;
 
-import java.util.Date;
-
 @Immutable
 public final class Issue {
   private final String key;

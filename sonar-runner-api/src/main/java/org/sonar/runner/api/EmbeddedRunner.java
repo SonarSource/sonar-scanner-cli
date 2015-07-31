@@ -275,5 +275,5 @@ public class EmbeddedRunner {
     public void debug(String msg) {
       logOutput.log(msg, LogOutput.Level.DEBUG);
     }
-  };
+  }
 }
