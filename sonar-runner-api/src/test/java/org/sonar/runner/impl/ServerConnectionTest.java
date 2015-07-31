@@ -24,8 +24,10 @@ import com.github.kevinsawicki.http.HttpRequest;
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.Properties;
 
+import static org.junit.Assert.*;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -98,7 +100,7 @@ public class ServerConnectionTest {
     str = connection.downloadStringCache("/batch/index.txt");
     assertThat(str).isEqualTo("abcde");
   }
-  
+
   @Test
   public void should_throw_connection_exception_() throws IOException {
     File cacheDir = new File(temp.getRoot(), "ws_cache");
@@ -110,20 +112,20 @@ public class ServerConnectionTest {
     ServerConnection connection = ServerConnection.create(props, cache, mock(Logger.class));
     String str = connection.downloadStringCache("/batch/index.txt");
     assertThat(str).isEqualTo("abcde");
-    
+
     httpServer.after();
-    
+
     try {
       connection.downloadStringCache("/batch/index.txt");
       fail("exception expected");
-    } catch(HttpRequest.HttpRequestException e) {
-      //expected
-      assertThat(e.getCause()).isInstanceOf(ConnectException.class);
-      
-      //cache never used
+    } catch (HttpRequest.HttpRequestException e) {
+      // expected
+      assertTrue((e.getCause() instanceof ConnectException) || (e.getCause() instanceof SocketTimeoutException));
+
+      // cache never used
       assertThat(cacheDir.list().length).isEqualTo(0);
     }
-    
+
   }
 
   @Test
