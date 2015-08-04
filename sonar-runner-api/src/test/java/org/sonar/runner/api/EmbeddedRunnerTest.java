@@ -172,11 +172,11 @@ public class EmbeddedRunnerTest {
     IssueListenerAdapter adapter = new IssueListenerAdapter(apiIssueListener);
 
     org.sonar.runner.batch.IssueListener.Issue batchIssue = new org.sonar.runner.batch.IssueListener.Issue();
-    batchIssue.setAssignee("assignee");
+    batchIssue.setAssigneeName("assignee");
     adapter.handle(batchIssue);
 
     assertThat(issuesRecorded).hasSize(1);
-    assertThat(issuesRecorded.get(0).getAssignee()).isEqualTo("assignee");
+    assertThat(issuesRecorded.get(0).getAssigneeName()).isEqualTo("assignee");
   }
 
   @Test(expected = IllegalArgumentException.class)

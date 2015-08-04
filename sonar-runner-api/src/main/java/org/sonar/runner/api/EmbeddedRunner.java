@@ -228,14 +228,17 @@ public class EmbeddedRunner {
     private static org.sonar.runner.api.Issue transformIssue(org.sonar.runner.batch.IssueListener.Issue batchIssue) {
       org.sonar.runner.api.Issue.Builder issueBuilder = org.sonar.runner.api.Issue.builder();
 
-      issueBuilder.setAssignee(batchIssue.getAssignee());
+      issueBuilder.setAssigneeLogin(batchIssue.getAssigneeLogin());
+      issueBuilder.setAssigneeName(batchIssue.getAssigneeName());
       issueBuilder.setComponentKey(batchIssue.getComponentKey());
       issueBuilder.setKey(batchIssue.getKey());
       issueBuilder.setLine(batchIssue.getLine());
       issueBuilder.setMessage(batchIssue.getMessage());
       issueBuilder.setNew(batchIssue.isNew());
       issueBuilder.setResolution(batchIssue.getResolution());
-      issueBuilder.setRule(batchIssue.getRule());
+      issueBuilder.setRuleKey(batchIssue.getRuleKey());
+      issueBuilder.setRuleName(batchIssue.getRuleName());
+      issueBuilder.setSeverity(batchIssue.getSeverity());
       issueBuilder.setStatus(batchIssue.getStatus());
 
       return issueBuilder.build();

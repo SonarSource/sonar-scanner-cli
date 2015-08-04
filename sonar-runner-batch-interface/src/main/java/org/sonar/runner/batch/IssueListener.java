@@ -27,82 +27,109 @@ public interface IssueListener {
     private String componentKey;
     private Integer line;
     private String message;
-    private String rule;
+    private String ruleKey;
+    private String ruleName;
     private String status;
     private String resolution;
     private boolean isNew;
-    private String assignee;
+    private String assigneeLogin;
+    private String assigneeName;
+    private String severity;
 
-    public void setKey(String key) {
-      this.key = key;
+    public String getSeverity() {
+      return severity;
     }
 
-    public void setComponentKey(String componentKey) {
-      this.componentKey = componentKey;
-    }
-
-    public void setLine(Integer line) {
-      this.line = line;
-    }
-
-    public void setMessage(String message) {
-      this.message = message;
-    }
-
-    public void setRule(String rule) {
-      this.rule = rule;
-    }
-
-    public void setStatus(String status) {
-      this.status = status;
-    }
-
-    public void setResolution(String resolution) {
-      this.resolution = resolution;
-    }
-
-    public void setNew(boolean isNew) {
-      this.isNew = isNew;
-    }
-
-    public void setAssignee(String assignee) {
-      this.assignee = assignee;
+    public void setSeverity(String severity) {
+      this.severity = severity;
     }
 
     public String getKey() {
       return key;
     }
 
+    public void setKey(String key) {
+      this.key = key;
+    }
+
     public String getComponentKey() {
       return componentKey;
+    }
+
+    public void setComponentKey(String componentKey) {
+      this.componentKey = componentKey;
     }
 
     public Integer getLine() {
       return line;
     }
 
+    public void setLine(Integer line) {
+      this.line = line;
+    }
+
     public String getMessage() {
       return message;
     }
 
-    public String getRule() {
-      return rule;
+    public void setMessage(String message) {
+      this.message = message;
+    }
+
+    public String getRuleKey() {
+      return ruleKey;
+    }
+
+    public void setRuleKey(String ruleKey) {
+      this.ruleKey = ruleKey;
+    }
+
+    public String getRuleName() {
+      return ruleName;
+    }
+
+    public void setRuleName(String ruleName) {
+      this.ruleName = ruleName;
     }
 
     public String getStatus() {
       return status;
     }
 
+    public void setStatus(String status) {
+      this.status = status;
+    }
+
     public String getResolution() {
       return resolution;
+    }
+
+    public void setResolution(String resolution) {
+      this.resolution = resolution;
     }
 
     public boolean isNew() {
       return isNew;
     }
 
-    public String getAssignee() {
-      return assignee;
+    public void setNew(boolean isNew) {
+      this.isNew = isNew;
+    }
+
+    public String getAssigneeLogin() {
+      return assigneeLogin;
+    }
+
+    public void setAssigneeLogin(String assigneeLogin) {
+      this.assigneeLogin = assigneeLogin;
+    }
+
+    public String getAssigneeName() {
+      return assigneeName;
+    }
+
+    public void setAssigneeName(String assigneeName) {
+      this.assigneeName = assigneeName;
     }
 
   }

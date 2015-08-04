@@ -19,7 +19,6 @@
  */
 package org.sonar.runner.batch;
 
-import org.sonar.api.issue.Issue;
 import org.sonar.batch.bootstrapper.Batch;
 import org.sonar.batch.bootstrapper.LogOutput;
 
@@ -57,15 +56,20 @@ public class Compatibility {
 
     private static IssueListener.Issue transformIssue(Issue batchIssue) {
       IssueListener.Issue newIssue = new IssueListener.Issue();
-      newIssue.setAssignee(batchIssue.assignee());
-      newIssue.setComponentKey(batchIssue.componentKey());
-      newIssue.setKey(batchIssue.key());
-      newIssue.setResolution(batchIssue.resolution());
-      newIssue.setRule(batchIssue.ruleKey().toString());
-      newIssue.setMessage(batchIssue.message());
+
+      newIssue.setAssigneeLogin(batchIssue.getAssigneeLogin());
+      newIssue.setAssigneeName(batchIssue.getAssigneeName());
+      newIssue.setComponentKey(batchIssue.getComponentKey());
+      newIssue.setKey(batchIssue.getKey());
+      newIssue.setResolution(batchIssue.getResolution());
+      newIssue.setRuleKey(batchIssue.getRuleKey());
+      newIssue.setRuleName(batchIssue.getRuleName());
+      newIssue.setMessage(batchIssue.getMessage());
       newIssue.setNew(batchIssue.isNew());
-      newIssue.setLine(batchIssue.line());
-      
+      newIssue.setLine(batchIssue.getLine());
+      newIssue.setSeverity(batchIssue.getSeverity());
+      newIssue.setStatus(batchIssue.getStatus());
+
       return newIssue;
     }
   }

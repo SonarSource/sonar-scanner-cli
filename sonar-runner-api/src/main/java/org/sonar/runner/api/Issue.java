@@ -27,23 +27,30 @@ public final class Issue {
   private final String componentKey;
   private final Integer line;
   private final String message;
-  private final String rule;
+  private final String ruleKey;
+  private final String ruleName;
   private final String status;
   private final String resolution;
   private final boolean isNew;
-  private final String assignee;
+  private final String assigneeLogin;
+  private final String assigneeName;
+  private final String severity;
 
-  private Issue(String key, String componentKey, Integer line, String message, String rule, String status, String resolution, boolean isNew, String assignee) {
+  private Issue(String key, String componentKey, Integer line, String message, String ruleKey, String ruleName, String status, String resolution, boolean isNew,
+    String assigneeLogin, String assigneeName, String severity) {
     super();
     this.key = key;
     this.componentKey = componentKey;
     this.line = line;
     this.message = message;
-    this.rule = rule;
+    this.ruleKey = ruleKey;
+    this.ruleName = ruleName;
     this.status = status;
     this.resolution = resolution;
     this.isNew = isNew;
-    this.assignee = assignee;
+    this.assigneeLogin = assigneeLogin;
+    this.assigneeName = assigneeName;
+    this.severity = severity;
   }
 
   public static class Builder {
@@ -51,11 +58,14 @@ public final class Issue {
     private String componentKey;
     private Integer line;
     private String message;
-    private String rule;
+    private String ruleKey;
+    private String ruleName;
     private String status;
     private String resolution;
     private boolean isNew;
-    private String assignee;
+    private String assigneeLogin;
+    private String assigneeName;
+    private String severity;
 
     public String getKey() {
       return key;
@@ -93,12 +103,21 @@ public final class Issue {
       return this;
     }
 
-    public String getRule() {
-      return rule;
+    public String getRuleKey() {
+      return ruleKey;
     }
 
-    public Builder setRule(String rule) {
-      this.rule = rule;
+    public Builder setRuleKey(String ruleKey) {
+      this.ruleKey = ruleKey;
+      return this;
+    }
+
+    public String getRuleName() {
+      return ruleKey;
+    }
+
+    public Builder setRuleName(String ruleName) {
+      this.ruleName = ruleName;
       return this;
     }
 
@@ -129,17 +148,35 @@ public final class Issue {
       return this;
     }
 
-    public String getAssignee() {
-      return assignee;
+    public String getAssigneeLogin() {
+      return assigneeLogin;
     }
 
-    public Builder setAssignee(String assignee) {
-      this.assignee = assignee;
+    public Builder setAssigneeLogin(String assigneeLogin) {
+      this.assigneeLogin = assigneeLogin;
+      return this;
+    }
+
+    public String getAssigneeName() {
+      return assigneeName;
+    }
+
+    public Builder setAssigneeName(String assigneeName) {
+      this.assigneeName = assigneeName;
+      return this;
+    }
+
+    public String getSeverity() {
+      return severity;
+    }
+
+    public Builder setSeverity(String severity) {
+      this.severity = severity;
       return this;
     }
 
     public Issue build() {
-      return new Issue(key, componentKey, line, message, rule, status, resolution, isNew, assignee);
+      return new Issue(key, componentKey, line, message, ruleKey, ruleName, status, resolution, isNew, assigneeLogin, assigneeName, severity);
     }
   }
 
@@ -163,8 +200,12 @@ public final class Issue {
     return message;
   }
 
-  public String getRule() {
-    return rule;
+  public String getRuleKey() {
+    return ruleKey;
+  }
+
+  public String getRuleName() {
+    return ruleName;
   }
 
   public String getStatus() {
@@ -179,8 +220,16 @@ public final class Issue {
     return isNew;
   }
 
-  public String getAssignee() {
-    return assignee;
+  public String getAssigneeLogin() {
+    return assigneeLogin;
+  }
+
+  public String getAssigneeName() {
+    return assigneeName;
+  }
+
+  public String getSeverity() {
+    return severity;
   }
 
 }
