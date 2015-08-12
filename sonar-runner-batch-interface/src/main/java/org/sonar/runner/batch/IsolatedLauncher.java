@@ -23,13 +23,15 @@ import java.util.Properties;
 
 public interface IsolatedLauncher {
 
-  void start(Properties properties, LogOutput logOutput);
+  void start(Properties properties, LogOutput logOutput, boolean forceSync);
 
   void stop();
 
   void execute(Properties properties);
   
   void execute(Properties properties, IssueListener listener);
+  
+  void syncProject(String projectKey);
   
   void executeOldVersion(Properties properties);
 

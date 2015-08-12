@@ -19,9 +19,10 @@
  */
 package org.sonar.runner.api;
 
+import org.junit.rules.ExpectedException;
+
 import org.sonar.runner.api.EmbeddedRunner.IssueListenerAdapter;
 
-import java.awt.geom.IllegalPathStateException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,6 +51,9 @@ public class EmbeddedRunnerTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
   @Test
   public void should_create() {
     assertThat(EmbeddedRunner.create(mock(LogOutput.class))).isNotNull().isInstanceOf(EmbeddedRunner.class);
@@ -66,6 +70,26 @@ public class EmbeddedRunnerTest {
     when(launcher.getVersion()).thenReturn("5.2");
     when(batchLauncher.createLauncher(any(Properties.class))).thenReturn(launcher);
     runner = new EmbeddedRunner(batchLauncher, mock(Logger.class), mock(LogOutput.class));
+  }
+
+  @Test
+  public void test_syncProject() {
+    String projectKey = "proj";
+    runner.start();
+    runner.syncProject(projectKey);
+    verify(launcher).syncProject(projectKey);
+  }
+
+  @Test
+  public void test_fail_projectSync_old_sq() {
+    when(launcher.getVersion()).thenReturn("5.0");
+
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("version");
+
+    runner.setGlobalProperty("sonar.projectKey", "foo");
+    runner.start();
+    runner.syncProject("foo");
   }
 
   @Test

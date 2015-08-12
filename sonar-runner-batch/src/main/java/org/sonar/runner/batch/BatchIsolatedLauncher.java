@@ -39,9 +39,9 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
   private Batch batch = null;
 
   @Override
-  public void start(Properties globalProperties, org.sonar.runner.batch.LogOutput logOutput) {
+  public void start(Properties globalProperties, org.sonar.runner.batch.LogOutput logOutput, boolean forceSync) {
     batch = createBatch(globalProperties, logOutput);
-    batch.start();
+    batch.start(forceSync);
   }
 
   @Override
@@ -58,6 +58,11 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
   public void execute(Properties properties, IssueListener listener) {
     org.sonar.batch.bootstrapper.IssueListener batchIssueListener = Compatibility.getBatchIssueListener(listener);
     batch.executeTask((Map) properties, batchIssueListener);
+  }
+
+  @Override
+  public void syncProject(String projectKey) {
+    batch.syncProject(projectKey);
   }
 
   Batch createBatch(Properties properties, @Nullable final org.sonar.runner.batch.LogOutput logOutput) {

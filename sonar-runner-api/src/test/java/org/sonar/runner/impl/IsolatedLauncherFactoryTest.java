@@ -60,7 +60,7 @@ public class IsolatedLauncherFactoryTest {
     public static IssueListener listener = null;
 
     @Override
-    public void start(Properties properties, LogOutput logger) {
+    public void start(Properties properties, LogOutput logger, boolean forceSync) {
     }
 
     @Override
@@ -85,6 +85,10 @@ public class IsolatedLauncherFactoryTest {
     public void execute(Properties properties, IssueListener listener) {
       FakeIsolatedLauncher.props = properties;
       FakeIsolatedLauncher.listener = listener;
+    }
+
+    @Override
+    public void syncProject(String projectKey) {
     }
   }
 }

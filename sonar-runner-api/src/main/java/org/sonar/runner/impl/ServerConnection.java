@@ -78,11 +78,8 @@ class ServerConnection {
 
   private static boolean isCacheEnabled(Properties properties) {
     String analysisMode = properties.getProperty("sonar.analysis.mode");
-    String enableOffline = properties.getProperty("sonar.enableOffline");
-    boolean isPreview = "preview".equalsIgnoreCase(analysisMode) || "quick".equalsIgnoreCase(analysisMode) ||
-      "incremental".equalsIgnoreCase(analysisMode);
-
-    return isPreview && "true".equals(enableOffline);
+    boolean isPreview = "issues".equalsIgnoreCase(analysisMode);
+    return isPreview;
   }
 
   /**

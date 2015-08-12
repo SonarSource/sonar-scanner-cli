@@ -124,9 +124,20 @@ public class EmbeddedRunner {
     }
   }
 
+  public void syncProject(String projectKey) {
+    if (!VersionUtils.isAtLeast52(launcher.getVersion())) {
+      throw new IllegalStateException("not supported in current SonarQube version: " + launcher.getVersion());
+    }
+    launcher.syncProject(projectKey);
+  }
+
   public void start() {
+    start(false);
+  }
+
+  public void start(boolean forceSync) {
     initGlobalDefaultValues();
-    doStart();
+    doStart(forceSync);
   }
 
   public void stop() {
@@ -175,7 +186,7 @@ public class EmbeddedRunner {
     }
   }
 
-  protected void doStart() {
+  protected void doStart(boolean forceSync) {
     launcher = launcherFactory.createLauncher(globalProperties());
     if (VersionUtils.isAtLeast52(launcher.getVersion())) {
       launcher.start(globalProperties(), new org.sonar.runner.batch.LogOutput() {
@@ -185,7 +196,7 @@ public class EmbeddedRunner {
           logOutput.log(formattedMessage, LogOutput.Level.valueOf(level.name()));
         }
 
-      });
+      }, forceSync);
     }
   }
 
