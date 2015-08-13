@@ -48,11 +48,12 @@ public class JavaTest extends RunnerTestCase {
   @Test
   public void scan_java_sources() {
     orchestrator.getServer().restoreProfile(ResourceLocation.create("/sonar-way-profile.xml"));
+    orchestrator.getServer().provisionProject("java:sample", "Java Sample, with comma");
+    orchestrator.getServer().associateProjectToQualityProfile("java:sample", "java", "sonar-way");
 
     SonarRunner build = newRunner(new File("projects/java-sample"))
       .setProperty("sonar.verbose", "true")
-      .addArguments("-e", "-X")
-      .setProfile("sonar-way");
+      .addArguments("-e", "-X");
     // SONARPLUGINS-3061
     // Add a trailing slash
     build.setProperty("sonar.host.url", orchestrator.getServer().getUrl() + "/");
@@ -93,7 +94,10 @@ public class JavaTest extends RunnerTestCase {
   @Test
   public void scan_java_sources_and_bytecode() {
     orchestrator.getServer().restoreProfile(ResourceLocation.create("/requires-bytecode-profile.xml"));
-    SonarRunner build = newRunner(new File("projects/java-bytecode")).setProfile("requires-bytecode");
+    orchestrator.getServer().provisionProject("java:bytecode", "Java Bytecode Sample");
+    orchestrator.getServer().associateProjectToQualityProfile("java:bytecode", "java", "requires-bytecode");
+
+    SonarRunner build = newRunner(new File("projects/java-bytecode"));
     orchestrator.executeBuild(build);
 
     Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:bytecode").setMetrics("lcom4", "violations"));
@@ -122,7 +126,10 @@ public class JavaTest extends RunnerTestCase {
   @Test
   public void basedir_contains_java_sources() {
     orchestrator.getServer().restoreProfile(ResourceLocation.create("/sonar-way-profile.xml"));
-    SonarRunner build = newRunner(new File("projects/basedir-with-source")).setProfile("sonar-way");
+    orchestrator.getServer().provisionProject("java:basedir-with-source", "Basedir with source");
+    orchestrator.getServer().associateProjectToQualityProfile("java:basedir-with-source", "java", "sonar-way");
+
+    SonarRunner build = newRunner(new File("projects/basedir-with-source"));
     orchestrator.executeBuild(build);
 
     Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:basedir-with-source").setMetrics("files", "ncloc"));
@@ -136,9 +143,11 @@ public class JavaTest extends RunnerTestCase {
   @Test
   public void should_support_simple_project_keys() {
     orchestrator.getServer().restoreProfile(ResourceLocation.create("/sonar-way-profile.xml"));
+    orchestrator.getServer().provisionProject("SAMPLE", "Java Sample, with comma");
+    orchestrator.getServer().associateProjectToQualityProfile("SAMPLE", "java", "sonar-way");
+
     SonarRunner build = newRunner(new File("projects/java-sample"))
-      .setProjectKey("SAMPLE")
-      .setProfile("sonar-way");
+      .setProjectKey("SAMPLE");
     orchestrator.executeBuild(build);
 
     Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("SAMPLE").setMetrics("files", "ncloc"));

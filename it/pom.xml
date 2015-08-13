@@ -22,7 +22,7 @@
   </organization>
 
   <properties>
-    <sonar.buildVersion>3.7</sonar.buildVersion>
+    <sonar.buildVersion>5.0</sonar.buildVersion>
     <surefire.argLine>-server</surefire.argLine>
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
   </properties>
@@ -51,6 +51,11 @@
       <version>1.4</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+		<groupId>org.assertj</groupId>
+		<artifactId>assertj-core</artifactId>
+		<version>2.1.0</version>
+	</dependency>
   </dependencies>
 
   <build>

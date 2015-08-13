@@ -57,6 +57,7 @@ public abstract class RunnerTestCase {
   public static void stopServer() {
     if (orchestrator != null) {
       orchestrator.stop();
+      orchestrator = null;
     }
   }
 

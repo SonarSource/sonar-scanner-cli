@@ -19,48 +19,115 @@
  */
 package com.sonar.runner.it;
 
+import org.sonar.wsclient.issue.Issue;
+import org.sonar.wsclient.issue.IssueQuery;
+import org.junit.BeforeClass;
+import org.junit.rules.TemporaryFolder;
+import org.junit.Rule;
 import com.sonar.orchestrator.build.BuildFailureException;
-
 import com.sonar.orchestrator.locator.ResourceLocation;
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.SonarRunner;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CacheTest extends RunnerTestCase {
-  @Test
-  public void testOffline() {
-    assumeTrue(orchestrator.getServer().version().isGreaterThanOrEquals("5.2"));
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
+
+  private File currentTemp = null;
+  private static boolean serverRunning = false;
+
+  @BeforeClass
+  public static void setUpClass() {
+    System.out.println("SETTING UP");
     orchestrator.getServer().restoreProfile(ResourceLocation.create("/sonar-way-profile.xml"));
-
-    SonarRunner build = createRunner(true);
-    BuildResult result = orchestrator.executeBuild(build);
-    stopServer();
-
-    build = createRunner(false);
-    try {
-      result = orchestrator.executeBuild(build, false);
-    } catch (BuildFailureException e) {
-      // expected
-    }
-
-    build = createRunner(true);
-    result = orchestrator.executeBuild(build, false);
-    assertTrue(result.isSuccess());
+    orchestrator.getServer().provisionProject("java:sample", "Java Sample, with comma");
+    orchestrator.getServer().associateProjectToQualityProfile("java:sample", "java", "sonar-way");
+    serverRunning = true;
   }
 
-  private SonarRunner createRunner(boolean enableOffline) {
-    SonarRunner runner = newRunner(new File("projects/java-sample"))
-      .setProperty("sonar.analysis.mode", "preview")
-      .setProfile("sonar-way");
-
-    if (enableOffline) {
-      runner.setProperty("sonar.enableOffline", "true");
+  private static void ensureStarted() {
+    if (!serverRunning) {
+      orchestrator.start();
+      serverRunning = true;
     }
+  }
+
+  private static void ensureStopped() {
+    if (serverRunning) {
+      orchestrator.stop();
+      serverRunning = false;
+    }
+  }
+
+  @Test
+  public void testIssuesMode() throws IOException {
+    // online, without cache -> should sync
+    ensureStarted();
+    SonarRunner build = createRunner("issues", true);
+    BuildResult result = orchestrator.executeBuild(build, false);
+    assertThat(result.isSuccess()).isTrue();
+
+    // offline, with cache -> should run from cache
+    ensureStopped();
+    build = createRunner("issues", false);
+    result = orchestrator.executeBuild(build, false);
+    assertThat(result.isSuccess()).isTrue();
+
+    // offline, without cache -> should fail
+    build = createRunner("issues", true);
+    try {
+      result = orchestrator.executeBuild(build);
+    } catch (BuildFailureException e) {
+      assertThat(e.getResult().getLogs()).contains("Server is not accessible and data is not cached");
+    }
+  }
+
+  @Test
+  public void testPublishModeOffline() throws IOException {
+    // online (cache not used)
+    ensureStarted();
+    SonarRunner build = createRunner("publish");
+    BuildResult result = orchestrator.executeBuild(build, false);
+    assertThat(result.isSuccess()).isTrue();
+    getIssues();
+    
+    // offline (cache not used) -> should fail
+    ensureStopped();
+    build = createRunner("publish", false);
+    try {
+      result = orchestrator.executeBuild(build);
+    } catch (BuildFailureException e) {
+      assertThat(e.getResult().getLogs()).contains("Fail to download libraries from server");
+    }
+
+  }
+
+  private void getIssues() {
+    List<Issue> issues = orchestrator.getServer().wsClient().issueClient()
+      .find(IssueQuery.create()).list();
+    System.out.println(issues.size());
+
+  }
+
+  private SonarRunner createRunner(String mode) throws IOException {
+    return createRunner(mode, false);
+  }
+
+  private SonarRunner createRunner(String mode, boolean refreshCache) throws IOException {
+    if (refreshCache || currentTemp == null) {
+      currentTemp = temp.newFolder();
+    }
+
+    SonarRunner runner = newRunner(new File("projects/java-sample"))
+      .setProperty("sonar.analysis.mode", mode)
+      .setProperty("sonar.userHome", currentTemp.getAbsolutePath());
 
     return runner;
   }
