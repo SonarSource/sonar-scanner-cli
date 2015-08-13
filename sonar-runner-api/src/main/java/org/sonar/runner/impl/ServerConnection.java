@@ -143,16 +143,18 @@ class ServerConnection {
     try {
       return downloadString(fullUrl, isCacheEnable);
     } catch (HttpRequest.HttpRequestException e) {
-      if (e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException ||
-        e.getCause() instanceof java.net.SocketTimeoutException) {
-        if (isCacheEnable) {
-          return fallbackToCache(fullUrl, e);
-        }
+      if (isCausedByConnection(e) && isCacheEnable) {
+        return fallbackToCache(fullUrl, e);
       }
 
       logger.error(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED, serverUrl));
       throw e;
     }
+  }
+
+  private boolean isCausedByConnection(Exception e) {
+    return e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException ||
+      e.getCause() instanceof java.net.SocketTimeoutException;
   }
 
   private String fallbackToCache(String fullUrl, HttpRequest.HttpRequestException originalException) {
