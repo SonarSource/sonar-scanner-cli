@@ -73,15 +73,29 @@ public class EmbeddedRunnerTest {
   }
 
   @Test
-  public void test_syncProject() {
+  public void test_sync_project() {
     String projectKey = "proj";
     runner.start();
     runner.syncProject(projectKey);
     verify(launcher).syncProject(projectKey);
   }
+  
+  @Test
+  public void test_server_version() {
+    runner.start();
+    assertThat(runner.serverVersion()).isEqualTo("5.2");
+  }
+  
+  @Test
+  public void test_run_before_start() {
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("started");
+    
+    runner.runAnalysis(new Properties());
+  }
 
   @Test
-  public void test_fail_projectSync_old_sq() {
+  public void test_fail_project_sync_old_sq() {
     when(launcher.getVersion()).thenReturn("5.0");
 
     expectedException.expect(IllegalStateException.class);

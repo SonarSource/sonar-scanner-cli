@@ -110,6 +110,7 @@ public class EmbeddedRunner {
   }
 
   public void runAnalysis(Properties analysisProperties, @Nullable IssueListener issueListener) {
+    checkLauncherExists();
     Properties copy = new Properties();
     copy.putAll(analysisProperties);
     initAnalysisProperties(copy);
@@ -125,6 +126,7 @@ public class EmbeddedRunner {
   }
 
   public void syncProject(String projectKey) {
+    checkLauncherExists();
     if (!VersionUtils.isAtLeast52(launcher.getVersion())) {
       throw new IllegalStateException("not supported in current SonarQube version: " + launcher.getVersion());
     }
@@ -141,8 +143,15 @@ public class EmbeddedRunner {
   }
 
   public void stop() {
+    checkLauncherExists();
     doStop();
   }
+  
+  public String serverVersion() {
+    checkLauncherExists();
+    return launcher.getVersion();
+  }
+  
 
   /**
    * @deprecated since 2.5 use {@link #start()}, {@link #runAnalysis(Properties)} and then {@link #stop()}
@@ -221,6 +230,12 @@ public class EmbeddedRunner {
       prop.putAll(globalProperties());
       prop.putAll(analysisProperties);
       launcher.executeOldVersion(prop);
+    }
+  }
+  
+  private void checkLauncherExists() {
+    if(launcher == null) {
+      throw new IllegalStateException("not started");
     }
   }
 

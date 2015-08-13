@@ -86,7 +86,7 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
   public void executeOldVersion(Properties properties) {
     createBatch(properties, null).execute();
   }
-
+  
   @Override
   public String getVersion() {
     InputStream is = this.getClass().getClassLoader().getResourceAsStream("sq-version.txt");
