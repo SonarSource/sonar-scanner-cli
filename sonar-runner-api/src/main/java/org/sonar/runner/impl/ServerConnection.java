@@ -78,8 +78,7 @@ class ServerConnection {
 
   private static boolean isCacheEnabled(Properties properties) {
     String analysisMode = properties.getProperty("sonar.analysis.mode");
-    boolean isPreview = "issues".equalsIgnoreCase(analysisMode);
-    return isPreview;
+    return "issues".equalsIgnoreCase(analysisMode);
   }
 
   /**
@@ -152,7 +151,7 @@ class ServerConnection {
     }
   }
 
-  private boolean isCausedByConnection(Exception e) {
+  private static boolean isCausedByConnection(Exception e) {
     return e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException ||
       e.getCause() instanceof java.net.SocketTimeoutException;
   }
