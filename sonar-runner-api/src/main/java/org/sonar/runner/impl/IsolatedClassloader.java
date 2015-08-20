@@ -86,7 +86,7 @@ class IsolatedClassloader extends URLClassLoader {
     return c;
   }
 
-  private boolean fromSonarBatchPackage(String name) {
+  private static boolean fromSonarBatchPackage(String name) {
     return name.startsWith("org.sonar.runner.batch");
   }
 

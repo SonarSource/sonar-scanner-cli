@@ -148,7 +148,7 @@ public class Main {
     Logs.info("------------------------------------------------------------------------");
   }
 
-  public void showError(String message, Throwable e, boolean showStackTrace) {
+  private void showError(String message, Throwable e, boolean showStackTrace) {
     if (showStackTrace) {
       Logs.error(message, e);
       if (!cli.isDebugMode()) {

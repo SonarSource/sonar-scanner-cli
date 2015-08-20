@@ -19,25 +19,66 @@
  */
 package org.sonar.runner.cli;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import static org.mockito.Mockito.verify;
+
+import org.junit.Before;
+import org.sonar.runner.cli.SystemInfo.System2;
 import org.junit.Test;
 import org.sonar.runner.cli.SystemInfo;
-
 import static org.fest.assertions.Assertions.assertThat;
 
 public class SystemInfoTest {
+  System2 mockSystem = mock(System2.class);
+
+  @Before
+  public void setUp() {
+    SystemInfo.setSystem(mockSystem);
+  }
+
   @Test
   public void test_java() {
-    assertThat(SystemInfo.java()).matches("Java .* \\((32|64)-bit\\)");
+    mockJava();
+    assertThat(SystemInfo.java()).isEqualTo("Java 1.9 oracle (64-bit)");
+
+    when(mockSystem.getProperty("sun.arch.data.model")).thenReturn("32");
+    assertThat(SystemInfo.java()).isEqualTo("Java 1.9 oracle (32-bit)");
+
+    when(mockSystem.getProperty("sun.arch.data.model")).thenReturn(null);
+    assertThat(SystemInfo.java()).isEqualTo("Java 1.9 oracle");
   }
 
   @Test
   public void test_os() {
-    assertThat(SystemInfo.os()).isNotEmpty();
+    mockOs();
+
+    assertThat(SystemInfo.os()).isEqualTo("linux 2.5 x64");
+  }
+
+  private void mockJava() {
+    when(mockSystem.getProperty("java.version")).thenReturn("1.9");
+    when(mockSystem.getProperty("java.vendor")).thenReturn("oracle");
+    when(mockSystem.getProperty("sun.arch.data.model")).thenReturn("64");
+  }
+
+  private void mockOs() {
+    when(mockSystem.getProperty("os.version")).thenReturn("2.5");
+    when(mockSystem.getProperty("os.arch")).thenReturn("x64");
+    when(mockSystem.getProperty("os.name")).thenReturn("linux");
   }
 
   @Test
   public void should_print() {
+    mockOs();
+    mockJava();
+    when(mockSystem.getenv("SONAR_RUNNER_OPTS")).thenReturn("arg");
+    
     SystemInfo.print();
-    // should mock output
+    
+    verify(mockSystem).getProperty("java.version");
+    verify(mockSystem).getProperty("os.version");
+    verify(mockSystem).getenv("SONAR_RUNNER_OPTS");
   }
 }

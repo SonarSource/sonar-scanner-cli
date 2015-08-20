@@ -22,16 +22,20 @@ package org.sonar.runner.cli;
 import org.sonar.runner.api.RunnerVersion;
 
 class SystemInfo {
+  private static System2 system = new System2();
 
   private SystemInfo() {
-    // only static methods
+  }
+
+  static void setSystem(System2 system) {
+    SystemInfo.system = system;
   }
 
   static void print() {
     Logs.info("SonarQube Runner " + RunnerVersion.version());
     Logs.info(java());
     Logs.info(os());
-    String runnerOpts = System.getenv("SONAR_RUNNER_OPTS");
+    String runnerOpts = system.getenv("SONAR_RUNNER_OPTS");
     if (runnerOpts != null) {
       Logs.info("SONAR_RUNNER_OPTS=" + runnerOpts);
     }
@@ -41,10 +45,10 @@ class SystemInfo {
     StringBuilder sb = new StringBuilder();
     sb
       .append("Java ")
-      .append(System.getProperty("java.version"))
+      .append(system.getProperty("java.version"))
       .append(" ")
-      .append(System.getProperty("java.vendor"));
-    String bits = System.getProperty("sun.arch.data.model");
+      .append(system.getProperty("java.vendor"));
+    String bits = system.getProperty("sun.arch.data.model");
     if ("32".equals(bits) || "64".equals(bits)) {
       sb.append(" (").append(bits).append("-bit)");
     }
@@ -54,11 +58,21 @@ class SystemInfo {
   static String os() {
     StringBuilder sb = new StringBuilder();
     sb
-      .append(System.getProperty("os.name"))
+      .append(system.getProperty("os.name"))
       .append(" ")
-      .append(System.getProperty("os.version"))
+      .append(system.getProperty("os.version"))
       .append(" ")
-      .append(System.getProperty("os.arch"));
+      .append(system.getProperty("os.arch"));
     return sb.toString();
+  }
+
+  static class System2 {
+    String getProperty(String key) {
+      return System.getProperty(key);
+    }
+
+    String getenv(String key) {
+      return System.getenv(key);
+    }
   }
 }
