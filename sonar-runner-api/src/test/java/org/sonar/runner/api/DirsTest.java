@@ -76,7 +76,7 @@ public class DirsTest {
 
   @Test
   public void should_set_relative_path_to_project_work_dir() throws Exception {
-    File initialProjectDir = temp.newFolder();
+    File initialProjectDir = temp.getRoot();
     p.setProperty("sonar.task", "scan");
     p.setProperty(RunnerProperties.WORK_DIR, "relative/path");
     p.setProperty(ScanProperties.PROJECT_BASEDIR, initialProjectDir.getAbsolutePath());

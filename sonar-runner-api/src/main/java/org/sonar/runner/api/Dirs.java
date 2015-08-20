@@ -20,7 +20,11 @@
 package org.sonar.runner.api;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
+
 import org.sonar.home.cache.Logger;
 
 class Dirs {
@@ -41,27 +45,25 @@ class Dirs {
   }
 
   private void initProjectDirs(Properties p) {
-    String path = p.getProperty(ScanProperties.PROJECT_BASEDIR, ".");
-    File projectDir = new File(path);
-    if (!projectDir.isDirectory()) {
-      throw new IllegalStateException("Project home must be an existing directory: " + path);
+    String pathString = p.getProperty(ScanProperties.PROJECT_BASEDIR, "");
+    Path absoluteProjectPath = Paths.get(pathString).toAbsolutePath().normalize();
+    if (!Files.isDirectory(absoluteProjectPath)) {
+      throw new IllegalStateException("Project home must be an existing directory: " + pathString);
     }
-    p.setProperty(ScanProperties.PROJECT_BASEDIR, projectDir.getAbsolutePath());
+    p.setProperty(ScanProperties.PROJECT_BASEDIR, absoluteProjectPath.toString());
 
-    File workDir;
-    path = p.getProperty(RunnerProperties.WORK_DIR, "");
-    if ("".equals(path.trim())) {
-      workDir = new File(projectDir, ".sonar");
-
+    Path workDirPath;
+    pathString = p.getProperty(RunnerProperties.WORK_DIR, "");
+    if ("".equals(pathString.trim())) {
+      workDirPath = absoluteProjectPath.resolve(".sonar");
     } else {
-      workDir = new File(path);
-      if (!workDir.isAbsolute()) {
-        workDir = new File(projectDir, path);
+      workDirPath = Paths.get(pathString);
+      if (!workDirPath.isAbsolute()) {
+        workDirPath = absoluteProjectPath.resolve(pathString);
       }
     }
-    Utils.deleteQuietly(workDir);
-    p.setProperty(RunnerProperties.WORK_DIR, workDir.getAbsolutePath());
-    logger.info("Work directory: " + workDir.getAbsolutePath());
+    p.setProperty(RunnerProperties.WORK_DIR, workDirPath.normalize().toString());
+    logger.info("Work directory: " + workDirPath.normalize().toString());
   }
 
   /**

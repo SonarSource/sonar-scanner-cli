@@ -19,8 +19,6 @@
  */
 package com.sonar.runner.it;
 
-import org.sonar.wsclient.issue.Issue;
-import org.sonar.wsclient.issue.IssueQuery;
 import org.junit.BeforeClass;
 import org.junit.rules.TemporaryFolder;
 import org.junit.Rule;
@@ -32,7 +30,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,7 +42,6 @@ public class CacheTest extends RunnerTestCase {
 
   @BeforeClass
   public static void setUpClass() {
-    System.out.println("SETTING UP");
     orchestrator.getServer().restoreProfile(ResourceLocation.create("/sonar-way-profile.xml"));
     orchestrator.getServer().provisionProject("java:sample", "Java Sample, with comma");
     orchestrator.getServer().associateProjectToQualityProfile("java:sample", "java", "sonar-way");
@@ -96,8 +92,7 @@ public class CacheTest extends RunnerTestCase {
     SonarRunner build = createRunner("publish");
     BuildResult result = orchestrator.executeBuild(build, false);
     assertThat(result.isSuccess()).isTrue();
-    getIssues();
-    
+
     // offline (cache not used) -> should fail
     ensureStopped();
     build = createRunner("publish", false);
@@ -106,13 +101,6 @@ public class CacheTest extends RunnerTestCase {
     } catch (BuildFailureException e) {
       assertThat(e.getResult().getLogs()).contains("Fail to download libraries from server");
     }
-
-  }
-
-  private void getIssues() {
-    List<Issue> issues = orchestrator.getServer().wsClient().issueClient()
-      .find(IssueQuery.create()).list();
-    System.out.println(issues.size());
 
   }
 
