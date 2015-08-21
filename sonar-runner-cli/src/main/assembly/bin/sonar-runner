@@ -85,7 +85,13 @@ if [ ! -f "$SONAR_RUNNER_HOME/lib/sonar-runner-dist-${project.version}.jar" ] ; 
   exit 1
 fi
 
-JAVA_CMD="`which java`"
+if [ -n "$JAVA_HOME" ]
+then
+  JAVA_CMD="$JAVA_HOME/bin/java"
+else
+  JAVA_CMD="`which java`"
+fi
+
 JAR_FILE="${SONAR_RUNNER_HOME}"/lib/sonar-runner-dist-${project.version}.jar
 PROJECT_HOME=`pwd`
 
