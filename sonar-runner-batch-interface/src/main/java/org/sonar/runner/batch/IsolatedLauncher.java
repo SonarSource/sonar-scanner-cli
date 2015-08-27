@@ -19,6 +19,7 @@
  */
 package org.sonar.runner.batch;
 
+import java.util.List;
 import java.util.Properties;
 
 public interface IsolatedLauncher {
@@ -33,7 +34,7 @@ public interface IsolatedLauncher {
   
   void syncProject(String projectKey);
   
-  void executeOldVersion(Properties properties);
+  void executeOldVersion(Properties properties, List<Object> extensions);
 
   String getVersion();
 

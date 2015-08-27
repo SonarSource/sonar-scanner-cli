@@ -31,12 +31,14 @@ import java.util.List;
  * Special {@link java.net.URLClassLoader} to execute batch, which restricts loading from parent.
  */
 class IsolatedClassloader extends URLClassLoader {
+  private final ClassloadRules rules;
 
   /**
    * The parent classloader is used only for loading classes and resources in unmasked packages
    */
-  IsolatedClassloader(ClassLoader parent) {
+  IsolatedClassloader(ClassLoader parent, ClassloadRules rules) {
     super(new URL[0], parent);
+    this.rules = rules;
   }
 
   void addFiles(List<File> files) {
@@ -59,7 +61,7 @@ class IsolatedClassloader extends URLClassLoader {
     if (c == null) {
       try {
         // Load from parent
-        if (getParent() != null && fromSonarBatchPackage(name)) {
+        if (getParent() != null && rules.canLoad(name)) {
           c = getParent().loadClass(name);
         } else {
 
@@ -84,10 +86,6 @@ class IsolatedClassloader extends URLClassLoader {
       resolveClass(c);
     }
     return c;
-  }
-
-  private static boolean fromSonarBatchPackage(String name) {
-    return name.startsWith("org.sonar.runner.batch");
   }
 
   /**

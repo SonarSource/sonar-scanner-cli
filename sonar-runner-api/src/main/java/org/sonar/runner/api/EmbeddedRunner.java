@@ -19,13 +19,17 @@
  */
 package org.sonar.runner.api;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import org.sonar.runner.impl.ClassloadRules;
+
 import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -44,12 +48,16 @@ public class EmbeddedRunner {
   private IsolatedLauncher launcher;
   private final LogOutput logOutput;
   private final Properties globalProperties = new Properties();
+  private final List<Object> extensions = new ArrayList<>();
   private final Logger logger;
+  private final Set<String> classloaderMask = new HashSet<>();
+  private final Set<String> classloaderUnmask = new HashSet<>();
 
   EmbeddedRunner(IsolatedLauncherFactory bl, Logger logger, LogOutput logOutput) {
     this.logger = logger;
     this.launcherFactory = bl;
     this.logOutput = logOutput;
+    this.classloaderUnmask.add("org.sonar.runner.batch.");
   }
 
   public static EmbeddedRunner create(final LogOutput logOutput) {
@@ -63,8 +71,22 @@ public class EmbeddedRunner {
     return clone;
   }
 
+  public EmbeddedRunner unmask(String fqcnPrefix) {
+    checkLauncherDoesntExist();
+    classloaderUnmask.add(fqcnPrefix);
+    return this;
+  }
+
+  public EmbeddedRunner mask(String fqcnPrefix) {
+    checkLauncherDoesntExist();
+    classloaderMask.add(fqcnPrefix);
+    return this;
+  }
+
   /**
    * Declare Sonar properties, for example sonar.projectKey=>foo.
+   * These might be used at different stages (on {@link #start() or #runAnalysis(Properties)}, depending on the 
+   * property and SQ version.
    *
    * @see #setProperty(String, String)
    */
@@ -75,6 +97,8 @@ public class EmbeddedRunner {
 
   /**
    * Declare a SonarQube property.
+   * These might be used at different stages (on {@link #start() or #runAnalysis(Properties)}, depending on the 
+   * property and SQ version.
    *
    * @see RunnerProperties
    * @see ScanProperties
@@ -101,30 +125,51 @@ public class EmbeddedRunner {
     return globalProperty(InternalProperties.RUNNER_APP, null);
   }
 
+  /**
+   * Add extensions to the batch's object container.
+   * Only supported until SQ 5.1. For more recent versions, an exception is thrown 
+   * @param objs
+   */
+  public EmbeddedRunner addExtensions(Object... objs) {
+    checkLauncherExists();
+    if (VersionUtils.isAtLeast52(launcher.getVersion())) {
+      throw new IllegalStateException("not supported in current SonarQube version: " + launcher.getVersion());
+    }
+
+    extensions.addAll(Arrays.asList(objs));
+    return this;
+  }
+
   public String appVersion() {
     return globalProperty(InternalProperties.RUNNER_APP_VERSION, null);
   }
 
+  /**
+   * Launch an analysis. 
+   * Runner must have been started - see {@link #start()}.
+   */
   public void runAnalysis(Properties analysisProperties) {
     runAnalysis(analysisProperties, null);
   }
 
+  /**
+   * Launch an analysis, providing optionally a issue listener.
+   * Runner must have been started - see {@link #start()}.
+   * Issue listener is supported starting in SQ 5.2. If a non-null listener is given for older versions, an exception is thrown
+   */
   public void runAnalysis(Properties analysisProperties, @Nullable IssueListener issueListener) {
     checkLauncherExists();
     Properties copy = new Properties();
     copy.putAll(analysisProperties);
     initAnalysisProperties(copy);
-
-    String dumpToFile = copy.getProperty(InternalProperties.RUNNER_DUMP_TO_FILE);
-    if (dumpToFile != null) {
-      File dumpFile = new File(dumpToFile);
-      Utils.writeProperties(dumpFile, copy);
-      logger.info("Simulation mode. Configuration written to " + dumpFile.getAbsolutePath());
-    } else {
-      doExecute(copy, issueListener);
-    }
+    doExecute(copy, issueListener);
   }
 
+  /**
+   * Synchronizes the project's data in the local cache with the server, allowing analysis of the project to be done offline.
+   * Runner must have been started - see {@link #start()}.
+   * Only supported starting in SQ 5.2. For older versions, an exception is thrown
+   */
   public void syncProject(String projectKey) {
     checkLauncherExists();
     if (!VersionUtils.isAtLeast52(launcher.getVersion())) {
@@ -142,16 +187,19 @@ public class EmbeddedRunner {
     doStart(forceSync);
   }
 
+  /**
+   * Stops the batch.
+   * Only supported starting in SQ 5.2. For older versions, this is a no-op.
+   */
   public void stop() {
     checkLauncherExists();
     doStop();
   }
-  
+
   public String serverVersion() {
     checkLauncherExists();
     return launcher.getVersion();
   }
-  
 
   /**
    * @deprecated since 2.5 use {@link #start()}, {@link #runAnalysis(Properties)} and then {@link #stop()}
@@ -196,7 +244,9 @@ public class EmbeddedRunner {
   }
 
   protected void doStart(boolean forceSync) {
-    launcher = launcherFactory.createLauncher(globalProperties());
+    checkLauncherDoesntExist();
+    ClassloadRules rules = new ClassloadRules(classloaderMask, classloaderUnmask);
+    launcher = launcherFactory.createLauncher(globalProperties(), rules);
     if (VersionUtils.isAtLeast52(launcher.getVersion())) {
       launcher.start(globalProperties(), new org.sonar.runner.batch.LogOutput() {
 
@@ -212,6 +262,7 @@ public class EmbeddedRunner {
   protected void doStop() {
     if (VersionUtils.isAtLeast52(launcher.getVersion())) {
       launcher.stop();
+      launcher = null;
     }
   }
 
@@ -229,80 +280,19 @@ public class EmbeddedRunner {
       Properties prop = new Properties();
       prop.putAll(globalProperties());
       prop.putAll(analysisProperties);
-      launcher.executeOldVersion(prop);
+      launcher.executeOldVersion(prop, extensions);
     }
   }
-  
+
   private void checkLauncherExists() {
-    if(launcher == null) {
+    if (launcher == null) {
       throw new IllegalStateException("not started");
     }
   }
 
-  static class IssueListenerAdapter implements org.sonar.runner.batch.IssueListener {
-    private IssueListener apiIssueListener;
-
-    public IssueListenerAdapter(IssueListener apiIssueListener) {
-      this.apiIssueListener = apiIssueListener;
-    }
-
-    @Override
-    public void handle(org.sonar.runner.batch.IssueListener.Issue issue) {
-      apiIssueListener.handle(transformIssue(issue));
-    }
-
-    private static org.sonar.runner.api.Issue transformIssue(org.sonar.runner.batch.IssueListener.Issue batchIssue) {
-      org.sonar.runner.api.Issue.Builder issueBuilder = org.sonar.runner.api.Issue.builder();
-
-      issueBuilder.setAssigneeLogin(batchIssue.getAssigneeLogin());
-      issueBuilder.setAssigneeName(batchIssue.getAssigneeName());
-      issueBuilder.setComponentKey(batchIssue.getComponentKey());
-      issueBuilder.setKey(batchIssue.getKey());
-      issueBuilder.setLine(batchIssue.getLine());
-      issueBuilder.setMessage(batchIssue.getMessage());
-      issueBuilder.setNew(batchIssue.isNew());
-      issueBuilder.setResolution(batchIssue.getResolution());
-      issueBuilder.setRuleKey(batchIssue.getRuleKey());
-      issueBuilder.setRuleName(batchIssue.getRuleName());
-      issueBuilder.setSeverity(batchIssue.getSeverity());
-      issueBuilder.setStatus(batchIssue.getStatus());
-
-      return issueBuilder.build();
-    }
-  }
-
-  private static class LoggerAdapter implements Logger {
-    private LogOutput logOutput;
-
-    LoggerAdapter(LogOutput logOutput) {
-      this.logOutput = logOutput;
-    }
-
-    @Override
-    public void warn(String msg) {
-      logOutput.log(msg, LogOutput.Level.WARN);
-    }
-
-    @Override
-    public void info(String msg) {
-      logOutput.log(msg, LogOutput.Level.INFO);
-    }
-
-    @Override
-    public void error(String msg, Throwable t) {
-      StringWriter errors = new StringWriter();
-      t.printStackTrace(new PrintWriter(errors));
-      logOutput.log(msg + "\n" + errors.toString(), LogOutput.Level.ERROR);
-    }
-
-    @Override
-    public void error(String msg) {
-      logOutput.log(msg, LogOutput.Level.ERROR);
-    }
-
-    @Override
-    public void debug(String msg) {
-      logOutput.log(msg, LogOutput.Level.DEBUG);
+  private void checkLauncherDoesntExist() {
+    if (launcher != null) {
+      throw new IllegalStateException("already started");
     }
   }
 }

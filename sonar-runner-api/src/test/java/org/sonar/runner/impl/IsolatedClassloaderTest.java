@@ -20,10 +20,11 @@
 package org.sonar.runner.impl;
 
 import java.io.IOException;
+import java.util.HashSet;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import static org.fest.assertions.Assertions.assertThat;
 
 public class IsolatedClassloaderTest {
@@ -35,7 +36,7 @@ public class IsolatedClassloaderTest {
     thrown.expect(ClassNotFoundException.class);
     thrown.expectMessage("org.junit.Test");
     ClassLoader parent = getClass().getClassLoader();
-    IsolatedClassloader classLoader = new IsolatedClassloader(parent);
+    IsolatedClassloader classLoader = new IsolatedClassloader(parent, new ClassloadRules(new HashSet<String>(), new HashSet<String>()));
 
     // JUnit is available in the parent classloader (classpath used to execute this test) but not in the core JVM
     assertThat(classLoader.loadClass("java.lang.String", false)).isNotNull();

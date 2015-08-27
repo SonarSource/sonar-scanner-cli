@@ -21,6 +21,8 @@ package org.sonar.runner.impl;
 
 import org.sonar.runner.batch.IssueListener;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 
 import org.junit.Before;
@@ -48,7 +50,7 @@ public class IsolatedLauncherFactoryTest {
   @Test
   public void should_use_isolated_classloader() {
     try {
-      factory.createLauncher(jarDownloader);
+      factory.createLauncher(jarDownloader, new ClassloadRules(new HashSet<String>(), new HashSet<String>()));
       fail();
     } catch (RunnerException e) {
       // success
@@ -73,7 +75,7 @@ public class IsolatedLauncherFactoryTest {
     }
 
     @Override
-    public void executeOldVersion(Properties properties) {
+    public void executeOldVersion(Properties properties, List<Object> extensions) {
     }
 
     @Override

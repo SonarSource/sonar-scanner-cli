@@ -24,8 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import org.picocontainer.annotations.Nullable;
 import org.sonar.batch.bootstrapper.Batch;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
@@ -35,12 +37,11 @@ import org.sonar.batch.bootstrapper.EnvironmentInformation;
  * the same version of sonar-batch as the server.
  */
 public class BatchIsolatedLauncher implements IsolatedLauncher {
-
   private Batch batch = null;
 
   @Override
   public void start(Properties globalProperties, org.sonar.runner.batch.LogOutput logOutput, boolean forceSync) {
-    batch = createBatch(globalProperties, logOutput);
+    batch = createBatch(globalProperties, logOutput, null);
     batch.start(forceSync);
   }
 
@@ -65,11 +66,15 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
     batch.syncProject(projectKey);
   }
 
-  Batch createBatch(Properties properties, @Nullable final org.sonar.runner.batch.LogOutput logOutput) {
+  Batch createBatch(Properties properties, @Nullable final org.sonar.runner.batch.LogOutput logOutput, @Nullable List<Object> extensions) {
     EnvironmentInformation env = new EnvironmentInformation(properties.getProperty("sonarRunner.app"), properties.getProperty("sonarRunner.appVersion"));
     Batch.Builder builder = Batch.builder()
       .setEnvironment(env)
       .setBootstrapProperties((Map) properties);
+
+    if (extensions != null) {
+      builder.addComponents(extensions);
+    }
 
     if (logOutput != null) {
       // Do that is a separate class to avoid NoClassDefFoundError for org/sonar/batch/bootstrapper/LogOutput
@@ -83,10 +88,10 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
    * This method exists for backward compatibility with SonarQube < 5.2. 
    */
   @Override
-  public void executeOldVersion(Properties properties) {
-    createBatch(properties, null).execute();
+  public void executeOldVersion(Properties properties, List<Object> extensions) {
+    createBatch(properties, null, extensions).execute();
   }
-  
+
   @Override
   public String getVersion() {
     InputStream is = this.getClass().getClassLoader().getResourceAsStream("sq-version.txt");

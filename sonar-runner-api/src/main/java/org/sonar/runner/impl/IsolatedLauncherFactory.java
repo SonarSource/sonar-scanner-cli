@@ -24,6 +24,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Properties;
+
 import org.sonar.home.cache.Logger;
 import org.sonar.home.cache.PersistentCache;
 import org.sonar.home.cache.PersistentCacheBuilder;
@@ -53,28 +54,35 @@ public class IsolatedLauncherFactory {
     return builder.build();
   }
 
-  private ClassLoader createClassLoader(List<File> jarFiles) {
-    IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader());
+  private ClassLoader createClassLoader(List<File> jarFiles, ClassloadRules maskRules) {
+    IsolatedClassloader classloader = new IsolatedClassloader(getClass().getClassLoader(), maskRules);
     classloader.addFiles(jarFiles);
 
     return classloader;
   }
 
-  public IsolatedLauncher createLauncher(Properties props) {
+  public IsolatedLauncher createLauncher(Properties props, ClassloadRules rules) {
+    if (props.containsKey(InternalProperties.RUNNER_DUMP_TO_FILE)) {
+      String version = props.getProperty(InternalProperties.RUNNER_VERSION_SIMULATION);
+      if (version == null) {
+        version = "5.2";
+      }
+      return new SimulatedLauncher(version, logger);
+    }
     ServerConnection serverConnection = ServerConnection.create(props, getCache(props), logger);
     JarDownloader jarDownloader = new JarDownloader(serverConnection, logger);
 
-    return createLauncher(jarDownloader);
+    return createLauncher(jarDownloader, rules);
   }
 
-  IsolatedLauncher createLauncher(final JarDownloader jarDownloader) {
+  IsolatedLauncher createLauncher(final JarDownloader jarDownloader, final ClassloadRules rules) {
     return AccessController.doPrivileged(new PrivilegedAction<IsolatedLauncher>() {
       @Override
       public IsolatedLauncher run() {
         try {
           List<File> jarFiles = jarDownloader.download();
           logger.debug("Create isolated classloader...");
-          ClassLoader cl = createClassLoader(jarFiles);
+          ClassLoader cl = createClassLoader(jarFiles, rules);
           IsolatedLauncher objProxy = IsolatedLauncherProxy.create(cl, IsolatedLauncher.class, launcherImplClassName, logger);
           tempCleaning.clean();
 

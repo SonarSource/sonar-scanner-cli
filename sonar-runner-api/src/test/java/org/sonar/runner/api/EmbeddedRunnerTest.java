@@ -19,9 +19,9 @@
  */
 package org.sonar.runner.api;
 
-import org.junit.rules.ExpectedException;
+import org.sonar.runner.impl.ClassloadRules;
 
-import org.sonar.runner.api.EmbeddedRunner.IssueListenerAdapter;
+import org.junit.rules.ExpectedException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import static org.mockito.Matchers.eq;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -68,7 +69,7 @@ public class EmbeddedRunnerTest {
     batchLauncher = mock(IsolatedLauncherFactory.class);
     launcher = mock(IsolatedLauncher.class);
     when(launcher.getVersion()).thenReturn("5.2");
-    when(batchLauncher.createLauncher(any(Properties.class))).thenReturn(launcher);
+    when(batchLauncher.createLauncher(any(Properties.class), any(ClassloadRules.class))).thenReturn(launcher);
     runner = new EmbeddedRunner(batchLauncher, mock(Logger.class), mock(LogOutput.class));
   }
 
@@ -79,18 +80,18 @@ public class EmbeddedRunnerTest {
     runner.syncProject(projectKey);
     verify(launcher).syncProject(projectKey);
   }
-  
+
   @Test
   public void test_server_version() {
     runner.start();
     assertThat(runner.serverVersion()).isEqualTo("5.2");
   }
-  
+
   @Test
   public void test_run_before_start() {
     expectedException.expect(IllegalStateException.class);
     expectedException.expectMessage("started");
-    
+
     runner.runAnalysis(new Properties());
   }
 
@@ -130,7 +131,7 @@ public class EmbeddedRunnerTest {
       public boolean matches(Object o) {
         return "foo".equals(((Properties) o).getProperty("sonar.projectKey"));
       }
-    }));
+    }), any(ClassloadRules.class));
 
     // it should have added a few properties to analysisProperties, and have merged global props
     final String[] mustHaveKeys = {"sonar.working.directory", "sonar.sourceEncoding", "sonar.projectBaseDir",
@@ -147,7 +148,7 @@ public class EmbeddedRunnerTest {
         }
         return true;
       }
-    }));
+    }), eq(new LinkedList<>()));
   }
 
   @Test
@@ -179,7 +180,7 @@ public class EmbeddedRunnerTest {
       public boolean matches(Object o) {
         return "foo".equals(((Properties) o).getProperty("sonar.projectKey"));
       }
-    }));
+    }), any(ClassloadRules.class));
 
     // it should have added a few properties to analysisProperties
     final String[] mustHaveKeys = {"sonar.working.directory", "sonar.sourceEncoding", "sonar.projectBaseDir"};
@@ -247,7 +248,7 @@ public class EmbeddedRunnerTest {
       public boolean matches(Object o) {
         return "foo".equals(((Properties) o).getProperty("sonar.projectKey"));
       }
-    }));
+    }), any(ClassloadRules.class));
 
     verify(launcher).execute(argThat(new ArgumentMatcher<Properties>() {
       @Override
@@ -259,11 +260,14 @@ public class EmbeddedRunnerTest {
 
   @Test
   public void should_launch_in_simulation_mode() throws IOException {
+    batchLauncher = new IsolatedLauncherFactory(mock(Logger.class));
+    runner = new EmbeddedRunner(batchLauncher, mock(Logger.class), mock(LogOutput.class));
+
     File dump = temp.newFile();
     Properties p = new Properties();
 
     p.setProperty("sonar.projectKey", "foo");
-    p.setProperty("sonarRunner.dumpToFile", dump.getAbsolutePath());
+    runner.setGlobalProperty("sonarRunner.dumpToFile", dump.getAbsolutePath());
     runner.start();
     runner.runAnalysis(p);
     runner.stop();
@@ -280,6 +284,25 @@ public class EmbeddedRunnerTest {
     p.setProperty("sonar.task", "scan");
     runner.initSourceEncoding(p);
     assertThat(p.getProperty("sonar.sourceEncoding", null)).isEqualTo(Charset.defaultCharset().name());
+  }
+
+  @Test
+  public void invalidate_after_stop() {
+    runner.start();
+    runner.stop();
+
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("started");
+    runner.runAnalysis(new Properties());
+  }
+  
+  @Test
+  public void cannot_start_twice() {
+    runner.start();
+
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("started");
+    runner.start();
   }
 
   @Test
