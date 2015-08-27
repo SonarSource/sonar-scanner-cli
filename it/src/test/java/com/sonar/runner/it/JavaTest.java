@@ -53,7 +53,7 @@ public class JavaTest extends RunnerTestCase {
 
     SonarRunner build = newRunner(new File("projects/java-sample"))
       .setProperty("sonar.verbose", "true")
-      .addArguments("-e", "-X");
+      .addArguments("-e");
     // SONARPLUGINS-3061
     // Add a trailing slash
     build.setProperty("sonar.host.url", orchestrator.getServer().getUrl() + "/");

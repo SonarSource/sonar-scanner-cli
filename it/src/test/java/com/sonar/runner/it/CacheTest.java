@@ -19,6 +19,8 @@
  */
 package com.sonar.runner.it;
 
+import org.junit.Assume;
+
 import org.junit.BeforeClass;
 import org.junit.rules.TemporaryFolder;
 import org.junit.Rule;
@@ -64,6 +66,8 @@ public class CacheTest extends RunnerTestCase {
 
   @Test
   public void testIssuesMode() throws IOException {
+    Assume.assumeTrue(orchestrator.getServer().version().isGreaterThanOrEquals("5.2"));
+    
     // online, without cache -> should sync
     ensureStarted();
     SonarRunner build = createRunner("issues", true);
@@ -87,6 +91,8 @@ public class CacheTest extends RunnerTestCase {
 
   @Test
   public void testPublishModeOffline() throws IOException {
+    Assume.assumeTrue(orchestrator.getServer().version().isGreaterThanOrEquals("5.2"));
+    
     // online (cache not used)
     ensureStarted();
     SonarRunner build = createRunner("publish");
