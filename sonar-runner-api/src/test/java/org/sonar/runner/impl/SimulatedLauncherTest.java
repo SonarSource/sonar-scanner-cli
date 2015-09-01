@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.sonar.home.cache.Logger;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
@@ -99,19 +100,17 @@ public class SimulatedLauncherTest {
 
   private void assertDump(Properties global, Properties analysis) throws IOException {
     if (analysis != null) {
-      String content = FileUtils.readFileToString(new File(filename));
-      for (Map.Entry<Object, Object> e : analysis.entrySet()) {
-        assertThat(content).contains(e.getKey() + "=" + e.getValue());
-      }
+      Properties p = new Properties();
+      p.load(new FileInputStream(new File(filename)));
+      assertThat(p).isEqualTo(analysis);
     } else {
       assertThat(new File(filename)).doesNotExist();
     }
 
     if (global != null) {
-      String content = FileUtils.readFileToString(new File(filename + ".global"));
-      for (Map.Entry<Object, Object> e : global.entrySet()) {
-        assertThat(content).contains(e.getKey() + "=" + e.getValue());
-      }
+      Properties p = new Properties();
+      p.load(new FileInputStream(new File(filename + ".global")));
+      assertThat(p).isEqualTo(global);
     } else {
       assertThat(new File(filename + ".global")).doesNotExist();
     }
