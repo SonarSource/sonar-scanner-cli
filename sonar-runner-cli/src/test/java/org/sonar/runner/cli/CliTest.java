@@ -31,7 +31,8 @@ import static org.fest.assertions.Assertions.assertThat;
 
 public class CliTest {
   Exit exit = mock(Exit.class);
-  Cli cli = new Cli(exit);
+  Logs logs = new Logs();
+  Cli cli = new Cli(exit, logs);
 
   @Test
   public void should_parse_empty_arguments() {

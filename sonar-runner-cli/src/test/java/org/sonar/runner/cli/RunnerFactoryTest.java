@@ -19,23 +19,70 @@
  */
 package org.sonar.runner.cli;
 
+import org.sonar.runner.api.LogOutput.Level;
+import org.sonar.runner.api.LogOutput;
+import org.junit.Before;
+
 import java.util.Properties;
+
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
 import org.junit.Test;
 import org.sonar.runner.api.EmbeddedRunner;
-
 import static org.fest.assertions.Assertions.assertThat;
 
 public class RunnerFactoryTest {
 
   Properties props = new Properties();
+  Logs logs;
+
+  @Before
+  public void setUp() {
+    logs = mock(Logs.class);
+  }
 
   @Test
   public void should_create_embedded_runner() {
     props.setProperty("foo", "bar");
-    EmbeddedRunner runner = new RunnerFactory().create(props);
+    EmbeddedRunner runner = new RunnerFactory(logs).create(props);
 
     assertThat(runner).isInstanceOf(EmbeddedRunner.class);
     assertThat(runner.globalProperties().get("foo")).isEqualTo("bar");
+  }
+
+  @Test
+  public void should_fwd_logs() {
+    LogOutput logOutput = new RunnerFactory(logs).new DefaultLogOutput();
+
+    String msg = "test";
+
+    logOutput.log(msg, Level.DEBUG);
+    verify(logs).debug(msg);
+    verifyNoMoreInteractions(logs);
+    reset(logs);
+
+    logOutput.log(msg, Level.INFO);
+    verify(logs).info(msg);
+    verifyNoMoreInteractions(logs);
+    reset(logs);
+
+    logOutput.log(msg, Level.ERROR);
+    verify(logs).error(msg);
+    verifyNoMoreInteractions(logs);
+    reset(logs);
+
+    logOutput.log(msg, Level.WARN);
+    verify(logs).info(msg);
+    verifyNoMoreInteractions(logs);
+    reset(logs);
+
+    logOutput.log(msg, Level.TRACE);
+    verify(logs).debug(msg);
+    verifyNoMoreInteractions(logs);
+    reset(logs);
   }
 
 }

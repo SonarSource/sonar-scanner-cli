@@ -46,25 +46,28 @@ public class Main {
   private EmbeddedRunner runner;
   private BufferedReader inputReader;
   private RunnerFactory runnerFactory;
+  private Logs logger;
 
-  Main(Shutdown shutdown, Cli cli, Conf conf, RunnerFactory runnerFactory) {
+  Main(Shutdown shutdown, Cli cli, Conf conf, RunnerFactory runnerFactory, Logs logger) {
     this.shutdown = shutdown;
     this.cli = cli;
     this.conf = conf;
     this.runnerFactory = runnerFactory;
+    this.logger = logger;
   }
 
   public static void main(String[] args) {
     Exit exit = new Exit();
     Shutdown shutdown = new Shutdown(exit);
-    Cli cli = new Cli(exit).parse(args);
+    Logs logs = new Logs();
+    Cli cli = new Cli(exit, logs).parse(args);
     cli.verify();
-    Main main = new Main(shutdown, cli, new Conf(cli), new RunnerFactory());
+    Main main = new Main(shutdown, cli, new Conf(cli, logs), new RunnerFactory(logs), logs);
     main.execute();
   }
 
   void execute() {
-    Stats stats = new Stats().start();
+    Stats stats = new Stats(logger).start();
 
     try {
       Properties p = conf.properties();
@@ -88,7 +91,7 @@ public class Main {
 
   private void interactiveLoop(Properties p) throws IOException {
     do {
-      Stats stats = new Stats().start();
+      Stats stats = new Stats(logger).start();
       try {
         runAnalysis(stats, p);
       } catch (Exception e) {
@@ -99,13 +102,13 @@ public class Main {
   }
 
   private void init(Properties p) throws IOException {
-    SystemInfo.print();
+    SystemInfo.print(logger);
     if (cli.isDisplayVersionOnly()) {
       shutdown.exit(Exit.SUCCESS);
     }
 
     if (cli.isDisplayStackTrace()) {
-      Logs.info("Error stacktraces are turned on.");
+      logger.info("Error stacktraces are turned on.");
     }
 
     runner = runnerFactory.create(p);
@@ -140,43 +143,43 @@ public class Main {
     this.inputReader = inputReader;
   }
 
-  private static void displayExecutionResult(Stats stats, String resultMsg) {
-    Logs.info("------------------------------------------------------------------------");
-    Logs.info("EXECUTION " + resultMsg);
-    Logs.info("------------------------------------------------------------------------");
+  private void displayExecutionResult(Stats stats, String resultMsg) {
+    logger.info("------------------------------------------------------------------------");
+    logger.info("EXECUTION " + resultMsg);
+    logger.info("------------------------------------------------------------------------");
     stats.stop();
-    Logs.info("------------------------------------------------------------------------");
+    logger.info("------------------------------------------------------------------------");
   }
 
   private void showError(String message, Throwable e, boolean showStackTrace) {
     if (showStackTrace) {
-      Logs.error(message, e);
+      logger.error(message, e);
       if (!cli.isDebugMode()) {
-        Logs.error("");
+        logger.error("");
         suggestDebugMode();
       }
     } else {
-      Logs.error(message);
+      logger.error(message);
       if (e != null) {
-        Logs.error(e.getMessage());
+        logger.error(e.getMessage());
         String previousMsg = "";
         for (Throwable cause = e.getCause(); cause != null
           && cause.getMessage() != null
           && !cause.getMessage().equals(previousMsg); cause = cause.getCause()) {
-          Logs.error("Caused by: " + cause.getMessage());
+          logger.error("Caused by: " + cause.getMessage());
           previousMsg = cause.getMessage();
         }
       }
-      Logs.error("");
-      Logs.error("To see the full stack trace of the errors, re-run SonarQube Runner with the -e switch.");
+      logger.error("");
+      logger.error("To see the full stack trace of the errors, re-run SonarQube Runner with the -e switch.");
       if (!cli.isDebugMode()) {
         suggestDebugMode();
       }
     }
   }
 
-  private static void suggestDebugMode() {
-    Logs.error("Re-run SonarQube Runner using the -X switch to enable full debug logging.");
+  private void suggestDebugMode() {
+    logger.error("Re-run SonarQube Runner using the -X switch to enable full debug logging.");
   }
 
 }

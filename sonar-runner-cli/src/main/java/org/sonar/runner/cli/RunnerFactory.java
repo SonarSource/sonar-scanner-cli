@@ -25,26 +25,32 @@ import org.sonar.runner.api.LogOutput;
 
 class RunnerFactory {
 
-  EmbeddedRunner create(Properties props) {
-    return EmbeddedRunner.create(new LogOutput() {
+  private final Logs logger;
 
-      @Override
-      public void log(String formattedMessage, Level level) {
-        switch (level) {
-          case TRACE:
-          case DEBUG:
-            Logs.debug(formattedMessage);
-            break;
-          case ERROR:
-            Logs.error(formattedMessage);
-            break;
-          case INFO:
-          case WARN:
-          default:
-            Logs.info(formattedMessage);
-        }
-      }
-    }).addGlobalProperties(props);
+  public RunnerFactory(Logs logger) {
+    this.logger = logger;
   }
 
+  EmbeddedRunner create(Properties props) {
+    return EmbeddedRunner.create(new DefaultLogOutput()).addGlobalProperties(props);
+  }
+
+  class DefaultLogOutput implements LogOutput {
+    @Override
+    public void log(String formattedMessage, Level level) {
+      switch (level) {
+        case TRACE:
+        case DEBUG:
+          logger.debug(formattedMessage);
+          break;
+        case ERROR:
+          logger.error(formattedMessage);
+          break;
+        case INFO:
+        case WARN:
+        default:
+          logger.info(formattedMessage);
+      }
+    }
+  }
 }

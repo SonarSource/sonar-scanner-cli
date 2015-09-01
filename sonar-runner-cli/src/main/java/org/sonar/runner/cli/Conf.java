@@ -39,9 +39,11 @@ class Conf {
   private static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
 
   private final Cli cli;
+  private final Logs logger;
 
-  Conf(Cli cli) {
+  Conf(Cli cli, Logs logger) {
     this.cli = cli;
+    this.logger = logger;
   }
 
   Properties properties() throws IOException {
@@ -57,10 +59,10 @@ class Conf {
   private Properties loadGlobalProperties() throws IOException {
     File settingsFile = locatePropertiesFile(cli.properties(), RUNNER_HOME, "conf/sonar-runner.properties", RUNNER_SETTINGS);
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
-      Logs.info("Runner configuration file: " + settingsFile.getAbsolutePath());
+      logger.info("Runner configuration file: " + settingsFile.getAbsolutePath());
       return toProperties(settingsFile);
     }
-    Logs.info("Runner configuration file: NONE");
+    logger.info("Runner configuration file: NONE");
     return new Properties();
   }
 
@@ -70,7 +72,7 @@ class Conf {
       SONAR_PROJECT_PROPERTIES_FILENAME,
       PROJECT_SETTINGS);
     if (rootSettingsFile != null && rootSettingsFile.isFile() && rootSettingsFile.exists()) {
-      Logs.info("Project configuration file: " + rootSettingsFile.getAbsolutePath());
+      logger.info("Project configuration file: " + rootSettingsFile.getAbsolutePath());
       Properties projectProps = new Properties();
       Properties rootProps = toProperties(rootSettingsFile);
       projectProps.putAll(rootProps);
@@ -78,7 +80,7 @@ class Conf {
       loadModulesProperties(rootProps, projectProps, "");
       return projectProps;
     }
-    Logs.info("Project configuration file: NONE");
+    logger.info("Project configuration file: NONE");
     return new Properties();
   }
 

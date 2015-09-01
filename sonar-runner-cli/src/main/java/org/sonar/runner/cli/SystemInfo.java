@@ -31,13 +31,13 @@ class SystemInfo {
     SystemInfo.system = system;
   }
 
-  static void print() {
-    Logs.info("SonarQube Runner " + RunnerVersion.version());
-    Logs.info(java());
-    Logs.info(os());
+  static void print(Logs logger) {
+    logger.info("SonarQube Runner " + RunnerVersion.version());
+    logger.info(java());
+    logger.info(os());
     String runnerOpts = system.getenv("SONAR_RUNNER_OPTS");
     if (runnerOpts != null) {
-      Logs.info("SONAR_RUNNER_OPTS=" + runnerOpts);
+      logger.info("SONAR_RUNNER_OPTS=" + runnerOpts);
     }
   }
 

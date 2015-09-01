@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -32,7 +33,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.sonar.runner.api.EmbeddedRunner;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -54,6 +54,8 @@ public class MainTest {
   private RunnerFactory runnerFactory;
   @Mock
   private EmbeddedRunner runner;
+  @Mock
+  private Logs logs;
 
   @Before
   public void setUp() throws IOException {
@@ -65,7 +67,7 @@ public class MainTest {
 
   @Test
   public void should_execute_runner() {
-    Main main = new Main(exit, cli, conf, runnerFactory);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     main.execute();
 
     verify(exit).exit(Exit.SUCCESS);
@@ -79,14 +81,36 @@ public class MainTest {
   @Test
   public void should_stop_on_error() {
     EmbeddedRunner runner = mock(EmbeddedRunner.class);
-    doThrow(new IllegalStateException("Error")).when(runner).runAnalysis(any(Properties.class));
+    Exception e = new NullPointerException("NPE");
+    e = new IllegalStateException("Error", e);
+    doThrow(e).when(runner).runAnalysis(any(Properties.class));
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
 
-    Main main = new Main(exit, cli, conf, runnerFactory);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     main.execute();
 
     verify(runner).stop();
     verify(exit).exit(Exit.ERROR);
+    verify(logs).error("Caused by: NPE" );
+    
+  }
+  
+  @Test
+  public void show_error_stacktrace() {
+    Exception e = new NullPointerException("NPE");
+    e = new IllegalStateException("Error", e);
+    when(cli.isDisplayStackTrace()).thenReturn(true);
+    
+    EmbeddedRunner runner = mock(EmbeddedRunner.class);
+    doThrow(e).when(runner).runAnalysis(any(Properties.class));
+    when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
+
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    main.execute();
+
+    verify(runner).stop();
+    verify(exit).exit(Exit.ERROR);
+    verify(logs).error("Error during Sonar runner execution", e);
   }
 
   @Test
@@ -96,7 +120,7 @@ public class MainTest {
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
     when(cli.isInteractive()).thenReturn(true);
 
-    Main main = new Main(exit, cli, conf, runnerFactory);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     BufferedReader inputReader = mock(BufferedReader.class);
     when(inputReader.readLine()).thenReturn("");
     when(exit.shouldExit()).thenReturn(false).thenReturn(true);
@@ -115,7 +139,7 @@ public class MainTest {
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(exit, cli, conf, runnerFactory);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     main.execute();
 
     InOrder inOrder = Mockito.inOrder(exit, runnerFactory);
@@ -136,7 +160,7 @@ public class MainTest {
     when(cli.isDebugMode()).thenReturn(true);
     when(cli.isDisplayStackTrace()).thenReturn(true);
 
-    Main main = new Main(exit, cli, conf, runnerFactory);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     main.execute();
 
     verify(runner, times(1)).start();

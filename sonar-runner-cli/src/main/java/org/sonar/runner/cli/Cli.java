@@ -29,10 +29,12 @@ class Cli {
   private boolean displayStackTrace = false;
   private boolean interactive = false;
   private Properties props = new Properties();
-  private Exit exit;
+  private final Exit exit;
+  private Logs logger;
 
-  public Cli(Exit exit) {
+  public Cli(Exit exit, Logs logger) {
     this.exit = exit;
+    this.logger = logger;
   }
 
   boolean isDebugMode() {
@@ -71,14 +73,14 @@ class Cli {
 
       } else if ("-e".equals(arg) || "--errors".equals(arg)) {
         displayStackTrace = true;
-        Logs.setDisplayStackTrace(true);
+        logger.setDisplayStackTrace(true);
 
       } else if ("-X".equals(arg) || "--debug".equals(arg)) {
         props.setProperty("sonar.verbose", "true");
         displayStackTrace = true;
         debugMode = true;
-        Logs.setDebugEnabled(true);
-        Logs.setDisplayStackTrace(true);
+        logger.setDebugEnabled(true);
+        logger.setDisplayStackTrace(true);
 
       } else if ("-D".equals(arg) || "--define".equals(arg)) {
         i++;
@@ -130,21 +132,21 @@ class Cli {
   }
 
   private void printError(String message) {
-    Logs.error(message);
+    logger.error(message);
     printUsage();
   }
 
   private void printUsage() {
-    Logs.info("");
-    Logs.info("usage: sonar-runner [options]");
-    Logs.info("");
-    Logs.info("Options:");
-    Logs.info(" -D,--define <arg>     Define property");
-    Logs.info(" -e,--errors           Produce execution error messages");
-    Logs.info(" -h,--help             Display help information");
-    Logs.info(" -v,--version          Display version information");
-    Logs.info(" -X,--debug            Produce execution debug output");
-    Logs.info(" -i,--interactive      Run interactively");
+    logger.info("");
+    logger.info("usage: sonar-runner [options]");
+    logger.info("");
+    logger.info("Options:");
+    logger.info(" -D,--define <arg>     Define property");
+    logger.info(" -e,--errors           Produce execution error messages");
+    logger.info(" -h,--help             Display help information");
+    logger.info(" -v,--version          Display version information");
+    logger.info(" -X,--debug            Produce execution debug output");
+    logger.info(" -i,--interactive      Run interactively");
     exit.exit(Exit.SUCCESS);
   }
 }

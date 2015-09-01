@@ -20,44 +20,40 @@
 package org.sonar.runner.cli;
 
 public class Logs {
+  private boolean debugEnabled = false;
+  private boolean displayStackTrace = false;
 
-  private Logs() {
+  public void setDebugEnabled(boolean debugEnabled) {
+    this.debugEnabled = debugEnabled;
   }
 
-  private static boolean debugEnabled = false;
-  private static boolean displayStackTrace = false;
-
-  public static void setDebugEnabled(boolean debugEnabled) {
-    Logs.debugEnabled = debugEnabled;
+  public void setDisplayStackTrace(boolean displayStackTrace) {
+    this.displayStackTrace = displayStackTrace;
   }
 
-  public static void setDisplayStackTrace(boolean displayStackTrace) {
-    Logs.displayStackTrace = displayStackTrace;
-  }
-
-  public static boolean isDebugEnabled() {
+  public boolean isDebugEnabled() {
     return debugEnabled;
   }
 
-  public static void debug(String message) {
+  public void debug(String message) {
     if (isDebugEnabled()) {
       System.out.println("DEBUG: " + message);
     }
   }
 
-  public static void info(String message) {
+  public void info(String message) {
     System.out.println("INFO: " + message);
   }
 
-  public static void warn(String message) {
+  public void warn(String message) {
     System.out.println("WARN: " + message);
   }
 
-  public static void error(String message) {
+  public void error(String message) {
     System.err.println("ERROR: " + message);
   }
 
-  public static void error(String message, Throwable t) {
+  public void error(String message, Throwable t) {
     System.err.println("ERROR: " + message);
     if (t != null && displayStackTrace) {
       t.printStackTrace(System.err);

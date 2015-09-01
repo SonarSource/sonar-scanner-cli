@@ -27,6 +27,7 @@ import org.junit.Test;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class StatsTest {
+  Logs logs = new Logs();
 
   @Test
   public void shouldPrintStats() throws UnsupportedEncodingException {
@@ -36,7 +37,7 @@ public class StatsTest {
     try {
       System.setOut(new PrintStream(baos));
 
-      new Stats().start().stop();
+      new Stats(logs).start().stop();
 
       String out = baos.toString();
       String[] lines = out.split(System.lineSeparator());

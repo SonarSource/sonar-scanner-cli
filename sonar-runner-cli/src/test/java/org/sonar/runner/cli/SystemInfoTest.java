@@ -21,9 +21,11 @@ package org.sonar.runner.cli;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import static org.mockito.Mockito.verify;
 
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import org.sonar.runner.api.RunnerVersion;
 import org.junit.Before;
 import org.sonar.runner.cli.SystemInfo.System2;
 import org.junit.Test;
@@ -31,10 +33,13 @@ import org.sonar.runner.cli.SystemInfo;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class SystemInfoTest {
-  System2 mockSystem = mock(System2.class);
+  System2 mockSystem;
+  Logs logs;
 
   @Before
   public void setUp() {
+    mockSystem = mock(System2.class);
+    logs = mock(Logs.class);
     SystemInfo.setSystem(mockSystem);
   }
 
@@ -74,11 +79,17 @@ public class SystemInfoTest {
     mockOs();
     mockJava();
     when(mockSystem.getenv("SONAR_RUNNER_OPTS")).thenReturn("arg");
-    
-    SystemInfo.print();
-    
+
+    SystemInfo.print(logs);
+
     verify(mockSystem).getProperty("java.version");
     verify(mockSystem).getProperty("os.version");
     verify(mockSystem).getenv("SONAR_RUNNER_OPTS");
+
+    verify(logs).info("SonarQube Runner " + RunnerVersion.version());
+    verify(logs).info("Java 1.9 oracle (64-bit)");
+    verify(logs).info("linux 2.5 x64");
+    verify(logs).info("SONAR_RUNNER_OPTS=arg");
+    verifyNoMoreInteractions(logs);
   }
 }

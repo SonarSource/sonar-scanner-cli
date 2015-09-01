@@ -61,9 +61,6 @@ class ServerConnection {
   }
 
   private static String removeEndSlash(String url) {
-    if (url == null) {
-      return null;
-    }
     return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
   }
 
