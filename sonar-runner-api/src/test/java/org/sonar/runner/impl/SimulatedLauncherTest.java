@@ -19,7 +19,6 @@
  */
 package org.sonar.runner.impl;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.Before;
@@ -29,7 +28,6 @@ import org.sonar.home.cache.Logger;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
