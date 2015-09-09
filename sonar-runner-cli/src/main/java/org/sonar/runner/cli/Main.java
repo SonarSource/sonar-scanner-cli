@@ -60,7 +60,7 @@ public class Main {
     Exit exit = new Exit();
     Shutdown shutdown = new Shutdown(exit);
     Logs logs = new Logs();
-    Cli cli = new Cli(exit, logs).parse(args);
+    Cli cli = new Cli(shutdown, logs).parse(args);
     cli.verify();
     Main main = new Main(shutdown, cli, new Conf(cli, logs), new RunnerFactory(logs), logs);
     main.execute();

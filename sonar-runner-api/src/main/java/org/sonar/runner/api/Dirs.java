@@ -63,7 +63,7 @@ class Dirs {
       }
     }
     p.setProperty(RunnerProperties.WORK_DIR, workDirPath.normalize().toString());
-    logger.info("Work directory: " + workDirPath.normalize().toString());
+    logger.debug("Work directory: " + workDirPath.normalize().toString());
   }
 
   /**

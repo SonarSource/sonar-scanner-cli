@@ -30,9 +30,9 @@ import org.sonar.runner.cli.Exit;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class CliTest {
-  Exit exit = mock(Exit.class);
+  Shutdown shutdown = mock(Shutdown.class);
   Logs logs = new Logs();
-  Cli cli = new Cli(exit, logs);
+  Cli cli = new Cli(shutdown, logs);
 
   @Test
   public void should_parse_empty_arguments() {
@@ -45,31 +45,31 @@ public class CliTest {
 
   @Test
   public void should_extract_properties() {
-    cli.parse(new String[]{"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
+    cli.parse(new String[] {"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
     assertThat(cli.properties().get("foo")).isEqualTo("bar");
     assertThat(cli.properties().get("hello")).isEqualTo("world");
     assertThat(cli.properties().get("boolean")).isEqualTo("true");
   }
-  
+
   @Test
   public void dont_allow_interactive_fork() {
-    cli.parse(new String[]{"-i", "-DsonarRunner.mode=fork"});
+    cli.parse(new String[] {"-i", "-DsonarRunner.mode=fork"});
     cli.verify();
-    verify(exit).exit(Exit.SUCCESS);
+    verify(shutdown).exit(Exit.SUCCESS);
   }
 
   @Test
   public void should_parse_optional_task() {
-    cli.parse(new String[]{"-D", "foo=bar"});
+    cli.parse(new String[] {"-D", "foo=bar"});
     assertThat(cli.properties().get("sonar.task")).isNull();
 
-    cli.parse(new String[]{"views", "-D", "foo=bar"});
+    cli.parse(new String[] {"views", "-D", "foo=bar"});
     assertThat(cli.properties().get("sonar.task")).isEqualTo("views");
   }
 
   @Test
   public void should_enable_debug_mode() {
-    cli.parse(new String[]{"-X"});
+    cli.parse(new String[] {"-X"});
     assertThat(cli.isDebugMode()).isTrue();
     assertThat(cli.isDisplayStackTrace()).isTrue();
     assertThat(cli.properties().get("sonar.verbose")).isEqualTo("true");
@@ -77,7 +77,7 @@ public class CliTest {
 
   @Test
   public void should_enable_stacktrace_log() {
-    cli.parse(new String[]{"-e"});
+    cli.parse(new String[] {"-e"});
     assertThat(cli.isDebugMode()).isFalse();
     assertThat(cli.isDisplayStackTrace()).isTrue();
     assertThat(cli.properties().get("sonar.verbose")).isNull();

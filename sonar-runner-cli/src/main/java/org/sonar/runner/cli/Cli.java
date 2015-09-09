@@ -28,12 +28,12 @@ class Cli {
   private boolean displayVersionOnly = false;
   private boolean displayStackTrace = false;
   private boolean interactive = false;
-  private Properties props = new Properties();
-  private final Exit exit;
-  private Logs logger;
+  private final Properties props = new Properties();
+  private final Shutdown shutdown;
+  private final Logs logger;
 
-  public Cli(Exit exit, Logs logger) {
-    this.exit = exit;
+  public Cli(Shutdown shutdown, Logs logger) {
+    this.shutdown = shutdown;
     this.logger = logger;
   }
 
@@ -147,6 +147,6 @@ class Cli {
     logger.info(" -v,--version          Display version information");
     logger.info(" -X,--debug            Produce execution debug output");
     logger.info(" -i,--interactive      Run interactively");
-    exit.exit(Exit.SUCCESS);
+    shutdown.exit(Exit.SUCCESS);
   }
 }
