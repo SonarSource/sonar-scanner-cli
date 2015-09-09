@@ -20,7 +20,6 @@
 package com.sonar.runner.it;
 
 import org.junit.Assume;
-
 import org.junit.BeforeClass;
 import org.junit.rules.TemporaryFolder;
 import org.junit.Rule;
@@ -67,21 +66,21 @@ public class CacheTest extends RunnerTestCase {
   @Test
   public void testIssuesMode() throws IOException {
     Assume.assumeTrue(orchestrator.getServer().version().isGreaterThanOrEquals("5.2"));
-    
+
     // online, without cache -> should sync
     ensureStarted();
-    SonarRunner build = createRunner("issues", true);
+    SonarRunner build = createRunner("issues", true, "java-sample");
     BuildResult result = orchestrator.executeBuild(build, false);
     assertThat(result.isSuccess()).isTrue();
 
     // offline, with cache -> should run from cache
     ensureStopped();
-    build = createRunner("issues", false);
+    build = createRunner("issues", false, "java-sample");
     result = orchestrator.executeBuild(build, false);
     assertThat(result.isSuccess()).isTrue();
 
     // offline, without cache -> should fail
-    build = createRunner("issues", true);
+    build = createRunner("issues", true, "java-sample");
     try {
       result = orchestrator.executeBuild(build);
     } catch (BuildFailureException e) {
@@ -90,18 +89,35 @@ public class CacheTest extends RunnerTestCase {
   }
 
   @Test
+  public void testNonAssociatedMode() throws IOException {
+    Assume.assumeTrue(orchestrator.getServer().version().isGreaterThanOrEquals("5.2"));
+
+    // online, without cache -> should sync
+    ensureStarted();
+    SonarRunner build = createRunner("issues", true, "java-sample-non-associated");
+    BuildResult result = orchestrator.executeBuild(build, false);
+    assertThat(result.isSuccess()).isTrue();
+
+    // offline, with cache -> should run from cache
+    ensureStopped();
+    build = createRunner("issues", false, "java-sample-non-associated");
+    result = orchestrator.executeBuild(build, false);
+    assertThat(result.isSuccess()).isTrue();
+  }
+
+  @Test
   public void testPublishModeOffline() throws IOException {
     Assume.assumeTrue(orchestrator.getServer().version().isGreaterThanOrEquals("5.2"));
-    
+
     // online (cache not used)
     ensureStarted();
-    SonarRunner build = createRunner("publish");
+    SonarRunner build = createRunner("publish", "java-sample");
     BuildResult result = orchestrator.executeBuild(build, false);
     assertThat(result.isSuccess()).isTrue();
 
     // offline (cache not used) -> should fail
     ensureStopped();
-    build = createRunner("publish", false);
+    build = createRunner("publish", false, "java-sample");
     try {
       result = orchestrator.executeBuild(build);
     } catch (BuildFailureException e) {
@@ -110,16 +126,16 @@ public class CacheTest extends RunnerTestCase {
 
   }
 
-  private SonarRunner createRunner(String mode) throws IOException {
-    return createRunner(mode, false);
+  private SonarRunner createRunner(String mode, String project) throws IOException {
+    return createRunner(mode, false, project);
   }
 
-  private SonarRunner createRunner(String mode, boolean refreshCache) throws IOException {
+  private SonarRunner createRunner(String mode, boolean refreshCache, String project) throws IOException {
     if (refreshCache || currentTemp == null) {
       currentTemp = temp.newFolder();
     }
 
-    SonarRunner runner = newRunner(new File("projects/java-sample"))
+    SonarRunner runner = newRunner(new File("projects/" + project))
       .setProperty("sonar.analysis.mode", mode)
       .setProperty("sonar.userHome", currentTemp.getAbsolutePath());
 

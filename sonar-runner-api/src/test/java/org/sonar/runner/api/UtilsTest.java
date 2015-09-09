@@ -19,19 +19,27 @@
  */
 package org.sonar.runner.api;
 
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
+
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
-import org.junit.Test;
 
+import org.junit.Test;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class UtilsTest {
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
+
   @Test
   public void should_join_strings() {
     assertThat(Utils.join(new String[] {}, ",")).isEqualTo("");
@@ -49,6 +57,15 @@ public class UtilsTest {
   }
 
   @Test
+  public void write_properties() throws IOException {
+    File f = temp.newFile();
+    Properties p = new Properties();
+    p.put("key", "value");
+    Utils.writeProperties(f, p);
+    assertThat(Files.readAllLines(f.toPath(), StandardCharsets.UTF_8)).contains("key=value");
+  }
+
+  @Test
   public void task_should_not_require_project() {
     Properties props = new Properties();
     props.setProperty("sonar.task", "views");
@@ -56,7 +73,7 @@ public class UtilsTest {
   }
 
   @Test
-  public void close_quietly() throws IOException {
+  public void close_quietly_error() throws IOException {
     Closeable c = mock(Closeable.class);
     doThrow(IOException.class).when(c).close();
     Utils.closeQuietly(c);
@@ -66,6 +83,20 @@ public class UtilsTest {
   @Test
   public void close_quietly_null() throws IOException {
     Utils.closeQuietly(null);
+  }
+
+  @Test
+  public void close_quietly() throws IOException {
+    Closeable c = mock(Closeable.class);
+    Utils.closeQuietly(c);
+    verify(c).close();
+  }
+  
+  @Test
+  public void delete_quietly() {
+    File f = mock(File.class);
+    doThrow(IOException.class).when(f).toPath();
+    Utils.deleteQuietly(f);
   }
 
   @Test
