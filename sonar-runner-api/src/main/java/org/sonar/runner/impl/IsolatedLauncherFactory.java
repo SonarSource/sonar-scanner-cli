@@ -20,6 +20,7 @@
 package org.sonar.runner.impl;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
@@ -51,6 +52,10 @@ public class IsolatedLauncherFactory {
 
   private PersistentCache getCache(Properties props) {
     PersistentCacheBuilder builder = new PersistentCacheBuilder(logger);
+    String home = props.getProperty("sonar.userHome");
+    if (home != null) {
+      builder.setSonarHome(Paths.get(home));
+    }
     return builder.build();
   }
 
@@ -70,7 +75,7 @@ public class IsolatedLauncherFactory {
       return new SimulatedLauncher(version, logger);
     }
     ServerConnection serverConnection = ServerConnection.create(props, getCache(props), logger);
-    JarDownloader jarDownloader = new JarDownloader(serverConnection, logger);
+    JarDownloader jarDownloader = new JarDownloader(serverConnection, logger, props);
 
     return createLauncher(jarDownloader, rules);
   }

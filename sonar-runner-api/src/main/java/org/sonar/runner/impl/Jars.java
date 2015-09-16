@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
 import org.sonar.home.cache.FileCache;
 import org.sonar.home.cache.FileCacheBuilder;
 import org.sonar.home.cache.Logger;
@@ -36,9 +38,11 @@ class Jars {
   private final JarExtractor jarExtractor;
   private final Logger logger;
 
-  Jars(ServerConnection conn, JarExtractor jarExtractor, Logger logger) {
+  Jars(ServerConnection conn, JarExtractor jarExtractor, Logger logger, Properties props) {
     this.logger = logger;
-    this.fileCache = new FileCacheBuilder(logger).build();
+    this.fileCache = new FileCacheBuilder(logger)
+      .setUserHome(props.getProperty("sonar.userHome"))
+      .build();
     this.connection = conn;
     this.jarExtractor = jarExtractor;
   }
@@ -51,6 +55,13 @@ class Jars {
     this.fileCache = fileCache;
     this.connection = conn;
     this.jarExtractor = jarExtractor;
+  }
+
+  /**
+   * For unit tests
+   */
+  FileCache getFileCache() {
+    return fileCache;
   }
 
   List<File> download() {

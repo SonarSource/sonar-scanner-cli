@@ -84,7 +84,7 @@ public class CacheTest extends RunnerTestCase {
     try {
       result = orchestrator.executeBuild(build);
     } catch (BuildFailureException e) {
-      assertThat(e.getResult().getLogs()).contains("Server is not accessible and data is not cached");
+      assertThat(e.getResult().getLogs()).contains("and data is not cached");
     }
   }
 

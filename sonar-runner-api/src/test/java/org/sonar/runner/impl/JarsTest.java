@@ -20,13 +20,15 @@
 package org.sonar.runner.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.home.cache.FileCache;
 import org.sonar.home.cache.Logger;
-
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
 import static org.mockito.Matchers.any;
@@ -38,7 +40,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 public class JarsTest {
-
   ServerConnection connection = mock(ServerConnection.class);
   JarExtractor jarExtractor = mock(JarExtractor.class);
   FileCache fileCache = mock(FileCache.class);
@@ -64,6 +65,15 @@ public class JarsTest {
     verify(fileCache, times(1)).get(eq("cpd.jar"), eq("CA124VADFSDS"), any(FileCache.Downloader.class));
     verify(fileCache, times(1)).get(eq("squid.jar"), eq("34535FSFSDF"), any(FileCache.Downloader.class));
     verifyNoMoreInteractions(fileCache);
+  }
+
+  @Test
+  public void should_honor_sonarUserHome() throws IOException {
+    Properties props = new Properties();
+    File f = temp.newFolder();
+    props.put("sonar.userHome", f.getAbsolutePath());
+    Jars jars = new Jars(connection, jarExtractor, mock(Logger.class), props);
+    assertThat(jars.getFileCache().getDir()).isEqualTo(new File(f, "cache"));
   }
 
   @Test

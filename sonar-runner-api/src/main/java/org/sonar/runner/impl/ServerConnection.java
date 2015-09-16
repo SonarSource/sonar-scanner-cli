@@ -161,7 +161,7 @@ class ServerConnection {
       if (cached != null) {
         return cached;
       }
-      logger.error(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED + " and had a cache miss", serverUrl));
+      logger.error(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED + " and data is not cached", serverUrl));
       throw originalException;
     } catch (IOException e) {
       throw new IllegalStateException("Failed to access cache", e);

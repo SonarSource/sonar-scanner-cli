@@ -21,18 +21,22 @@ package org.sonar.runner.impl;
 
 import java.io.File;
 import java.util.List;
+import java.util.Properties;
+
 import org.sonar.home.cache.Logger;
 
 class JarDownloader {
   private final ServerConnection serverConnection;
   private final Logger logger;
+  private final Properties props;
 
-  JarDownloader(ServerConnection conn, Logger logger) {
+  JarDownloader(ServerConnection conn, Logger logger, Properties props) {
     this.serverConnection = conn;
     this.logger = logger;
+    this.props = props;
   }
 
   List<File> download() {
-    return new Jars(serverConnection, new JarExtractor(), logger).download();
+    return new Jars(serverConnection, new JarExtractor(), logger, props).download();
   }
 }

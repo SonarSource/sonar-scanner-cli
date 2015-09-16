@@ -35,7 +35,7 @@ public class JarDownloaderTest {
 
   ServerConnection serverConnection = mock(ServerConnection.class);
   Properties props = new Properties();
-  JarDownloader downloader = spy(new JarDownloader(serverConnection, mock(Logger.class)));
+  JarDownloader downloader = spy(new JarDownloader(serverConnection, mock(Logger.class), props));
 
   @Test
   public void should_download_jar_files() {
