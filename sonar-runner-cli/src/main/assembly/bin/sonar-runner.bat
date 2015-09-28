@@ -74,7 +74,7 @@ echo %SONAR_RUNNER_HOME%
 
 set PROJECT_HOME=%CD%
 
-%JAVA_EXEC% %SONAR_RUNNER_OPTS% -cp "%SONAR_RUNNER_HOME%\lib\sonar-runner-dist-${project.version}.jar" "-Drunner.home=%SONAR_RUNNER_HOME%" "-Dproject.home=%PROJECT_HOME%" org.sonar.runner.cli.Main %*
+%JAVA_EXEC% -Djava.awt.headless=true %SONAR_RUNNER_OPTS% -cp "%SONAR_RUNNER_HOME%\lib\sonar-runner-dist-${project.version}.jar" "-Drunner.home=%SONAR_RUNNER_HOME%" "-Dproject.home=%PROJECT_HOME%" org.sonar.runner.cli.Main %*
 if ERRORLEVEL 1 goto error
 goto end
 

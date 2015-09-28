@@ -101,6 +101,7 @@ PROJECT_HOME=`pwd`
 #echo "Info: Using project $PROJECT_HOME"
 
 exec "$JAVA_CMD" \
+  -Djava.awt.headless=true \
   $SONAR_RUNNER_OPTS \
   -classpath  $JAR_FILE \
   "-Drunner.home=\${SONAR_RUNNER_HOME}" \
