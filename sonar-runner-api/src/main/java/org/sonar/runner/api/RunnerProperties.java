@@ -20,8 +20,8 @@
 package org.sonar.runner.api;
 
 /**
- * Mostly used properties that can be injected in {@link Runner#setProperty(String, String)}.
- * See <a href="http://docs.codehaus.org/pages/viewinfo.action?pageId=194314339">documentation</a> for more properties.
+ * Mostly used properties that can be passed to {@link EmbeddedRunner#addGlobalProperties(java.util.Properties)}.
+ * See <a href="http://docs.sonarqube.org/display/SONAR/Analysis+Parameters">documentation</a> for more properties.
  *
  * @since 2.2
  */
@@ -33,7 +33,9 @@ public interface RunnerProperties {
 
   /**
    * Task to execute, "scan" by default
+   * @deprecated since 2.5 No more task starting from SQ 5.2
    */
+  @Deprecated
   String TASK = "sonar.task";
 
   /**

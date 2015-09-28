@@ -20,8 +20,8 @@
 package org.sonar.runner.api;
 
 /**
- * Most commonly used properties of the task "scan". These properties are injected in {@link Runner#setProperty(String, String)}.
- * See <a href="http://docs.codehaus.org/pages/viewinfo.action?pageId=194314339">documentation</a> for more properties.
+ * Most commonly used properties for a SonarQube analysis. These properties are passed to {@link EmbeddedRunner#runAnalysis(java.util.Properties)}.
+ * See <a href="http://docs.sonarqube.org/display/SONAR/Analysis+Parameters">documentation</a> for more properties.
  *
  * @since 2.2
  */
@@ -31,7 +31,9 @@ public interface ScanProperties {
    * Default task
    *
    * @see RunnerProperties#TASK
+   * @deprecated since 2.5 No more task since SQ 5.2
    */
+  @Deprecated
   String SCAN_TASK = "scan";
 
   /**
@@ -63,24 +65,6 @@ public interface ScanProperties {
    * Optional paths to test directories, separated by commas, for example: "testDir1,testDir2"
    */
   String PROJECT_TEST_DIRS = "sonar.tests";
-
-  /**
-   * Optional paths to binaries, for example to declare the directory of Java bytecode. Example : "binDir"
-   */
-  String PROJECT_BINARY_DIRS = "sonar.binaries";
-
-  /**
-   * Optional comma-separated list of paths to libraries. Example : <code>path/to/library/*.jar,path/to/specific/library/myLibrary.jar,parent/*.jar</code>
-   */
-  String PROJECT_LIBRARIES = "sonar.libraries";
-
-  String PROJECT_LANGUAGE = "sonar.language";
-
-  /**
-   * It becomes quickly necessary to input historical data and to highlight some events. It is possible by going for example in a subversion tag
-   * and use this property. Format is yyyy-MM-dd, for example 2010-12-25.
-   */
-  String PROJECT_DATE = "sonar.projectDate";
 
   /**
    * Property used to specify the base directory of the project to analyse. Default is ".".
