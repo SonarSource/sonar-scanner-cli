@@ -19,20 +19,16 @@
  */
 package org.sonar.runner.cli;
 
-import static org.mockito.Mockito.mock;
-
-import static org.mockito.Mockito.verify;
-
 import org.junit.Test;
-import org.sonar.runner.cli.Cli;
-import org.sonar.runner.cli.Exit;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class CliTest {
-  Shutdown shutdown = mock(Shutdown.class);
+  Exit exit = mock(Exit.class);
   Logs logs = new Logs();
-  Cli cli = new Cli(shutdown, logs);
+  Cli cli = new Cli(exit, logs);
 
   @Test
   public void should_parse_empty_arguments() {
@@ -55,7 +51,7 @@ public class CliTest {
   public void dont_allow_interactive_fork() {
     cli.parse(new String[] {"-i", "-DsonarRunner.mode=fork"});
     cli.verify();
-    verify(shutdown).exit(Exit.SUCCESS);
+    verify(exit).exit(Exit.SUCCESS);
   }
 
   @Test

@@ -58,10 +58,10 @@ public class Main {
 
   public static void main(String[] args) {
     Exit exit = new Exit();
-    Shutdown shutdown = new Shutdown(exit);
     Logs logs = new Logs();
-    Cli cli = new Cli(shutdown, logs).parse(args);
+    Cli cli = new Cli(exit, logs).parse(args);
     cli.verify();
+    Shutdown shutdown = new Shutdown(exit, cli.isInteractive());
     Main main = new Main(shutdown, cli, new Conf(cli, logs), new RunnerFactory(logs), logs);
     main.execute();
   }

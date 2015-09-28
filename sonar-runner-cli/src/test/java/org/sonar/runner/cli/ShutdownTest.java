@@ -19,20 +19,17 @@
  */
 package org.sonar.runner.cli;
 
-import static org.mockito.Mockito.verify;
-import static org.fest.assertions.Assertions.assertThat;
-import static com.jayway.awaitility.Awaitility.await;
-
+import com.jayway.awaitility.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
-import com.jayway.awaitility.Duration;
-import org.mockito.MockitoAnnotations;
-import org.sonar.runner.cli.Exit;
-import org.sonar.runner.cli.Shutdown;
-import org.mockito.Mock;
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import static com.jayway.awaitility.Awaitility.await;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 
 public class ShutdownTest {
   @Mock
@@ -42,7 +39,7 @@ public class ShutdownTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    shutdown = new Shutdown(exit);
+    shutdown = new Shutdown(exit, true);
   }
 
   @Test
@@ -53,7 +50,7 @@ public class ShutdownTest {
 
   @Test(timeout = 60_000)
   public void testWaitReady() throws InterruptedException {
-    shutdown = new Shutdown(exit, 100_000);
+    shutdown = new Shutdown(exit, true, 100_000);
     shutdown.signalReady(false);
     assertThat(shutdown.shouldExit()).isFalse();
 
@@ -75,7 +72,7 @@ public class ShutdownTest {
 
   @Test(timeout = 60_000)
   public void testTimeout() throws InterruptedException {
-    shutdown = new Shutdown(exit, 0);
+    shutdown = new Shutdown(exit, true, 0);
 
     Thread t = new HookCaller();
     t.start();

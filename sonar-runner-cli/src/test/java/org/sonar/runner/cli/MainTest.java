@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -33,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.sonar.runner.api.EmbeddedRunner;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 public class MainTest {
 
   @Mock
-  private Shutdown exit;
+  private Shutdown shutdown;
   @Mock
   private Cli cli;
   @Mock
@@ -67,10 +67,10 @@ public class MainTest {
 
   @Test
   public void should_execute_runner() {
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
     main.execute();
 
-    verify(exit).exit(Exit.SUCCESS);
+    verify(shutdown).exit(Exit.SUCCESS);
     verify(runnerFactory).create(properties);
 
     verify(runner, times(1)).start();
@@ -86,30 +86,30 @@ public class MainTest {
     doThrow(e).when(runner).runAnalysis(any(Properties.class));
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
     main.execute();
 
     verify(runner).stop();
-    verify(exit).exit(Exit.ERROR);
-    verify(logs).error("Caused by: NPE" );
-    
+    verify(shutdown).exit(Exit.ERROR);
+    verify(logs).error("Caused by: NPE");
+
   }
-  
+
   @Test
   public void show_error_stacktrace() {
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
     when(cli.isDisplayStackTrace()).thenReturn(true);
-    
+
     EmbeddedRunner runner = mock(EmbeddedRunner.class);
     doThrow(e).when(runner).runAnalysis(any(Properties.class));
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
     main.execute();
 
     verify(runner).stop();
-    verify(exit).exit(Exit.ERROR);
+    verify(shutdown).exit(Exit.ERROR);
     verify(logs).error("Error during Sonar runner execution", e);
   }
 
@@ -120,16 +120,16 @@ public class MainTest {
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
     when(cli.isInteractive()).thenReturn(true);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
     BufferedReader inputReader = mock(BufferedReader.class);
     when(inputReader.readLine()).thenReturn("");
-    when(exit.shouldExit()).thenReturn(false).thenReturn(true);
+    when(shutdown.shouldExit()).thenReturn(false).thenReturn(true);
     main.setInputReader(inputReader);
     main.execute();
 
     verify(runner, times(2)).runAnalysis(any(Properties.class));
     verify(runner).stop();
-    verify(exit).exit(Exit.SUCCESS);
+    verify(shutdown).exit(Exit.SUCCESS);
   }
 
   @Test
@@ -139,14 +139,14 @@ public class MainTest {
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
     main.execute();
 
-    InOrder inOrder = Mockito.inOrder(exit, runnerFactory);
+    InOrder inOrder = Mockito.inOrder(shutdown, runnerFactory);
 
-    inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
+    inOrder.verify(shutdown, times(1)).exit(Exit.SUCCESS);
     inOrder.verify(runnerFactory, times(1)).create(p);
-    inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
+    inOrder.verify(shutdown, times(1)).exit(Exit.SUCCESS);
   }
 
   @Test(timeout = 30000)
@@ -160,7 +160,7 @@ public class MainTest {
     when(cli.isDebugMode()).thenReturn(true);
     when(cli.isDisplayStackTrace()).thenReturn(true);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
     main.execute();
 
     verify(runner, times(1)).start();

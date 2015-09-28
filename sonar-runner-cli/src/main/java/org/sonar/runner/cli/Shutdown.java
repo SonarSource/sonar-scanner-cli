@@ -31,14 +31,16 @@ class Shutdown {
   private Object lock = new Object();
   private Exit exit;
 
-  Shutdown(Exit exit) {
-    this(exit, DEFAULT_MAX_WAIT);
+  Shutdown(Exit exit, boolean isInteractive) {
+    this(exit, isInteractive, DEFAULT_MAX_WAIT);
   }
 
-  Shutdown(Exit exit, long maxWait) {
+  Shutdown(Exit exit, boolean isInteractive, long maxWait) {
     this.maxWait = maxWait;
     this.exit = exit;
-    Runtime.getRuntime().addShutdownHook(hook);
+    if (isInteractive) {
+      Runtime.getRuntime().addShutdownHook(hook);
+    }
   }
 
   void exit(int status) {
