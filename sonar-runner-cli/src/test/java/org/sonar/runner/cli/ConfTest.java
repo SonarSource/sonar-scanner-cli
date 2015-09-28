@@ -19,14 +19,12 @@
  */
 package org.sonar.runner.cli;
 
+import java.io.File;
+import java.util.Properties;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.sonar.runner.cli.Cli;
-import org.sonar.runner.cli.Conf;
-import java.io.File;
-import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -132,6 +130,23 @@ public class ConfTest {
 
     assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
     assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
+  }
+
+  @Test
+  public void ignoreEmptyModule() throws Exception {
+    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/emptyModules/project").toURI());
+    args.setProperty("project.home", temp.newFolder().getCanonicalPath());
+    args.setProperty("sonar.projectBaseDir", projectHome.getCanonicalPath());
+
+    conf.properties();
+  }
+
+  @Test
+  public void shouldGetList() {
+    Properties props = new Properties();
+
+    props.put("prop", "  foo  ,,  bar  , \n\ntoto,tutu");
+    assertThat(Conf.getListFromProperty(props, "prop")).containsOnly("foo", "bar", "toto", "tutu");
   }
 
 }

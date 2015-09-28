@@ -24,6 +24,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -257,11 +259,18 @@ class Conf {
    *
    */
   static String[] getListFromProperty(Properties properties, String key) {
-    String value = properties.getProperty(key, "");
-    String[] values = value.split(",");
-    for (int i = 0; i < values.length; i++) {
-      values[i] = values[i].trim();
+    String value = properties.getProperty(key, "").trim();
+    if (value.isEmpty()) {
+      return new String[0];
     }
-    return values;
+    String[] values = value.split(",");
+    List<String> trimmedValues = new ArrayList<>();
+    for (int i = 0; i < values.length; i++) {
+      String trimmedValue = values[i].trim();
+      if (!trimmedValue.isEmpty()) {
+        trimmedValues.add(trimmedValue);
+      }
+    }
+    return trimmedValues.toArray(new String[trimmedValues.size()]);
   }
 }
