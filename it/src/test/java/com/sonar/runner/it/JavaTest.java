@@ -237,7 +237,7 @@ public class JavaTest extends RunnerTestCase {
     // expect build failure
     assertThat(result.getStatus()).isNotEqualTo(0);
     // with the following message
-    assertThat(result.getLogs()).contains("ERROR: Sonar server 'http://foo' can not be reached");
+    assertThat(result.getLogs()).contains("server 'http://foo' can not be reached");
   }
 
   // SONARPLUGINS-3574

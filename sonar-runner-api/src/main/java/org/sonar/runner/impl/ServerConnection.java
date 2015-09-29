@@ -39,7 +39,7 @@ import org.sonar.home.cache.PersistentCache;
 
 class ServerConnection {
 
-  private static final String SONAR_SERVER_CAN_NOT_BE_REACHED = "Sonar server ''{0}'' can not be reached";
+  private static final String SONAR_SERVER_CAN_NOT_BE_REACHED = "SonarQube server ''{0}'' can not be reached";
   private static final String STATUS_RETURNED_BY_URL_IS_INVALID = "Status returned by url : ''{0}'' is invalid : {1}";
   static final int CONNECT_TIMEOUT_MILLISECONDS = 5000;
   static final int READ_TIMEOUT_MILLISECONDS = 60000;
