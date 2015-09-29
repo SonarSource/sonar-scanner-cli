@@ -1,5 +1,5 @@
 /*
- * SonarQube Runner - CLI - Distribution
+ * SonarQube Runner - API
  * Copyright (C) 2011 SonarSource
  * sonarqube@googlegroups.com
  *
@@ -17,36 +17,24 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.cli;
+package org.sonar.runner.api;
 
-import org.mockito.Mockito;
+import org.junit.Test;
+import org.sonar.runner.api.LogOutput.Level;
 
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 
 import static org.mockito.Mockito.verify;
+
 import static org.mockito.Mockito.mock;
-import org.junit.Test;
-import static org.fest.assertions.Assertions.assertThat;
 
-public class StatsTest {
+public class StdOutLogOutputTest {
   private PrintStream stdOut = mock(PrintStream.class);
-  private PrintStream stdErr;
-  private Logs logs = new Logs(stdOut, stdErr);
+  private StdOutLogOutput logOutput = new StdOutLogOutput(stdOut);
 
   @Test
-  public void shouldPrintStats() throws UnsupportedEncodingException {
-    new Stats(logs).start().stop();
-
-    verify(stdOut).println(Mockito.contains("Total time: "));
-    verify(stdOut).println(Mockito.contains("Final Memory: "));
-  }
-
-  @Test
-  public void shouldFormatTime() {
-    assertThat(Stats.formatTime(1 * 60 * 60 * 1000 + 2 * 60 * 1000 + 3 * 1000 + 400)).isEqualTo("1:02:03.400s");
-    assertThat(Stats.formatTime(2 * 60 * 1000 + 3 * 1000 + 400)).isEqualTo("2:03.400s");
-    assertThat(Stats.formatTime(3 * 1000 + 400)).isEqualTo("3.400s");
-    assertThat(Stats.formatTime(400)).isEqualTo("0.400s");
+  public void test() {
+    logOutput.log("msg", Level.INFO);
+    verify(stdOut).println("INFO: msg");
   }
 }

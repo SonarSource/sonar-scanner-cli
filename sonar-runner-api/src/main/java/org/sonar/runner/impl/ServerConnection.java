@@ -157,7 +157,7 @@ class ServerConnection {
     logger.info(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED + ", trying cache", serverUrl));
 
     try {
-      String cached = wsCache.getString(fullUrl, null);
+      String cached = wsCache.getString(fullUrl);
       if (cached != null) {
         return cached;
       }

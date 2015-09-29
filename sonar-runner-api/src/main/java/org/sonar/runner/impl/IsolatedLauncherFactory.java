@@ -52,7 +52,10 @@ public class IsolatedLauncherFactory {
 
   private PersistentCache getCache(Properties props) {
     PersistentCacheBuilder builder = new PersistentCacheBuilder(logger);
+    String serverUrl = props.getProperty("sonar.host.url");
     String home = props.getProperty("sonar.userHome");
+
+    builder.setAreaForGlobal(serverUrl, null);
     if (home != null) {
       builder.setSonarHome(Paths.get(home));
     }

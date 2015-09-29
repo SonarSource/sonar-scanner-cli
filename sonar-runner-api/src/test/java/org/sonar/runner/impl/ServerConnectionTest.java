@@ -19,8 +19,6 @@
  */
 package org.sonar.runner.impl;
 
-import org.sonar.home.cache.PersistentCacheLoader;
-
 import com.github.kevinsawicki.http.HttpRequest;
 
 import java.io.File;
@@ -60,7 +58,10 @@ public class ServerConnectionTest {
 
   @Before
   public void setUp() {
-    cache = new PersistentCacheBuilder(mock(Logger.class)).setSonarHome(temp.getRoot().toPath()).build();
+    cache = new PersistentCacheBuilder(mock(Logger.class))
+      .setAreaForGlobal("server", "5.2")
+      .setSonarHome(temp.getRoot().toPath())
+      .build();
     logger = mock(Logger.class);
   }
 
@@ -101,14 +102,14 @@ public class ServerConnectionTest {
       connection.downloadStringCache("/batch/index.txt");
       fail();
     } catch (HttpRequest.HttpRequestException e) {
-      verify(cache).getString(anyString(), any(PersistentCacheLoader.class));
+      verify(cache).getString(anyString());
       assertThat(e.getCause()).isInstanceOf(ConnectException.class);
     }
   }
 
   @Test
   public void should_cache_jar_list() throws Exception {
-    File cacheDir = new File(temp.getRoot(), "ws_cache");
+    File cacheDir = cache.getDirectory().toFile();
 
     ServerConnection connection = createSimpleServerConnection(httpServer.url() + "/", null, true);
 
@@ -116,7 +117,7 @@ public class ServerConnectionTest {
     String str = connection.downloadStringCache("/batch/index.txt");
 
     assertThat(str).isEqualTo("abcde");
-    assertThat(cacheDir.list().length).isEqualTo(2);
+    assertThat(cacheDir.list().length).isEqualTo(1);
 
     httpServer.after();
     str = connection.downloadStringCache("/batch/index.txt");
@@ -125,7 +126,7 @@ public class ServerConnectionTest {
 
   @Test
   public void should_throw_connection_exception_() throws IOException {
-    File cacheDir = new File(temp.getRoot(), "ws_cache");
+    File cacheDir = cache.getDirectory().toFile();
     ServerConnection connection = createSimpleServerConnection(httpServer.url() + "/", null);
 
     assertThat(cacheDir.list().length).isEqualTo(0);
@@ -149,7 +150,7 @@ public class ServerConnectionTest {
 
   @Test
   public void should_not_cache_not_issues_mode() throws Exception {
-    File cacheDir = new File(temp.getRoot(), "ws_cache");
+    File cacheDir = cache.getDirectory().toFile();
     ServerConnection connection = createSimpleServerConnection(httpServer.url() + "/", null);
 
     assertThat(cacheDir.list().length).isEqualTo(0);

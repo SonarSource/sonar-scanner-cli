@@ -58,7 +58,7 @@ public class Main {
 
   public static void main(String[] args) {
     Exit exit = new Exit();
-    Logs logs = new Logs();
+    Logs logs = new Logs(System.out, System.err);
     Cli cli = new Cli(exit, logs).parse(args);
     cli.verify();
     Shutdown shutdown = new Shutdown(exit, cli.isInteractive());

@@ -36,7 +36,7 @@ public class ConfTest {
   public TemporaryFolder temp = new TemporaryFolder();
 
   Properties args = new Properties();
-  Logs logs = new Logs();
+  Logs logs = new Logs(System.out, System.err);
   Cli cli = mock(Cli.class);
   Conf conf = new Conf(cli, logs);
 

@@ -19,10 +19,21 @@
  */
 package org.sonar.runner.api;
 
+import java.io.PrintStream;
+
 public class StdOutLogOutput implements LogOutput {
+  private PrintStream stdOut;
+
+  public StdOutLogOutput() {
+    this(System.out);
+  }
+
+  StdOutLogOutput(PrintStream stdOut) {
+    this.stdOut = stdOut;
+  }
 
   @Override
   public void log(String formattedMessage, org.sonar.runner.api.LogOutput.Level level) {
-    System.out.println(level.name() + ": " + formattedMessage);
+    stdOut.println(level.name() + ": " + formattedMessage);
   }
 }

@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verify;
 
 public class CliTest {
   Exit exit = mock(Exit.class);
-  Logs logs = new Logs();
+  Logs logs = new Logs(System.out, System.err);
   Cli cli = new Cli(exit, logs);
 
   @Test

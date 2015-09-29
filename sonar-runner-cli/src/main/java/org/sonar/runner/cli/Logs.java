@@ -19,9 +19,18 @@
  */
 package org.sonar.runner.cli;
 
+import java.io.PrintStream;
+
 public class Logs {
   private boolean debugEnabled = false;
   private boolean displayStackTrace = false;
+  private PrintStream stdOut;
+  private PrintStream stdErr;
+
+  public Logs(PrintStream stdOut, PrintStream stdErr) {
+    this.stdErr = stdErr;
+    this.stdOut = stdOut;
+  }
 
   public void setDebugEnabled(boolean debugEnabled) {
     this.debugEnabled = debugEnabled;
@@ -37,26 +46,26 @@ public class Logs {
 
   public void debug(String message) {
     if (isDebugEnabled()) {
-      System.out.println("DEBUG: " + message);
+      stdOut.println("DEBUG: " + message);
     }
   }
 
   public void info(String message) {
-    System.out.println("INFO: " + message);
+    stdOut.println("INFO: " + message);
   }
 
   public void warn(String message) {
-    System.out.println("WARN: " + message);
+    stdOut.println("WARN: " + message);
   }
 
   public void error(String message) {
-    System.err.println("ERROR: " + message);
+    stdErr.println("ERROR: " + message);
   }
 
   public void error(String message, Throwable t) {
-    System.err.println("ERROR: " + message);
+    stdErr.println("ERROR: " + message);
     if (t != null && displayStackTrace) {
-      t.printStackTrace(System.err);
+      t.printStackTrace(stdErr);
     }
   }
 }
