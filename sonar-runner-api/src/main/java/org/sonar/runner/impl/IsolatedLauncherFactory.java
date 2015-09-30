@@ -55,7 +55,7 @@ public class IsolatedLauncherFactory {
     String serverUrl = props.getProperty("sonar.host.url");
     String home = props.getProperty("sonar.userHome");
 
-    builder.setAreaForGlobal(serverUrl, null);
+    builder.setAreaForGlobal(serverUrl);
     if (home != null) {
       builder.setSonarHome(Paths.get(home));
     }

@@ -59,7 +59,7 @@ public class ServerConnectionTest {
   @Before
   public void setUp() {
     cache = new PersistentCacheBuilder(mock(Logger.class))
-      .setAreaForGlobal("server", "5.2")
+      .setAreaForGlobal("server")
       .setSonarHome(temp.getRoot().toPath())
       .build();
     logger = mock(Logger.class);
