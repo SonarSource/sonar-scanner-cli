@@ -19,6 +19,8 @@
  */
 package org.sonar.runner.api;
 
+import org.sonar.runner.cache.Logger;
+
 import org.sonar.runner.impl.ClassloadRules;
 
 import java.nio.charset.Charset;
@@ -33,7 +35,6 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.sonar.home.cache.Logger;
 import org.sonar.runner.batch.IsolatedLauncher;
 import org.sonar.runner.impl.InternalProperties;
 import org.sonar.runner.impl.IsolatedLauncherFactory;

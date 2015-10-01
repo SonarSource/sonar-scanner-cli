@@ -19,13 +19,14 @@
  */
 package org.sonar.runner.impl;
 
-import java.io.File;
-import java.util.Collection;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AgeFileFilter;
 import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
-import org.sonar.home.cache.Logger;
+import org.sonar.runner.cache.Logger;
+
+import java.io.File;
+import java.util.Collection;
 
 /**
  * The file sonar-runner-batch.jar is locked by the classloader on Windows and can't be dropped at the end of the execution.

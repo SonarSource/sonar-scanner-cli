@@ -17,26 +17,44 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.impl;
-
-import org.sonar.runner.cache.Logger;
+package org.sonar.runner.cache;
 
 import java.io.File;
-import java.util.List;
-import java.util.Properties;
 
-class JarDownloader {
-  private final ServerConnection serverConnection;
+import javax.annotation.Nullable;
+
+public class FileCacheBuilder {
   private final Logger logger;
-  private final Properties props;
+  private File userHome;
 
-  JarDownloader(ServerConnection conn, Logger logger, Properties props) {
-    this.serverConnection = conn;
+  public FileCacheBuilder(Logger logger) {
     this.logger = logger;
-    this.props = props;
   }
 
-  List<File> download() {
-    return new Jars(serverConnection, new JarExtractor(), logger, props).download();
+  public FileCacheBuilder setUserHome(File d) {
+    this.userHome = d;
+    return this;
+  }
+
+  public FileCacheBuilder setUserHome(@Nullable String path) {
+    this.userHome = (path == null) ? null : new File(path);
+    return this;
+  }
+
+  public FileCache build() {
+    if (userHome == null) {
+      userHome = findHome();
+    }
+    File cacheDir = new File(userHome, "cache");
+    return FileCache.create(cacheDir, logger);
+  }
+  
+  private File findHome() {
+    String path = System.getenv("SONAR_USER_HOME");
+    if (path == null) {
+      // Default
+      path = System.getProperty("user.home") + File.separator + ".sonar";
+    }
+    return new File(path);
   }
 }

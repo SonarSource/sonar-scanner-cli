@@ -19,12 +19,13 @@
  */
 package org.sonar.runner.impl;
 
-import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.sonar.home.cache.Logger;
+import org.sonar.runner.cache.Logger;
+
+import java.io.File;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

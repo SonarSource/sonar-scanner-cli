@@ -20,6 +20,14 @@
 package org.sonar.runner.impl;
 
 import com.github.kevinsawicki.http.HttpRequest;
+import org.apache.commons.io.FileUtils;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.sonar.runner.cache.Logger;
+import org.sonar.runner.cache.PersistentCache;
+import org.sonar.runner.cache.PersistentCacheBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,23 +35,15 @@ import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.Properties;
 
-import static org.mockito.Matchers.startsWith;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.junit.Assert.*;
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.sonar.home.cache.Logger;
-import org.sonar.home.cache.PersistentCache;
-import org.sonar.home.cache.PersistentCacheBuilder;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.startsWith;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class ServerConnectionTest {
 

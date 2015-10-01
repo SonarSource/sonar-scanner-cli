@@ -17,26 +17,11 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.impl;
+package org.sonar.runner.cache;
 
-import org.sonar.runner.cache.Logger;
+import java.io.IOException;
+import java.nio.file.Path;
 
-import java.io.File;
-import java.util.List;
-import java.util.Properties;
-
-class JarDownloader {
-  private final ServerConnection serverConnection;
-  private final Logger logger;
-  private final Properties props;
-
-  JarDownloader(ServerConnection conn, Logger logger, Properties props) {
-    this.serverConnection = conn;
-    this.logger = logger;
-    this.props = props;
-  }
-
-  List<File> download() {
-    return new Jars(serverConnection, new JarExtractor(), logger, props).download();
-  }
+public interface PersistentCacheInvalidation {
+  boolean test(Path cacheEntryPath) throws IOException;
 }

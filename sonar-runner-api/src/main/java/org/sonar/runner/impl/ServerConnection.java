@@ -19,9 +19,11 @@
  */
 package org.sonar.runner.impl;
 
-import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
-
 import com.github.kevinsawicki.http.HttpRequest;
+import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
+import org.apache.commons.io.FileUtils;
+import org.sonar.runner.cache.Logger;
+import org.sonar.runner.cache.PersistentCache;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,10 +34,6 @@ import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.io.FileUtils;
-import org.sonar.home.cache.Logger;
-import org.sonar.home.cache.PersistentCache;
 
 class ServerConnection {
 

@@ -19,15 +19,15 @@
  */
 package org.sonar.runner.impl;
 
+import org.sonar.runner.cache.FileCache;
+import org.sonar.runner.cache.FileCacheBuilder;
+import org.sonar.runner.cache.Logger;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import org.sonar.home.cache.FileCache;
-import org.sonar.home.cache.FileCacheBuilder;
-import org.sonar.home.cache.Logger;
 
 class Jars {
   private static final String BOOTSTRAP_INDEX_PATH = "/batch_bootstrap/index";

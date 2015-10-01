@@ -19,11 +19,11 @@
  */
 package org.sonar.runner.impl;
 
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.sonar.home.cache.Logger;
+import org.junit.rules.TemporaryFolder;
+import org.sonar.runner.cache.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;

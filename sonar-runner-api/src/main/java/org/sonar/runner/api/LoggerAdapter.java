@@ -19,7 +19,8 @@
  */
 package org.sonar.runner.api;
 
-import org.sonar.home.cache.Logger;
+
+import org.sonar.runner.cache.Logger;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

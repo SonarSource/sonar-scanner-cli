@@ -19,12 +19,13 @@
  */
 package org.sonar.runner.impl;
 
+import org.sonar.runner.cache.Logger;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.UndeclaredThrowableException;
-import org.sonar.home.cache.Logger;
 
 public class IsolatedLauncherProxy implements InvocationHandler {
   private final Object proxied;

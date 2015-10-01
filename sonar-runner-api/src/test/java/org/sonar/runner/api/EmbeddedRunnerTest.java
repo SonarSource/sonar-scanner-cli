@@ -19,9 +19,16 @@
  */
 package org.sonar.runner.api;
 
-import org.sonar.runner.impl.ClassloadRules;
-
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
+import org.mockito.ArgumentMatcher;
+import org.sonar.runner.batch.IsolatedLauncher;
+import org.sonar.runner.cache.Logger;
+import org.sonar.runner.impl.ClassloadRules;
+import org.sonar.runner.impl.IsolatedLauncherFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,18 +38,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import static org.mockito.Matchers.eq;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.ArgumentMatcher;
-import org.sonar.home.cache.Logger;
-import org.sonar.runner.batch.IsolatedLauncher;
-import org.sonar.runner.impl.IsolatedLauncherFactory;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -295,7 +294,7 @@ public class EmbeddedRunnerTest {
     expectedException.expectMessage("started");
     runner.runAnalysis(new Properties());
   }
-  
+
   @Test
   public void cannot_start_twice() {
     runner.start();

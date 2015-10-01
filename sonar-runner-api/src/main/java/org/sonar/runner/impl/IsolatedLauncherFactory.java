@@ -19,17 +19,17 @@
  */
 package org.sonar.runner.impl;
 
+import org.sonar.runner.batch.IsolatedLauncher;
+import org.sonar.runner.cache.Logger;
+import org.sonar.runner.cache.PersistentCache;
+import org.sonar.runner.cache.PersistentCacheBuilder;
+
 import java.io.File;
 import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Properties;
-
-import org.sonar.home.cache.Logger;
-import org.sonar.home.cache.PersistentCache;
-import org.sonar.home.cache.PersistentCacheBuilder;
-import org.sonar.runner.batch.IsolatedLauncher;
 
 public class IsolatedLauncherFactory {
   static final String ISOLATED_LAUNCHER_IMPL = "org.sonar.runner.batch.BatchIsolatedLauncher";

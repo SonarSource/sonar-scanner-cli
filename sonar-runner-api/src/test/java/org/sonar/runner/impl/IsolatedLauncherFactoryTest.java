@@ -19,17 +19,17 @@
  */
 package org.sonar.runner.impl;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.sonar.runner.batch.IsolatedLauncher;
 import org.sonar.runner.batch.IssueListener;
+import org.sonar.runner.batch.LogOutput;
+import org.sonar.runner.cache.Logger;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.sonar.home.cache.Logger;
-import org.sonar.runner.batch.IsolatedLauncher;
-import org.sonar.runner.batch.LogOutput;
 import static org.fest.assertions.Fail.fail;
 import static org.mockito.Mockito.mock;
 

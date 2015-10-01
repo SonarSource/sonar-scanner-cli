@@ -17,26 +17,9 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.impl;
 
-import org.sonar.runner.cache.Logger;
+@ParametersAreNonnullByDefault
+package org.sonar.runner.cache;
 
-import java.io.File;
-import java.util.List;
-import java.util.Properties;
+import javax.annotation.ParametersAreNonnullByDefault;
 
-class JarDownloader {
-  private final ServerConnection serverConnection;
-  private final Logger logger;
-  private final Properties props;
-
-  JarDownloader(ServerConnection conn, Logger logger, Properties props) {
-    this.serverConnection = conn;
-    this.logger = logger;
-    this.props = props;
-  }
-
-  List<File> download() {
-    return new Jars(serverConnection, new JarExtractor(), logger, props).download();
-  }
-}

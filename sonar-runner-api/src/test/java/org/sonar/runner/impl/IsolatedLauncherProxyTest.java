@@ -19,13 +19,14 @@
  */
 package org.sonar.runner.impl;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.sonar.runner.batch.BatchIsolatedLauncher;
+import org.sonar.runner.cache.Logger;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.concurrent.Callable;
-import org.junit.Before;
-import org.junit.Test;
-import org.sonar.home.cache.Logger;
-import org.sonar.runner.batch.BatchIsolatedLauncher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

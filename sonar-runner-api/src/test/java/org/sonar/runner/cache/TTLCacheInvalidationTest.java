@@ -17,31 +17,39 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.impl;
+package org.sonar.runner.cache;
+
+import org.junit.Before;
+
+import java.io.IOException;
+import java.nio.file.Path;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
-import org.sonar.runner.cache.Logger;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+public class TTLCacheInvalidationTest {
+  private Path testFile;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
 
-public class JarDownloaderTest {
-
-  ServerConnection serverConnection = mock(ServerConnection.class);
-  Properties props = new Properties();
-  JarDownloader downloader = spy(new JarDownloader(serverConnection, mock(Logger.class), props));
+  @Before
+  public void setUp() throws IOException {
+    testFile = temp.newFile().toPath();
+  }
 
   @Test
-  public void should_download_jar_files() {
-    doReturn(new ArrayList<File>()).when(downloader).download();
-    List<File> jarFiles = downloader.download();
-    assertThat(jarFiles).isNotNull();
+  public void testExpired() throws IOException {
+    TTLCacheInvalidation invalidation = new TTLCacheInvalidation(-100);
+    assertThat(invalidation.test(testFile)).isEqualTo(true);
+  }
+
+  @Test
+  public void testValid() throws IOException {
+    TTLCacheInvalidation invalidation = new TTLCacheInvalidation(100_000);
+    assertThat(invalidation.test(testFile)).isEqualTo(false);
   }
 }
