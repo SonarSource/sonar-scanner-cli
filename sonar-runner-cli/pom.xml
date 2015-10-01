@@ -116,7 +116,7 @@
               <rules>
                 <requireFilesSize>
                   <minsize>160000</minsize>
-                  <maxsize>180000</maxsize>
+                  <maxsize>185000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonar-runner-${project.version}.zip</file>
                   </files>
