@@ -47,7 +47,7 @@ public class FileCache {
     this.tmpDir = createDir(new File(dir, "_tmp"), "temp dir");
   }
 
-  public static FileCache create(File dir, Logger logger) {
+  static FileCache create(File dir, Logger logger) {
     return new FileCache(dir, new FileHashes(), logger);
   }
 

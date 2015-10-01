@@ -48,7 +48,7 @@ public class PersistentCache {
   private final Path dir;
   private DirectoryLock lock;
 
-  public PersistentCache(Path dir, PersistentCacheInvalidation invalidation, Logger logger, DirectoryLock lock) {
+  PersistentCache(Path dir, PersistentCacheInvalidation invalidation, Logger logger, DirectoryLock lock) {
     this.dir = dir;
     this.invalidation = invalidation;
     this.logger = logger;

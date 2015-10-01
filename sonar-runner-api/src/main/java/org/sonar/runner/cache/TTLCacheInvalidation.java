@@ -24,10 +24,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 
-public class TTLCacheInvalidation implements PersistentCacheInvalidation {
+class TTLCacheInvalidation implements PersistentCacheInvalidation {
   private final long durationToExpireMs;
 
-  public TTLCacheInvalidation(long durationToExpireMs) {
+  TTLCacheInvalidation(long durationToExpireMs) {
     this.durationToExpireMs = durationToExpireMs;
   }
   

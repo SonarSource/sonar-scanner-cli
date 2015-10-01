@@ -31,11 +31,11 @@ import java.security.MessageDigest;
  *
  * @since 3.5
  */
-public class FileHashes {
+class FileHashes {
 
   private static final int STREAM_BUFFER_LENGTH = 1024;
 
-  public String of(File file) {
+  String of(File file) {
     try {
       return of(new FileInputStream(file));
     } catch (IOException e) {
@@ -46,7 +46,7 @@ public class FileHashes {
   /**
    * Computes the hash of given stream. The stream is closed by this method.
    */
-  public String of(InputStream input) {
+  String of(InputStream input) {
     try(InputStream is = input) {
       MessageDigest digest = MessageDigest.getInstance("MD5");
       byte[] hash = digest(is, digest);
