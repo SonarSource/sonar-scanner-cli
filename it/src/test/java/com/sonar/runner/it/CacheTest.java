@@ -32,6 +32,8 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static org.junit.Assert.fail;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CacheTest extends RunnerTestCase {
@@ -83,8 +85,11 @@ public class CacheTest extends RunnerTestCase {
     build = createRunner("issues", true, "java-sample");
     try {
       result = orchestrator.executeBuild(build);
+      fail("exception expected");
     } catch (BuildFailureException e) {
-      assertThat(e.getResult().getLogs()).contains("and data is not cached");
+      // this message is specific to the server_first cache strategy
+      assertThat(e.getResult().getLogs()).contains("can not be reached, trying cache");
+      assertThat(e.getResult().getLogs()).contains("can not be reached and data is not cached");
     }
   }
 

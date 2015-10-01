@@ -43,7 +43,7 @@ public class SimulatedLauncher implements IsolatedLauncher {
   }
 
   @Override
-  public void start(Properties properties, LogOutput logOutput, boolean forceSync) {
+  public void start(Properties properties, LogOutput logOutput, boolean preferCache) {
     globalProperties = properties;
   }
 

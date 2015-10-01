@@ -40,9 +40,9 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
   private Batch batch = null;
 
   @Override
-  public void start(Properties globalProperties, org.sonar.runner.batch.LogOutput logOutput, boolean forceSync) {
+  public void start(Properties globalProperties, org.sonar.runner.batch.LogOutput logOutput, boolean preferCache) {
     batch = createBatch(globalProperties, logOutput, null);
-    batch.start(forceSync);
+    batch.start(preferCache);
   }
 
   @Override

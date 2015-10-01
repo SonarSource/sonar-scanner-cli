@@ -53,7 +53,7 @@ public class JarsTest {
     File batchJar = temp.newFile("sonar-runner-batch.jar");
     when(jarExtractor.extractToTemp("sonar-runner-batch")).thenReturn(batchJar);
     // index of the files to download
-    when(connection.downloadStringCache("/batch_bootstrap/index")).thenReturn(
+    when(connection.loadString("/batch_bootstrap/index")).thenReturn(
       "cpd.jar|CA124VADFSDS\n" +
         "squid.jar|34535FSFSDF\n");
 
@@ -61,7 +61,7 @@ public class JarsTest {
     List<File> files = jars35.download();
 
     assertThat(files).isNotNull();
-    verify(connection, times(1)).downloadStringCache("/batch_bootstrap/index");
+    verify(connection, times(1)).loadString("/batch_bootstrap/index");
     verifyNoMoreInteractions(connection);
     verify(fileCache, times(1)).get(eq("cpd.jar"), eq("CA124VADFSDS"), any(FileCache.Downloader.class));
     verify(fileCache, times(1)).get(eq("squid.jar"), eq("34535FSFSDF"), any(FileCache.Downloader.class));
@@ -82,7 +82,7 @@ public class JarsTest {
     File batchJar = temp.newFile("sonar-runner-batch.jar");
     when(jarExtractor.extractToTemp("sonar-runner-batch")).thenReturn(batchJar);
     // index of the files to download
-    when(connection.downloadStringCache("/batch_bootstrap/index")).thenThrow(new IllegalStateException());
+    when(connection.loadString("/batch_bootstrap/index")).thenThrow(new IllegalStateException());
 
     Jars jars35 = new Jars(fileCache, connection, jarExtractor, mock(Logger.class));
     try {

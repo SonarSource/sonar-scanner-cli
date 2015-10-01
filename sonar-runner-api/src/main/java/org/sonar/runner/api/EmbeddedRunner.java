@@ -183,9 +183,9 @@ public class EmbeddedRunner {
     start(false);
   }
 
-  public void start(boolean forceSync) {
+  public void start(boolean preferCache) {
     initGlobalDefaultValues();
-    doStart(forceSync);
+    doStart(preferCache);
   }
 
   /**
@@ -244,10 +244,10 @@ public class EmbeddedRunner {
     }
   }
 
-  protected void doStart(boolean forceSync) {
+  protected void doStart(boolean preferCache) {
     checkLauncherDoesntExist();
     ClassloadRules rules = new ClassloadRules(classloaderMask, classloaderUnmask);
-    launcher = launcherFactory.createLauncher(globalProperties(), rules);
+    launcher = launcherFactory.createLauncher(globalProperties(), rules, preferCache);
     if (VersionUtils.isAtLeast52(launcher.getVersion())) {
       launcher.start(globalProperties(), new org.sonar.runner.batch.LogOutput() {
 
@@ -256,7 +256,7 @@ public class EmbeddedRunner {
           logOutput.log(formattedMessage, LogOutput.Level.valueOf(level.name()));
         }
 
-      }, forceSync);
+      }, preferCache);
     }
   }
 

@@ -62,7 +62,7 @@ public class IsolatedLauncherFactoryTest {
     public static IssueListener listener = null;
 
     @Override
-    public void start(Properties properties, LogOutput logger, boolean forceSync) {
+    public void start(Properties properties, LogOutput logger, boolean preferCache) {
     }
 
     @Override

@@ -38,6 +38,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import static org.mockito.Matchers.anyBoolean;
+
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -68,7 +70,7 @@ public class EmbeddedRunnerTest {
     batchLauncher = mock(IsolatedLauncherFactory.class);
     launcher = mock(IsolatedLauncher.class);
     when(launcher.getVersion()).thenReturn("5.2");
-    when(batchLauncher.createLauncher(any(Properties.class), any(ClassloadRules.class))).thenReturn(launcher);
+    when(batchLauncher.createLauncher(any(Properties.class), any(ClassloadRules.class), anyBoolean())).thenReturn(launcher);
     runner = new EmbeddedRunner(batchLauncher, mock(Logger.class), mock(LogOutput.class));
   }
 
@@ -130,7 +132,7 @@ public class EmbeddedRunnerTest {
       public boolean matches(Object o) {
         return "foo".equals(((Properties) o).getProperty("sonar.projectKey"));
       }
-    }), any(ClassloadRules.class));
+    }), any(ClassloadRules.class), anyBoolean());
 
     // it should have added a few properties to analysisProperties, and have merged global props
     final String[] mustHaveKeys = {"sonar.working.directory", "sonar.sourceEncoding", "sonar.projectBaseDir",
@@ -179,7 +181,7 @@ public class EmbeddedRunnerTest {
       public boolean matches(Object o) {
         return "foo".equals(((Properties) o).getProperty("sonar.projectKey"));
       }
-    }), any(ClassloadRules.class));
+    }), any(ClassloadRules.class), anyBoolean());
 
     // it should have added a few properties to analysisProperties
     final String[] mustHaveKeys = {"sonar.working.directory", "sonar.sourceEncoding", "sonar.projectBaseDir"};
@@ -247,7 +249,7 @@ public class EmbeddedRunnerTest {
       public boolean matches(Object o) {
         return "foo".equals(((Properties) o).getProperty("sonar.projectKey"));
       }
-    }), any(ClassloadRules.class));
+    }), any(ClassloadRules.class), anyBoolean());
 
     verify(launcher).execute(argThat(new ArgumentMatcher<Properties>() {
       @Override

@@ -69,8 +69,8 @@ public class ServerConnectionTest {
   public void continue_if_cache_put_fails() throws Exception {
     cache = mock(PersistentCache.class);
     doThrow(IOException.class).when(cache).put(anyString(), any(byte[].class));
-    ServerConnection connection = createSimpleServerConnection(httpServer.url(), null, true);
-    String response = connection.downloadStringCache("/batch/index.txt");
+    ServerConnection connection = createSimpleServerConnection(httpServer.url(), null, true, false);
+    String response = connection.loadString("/batch/index.txt");
 
     assertThat(response).isEqualTo("abcde");
     verify(logger).warn(startsWith("Failed to cache WS call:"));
@@ -79,9 +79,53 @@ public class ServerConnectionTest {
   @Test
   public void should_download_to_string() throws Exception {
     ServerConnection connection = createSimpleServerConnection(httpServer.url(), null);
-    String response = connection.downloadStringCache("/batch/index.txt");
+    String response = connection.loadString("/batch/index.txt");
 
     assertThat(response).isEqualTo("abcde");
+  }
+  
+  @Test
+  public void test_prefer_cache() throws IOException {
+    File cacheDir = cache.getDirectory().toFile();
+
+    ServerConnection connection = createSimpleServerConnection(httpServer.url() + "/", null, true, true);
+
+    //not cached
+    assertThat(cacheDir.list().length).isEqualTo(0);
+    String str = connection.loadString("/batch/index.txt");
+
+    //cached
+    assertThat(str).isEqualTo("abcde");
+    assertThat(cacheDir.list().length).isEqualTo(1);
+
+    httpServer.setMockResponseData("request2");
+    //got response in cached
+    str = connection.loadString("/batch/index.txt");
+    assertThat(str).isEqualTo("abcde");
+  }
+  
+  @Test
+  public void test_dont_prefer_cache() throws IOException {
+    File cacheDir = cache.getDirectory().toFile();
+
+    ServerConnection connection = createSimpleServerConnection(httpServer.url() + "/", null, true, false);
+
+    //not cached
+    assertThat(cacheDir.list().length).isEqualTo(0);
+    String str = connection.loadString("/batch/index.txt");
+
+    //cached
+    assertThat(str).isEqualTo("abcde");
+    assertThat(cacheDir.list().length).isEqualTo(1);
+
+    httpServer.setMockResponseData("request2");
+    //got response in cached
+    str = connection.loadString("/batch/index.txt");
+    assertThat(str).isEqualTo("request2");
+    
+    httpServer.after();
+    str = connection.loadString("/batch/index.txt");
+    assertThat(str).isEqualTo("request2");
   }
 
   @Test
@@ -94,12 +138,13 @@ public class ServerConnectionTest {
   }
 
   @Test
-  public void should_throw_original_exception_fallback() throws IOException {
+  public void should_throw_connection_exception_fallback_to_cache() throws IOException {
     cache = mock(PersistentCache.class);
-    ServerConnection connection = createSimpleServerConnection("http://localhost", NetworkUtil.getNextAvailablePort(), true);
+    ServerConnection connection = createSimpleServerConnection("http://localhost", NetworkUtil.getNextAvailablePort(),
+      true, false);
 
     try {
-      connection.downloadStringCache("/batch/index.txt");
+      connection.loadString("/batch/index.txt");
       fail();
     } catch (HttpRequest.HttpRequestException e) {
       verify(cache).getString(anyString());
@@ -111,32 +156,32 @@ public class ServerConnectionTest {
   public void should_cache_jar_list() throws Exception {
     File cacheDir = cache.getDirectory().toFile();
 
-    ServerConnection connection = createSimpleServerConnection(httpServer.url() + "/", null, true);
+    ServerConnection connection = createSimpleServerConnection(httpServer.url() + "/", null, true, false);
 
     assertThat(cacheDir.list().length).isEqualTo(0);
-    String str = connection.downloadStringCache("/batch/index.txt");
+    String str = connection.loadString("/batch/index.txt");
 
     assertThat(str).isEqualTo("abcde");
     assertThat(cacheDir.list().length).isEqualTo(1);
 
     httpServer.after();
-    str = connection.downloadStringCache("/batch/index.txt");
+    str = connection.loadString("/batch/index.txt");
     assertThat(str).isEqualTo("abcde");
   }
 
   @Test
-  public void should_throw_connection_exception_() throws IOException {
+  public void should_throw_connection_exception() throws IOException {
     File cacheDir = cache.getDirectory().toFile();
     ServerConnection connection = createSimpleServerConnection(httpServer.url() + "/", null);
 
     assertThat(cacheDir.list().length).isEqualTo(0);
-    String str = connection.downloadStringCache("/batch/index.txt");
+    String str = connection.loadString("/batch/index.txt");
     assertThat(str).isEqualTo("abcde");
 
     httpServer.after();
 
     try {
-      connection.downloadStringCache("/batch/index.txt");
+      connection.loadString("/batch/index.txt");
       fail("exception expected");
     } catch (HttpRequest.HttpRequestException e) {
       // expected
@@ -154,13 +199,13 @@ public class ServerConnectionTest {
     ServerConnection connection = createSimpleServerConnection(httpServer.url() + "/", null);
 
     assertThat(cacheDir.list().length).isEqualTo(0);
-    String str = connection.downloadStringCache("/batch/index.txt");
+    String str = connection.loadString("/batch/index.txt");
 
     assertThat(str).isEqualTo("abcde");
     assertThat(cacheDir.list().length).isEqualTo(0);
 
     httpServer.setMockResponseData("request2");
-    str = connection.downloadStringCache("/batch/index.txt");
+    str = connection.loadString("/batch/index.txt");
     assertThat(str).isEqualTo("request2");
   }
 
@@ -192,7 +237,7 @@ public class ServerConnectionTest {
     ServerConnection connection = createSimpleServerConnection("http://localhost", NetworkUtil.getNextAvailablePort());
 
     try {
-      connection.downloadStringCache("/batch/index.txt");
+      connection.loadString("/batch/index.txt");
       fail();
     } catch (Exception e) {
       // success
@@ -200,10 +245,10 @@ public class ServerConnectionTest {
   }
 
   private ServerConnection createSimpleServerConnection(String url, Integer port) {
-    return createSimpleServerConnection(url, port, false);
+    return createSimpleServerConnection(url, port, false, false);
   }
 
-  private ServerConnection createSimpleServerConnection(String url, Integer port, boolean issuesMode) {
+  private ServerConnection createSimpleServerConnection(String url, Integer port, boolean issuesMode, boolean preferCache) {
     httpServer.setMockResponseData("abcde");
     String fullUrl = port == null ? url : url + ":" + port;
     Properties props = new Properties();
@@ -211,6 +256,6 @@ public class ServerConnectionTest {
     if (issuesMode) {
       props.setProperty("sonar.analysis.mode", "issues");
     }
-    return ServerConnection.create(props, cache, logger);
+    return ServerConnection.create(props, cache, logger, preferCache);
   }
 }

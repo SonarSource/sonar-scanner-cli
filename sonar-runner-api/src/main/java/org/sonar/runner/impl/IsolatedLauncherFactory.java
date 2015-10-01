@@ -69,7 +69,7 @@ public class IsolatedLauncherFactory {
     return classloader;
   }
 
-  public IsolatedLauncher createLauncher(Properties props, ClassloadRules rules) {
+  public IsolatedLauncher createLauncher(Properties props, ClassloadRules rules, boolean preferCache) {
     if (props.containsKey(InternalProperties.RUNNER_DUMP_TO_FILE)) {
       String version = props.getProperty(InternalProperties.RUNNER_VERSION_SIMULATION);
       if (version == null) {
@@ -77,7 +77,7 @@ public class IsolatedLauncherFactory {
       }
       return new SimulatedLauncher(version, logger);
     }
-    ServerConnection serverConnection = ServerConnection.create(props, getCache(props), logger);
+    ServerConnection serverConnection = ServerConnection.create(props, getCache(props), logger, preferCache);
     JarDownloader jarDownloader = new JarDownloader(serverConnection, logger, props);
 
     return createLauncher(jarDownloader, rules);

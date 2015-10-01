@@ -47,28 +47,30 @@ class ServerConnection {
   private final String userAgent;
 
   private final PersistentCache wsCache;
-  private final boolean isCacheEnable;
+  private final boolean preferCache;
   private final Logger logger;
+  private final boolean isCacheEnabled;
 
-  private ServerConnection(String serverUrl, String app, String appVersion, boolean isCacheEnable, PersistentCache cache, Logger logger) {
+  private ServerConnection(String serverUrl, String app, String appVersion, boolean preferCache, boolean cacheEnabled, PersistentCache cache, Logger logger) {
+    this.isCacheEnabled = cacheEnabled;
     this.logger = logger;
     this.serverUrl = removeEndSlash(serverUrl);
     this.userAgent = app + "/" + appVersion;
     this.wsCache = cache;
-    this.isCacheEnable = isCacheEnable;
+    this.preferCache = preferCache;
   }
 
   private static String removeEndSlash(String url) {
     return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
   }
 
-  static ServerConnection create(Properties properties, PersistentCache cache, Logger logger) {
+  static ServerConnection create(Properties properties, PersistentCache cache, Logger logger, boolean preferCache) {
     String serverUrl = properties.getProperty("sonar.host.url");
     String app = properties.getProperty(InternalProperties.RUNNER_APP);
     String appVersion = properties.getProperty(InternalProperties.RUNNER_APP_VERSION);
     boolean enableCache = isCacheEnabled(properties);
 
-    return new ServerConnection(serverUrl, app, appVersion, enableCache, cache, logger);
+    return new ServerConnection(serverUrl, app, appVersion, preferCache, enableCache, cache, logger);
   }
 
   private static boolean isCacheEnabled(Properties properties) {
@@ -120,7 +122,7 @@ class ServerConnection {
       httpRequest.receive(toFile);
 
     } catch (Exception e) {
-      if (e.getCause() instanceof ConnectException || e.getCause() instanceof UnknownHostException) {
+      if (isCausedByConnection(e)) {
         logger.error(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED, serverUrl));
       }
       FileUtils.deleteQuietly(toFile);
@@ -129,16 +131,45 @@ class ServerConnection {
   }
 
   /**
-   * Tries to fetch from server and falls back to cache. If both attempts fail, it throws the exception 
-   * linked to the server connection failure.
+   * Tries to fetch from cache and server. If both attempts fail, it throws the exception linked to the server connection failure.
    */
-  String downloadStringCache(String path) throws IOException {
+  String loadString(String path) throws IOException {
     String fullUrl = serverUrl + path;
+
+    if (isCacheEnabled && preferCache) {
+      return tryCacheFirst(fullUrl);
+    } else {
+      return tryServerFirst(fullUrl, isCacheEnabled);
+    }
+
+  }
+
+  private String tryCacheFirst(String fullUrl) throws IOException {
+    String cached = getFromCache(fullUrl);
+    if (cached != null) {
+      return cached;
+    }
+
     try {
-      return downloadString(fullUrl, isCacheEnable);
+      return downloadString(fullUrl, preferCache);
+    } catch (Exception e) {
+      logger.error(MessageFormat.format("Data is not cached and " + SONAR_SERVER_CAN_NOT_BE_REACHED, serverUrl));
+      throw e;
+    }
+  }
+
+  private String tryServerFirst(String fullUrl, boolean cacheEnabled) throws IOException {
+    try {
+      return downloadString(fullUrl, cacheEnabled);
     } catch (HttpRequest.HttpRequestException e) {
-      if (isCausedByConnection(e) && isCacheEnable) {
-        return fallbackToCache(fullUrl, e);
+      if (cacheEnabled && isCausedByConnection(e)) {
+        logger.info(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED + ", trying cache", serverUrl));
+        String cached = getFromCache(fullUrl);
+        if (cached != null) {
+          return cached;
+        }
+        logger.error(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED + " and data is not cached", serverUrl));
+        throw e;
       }
 
       logger.error(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED, serverUrl));
@@ -151,20 +182,12 @@ class ServerConnection {
       e.getCause() instanceof java.net.SocketTimeoutException;
   }
 
-  private String fallbackToCache(String fullUrl, HttpRequest.HttpRequestException originalException) {
-    logger.info(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED + ", trying cache", serverUrl));
-
+  private String getFromCache(String fullUrl) {
     try {
-      String cached = wsCache.getString(fullUrl);
-      if (cached != null) {
-        return cached;
-      }
-      logger.error(MessageFormat.format(SONAR_SERVER_CAN_NOT_BE_REACHED + " and data is not cached", serverUrl));
-      throw originalException;
+      return wsCache.getString(fullUrl);
     } catch (IOException e) {
       throw new IllegalStateException("Failed to access cache", e);
     }
-
   }
 
   private HttpRequest newHttpRequest(URL url) {

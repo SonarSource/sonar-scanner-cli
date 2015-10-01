@@ -24,7 +24,7 @@ import java.util.Properties;
 
 public interface IsolatedLauncher {
 
-  void start(Properties properties, LogOutput logOutput, boolean forceSync);
+  void start(Properties properties, LogOutput logOutput, boolean preferCache);
 
   void stop();
 
