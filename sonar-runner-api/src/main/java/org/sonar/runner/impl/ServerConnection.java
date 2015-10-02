@@ -21,10 +21,6 @@ package org.sonar.runner.impl;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
-import org.apache.commons.io.FileUtils;
-import org.sonar.runner.cache.Logger;
-import org.sonar.runner.cache.PersistentCache;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -34,6 +30,9 @@ import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.io.FileUtils;
+import org.sonar.runner.cache.Logger;
+import org.sonar.runner.cache.PersistentCache;
 
 class ServerConnection {
 
@@ -84,6 +83,7 @@ class ServerConnection {
    * @throws IOException If the HTTP response code is != 200
    */
   private String downloadString(String url, boolean saveCache) throws HttpRequestException, IOException {
+    logger.debug("Download: " + url);
     HttpRequest httpRequest = null;
     try {
       httpRequest = newHttpRequest(new URL(url));
