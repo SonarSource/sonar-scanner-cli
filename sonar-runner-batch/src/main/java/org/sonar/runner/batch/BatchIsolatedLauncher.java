@@ -28,9 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.picocontainer.annotations.Nullable;
 import org.sonar.batch.bootstrapper.Batch;
-import org.sonar.batch.bootstrapper.EnvironmentInformation;
 
 /**
  * This class is executed within the classloader provided by the server. It contains the installed plugins and
@@ -38,10 +36,19 @@ import org.sonar.batch.bootstrapper.EnvironmentInformation;
  */
 public class BatchIsolatedLauncher implements IsolatedLauncher {
   private Batch batch = null;
+  private BatchFactory factory = null;
+
+  public BatchIsolatedLauncher() {
+    this.factory = new DefaultBatchFactory();
+  }
+
+  public BatchIsolatedLauncher(BatchFactory factory) {
+    this.factory = factory;
+  }
 
   @Override
   public void start(Properties globalProperties, org.sonar.runner.batch.LogOutput logOutput, boolean preferCache) {
-    batch = createBatch(globalProperties, logOutput, null);
+    batch = factory.createBatch(globalProperties, logOutput, null);
     batch.start(preferCache);
   }
 
@@ -66,30 +73,12 @@ public class BatchIsolatedLauncher implements IsolatedLauncher {
     batch.syncProject(projectKey);
   }
 
-  Batch createBatch(Properties properties, @Nullable final org.sonar.runner.batch.LogOutput logOutput, @Nullable List<Object> extensions) {
-    EnvironmentInformation env = new EnvironmentInformation(properties.getProperty("sonarRunner.app"), properties.getProperty("sonarRunner.appVersion"));
-    Batch.Builder builder = Batch.builder()
-      .setEnvironment(env)
-      .setBootstrapProperties((Map) properties);
-
-    if (extensions != null) {
-      builder.addComponents(extensions);
-    }
-
-    if (logOutput != null) {
-      // Do that is a separate class to avoid NoClassDefFoundError for org/sonar/batch/bootstrapper/LogOutput
-      Compatibility.setLogOutputFor5dot2(builder, logOutput);
-    }
-
-    return builder.build();
-  }
-
   /**
    * This method exists for backward compatibility with SonarQube < 5.2. 
    */
   @Override
   public void executeOldVersion(Properties properties, List<Object> extensions) {
-    createBatch(properties, null, extensions).execute();
+    factory.createBatch(properties, null, extensions).execute();
   }
 
   @Override

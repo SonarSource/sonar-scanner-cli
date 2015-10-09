@@ -28,7 +28,7 @@ import org.picocontainer.annotations.Nullable;
  *
  * @since 2.14
  */
-public final class Batch {
+public class Batch {
 
   private Batch(Builder builder) {
   }
@@ -52,7 +52,7 @@ public final class Batch {
     return start(false);
   }
 
-  public synchronized Batch start(boolean forceSync) {
+  public synchronized Batch start(boolean preferCache) {
     return this;
   }
 
@@ -81,12 +81,6 @@ public final class Batch {
    * @since 4.4
    */
   public synchronized void stop() {
-  }
-
-  private void doStop(boolean swallowException) {
-  }
-
-  private void configureLogging() {
   }
 
   public static Builder builder() {

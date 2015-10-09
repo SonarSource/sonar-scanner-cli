@@ -25,10 +25,10 @@ import org.sonar.batch.bootstrapper.Batch;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class IsolatedLauncherTest {
+public class DefaultBatchFactoryTest {
 
-  Properties props = new Properties();
-  BatchIsolatedLauncher launcher = new BatchIsolatedLauncher();
+  private Properties props = new Properties();
+  private BatchFactory factory = new DefaultBatchFactory();
 
   @Test
   public void should_create_batch() {
@@ -37,7 +37,7 @@ public class IsolatedLauncherTest {
     props.setProperty("sonar.projectName", "Sample");
     props.setProperty("sonar.projectVersion", "1.0");
     props.setProperty("sonar.sources", "src");
-    Batch batch = launcher.createBatch(props, null, null);
+    Batch batch = factory.createBatch(props, null, null);
 
     assertThat(batch).isNotNull();
   }
