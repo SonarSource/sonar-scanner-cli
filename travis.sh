@@ -19,6 +19,8 @@ CI)
 IT-DEV)
   installTravisTools
 
+  build_snapshot "SonarSource/sonarqube" 
+
   mvn install -Dsource.skip=true -Denforcer.skip=true -Danimal.sniffer.skip=true -Dmaven.test.skip=true
 
   cd it
