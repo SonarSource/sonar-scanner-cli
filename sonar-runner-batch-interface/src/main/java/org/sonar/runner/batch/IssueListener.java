@@ -23,9 +23,13 @@ public interface IssueListener {
   void handle(Issue issue);
 
   class Issue {
+    private Integer startLine;
+    private Integer startLineOffset;
+    private Integer endLine;
+    private Integer endLineOffset;
+
     private String key;
     private String componentKey;
-    private Integer line;
     private String message;
     private String ruleKey;
     private String ruleName;
@@ -60,14 +64,38 @@ public interface IssueListener {
       this.componentKey = componentKey;
     }
 
-    public Integer getLine() {
-      return line;
+    public Integer getStartLine() {
+      return startLine;
     }
 
-    public void setLine(Integer line) {
-      this.line = line;
+    public void setStartLine(Integer startLine) {
+      this.startLine = startLine;
     }
 
+    public Integer getStartLineOffset() {
+      return startLineOffset;
+    }
+
+    public void setStartLineOffset(Integer startLineOffset) {
+      this.startLineOffset = startLineOffset;
+    }
+
+    public Integer getEndLine() {
+      return endLine;
+    }
+
+    public void setEndLine(Integer endLine) {
+      this.endLine = endLine;
+    }
+
+    public Integer getEndLineOffset() {
+      return endLineOffset;
+    }
+
+    public void setEndLineOffset(Integer endLineOffset) {
+      this.endLineOffset = endLineOffset;
+    }
+    
     public String getMessage() {
       return message;
     }
@@ -131,6 +159,5 @@ public interface IssueListener {
     public void setAssigneeName(String assigneeName) {
       this.assigneeName = assigneeName;
     }
-
   }
 }

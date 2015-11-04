@@ -19,29 +19,62 @@
  */
 package org.sonar.runner.batch;
 
+import static org.mockito.Mockito.times;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.mockito.ArgumentCaptor;
-import org.junit.Test;
-
 public class CompatibilityTest {
+  private IssueListener issueListener;
+
+  @Before
+  public void setUp() {
+    issueListener = mock(IssueListener.class);
+  }
+
   @Test
   public void test() {
-    IssueListener issueListener = mock(IssueListener.class);
+    org.sonar.batch.bootstrapper.IssueListener.Issue batchIssue = new org.sonar.batch.bootstrapper.IssueListener.Issue();
+    setIssue(batchIssue);
 
-    org.sonar.batch.bootstrapper.IssueListener.Issue issue = new org.sonar.batch.bootstrapper.IssueListener.Issue();
-    setIssue(issue);
+    org.sonar.batch.bootstrapper.IssueListener adaptedIssueListener = Compatibility.getBatchIssueListener(issueListener, false);
 
-    org.sonar.batch.bootstrapper.IssueListener adaptedIssueListener = Compatibility.getBatchIssueListener(issueListener);
-
-    adaptedIssueListener.handle(issue);
+    adaptedIssueListener.handle(batchIssue);
 
     ArgumentCaptor<IssueListener.Issue> arg = ArgumentCaptor.forClass(IssueListener.Issue.class);
     verify(issueListener).handle(arg.capture());
-    assertIssue(arg.getValue());
+    assertIssue(arg.getValue(), false);
+  }
+
+  @Test
+  public void testPrecise() {
+    org.sonar.batch.bootstrapper.IssueListener.Issue batchIssue = new org.sonar.batch.bootstrapper.IssueListener.Issue();
+    setIssue(batchIssue);
+
+    org.sonar.batch.bootstrapper.IssueListener adaptedIssueListener = Compatibility.getBatchIssueListener(issueListener, true);
+
+    adaptedIssueListener.handle(batchIssue);
+
+    ArgumentCaptor<IssueListener.Issue> arg = ArgumentCaptor.forClass(IssueListener.Issue.class);
+    verify(issueListener).handle(arg.capture());
+    assertIssue(arg.getValue(), true);
+  }
+
+  @Test
+  public void preciseIssueLocationCompatibility() {
+    org.sonar.batch.bootstrapper.IssueListener.Issue batchIssue = mock(org.sonar.batch.bootstrapper.IssueListener.Issue.class);
+
+    org.sonar.batch.bootstrapper.IssueListener adaptedIssueListener = Compatibility.getBatchIssueListener(issueListener, false);
+    adaptedIssueListener.handle(batchIssue);
+
+    verify(batchIssue, times(0)).getEndLine();
+    verify(batchIssue, times(0)).getStartLine();
+    verify(batchIssue, times(0)).getStartLineOffset();
+    verify(batchIssue, times(0)).getEndLineOffset();
   }
 
   private static void setIssue(org.sonar.batch.bootstrapper.IssueListener.Issue issue) {
@@ -51,22 +84,37 @@ public class CompatibilityTest {
     issue.setMessage("msg");
     issue.setAssigneeLogin("login");
     issue.setLine(10);
+    issue.setStartLine(5);
+    issue.setEndLine(6);
+    issue.setStartLineOffset(1);
+    issue.setEndLineOffset(2);
     issue.setComponentKey("component");
     issue.setSeverity("severity");
     issue.setNew(true);
     issue.setStatus("status");
   }
 
-  private static void assertIssue(IssueListener.Issue issue) {
+  private static void assertIssue(IssueListener.Issue issue, boolean precise) {
     assertThat(issue.getAssigneeName()).isEqualTo("name");
     assertThat(issue.getRuleName()).isEqualTo("rule");
     assertThat(issue.getRuleKey()).isEqualTo("key");
     assertThat(issue.getMessage()).isEqualTo("msg");
     assertThat(issue.getAssigneeLogin()).isEqualTo("login");
-    assertThat(issue.getLine()).isEqualTo(10);
     assertThat(issue.getComponentKey()).isEqualTo("component");
     assertThat(issue.getSeverity()).isEqualTo("severity");
     assertThat(issue.isNew()).isEqualTo(true);
     assertThat(issue.getStatus()).isEqualTo("status");
+
+    if (precise) {
+      assertThat(issue.getStartLine()).isEqualTo(5);
+      assertThat(issue.getEndLine()).isEqualTo(6);
+      assertThat(issue.getStartLineOffset()).isEqualTo(1);
+      assertThat(issue.getEndLineOffset()).isEqualTo(2);
+    } else {
+      assertThat(issue.getStartLine()).isEqualTo(10);
+      assertThat(issue.getEndLine()).isEqualTo(10);
+      assertThat(issue.getStartLineOffset()).isEqualTo(null);
+      assertThat(issue.getEndLineOffset()).isEqualTo(null);
+    }
   }
 }

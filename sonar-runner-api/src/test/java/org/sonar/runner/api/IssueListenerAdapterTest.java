@@ -43,11 +43,15 @@ public class IssueListenerAdapterTest {
     org.sonar.runner.batch.IssueListener.Issue issue = new org.sonar.runner.batch.IssueListener.Issue();
 
     issue.setAssigneeName("dummy");
+    issue.setStartLineOffset(2);
     adapter.handle(issue);
 
     ArgumentCaptor<Issue> argument = ArgumentCaptor.forClass(Issue.class);
     verify(issueListener).handle(argument.capture());
 
-    assertThat(argument.getValue().getAssigneeName()).isEqualTo("dummy");
+    Issue i = argument.getValue();
+
+    assertThat(i.getAssigneeName()).isEqualTo("dummy");
+    assertThat(i.getStartLineOffset()).isEqualTo(2);
   }
 }

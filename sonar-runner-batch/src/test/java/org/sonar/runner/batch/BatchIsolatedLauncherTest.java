@@ -28,8 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.mockito.Matchers.eq;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,6 +49,26 @@ public class BatchIsolatedLauncherTest {
     batch = mock(Batch.class);
     when(factory.createBatch(any(Properties.class), any(LogOutput.class), anyListOf(Object.class))).thenReturn(batch);
     launcher = new BatchIsolatedLauncher(factory);
+  }
+
+  @Test
+  public void supportsPreciseLocation() {
+    assertThat(launcher.hasPreciseIssueLocation("5.2.9")).isFalse();
+    assertThat(launcher.hasPreciseIssueLocation("5.2")).isFalse();
+    assertThat(launcher.hasPreciseIssueLocation("5.")).isFalse();
+    assertThat(launcher.hasPreciseIssueLocation(null)).isFalse();
+    assertThat(launcher.hasPreciseIssueLocation("4.5")).isFalse();
+    assertThat(launcher.hasPreciseIssueLocation("4.5-SNAPSHOT")).isFalse();
+    assertThat(launcher.hasPreciseIssueLocation("4-RC1")).isFalse();
+    assertThat(launcher.hasPreciseIssueLocation("6")).isFalse();
+    assertThat(launcher.hasPreciseIssueLocation("e6.0")).isFalse();
+
+    assertThat(launcher.hasPreciseIssueLocation("5.3")).isTrue();
+    assertThat(launcher.hasPreciseIssueLocation("5.10.1")).isTrue();
+    assertThat(launcher.hasPreciseIssueLocation("5.3.1")).isTrue();
+    assertThat(launcher.hasPreciseIssueLocation("6.0")).isTrue();
+    assertThat(launcher.hasPreciseIssueLocation("5.3-SNAPSHOT")).isTrue();
+    assertThat(launcher.hasPreciseIssueLocation("5.3-RC1")).isTrue();
   }
 
   @Test

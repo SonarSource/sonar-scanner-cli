@@ -23,9 +23,20 @@ public interface IssueListener {
   void handle(Issue issue);
 
   class Issue {
+    /** @since 5.3 */
+    private Integer startLine;
+    /** @since 5.3 */
+    private Integer startLineOffset;
+    /** @since 5.3 */
+    private Integer endLine;
+    /** @since 5.3 */
+    private Integer endLineOffset;
+
+    /** no longer exists since 5.3 */
+    private Integer line;
+
     private String key;
     private String componentKey;
-    private Integer line;
     private String message;
     private String ruleKey;
     private String ruleName;
@@ -58,6 +69,38 @@ public interface IssueListener {
 
     public void setComponentKey(String componentKey) {
       this.componentKey = componentKey;
+    }
+
+    public Integer getStartLine() {
+      return startLine;
+    }
+
+    public void setStartLine(Integer startLine) {
+      this.startLine = startLine;
+    }
+
+    public Integer getStartLineOffset() {
+      return startLineOffset;
+    }
+
+    public void setStartLineOffset(Integer startLineOffset) {
+      this.startLineOffset = startLineOffset;
+    }
+
+    public Integer getEndLine() {
+      return endLine;
+    }
+
+    public void setEndLine(Integer endLine) {
+      this.endLine = endLine;
+    }
+
+    public Integer getEndLineOffset() {
+      return endLineOffset;
+    }
+
+    public void setEndLineOffset(Integer endLineOffset) {
+      this.endLineOffset = endLineOffset;
     }
 
     public Integer getLine() {

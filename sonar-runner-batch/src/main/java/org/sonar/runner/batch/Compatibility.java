@@ -38,15 +38,17 @@ public class Compatibility {
     });
   }
 
-  static org.sonar.batch.bootstrapper.IssueListener getBatchIssueListener(IssueListener listener) {
-    return new IssueListenerAdapter(listener);
+  static org.sonar.batch.bootstrapper.IssueListener getBatchIssueListener(IssueListener listener, boolean hasPreciseLocation) {
+    return new IssueListenerAdapter(listener, hasPreciseLocation);
   }
 
   static class IssueListenerAdapter implements org.sonar.batch.bootstrapper.IssueListener {
     private IssueListener listener;
+    private boolean hasPreciseLocation;
 
-    public IssueListenerAdapter(IssueListener listener) {
+    public IssueListenerAdapter(IssueListener listener, boolean hasPreciseLocation) {
       this.listener = listener;
+      this.hasPreciseLocation = hasPreciseLocation;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class Compatibility {
       listener.handle(transformIssue(issue));
     }
 
-    private static IssueListener.Issue transformIssue(Issue batchIssue) {
+    private IssueListener.Issue transformIssue(Issue batchIssue) {
       IssueListener.Issue newIssue = new IssueListener.Issue();
 
       newIssue.setAssigneeLogin(batchIssue.getAssigneeLogin());
@@ -66,9 +68,18 @@ public class Compatibility {
       newIssue.setRuleName(batchIssue.getRuleName());
       newIssue.setMessage(batchIssue.getMessage());
       newIssue.setNew(batchIssue.isNew());
-      newIssue.setLine(batchIssue.getLine());
       newIssue.setSeverity(batchIssue.getSeverity());
       newIssue.setStatus(batchIssue.getStatus());
+
+      if (hasPreciseLocation) {
+        newIssue.setStartLine(batchIssue.getStartLine());
+        newIssue.setStartLineOffset(batchIssue.getStartLineOffset());
+        newIssue.setEndLine(batchIssue.getEndLine());
+        newIssue.setEndLineOffset(batchIssue.getEndLineOffset());
+      } else {
+        newIssue.setStartLine(batchIssue.getLine());
+        newIssue.setEndLine(batchIssue.getLine());
+      }
 
       return newIssue;
     }

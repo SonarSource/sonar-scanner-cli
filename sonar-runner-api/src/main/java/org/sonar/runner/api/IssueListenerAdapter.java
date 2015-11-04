@@ -38,7 +38,6 @@ class IssueListenerAdapter implements org.sonar.runner.batch.IssueListener {
     issueBuilder.setAssigneeName(batchIssue.getAssigneeName());
     issueBuilder.setComponentKey(batchIssue.getComponentKey());
     issueBuilder.setKey(batchIssue.getKey());
-    issueBuilder.setLine(batchIssue.getLine());
     issueBuilder.setMessage(batchIssue.getMessage());
     issueBuilder.setNew(batchIssue.isNew());
     issueBuilder.setResolution(batchIssue.getResolution());
@@ -46,6 +45,10 @@ class IssueListenerAdapter implements org.sonar.runner.batch.IssueListener {
     issueBuilder.setRuleName(batchIssue.getRuleName());
     issueBuilder.setSeverity(batchIssue.getSeverity());
     issueBuilder.setStatus(batchIssue.getStatus());
+    issueBuilder.setStartLine(batchIssue.getStartLine());
+    issueBuilder.setStartLineOffset(batchIssue.getStartLineOffset());
+    issueBuilder.setEndLine(batchIssue.getEndLine());
+    issueBuilder.setEndLineOffset(batchIssue.getEndLineOffset());
 
     return issueBuilder.build();
   }

@@ -25,7 +25,6 @@ import javax.annotation.concurrent.Immutable;
 public final class Issue {
   private final String key;
   private final String componentKey;
-  private final Integer line;
   private final String message;
   private final String ruleKey;
   private final String ruleName;
@@ -35,13 +34,16 @@ public final class Issue {
   private final String assigneeLogin;
   private final String assigneeName;
   private final String severity;
+  private final Integer startLine;
+  private final Integer startLineOffset;
+  private final Integer endLine;
+  private final Integer endLineOffset;
 
-  private Issue(String key, String componentKey, Integer line, String message, String ruleKey, String ruleName, String status, String resolution, boolean isNew,
-    String assigneeLogin, String assigneeName, String severity) {
+  private Issue(String key, String componentKey, String message, String ruleKey, String ruleName, String status, String resolution, boolean isNew,
+    String assigneeLogin, String assigneeName, String severity, Integer startLine, Integer startLineOffset, Integer endLine, Integer endLineOffset) {
     super();
     this.key = key;
     this.componentKey = componentKey;
-    this.line = line;
     this.message = message;
     this.ruleKey = ruleKey;
     this.ruleName = ruleName;
@@ -51,12 +53,15 @@ public final class Issue {
     this.assigneeLogin = assigneeLogin;
     this.assigneeName = assigneeName;
     this.severity = severity;
+    this.startLine = startLine;
+    this.startLineOffset = startLineOffset;
+    this.endLine = endLine;
+    this.endLineOffset = endLineOffset;
   }
 
   public static class Builder {
     private String key;
     private String componentKey;
-    private Integer line;
     private String message;
     private String ruleKey;
     private String ruleName;
@@ -66,6 +71,46 @@ public final class Issue {
     private String assigneeLogin;
     private String assigneeName;
     private String severity;
+    private Integer startLine;
+    private Integer startLineOffset;
+    private Integer endLine;
+    private Integer endLineOffset;
+
+    public Integer getStartLine() {
+      return startLine;
+    }
+
+    public Builder setStartLine(Integer startLine) {
+      this.startLine = startLine;
+      return this;
+    }
+
+    public Integer getStartLineOffset() {
+      return startLineOffset;
+    }
+
+    public Builder setStartLineOffset(Integer startLineOffset) {
+      this.startLineOffset = startLineOffset;
+      return this;
+    }
+
+    public Integer getEndLine() {
+      return endLine;
+    }
+
+    public Builder setEndLine(Integer endLine) {
+      this.endLine = endLine;
+      return this;
+    }
+
+    public Integer getEndLineOffset() {
+      return endLineOffset;
+    }
+
+    public Builder setEndLineOffset(Integer endLineOffset) {
+      this.endLineOffset = endLineOffset;
+      return this;
+    }
 
     public String getKey() {
       return key;
@@ -82,15 +127,6 @@ public final class Issue {
 
     public Builder setComponentKey(String componentKey) {
       this.componentKey = componentKey;
-      return this;
-    }
-
-    public Integer getLine() {
-      return line;
-    }
-
-    public Builder setLine(Integer line) {
-      this.line = line;
       return this;
     }
 
@@ -176,7 +212,8 @@ public final class Issue {
     }
 
     public Issue build() {
-      return new Issue(key, componentKey, line, message, ruleKey, ruleName, status, resolution, isNew, assigneeLogin, assigneeName, severity);
+      return new Issue(key, componentKey, message, ruleKey, ruleName, status, resolution, isNew, assigneeLogin,
+        assigneeName, severity, startLine, startLineOffset, endLine, endLineOffset);
     }
   }
 
@@ -192,8 +229,26 @@ public final class Issue {
     return componentKey;
   }
 
-  public Integer getLine() {
-    return line;
+  public Integer getStartLine() {
+    return startLine;
+  }
+
+  /**
+   * @return <code>null</code> if it isn't supported by the sonar-batch being used (< 5.3).
+   */
+  public Integer getStartLineOffset() {
+    return startLineOffset;
+  }
+
+  public Integer getEndLine() {
+    return endLine;
+  }
+
+  /**
+   * @return <code>null</code> if it isn't supported by the sonar-batch being used (< 5.3).
+   */
+  public Integer getEndLineOffset() {
+    return endLineOffset;
   }
 
   public String getMessage() {
