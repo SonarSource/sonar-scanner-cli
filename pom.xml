@@ -6,20 +6,13 @@
     <version>23</version>
   </parent>
 
-  <groupId>org.sonarsource.sonar-runner</groupId>
-  <artifactId>sonar-runner</artifactId>
+  <groupId>org.sonarsource.scanner</groupId>
+  <artifactId>sonar-scanner</artifactId>
   <version>2.5-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>SonarQube Runner</name>
-  <url>http://docs.codehaus.org/display/SONAR/Analyzing+with+SonarQube+Runner</url>
+  <packaging>jar</packaging>
+  <name>SonarQube Scanner</name>
+  <url>http://docs.sonarqube.org/display/SONAR/Analyzing+with+SonarQube+Scanner</url>
   <inceptionYear>2011</inceptionYear>
-
-  <modules>
-    <module>sonar-runner-api</module>
-    <module>sonar-runner-batch</module>
-    <module>sonar-runner-batch-interface</module>
-    <module>sonar-runner-cli</module>
-  </modules>
 
   <organization>
     <name>SonarSource</name>
@@ -35,103 +28,142 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:SonarSource/sonar-runner.git</connection>
-    <developerConnection>scm:git:git@github.com:SonarSource/sonar-runner.git</developerConnection>
-    <url>https://github.com/SonarSource/sonar-runner</url>
+    <connection>scm:git:git@github.com:SonarSource/sonar-scanner-cli.git</connection>
+    <developerConnection>scm:git:git@github.com:SonarSource/sonar-scanner-cli.git</developerConnection>
+    <url>https://github.com/SonarSource/sonar-scanner-cli</url>
     <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
     <system>JIRA</system>
-    <url>http://jira.codehaus.org/browse/SONARPLUGINS/component/14640</url>
+    <url>https://jira.sonarsource.com/browse/SONARSCANNER</url>
   </issueManagement>
 
   <properties>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
   </properties>
 
-  <profiles>
-    <profile>
-      <id>release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>2.6</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>2.4</version>
-      </dependency>
-      <dependency>
-        <groupId>org.easytesting</groupId>
-        <artifactId>fest-assert</artifactId>
-        <version>1.4</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.kevinsawicki</groupId>
-        <artifactId>http-request</artifactId>
-        <version>4.1</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.code.findbugs</groupId>
-        <artifactId>jsr305</artifactId>
-        <version>2.0.1</version>
-      </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.11</version>
-      </dependency>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
-        <version>1.9.5</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
-        <version>1.10</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.sonarsource.sonar-runner</groupId>
+      <artifactId>sonar-runner-api</artifactId>
+      <version>2.5-RC1</version>
     </dependency>
-    </dependencies>
-  </dependencyManagement>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>2.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Unit tests -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-assert</artifactId>
+      <version>1.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.jayway.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>1.6.3</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.8</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-shade-plugin</artifactId>
-          <version>2.3</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>org/sonar/runner/commonsio/*</exclude>
+            </excludes>
+          <archive>
+            <manifest>
+              <addClasspath>false</addClasspath>
+              <mainClass>org.sonar.runner.cli.Main</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+	<version>2.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <createDependencyReducedPom>true</createDependencyReducedPom>
+              <minimizeJar>true</minimizeJar>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <finalName>sonar-runner-${project.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+              <escapeString>\</escapeString>
+              <descriptors>
+                <descriptor>${project.basedir}/assembly.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-distribution-size</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <phase>verify</phase>
+            <configuration>
+              <rules>
+                <requireFilesSize>
+                  <minsize>160000</minsize>
+                  <maxsize>185000</maxsize>
+                  <files>
+                    <file>${project.build.directory}/sonar-runner-${project.version}.zip</file>
+                  </files>
+                </requireFilesSize>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 </project>
