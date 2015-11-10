@@ -1,5 +1,5 @@
 /*
- * SonarSource :: IT :: SonarQube Runner
+ * SonarSource :: IT :: SonarQube Scanner
  * Copyright (C) 2009 SonarSource
  * sonarqube@googlegroups.com
  *

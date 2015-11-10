@@ -80,7 +80,7 @@ if [ -z "$SONAR_RUNNER_HOME" ] ; then
 fi
 
 # check that the SONAR_RUNNER_HOME has been correctly set
-if [ ! -f "$SONAR_RUNNER_HOME/lib/sonar-runner-dist-${project.version}.jar" ] ; then
+if [ ! -f "$SONAR_RUNNER_HOME/lib/sonar-scanner-${project.version}.jar" ] ; then
   echo '$SONAR_RUNNER_HOME' does not point to a valid installation directory: $SONAR_RUNNER_HOME
   exit 1
 fi
@@ -92,7 +92,7 @@ else
   JAVA_CMD="`which java`"
 fi
 
-JAR_FILE="${SONAR_RUNNER_HOME}"/lib/sonar-runner-dist-${project.version}.jar
+JAR_FILE="${SONAR_RUNNER_HOME}"/lib/sonar-scanner-${project.version}.jar
 PROJECT_HOME=`pwd`
 
 #echo "Info: Using sonar-runner at $SONAR_RUNNER_HOME"

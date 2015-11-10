@@ -8,13 +8,11 @@ install: true
 script: ./travis.sh
 
 env:
-  - TESTS=CI
-  - TESTS=IT-DEV
-  - TESTS=IT-DEV-SQ51
-  - TESTS=IT-DEV-LTS
-
-matrix:
-  fast_finish: true
+  matrix:
+    - PR_ANALYSIS=true
+    - RUN_ITS=true SQ_VERSION=DEV
+    - RUN_ITS=true SQ_VERSION=5.1.2
+    - RUN_ITS=true SQ_VERSION=LTS
 
 cache:
   directories:

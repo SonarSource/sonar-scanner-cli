@@ -36,7 +36,7 @@
 
   <issueManagement>
     <system>JIRA</system>
-    <url>https://jira.sonarsource.com/browse/SONARSCANNER</url>
+    <url>https://jira.sonarsource.com/browse/SQSCANNER</url>
   </issueManagement>
 
   <properties>
@@ -129,7 +129,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>sonar-runner-${project.version}</finalName>
+              <finalName>sonar-scanner-${project.version}</finalName>
               <appendAssemblyId>false</appendAssemblyId>
               <escapeString>\</escapeString>
               <descriptors>
@@ -156,7 +156,7 @@
                   <minsize>160000</minsize>
                   <maxsize>185000</maxsize>
                   <files>
-                    <file>${project.build.directory}/sonar-runner-${project.version}.zip</file>
+                    <file>${project.build.directory}/sonar-scanner-${project.version}.zip</file>
                   </files>
                 </requireFilesSize>
               </rules>

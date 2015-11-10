@@ -11,9 +11,9 @@
   </parent>
 
   <groupId>com.sonarsource.it</groupId>
-  <artifactId>it-sonar-runner</artifactId>
+  <artifactId>it-sonar-scanner</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>SonarSource :: IT :: SonarQube Runner</name>
+  <name>SonarSource :: IT :: SonarQube Scanner</name>
   <inceptionYear>2009</inceptionYear>
 
   <organization>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>org.sonarsource.orchestrator</groupId>
       <artifactId>sonar-orchestrator</artifactId>
-      <version>3.5</version>
+      <version>3.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

@@ -58,7 +58,7 @@ goto run
 if "%SONAR_RUNNER_HOME:~-1%"=="\" set SONAR_RUNNER_HOME=%SONAR_RUNNER_HOME:~0,-1%
 
 @REM Check if the provided SONAR_RUNNER_HOME is a valid install dir
-IF EXIST "%SONAR_RUNNER_HOME%\lib\sonar-runner-dist-${project.version}.jar" goto run
+IF EXIST "%SONAR_RUNNER_HOME%\lib\sonar-scanner-${project.version}.jar" goto run
 
 echo.
 echo ERROR: SONAR_RUNNER_HOME exists but does not point to a valid install
@@ -74,7 +74,7 @@ echo %SONAR_RUNNER_HOME%
 
 set PROJECT_HOME=%CD%
 
-%JAVA_EXEC% -Djava.awt.headless=true %SONAR_RUNNER_OPTS% -cp "%SONAR_RUNNER_HOME%\lib\sonar-runner-dist-${project.version}.jar" "-Drunner.home=%SONAR_RUNNER_HOME%" "-Dproject.home=%PROJECT_HOME%" org.sonar.runner.cli.Main %*
+%JAVA_EXEC% -Djava.awt.headless=true %SONAR_RUNNER_OPTS% -cp "%SONAR_RUNNER_HOME%\lib\sonar-scanner-${project.version}.jar" "-Drunner.home=%SONAR_RUNNER_HOME%" "-Dproject.home=%PROJECT_HOME%" org.sonar.runner.cli.Main %*
 if ERRORLEVEL 1 goto error
 goto end
 

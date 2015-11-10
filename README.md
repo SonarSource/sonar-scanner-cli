@@ -1,14 +1,10 @@
-SonarQube Runner [![Build Status](https://travis-ci.org/SonarSource/sonar-runner.svg?branch=master)](https://travis-ci.org/SonarSource/sonar-runner)
+SonarQube Scanner [![Build Status](https://travis-ci.org/SonarSource/sonar-scanner-cli.svg?branch=master)](https://travis-ci.org/SonarSource/sonar-scanner-cli)
 =========================
 
-Bootstrapper of code analysis
+Official SonarQube Scanner used to start code analysis. Project configuration is read from a sonar-project.properties or passed on command line.
 
 Documentation:
-http://docs.sonarqube.org/display/SONAR/Analyzing+with+SonarQube+Runner
+http://docs.sonarqube.org/display/SONAR/Analyzing+with+SonarQube+Scanner
 
 Issue Tracker:
-http://jira.sonarsource.com/browse/SONARUNNER
-
-Release:
-sonar-runner-api need to be signed for use in SonarLint for Eclipse. So you need to pass following properties during perform:
-mvn release:perform -Djarsigner.keystore=<path to keystore.jks> -Djarsigner.storepass=<password>
+http://jira.sonarsource.com/browse/SQSCANNER
