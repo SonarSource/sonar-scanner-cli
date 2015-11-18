@@ -115,7 +115,7 @@ CALLSTACK:$(Get-PSCallStack | Out-String)
     }
 }
 
-switch ($env:TEST)
+switch ($env:RUN)
 {
 	"ci"
 	{
@@ -150,6 +150,6 @@ switch ($env:TEST)
 
 	default
 	{
-		throw "Unexpected TEST mode: $env:TEST"
+		throw "Unexpected RUN mode: $env:RUN"
 	}
 }
