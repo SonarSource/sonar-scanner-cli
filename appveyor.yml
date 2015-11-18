@@ -11,12 +11,15 @@ install:
   - set MAVEN_VERSION=3.2.5
   - choco install maven -version %MAVEN_VERSION%
   - set PATH=%PATH%;C:\bin\apache-maven-%MAVEN_VERSION%\bin
-  - echo %JAVA_HOME%
+  - set JAVA_HOME=C:\Program Files\Java\jdk1.7.0
 
 environment:
   matrix:
   - RUN: ci
-    JAVA_HOME: C:\Program Files\Java\jdk1.7.0
+  - RUN: it
+    SQ_VERSION: DEV
+  - RUN: it
+    SQ_VERSION: LTS
 
 build_script:
   - ps: ./appveyor.ps1
