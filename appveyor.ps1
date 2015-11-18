@@ -115,8 +115,6 @@ CALLSTACK:$(Get-PSCallStack | Out-String)
     }
 }
 
-BuildSnapshot "SonarSource/orchestrator"
-
 switch ($env:TEST)
 {
 	"ci"
@@ -128,6 +126,7 @@ switch ($env:TEST)
 	"it"
 	{
 		InstallAppveyorTools
+		BuildSnapshot "SonarSource/orchestrator"
 
 		mvn install "--batch-mode" "-Dsource.skip=true" "-Dmaven.test.skip=true"
 		CheckLastExitCode
