@@ -19,20 +19,17 @@
  */
 package com.sonar.runner.it;
 
-import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.rules.TemporaryFolder;
-import org.junit.Rule;
 import com.sonar.orchestrator.build.BuildFailureException;
-import com.sonar.orchestrator.locator.ResourceLocation;
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.SonarRunner;
-import org.junit.Test;
-
+import com.sonar.orchestrator.locator.ResourceLocation;
 import java.io.File;
 import java.io.IOException;
-
-import static org.junit.Assert.fail;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -67,30 +64,34 @@ public class CacheTest extends RunnerTestCase {
 
   @Test
   public void testIssuesMode() throws IOException {
-    Assume.assumeTrue(orchestrator.getServer().version().isGreaterThanOrEquals("5.2"));
+    Assume.assumeTrue(orchestrator.getServer().version().isGreaterThanOrEquals("5.3"));
 
-    // online, without cache -> should sync
+    // online, cache empty -> should sync
     ensureStarted();
     SonarRunner build = createRunner("issues", true, "java-sample");
     BuildResult result = orchestrator.executeBuild(build, false);
     assertThat(result.isSuccess()).isTrue();
 
-    // offline, with cache -> should run from cache
+    // offline, don't use cache by default -> should fail
     ensureStopped();
     build = createRunner("issues", false, "java-sample");
+    result = orchestrator.executeBuildQuietly(build, false);
+    assertThat(result.isSuccess()).isFalse();
+
+    // offline, don't use cache -> should run from cache
+    build = createRunner("issues", false, "java-sample");
+    build.setProperty("sonar.useWsCache", "true");
     result = orchestrator.executeBuild(build, false);
     assertThat(result.isSuccess()).isTrue();
 
-    // offline, without cache -> should fail
+    // offline, cache empty -> should fail
     build = createRunner("issues", true, "java-sample");
-    try {
-      result = orchestrator.executeBuild(build);
-      fail("exception expected");
-    } catch (BuildFailureException e) {
-      // this message is specific to the server_first cache strategy
-      assertThat(e.getResult().getLogs()).contains("can not be reached, trying cache");
-      assertThat(e.getResult().getLogs()).contains("can not be reached and data is not cached");
-    }
+    build.setProperty("sonar.useWsCache", "true");
+    result = orchestrator.executeBuildQuietly(build, false);
+    assertThat(result.isSuccess()).isFalse();
+    // this message is specific to the server_first cache strategy
+    assertThat(result.getLogs()).contains("can not be reached, trying cache");
+    assertThat(result.getLogs()).contains("can not be reached and data is not cached");
   }
 
   @Test
@@ -106,6 +107,7 @@ public class CacheTest extends RunnerTestCase {
     // offline, with cache -> should run from cache
     ensureStopped();
     build = createRunner("issues", false, "java-sample-non-associated");
+    build.setProperty("sonar.useWsCache", "true");
     result = orchestrator.executeBuild(build, false);
     assertThat(result.isSuccess()).isTrue();
   }
