@@ -17,7 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.cli;
+package org.sonarsource.scanner.cli;
 
 import com.jayway.awaitility.Duration;
 import java.util.concurrent.Callable;
@@ -26,6 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.sonarsource.scanner.cli.Exit;
+import org.sonarsource.scanner.cli.Shutdown;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.fest.assertions.Assertions.assertThat;

@@ -17,7 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.cli;
+package org.sonarsource.scanner.cli;
 
 import java.io.File;
 import java.util.Properties;
@@ -47,7 +47,7 @@ public class ConfTest {
 
   @Test
   public void should_load_global_settings_by_home() throws Exception {
-    File home = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadRunnerSettingsByHome/").toURI());
+    File home = new File(getClass().getResource("ConfTest/shouldLoadRunnerSettingsByHome/").toURI());
     args.setProperty("runner.home", home.getCanonicalPath());
 
     assertThat(conf.properties().get("sonar.prop")).isEqualTo("value");
@@ -60,7 +60,7 @@ public class ConfTest {
 
   @Test
   public void should_load_conf_by_direct_path() throws Exception {
-    File settings = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
+    File settings = new File(getClass().getResource("ConfTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
     args.setProperty("runner.settings", settings.getCanonicalPath());
 
     assertThat(conf.properties().get("sonar.prop")).isEqualTo("otherValue");
@@ -68,8 +68,8 @@ public class ConfTest {
 
   @Test
   public void shouldLoadCompleteConfiguration() throws Exception {
-    File runnerHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadCompleteConfiguration/runner").toURI());
-    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadCompleteConfiguration/project").toURI());
+    File runnerHome = new File(getClass().getResource("ConfTest/shouldLoadCompleteConfiguration/runner").toURI());
+    File projectHome = new File(getClass().getResource("ConfTest/shouldLoadCompleteConfiguration/project").toURI());
     args.setProperty("runner.home", runnerHome.getCanonicalPath());
     args.setProperty("project.home", projectHome.getCanonicalPath());
 
@@ -82,7 +82,7 @@ public class ConfTest {
 
   @Test
   public void shouldLoadModuleConfiguration() throws Exception {
-    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadModuleConfiguration/project").toURI());
+    File projectHome = new File(getClass().getResource("ConfTest/shouldLoadModuleConfiguration/project").toURI());
     args.setProperty("project.home", projectHome.getCanonicalPath());
 
     Properties properties = conf.properties();
@@ -93,7 +93,7 @@ public class ConfTest {
 
   @Test
   public void shouldSupportDeepModuleConfigurationInRoot() throws Exception {
-    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldSupportDeepModuleConfigurationInRoot/project").toURI());
+    File projectHome = new File(getClass().getResource("ConfTest/shouldSupportDeepModuleConfigurationInRoot/project").toURI());
     args.setProperty("project.home", projectHome.getCanonicalPath());
 
     Properties properties = conf.properties();
@@ -110,7 +110,7 @@ public class ConfTest {
 
   @Test
   public void shouldLoadModuleConfigurationOverrideBasedir() throws Exception {
-    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());
+    File projectHome = new File(getClass().getResource("ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());
     args.setProperty("project.home", projectHome.getCanonicalPath());
 
     Properties properties = conf.properties();
@@ -122,7 +122,7 @@ public class ConfTest {
 
   @Test
   public void shouldSupportSettingBaseDirFromCli() throws Exception {
-    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/shouldLoadModuleConfiguration/project").toURI());
+    File projectHome = new File(getClass().getResource("ConfTest/shouldLoadModuleConfiguration/project").toURI());
     args.setProperty("project.home", temp.newFolder().getCanonicalPath());
     args.setProperty("sonar.projectBaseDir", projectHome.getCanonicalPath());
 
@@ -134,7 +134,7 @@ public class ConfTest {
 
   @Test
   public void ignoreEmptyModule() throws Exception {
-    File projectHome = new File(getClass().getResource("/org/sonar/runner/ConfTest/emptyModules/project").toURI());
+    File projectHome = new File(getClass().getResource("ConfTest/emptyModules/project").toURI());
     args.setProperty("project.home", temp.newFolder().getCanonicalPath());
     args.setProperty("sonar.projectBaseDir", projectHome.getCanonicalPath());
 

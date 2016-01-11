@@ -17,13 +17,13 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.cli;
+package org.sonarsource.scanner.cli;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
+import org.sonarsource.scanner.cli.Logs;
 import java.io.PrintStream;
 
 import static org.mockito.Mockito.verifyNoMoreInteractions;

@@ -17,7 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.cli;
+package org.sonarsource.scanner.cli;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,10 +26,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.sonar.runner.api.RunnerVersion;
+import org.sonarsource.scanner.cli.Logs;
+import org.sonarsource.scanner.cli.SystemInfo;
+import org.sonarsource.scanner.cli.SystemInfo.System2;
 import org.junit.Before;
-import org.sonar.runner.cli.SystemInfo.System2;
 import org.junit.Test;
-import org.sonar.runner.cli.SystemInfo;
+
 import static org.fest.assertions.Assertions.assertThat;
 
 public class SystemInfoTest {

@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
 @ParametersAreNonnullByDefault
-package org.sonar.runner.cli;
+package org.sonarsource.scanner.cli;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

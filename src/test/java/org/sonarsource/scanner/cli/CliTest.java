@@ -17,9 +17,12 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.cli;
+package org.sonarsource.scanner.cli;
 
 import org.junit.Test;
+import org.sonarsource.scanner.cli.Cli;
+import org.sonarsource.scanner.cli.Exit;
+import org.sonarsource.scanner.cli.Logs;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

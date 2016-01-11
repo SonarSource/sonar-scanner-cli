@@ -17,7 +17,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.runner.cli;
+package org.sonarsource.scanner.cli;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -32,6 +32,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.sonar.runner.api.EmbeddedRunner;
+import org.sonarsource.scanner.cli.Cli;
+import org.sonarsource.scanner.cli.Conf;
+import org.sonarsource.scanner.cli.Exit;
+import org.sonarsource.scanner.cli.Logs;
+import org.sonarsource.scanner.cli.Main;
+import org.sonarsource.scanner.cli.RunnerFactory;
+import org.sonarsource.scanner.cli.Shutdown;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
