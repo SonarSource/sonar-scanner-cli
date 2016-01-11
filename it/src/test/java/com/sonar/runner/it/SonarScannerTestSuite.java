@@ -19,12 +19,24 @@
  */
 package com.sonar.runner.it;
 
+import com.sonar.orchestrator.Orchestrator;
+import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({JavaTest.class, MultimoduleTest.class, CacheTest.class})
-public class SonarRunnerTestSuite {
+public class SonarScannerTestSuite {
+
+  @ClassRule
+  public static final Orchestrator ORCHESTRATOR = Orchestrator.builderEnv()
+    .setOrchestratorProperty("javaVersion", "LATEST_RELEASE")
+    .addPlugin("java")
+    .setOrchestratorProperty("findbugsVersion", "LATEST_RELEASE")
+    .addPlugin("findbugs")
+    .setOrchestratorProperty("javascriptVersion", "LATEST_RELEASE")
+    .addPlugin("javascript")
+    .build();
 
 }

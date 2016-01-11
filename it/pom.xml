@@ -31,7 +31,7 @@
     <dependency>
       <groupId>org.sonarsource.orchestrator</groupId>
       <artifactId>sonar-orchestrator</artifactId>
-      <version>3.8</version>
+      <version>3.9-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -66,7 +66,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <includes>
-              <include>**/SonarRunnerTestSuite.java</include>
+              <include>**/SonarScannerTestSuite.java</include>
             </includes>
           </configuration>
         </plugin>

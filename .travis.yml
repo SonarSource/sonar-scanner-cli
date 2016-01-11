@@ -9,10 +9,10 @@ script: ./travis.sh
 
 env:
   matrix:
-    - PR_ANALYSIS=true
-    - RUN_ITS=true SQ_VERSION=DEV
-    - RUN_ITS=true SQ_VERSION=5.1.2
-    - RUN_ITS=true SQ_VERSION=LTS
+    - TARGET=CI
+    - TARGET=IT SQ_VERSION=DEV
+    - TARGET=IT SQ_VERSION=5.1.2
+    - TARGET=IT SQ_VERSION=LTS
 
 cache:
   directories:

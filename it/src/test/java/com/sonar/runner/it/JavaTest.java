@@ -22,6 +22,10 @@ package com.sonar.runner.it;
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.SonarRunner;
 import com.sonar.orchestrator.locator.ResourceLocation;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -30,17 +34,18 @@ import org.sonar.wsclient.issue.IssueQuery;
 import org.sonar.wsclient.services.Resource;
 import org.sonar.wsclient.services.ResourceQuery;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
-public class JavaTest extends RunnerTestCase {
+public class JavaTest extends ScannerTestCase {
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
+
+  @After
+  public void cleanup() {
+    orchestrator.resetData();
+  }
 
   /**
    * No bytecode, only sources
@@ -51,7 +56,7 @@ public class JavaTest extends RunnerTestCase {
     orchestrator.getServer().provisionProject("java:sample", "Java Sample, with comma");
     orchestrator.getServer().associateProjectToQualityProfile("java:sample", "java", "sonar-way");
 
-    SonarRunner build = newRunner(new File("projects/java-sample"))
+    SonarRunner build = newScanner(new File("projects/java-sample"))
       .setProperty("sonar.verbose", "true")
       .addArguments("-e");
     // SONARPLUGINS-3061
@@ -97,7 +102,7 @@ public class JavaTest extends RunnerTestCase {
     orchestrator.getServer().provisionProject("java:bytecode", "Java Bytecode Sample");
     orchestrator.getServer().associateProjectToQualityProfile("java:bytecode", "java", "requires-bytecode");
 
-    SonarRunner build = newRunner(new File("projects/java-bytecode"));
+    SonarRunner build = newScanner(new File("projects/java-bytecode"));
     orchestrator.executeBuild(build);
 
     Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:bytecode").setMetrics("lcom4", "violations"));
@@ -129,7 +134,7 @@ public class JavaTest extends RunnerTestCase {
     orchestrator.getServer().provisionProject("java:basedir-with-source", "Basedir with source");
     orchestrator.getServer().associateProjectToQualityProfile("java:basedir-with-source", "java", "sonar-way");
 
-    SonarRunner build = newRunner(new File("projects/basedir-with-source"));
+    SonarRunner build = newScanner(new File("projects/basedir-with-source"));
     orchestrator.executeBuild(build);
 
     Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:basedir-with-source").setMetrics("files", "ncloc"));
@@ -146,7 +151,7 @@ public class JavaTest extends RunnerTestCase {
     orchestrator.getServer().provisionProject("SAMPLE", "Java Sample, with comma");
     orchestrator.getServer().associateProjectToQualityProfile("SAMPLE", "java", "sonar-way");
 
-    SonarRunner build = newRunner(new File("projects/java-sample"))
+    SonarRunner build = newScanner(new File("projects/java-sample"))
       .setProjectKey("SAMPLE");
     orchestrator.executeBuild(build);
 
@@ -160,7 +165,7 @@ public class JavaTest extends RunnerTestCase {
    */
   @Test
   public void should_override_working_dir_with_relative_path() {
-    SonarRunner build = newRunner(new File("projects/override-working-dir"))
+    SonarRunner build = newScanner(new File("projects/override-working-dir"))
       .setProperty("sonar.working.directory", ".overridden-relative-sonar");
     orchestrator.executeBuild(build);
 
@@ -174,7 +179,7 @@ public class JavaTest extends RunnerTestCase {
   @Test
   public void should_override_working_dir_with_absolute_path() {
     File projectHome = new File("projects/override-working-dir");
-    SonarRunner build = newRunner(projectHome)
+    SonarRunner build = newScanner(projectHome)
       .setProperty("sonar.working.directory", new File(projectHome, ".overridden-absolute-sonar").getAbsolutePath());
     orchestrator.executeBuild(build);
 
@@ -187,7 +192,7 @@ public class JavaTest extends RunnerTestCase {
    */
   @Test
   public void should_fail_if_source_dir_does_not_exist() {
-    SonarRunner build = newRunner(new File("projects/bad-source-dirs"));
+    SonarRunner build = newScanner(new File("projects/bad-source-dirs"));
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getStatus()).isNotEqualTo(0);
@@ -201,7 +206,7 @@ public class JavaTest extends RunnerTestCase {
   @Test
   public void should_log_message_when_deprecated_properties_are_used() {
     assumeTrue(!orchestrator.getServer().version().isGreaterThanOrEquals("4.3"));
-    SonarRunner build = newRunner(new File("projects/using-deprecated-props"));
+    SonarRunner build = newScanner(new File("projects/using-deprecated-props"));
 
     BuildResult result = orchestrator.executeBuild(build);
     String logs = result.getLogs();
@@ -216,7 +221,7 @@ public class JavaTest extends RunnerTestCase {
    */
   @Test
   public void should_warn_when_analysis_is_platform_dependent() {
-    SonarRunner build = newRunner(new File("projects/java-sample"))
+    SonarRunner build = newScanner(new File("projects/java-sample"))
       // ORCH-243
       .setSourceEncoding("");
     String log = orchestrator.executeBuild(build).getLogs();
@@ -230,21 +235,21 @@ public class JavaTest extends RunnerTestCase {
 
   @Test
   public void should_fail_if_unable_to_connect() {
-    SonarRunner build = newRunner(new File("projects/java-sample"))
+    SonarRunner build = newScanner(new File("projects/java-sample"))
       .setProperty("sonar.host.url", "http://foo");
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
     // expect build failure
     assertThat(result.getStatus()).isNotEqualTo(0);
     // with the following message
-    assertThat(result.getLogs()).contains("server 'http://foo' can not be reached");
+    assertThat(result.getLogs()).contains("SonarQube server [http://foo] can not be reached");
   }
 
   // SONARPLUGINS-3574
   @Test
   public void run_from_external_location() throws IOException {
     File tempDir = temp.newFolder();
-    SonarRunner build = newRunner(tempDir)
+    SonarRunner build = newScanner(tempDir)
       .setProperty("sonar.projectBaseDir", new File("projects/java-sample").getAbsolutePath())
       .addArguments("-e");
     orchestrator.executeBuild(build);

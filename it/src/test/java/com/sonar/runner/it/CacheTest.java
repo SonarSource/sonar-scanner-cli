@@ -25,6 +25,7 @@ import com.sonar.orchestrator.build.SonarRunner;
 import com.sonar.orchestrator.locator.ResourceLocation;
 import java.io.File;
 import java.io.IOException;
+import org.junit.AfterClass;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -33,7 +34,7 @@ import org.junit.rules.TemporaryFolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CacheTest extends RunnerTestCase {
+public class CacheTest extends ScannerTestCase {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
@@ -42,10 +43,16 @@ public class CacheTest extends RunnerTestCase {
 
   @BeforeClass
   public static void setUpClass() {
+    orchestrator.resetData();
     orchestrator.getServer().restoreProfile(ResourceLocation.create("/sonar-way-profile.xml"));
     orchestrator.getServer().provisionProject("java:sample", "Java Sample, with comma");
     orchestrator.getServer().associateProjectToQualityProfile("java:sample", "java", "sonar-way");
     serverRunning = true;
+  }
+
+  @AfterClass
+  public static void restartForOtherTests() {
+    ensureStarted();
   }
 
   private static void ensureStarted() {
@@ -142,7 +149,7 @@ public class CacheTest extends RunnerTestCase {
       currentTemp = temp.newFolder();
     }
 
-    SonarRunner runner = newRunner(new File("projects/" + project))
+    SonarRunner runner = newScanner(new File("projects/" + project))
       .setProperty("sonar.analysis.mode", mode)
       .setProperty("sonar.userHome", currentTemp.getAbsolutePath());
 

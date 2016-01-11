@@ -21,22 +21,27 @@ package com.sonar.runner.it;
 
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.SonarRunner;
+import java.io.File;
+import org.junit.After;
 import org.junit.Test;
 import org.sonar.wsclient.services.Resource;
 import org.sonar.wsclient.services.ResourceQuery;
 
-import java.io.File;
-
 import static org.fest.assertions.Assertions.assertThat;
 
-public class MultimoduleTest extends RunnerTestCase {
+public class MultimoduleTest extends ScannerTestCase {
+
+  @After
+  public void cleanup() {
+    orchestrator.resetData();
+  }
 
   /**
    * SONARPLUGINS-2202
    */
   @Test
   public void test_simplest_with_props_on_root() {
-    SonarRunner build = newRunner(new File("projects/multi-module/simplest/simplest-with-props-on-root"));
+    SonarRunner build = newScanner(new File("projects/multi-module/simplest/simplest-with-props-on-root"));
 
     orchestrator.executeBuild(build);
 
@@ -67,7 +72,7 @@ public class MultimoduleTest extends RunnerTestCase {
    */
   @Test
   public void test_multi_language_with_same_projectdir() {
-    SonarRunner build = newRunner(new File("projects/multi-module/multi-language"));
+    SonarRunner build = newScanner(new File("projects/multi-module/multi-language"));
 
     orchestrator.executeBuild(build);
 
@@ -90,7 +95,7 @@ public class MultimoduleTest extends RunnerTestCase {
    */
   @Test
   public void test_simplest_with_props_on_each_module() {
-    SonarRunner build = newRunner(new File("projects/multi-module/simplest/simplest-with-props-on-each-module"));
+    SonarRunner build = newScanner(new File("projects/multi-module/simplest/simplest-with-props-on-each-module"));
 
     orchestrator.executeBuild(build);
 
@@ -113,7 +118,7 @@ public class MultimoduleTest extends RunnerTestCase {
    */
   @Test
   public void test_warning_when_source_folder_on_root_module() {
-    SonarRunner build = newRunner(new File("projects/multi-module/simplest/simplest-with-props-on-each-module"));
+    SonarRunner build = newScanner(new File("projects/multi-module/simplest/simplest-with-props-on-each-module"));
 
     assertThat(orchestrator.executeBuild(build).getLogs()).contains("/!\\ A multi-module project can't have source folders");
   }
@@ -123,7 +128,7 @@ public class MultimoduleTest extends RunnerTestCase {
    */
   @Test
   public void test_deep_path_for_modules() {
-    SonarRunner build = newRunner(new File("projects/multi-module/customization/deep-path-for-modules"));
+    SonarRunner build = newScanner(new File("projects/multi-module/customization/deep-path-for-modules"));
 
     orchestrator.executeBuild(build);
 
@@ -146,7 +151,7 @@ public class MultimoduleTest extends RunnerTestCase {
    */
   @Test
   public void test_module_path_with_space() {
-    SonarRunner build = newRunner(new File("projects/multi-module/customization/module-path-with-space"));
+    SonarRunner build = newScanner(new File("projects/multi-module/customization/module-path-with-space"));
 
     orchestrator.executeBuild(build);
 
@@ -169,7 +174,7 @@ public class MultimoduleTest extends RunnerTestCase {
    */
   @Test
   public void test_overwriting_parent_properties() {
-    SonarRunner build = newRunner(new File("projects/multi-module/customization/overwriting-parent-properties"));
+    SonarRunner build = newScanner(new File("projects/multi-module/customization/overwriting-parent-properties"));
 
     orchestrator.executeBuild(build);
 
@@ -195,7 +200,7 @@ public class MultimoduleTest extends RunnerTestCase {
    */
   @Test
   public void test_using_config_file_property() {
-    SonarRunner build = newRunner(new File("projects/multi-module/advanced/using-config-file-prop"));
+    SonarRunner build = newScanner(new File("projects/multi-module/advanced/using-config-file-prop"));
 
     orchestrator.executeBuild(build);
 
@@ -218,7 +223,7 @@ public class MultimoduleTest extends RunnerTestCase {
    */
   @Test
   public void should_fail_if_unexisting_base_dir() {
-    SonarRunner build = newRunner(new File("projects/multi-module/failures/unexisting-base-dir"));
+    SonarRunner build = newScanner(new File("projects/multi-module/failures/unexisting-base-dir"));
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
     // expect build failure
@@ -233,7 +238,7 @@ public class MultimoduleTest extends RunnerTestCase {
    */
   @Test
   public void should_fail_if_unexisting_config_file() {
-    SonarRunner build = newRunner(new File("projects/multi-module/failures/unexisting-config-file"));
+    SonarRunner build = newScanner(new File("projects/multi-module/failures/unexisting-config-file"));
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
     // expect build failure
