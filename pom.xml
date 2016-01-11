@@ -47,7 +47,7 @@
     <dependency>
       <groupId>org.sonarsource.sonar-runner</groupId>
       <artifactId>sonar-runner-api</artifactId>
-      <version>2.5-RC1</version>
+      <version>2.5.1</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -104,7 +104,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-	<version>2.3</version>
+	    <version>2.3</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -114,6 +114,17 @@
             <configuration>
               <createDependencyReducedPom>true</createDependencyReducedPom>
               <minimizeJar>true</minimizeJar>
+              <filters>
+                <!-- Remove signatures from SQ Runner API -->
+                <filter>
+                  <artifact>org.sonarsource.sonar-runner:sonar-runner-api</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>
@@ -153,8 +164,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>160000</minsize>
-                  <maxsize>185000</maxsize>
+                  <minsize>510000</minsize>
+                  <maxsize>520000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonar-scanner-${project.version}.zip</file>
                   </files>
