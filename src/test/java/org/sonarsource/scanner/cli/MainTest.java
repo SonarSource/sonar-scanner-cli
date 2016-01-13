@@ -32,13 +32,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.sonar.runner.api.EmbeddedRunner;
-import org.sonarsource.scanner.cli.Cli;
-import org.sonarsource.scanner.cli.Conf;
-import org.sonarsource.scanner.cli.Exit;
-import org.sonarsource.scanner.cli.Logs;
-import org.sonarsource.scanner.cli.Main;
-import org.sonarsource.scanner.cli.RunnerFactory;
-import org.sonarsource.scanner.cli.Shutdown;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -117,7 +110,7 @@ public class MainTest {
 
     verify(runner).stop();
     verify(shutdown).exit(Exit.ERROR);
-    verify(logs).error("Error during Sonar runner execution", e);
+    verify(logs).error("Error during SonarQube Scanner execution", e);
   }
 
   @Test

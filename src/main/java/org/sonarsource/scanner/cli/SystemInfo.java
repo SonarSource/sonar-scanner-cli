@@ -19,8 +19,6 @@
  */
 package org.sonarsource.scanner.cli;
 
-import org.sonar.runner.api.RunnerVersion;
-
 class SystemInfo {
   private static System2 system = new System2();
 
@@ -32,7 +30,7 @@ class SystemInfo {
   }
 
   static void print(Logs logger) {
-    logger.info("SonarQube Runner " + RunnerVersion.version());
+    logger.info("SonarQube Scanner " + ScannerVersion.version());
     logger.info(java());
     logger.info(os());
     String runnerOpts = system.getenv("SONAR_RUNNER_OPTS");

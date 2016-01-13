@@ -19,20 +19,16 @@
  */
 package org.sonarsource.scanner.cli;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import org.sonar.runner.api.RunnerVersion;
-import org.sonarsource.scanner.cli.Logs;
-import org.sonarsource.scanner.cli.SystemInfo;
-import org.sonarsource.scanner.cli.SystemInfo.System2;
 import org.junit.Before;
 import org.junit.Test;
+import org.sonarsource.scanner.cli.SystemInfo.System2;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 public class SystemInfoTest {
   System2 mockSystem;
@@ -88,7 +84,8 @@ public class SystemInfoTest {
     verify(mockSystem).getProperty("os.version");
     verify(mockSystem).getenv("SONAR_RUNNER_OPTS");
 
-    verify(logs).info("SonarQube Runner " + RunnerVersion.version());
+    verify(logs, never()).info("SonarQube Scanner null");
+    verify(logs).info("SonarQube Scanner " + ScannerVersion.version());
     verify(logs).info("Java 1.9 oracle (64-bit)");
     verify(logs).info("linux 2.5 x64");
     verify(logs).info("SONAR_RUNNER_OPTS=arg");

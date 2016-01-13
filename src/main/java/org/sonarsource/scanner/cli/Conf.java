@@ -61,10 +61,10 @@ class Conf {
   private Properties loadGlobalProperties() throws IOException {
     File settingsFile = locatePropertiesFile(cli.properties(), RUNNER_HOME, "conf/sonar-runner.properties", RUNNER_SETTINGS);
     if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
-      logger.info("Runner configuration file: " + settingsFile.getAbsolutePath());
+      logger.info("Scanner configuration file: " + settingsFile.getAbsolutePath());
       return toProperties(settingsFile);
     }
-    logger.info("Runner configuration file: NONE");
+    logger.info("Scanner configuration file: NONE");
     return new Properties();
   }
 

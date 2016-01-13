@@ -81,7 +81,7 @@ public class Main {
       }
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
-      showError("Error during Sonar runner execution", e, cli.isDisplayStackTrace());
+      showError("Error during SonarQube Scanner execution", e, cli.isDisplayStackTrace());
       shutdown.exit(Exit.ERROR);
     }
 
@@ -96,7 +96,7 @@ public class Main {
         runAnalysis(stats, p);
       } catch (Exception e) {
         displayExecutionResult(stats, "FAILURE");
-        showError("Error during Sonar runner execution", e, cli.isDisplayStackTrace());
+        showError("Error during SonarQube Scanner execution", e, cli.isDisplayStackTrace());
       }
     } while (waitForUser());
   }
@@ -171,7 +171,7 @@ public class Main {
         }
       }
       logger.error("");
-      logger.error("To see the full stack trace of the errors, re-run SonarQube Runner with the -e switch.");
+      logger.error("To see the full stack trace of the errors, re-run SonarQube Scanner with the -e switch.");
       if (!cli.isDebugMode()) {
         suggestDebugMode();
       }
@@ -179,7 +179,7 @@ public class Main {
   }
 
   private void suggestDebugMode() {
-    logger.error("Re-run SonarQube Runner using the -X switch to enable full debug logging.");
+    logger.error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
   }
 
 }
