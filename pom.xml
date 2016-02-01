@@ -41,6 +41,9 @@
 
   <properties>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+
+    <!-- used for deployment to SonarSource Artifactory -->
+    <gitRepositoryName>sonar-scanner-cli</gitRepositoryName>
   </properties>
 
   <dependencies>
