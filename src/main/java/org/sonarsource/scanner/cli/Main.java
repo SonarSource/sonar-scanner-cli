@@ -74,6 +74,7 @@ public class Main {
       configureLogging(p);
       init(p);
       runner.start();
+      logger.info("SonarQube server " + runner.serverVersion());
 
       if (cli.isInteractive()) {
         interactiveLoop(p);
