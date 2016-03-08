@@ -39,7 +39,7 @@ public class Logs {
   public void setDisplayStackTrace(boolean displayStackTrace) {
     this.displayStackTrace = displayStackTrace;
   }
-
+  
   public boolean isDebugEnabled() {
     return debugEnabled;
   }

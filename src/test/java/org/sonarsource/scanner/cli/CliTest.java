@@ -37,7 +37,7 @@ public class CliTest {
   public void should_parse_empty_arguments() {
     cli.parse(new String[0]);
     assertThat(cli.properties()).isNotEmpty();
-    assertThat(cli.isDebugMode()).isFalse();
+    assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.isDisplayStackTrace()).isFalse();
     assertThat(cli.isDisplayVersionOnly()).isFalse();
   }
@@ -69,15 +69,14 @@ public class CliTest {
   @Test
   public void should_enable_debug_mode() {
     cli.parse(new String[] {"-X"});
-    assertThat(cli.isDebugMode()).isTrue();
-    assertThat(cli.isDisplayStackTrace()).isTrue();
+    assertThat(cli.isDebugEnabled()).isTrue();
     assertThat(cli.properties().get("sonar.verbose")).isEqualTo("true");
   }
 
   @Test
   public void should_enable_stacktrace_log() {
     cli.parse(new String[] {"-e"});
-    assertThat(cli.isDebugMode()).isFalse();
+    assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.isDisplayStackTrace()).isTrue();
     assertThat(cli.properties().get("sonar.verbose")).isNull();
   }
@@ -85,7 +84,7 @@ public class CliTest {
   @Test
   public void should_disable_debug_mode_and_stacktrace_log_by_default() {
     cli.parse(new String[0]);
-    assertThat(cli.isDebugMode()).isFalse();
+    assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.isDisplayStackTrace()).isFalse();
     assertThat(cli.properties().get("sonar.verbose")).isNull();
   }

@@ -9,13 +9,27 @@ function configureTravis {
 }
 configureTravis
 
-regular_mvn_build_deploy_analyze
 
+case "$TARGET" in
 
-MIN_SQ_VERSION="LTS"
-echo '======= Run integration tests on minimal supported version of SonarQube ($MIN_SQ_VERSION)'
-cd it
-mvn -Dsonar.runtimeVersion="$MIN_SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify -e -B -V
+CI)
+  regular_mvn_build_deploy_analyze
+  ;;
 
+IT)
+  MIN_SQ_VERSION="LTS"
+  mvn install -DskipTests=true -Dsource.skip=true -Denforcer.skip=true -B -e -V
 
-# all other versions of SQ are tested by the QA pipeline at SonarSource
+  echo '======= Run integration tests on minimal supported version of SonarQube ($MIN_SQ_VERSION)'
+  cd it
+  mvn -Dsonar.runtimeVersion="$MIN_SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify -e -B -V
+  # all other versions of SQ are tested by the QA pipeline at SonarSource
+  ;;
+
+*)
+  echo "Unexpected TARGET value: $TARGET"
+  exit 1
+  ;;
+
+esac
+

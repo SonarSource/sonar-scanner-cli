@@ -233,6 +233,19 @@ public class JavaTest extends ScannerTestCase {
     assertThat(log).contains("(analysis is platform dependent)");
   }
 
+  /**
+   * SONARUNNER-153
+   */
+  @Test
+  public void should_enable_verbose() {
+    // this line should appear in all versions (LTS-DEV) in debug only
+    String expectedLog = "Available languages:";
+    SonarRunner build = newScanner(new File("projects/java-sample"))
+      .setProperty("sonar.verbose", "true");
+    String logs = orchestrator.executeBuild(build).getLogs();
+    assertThat(logs).contains(expectedLog);
+  }
+
   @Test
   public void should_fail_if_unable_to_connect() {
     SonarRunner build = newScanner(new File("projects/java-sample"))
