@@ -151,6 +151,18 @@ public class MainTest {
   }
 
   @Test
+  public void shouldLogServerVersion() throws IOException {
+    when(runner.serverVersion()).thenReturn("5.5");
+    Properties p = new Properties();
+    when(cli.isDisplayVersionOnly()).thenReturn(true);
+    when(conf.properties()).thenReturn(p);
+
+    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
+    main.execute();
+    verify(logs).info("SonarQube server 5.5");
+  }
+
+  @Test
   public void should_configure_logging() throws IOException {
     Properties p = new Properties();
     p.put("sonar.verbose", "true");
