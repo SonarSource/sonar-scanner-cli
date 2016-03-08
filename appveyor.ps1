@@ -92,13 +92,11 @@ function Build
 
 function BuildSnapshot
 {
-	param ([string]$Project)
+        param ([string]$Project)
 
-	echo "Fetch and build latest green snapshot of [$Project]"
+        echo "Fetch and build snapshot of [$Project]"
 
-	$lastGreenSha1 = (new-object Net.WebClient).DownloadString("http://sonarsource-979.appspot.com/$Project/latestGreen")
-
-	Build $Project $lastGreenSha1
+        Build $Project "HEAD"
 }
 
 function CheckLastExitCode
