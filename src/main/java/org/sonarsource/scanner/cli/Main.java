@@ -68,9 +68,10 @@ public class Main {
 
   void execute() {
     Stats stats = new Stats(logger).start();
-
+    
     try {
       Properties p = conf.properties();
+      configureLogging(p);
       init(p);
       runner.start();
 
@@ -81,7 +82,7 @@ public class Main {
       }
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
-      showError("Error during SonarQube Scanner execution", e, cli.isDisplayStackTrace());
+      showError("Error during SonarQube Scanner execution", e, cli.isDisplayStackTrace() || cli.isDebugEnabled());
       shutdown.exit(Exit.ERROR);
     }
 
@@ -96,7 +97,7 @@ public class Main {
         runAnalysis(stats, p);
       } catch (Exception e) {
         displayExecutionResult(stats, "FAILURE");
-        showError("Error during SonarQube Scanner execution", e, cli.isDisplayStackTrace());
+        showError("Error during SonarQube Scanner execution", e, cli.isDisplayStackTrace() || cli.isDebugEnabled());
       }
     } while (waitForUser());
   }
@@ -112,6 +113,19 @@ public class Main {
     }
 
     runner = runnerFactory.create(p);
+  }
+
+  private void configureLogging(Properties props) throws IOException {
+    if("true".equals(props.getProperty("sonar.verbose"))
+      || "DEBUG".equalsIgnoreCase(props.getProperty("sonar.log.level")) 
+      || "TRACE".equalsIgnoreCase(props.getProperty("sonar.log.level")) ) {
+      logger.setDebugEnabled(true);
+      logger.setDisplayStackTrace(true);
+    }
+    
+    if(cli.isDisplayStackTrace()) {
+      logger.setDisplayStackTrace(true);
+    }
   }
 
   private void runAnalysis(Stats stats, Properties p) {
@@ -154,7 +168,7 @@ public class Main {
   private void showError(String message, Throwable e, boolean showStackTrace) {
     if (showStackTrace) {
       logger.error(message, e);
-      if (!cli.isDebugMode()) {
+      if (!cli.isDebugEnabled()) {
         logger.error("");
         suggestDebugMode();
       }
@@ -172,7 +186,7 @@ public class Main {
       }
       logger.error("");
       logger.error("To see the full stack trace of the errors, re-run SonarQube Scanner with the -e switch.");
-      if (!cli.isDebugMode()) {
+      if (!cli.isDebugEnabled()) {
         suggestDebugMode();
       }
     }

@@ -24,7 +24,7 @@ import org.sonar.runner.api.RunnerProperties;
 
 class Cli {
 
-  private boolean debugMode = false;
+  private boolean debugEnabled = false;
   private boolean displayVersionOnly = false;
   private boolean displayStackTrace = false;
   private boolean interactive = false;
@@ -37,8 +37,8 @@ class Cli {
     this.logger = logger;
   }
 
-  boolean isDebugMode() {
-    return debugMode;
+  boolean isDebugEnabled() {
+    return debugEnabled;
   }
 
   boolean isDisplayVersionOnly() {
@@ -77,8 +77,7 @@ class Cli {
 
       } else if ("-X".equals(arg) || "--debug".equals(arg)) {
         props.setProperty("sonar.verbose", "true");
-        displayStackTrace = true;
-        debugMode = true;
+        debugEnabled = true;
         logger.setDebugEnabled(true);
         logger.setDisplayStackTrace(true);
 
@@ -113,7 +112,7 @@ class Cli {
 
   private void reset() {
     props.clear();
-    debugMode = false;
+    debugEnabled = false;
     displayStackTrace = false;
     displayVersionOnly = false;
   }

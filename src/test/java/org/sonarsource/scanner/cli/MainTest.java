@@ -27,12 +27,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.sonar.runner.api.EmbeddedRunner;
 
+import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -62,7 +64,6 @@ public class MainTest {
     MockitoAnnotations.initMocks(this);
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
     when(conf.properties()).thenReturn(properties);
-
   }
 
   @Test
@@ -149,6 +150,46 @@ public class MainTest {
     inOrder.verify(shutdown, times(1)).exit(Exit.SUCCESS);
   }
 
+  @Test
+  public void should_configure_logging() throws IOException {
+    Properties p = new Properties();
+    p.put("sonar.verbose", "true");
+    when(conf.properties()).thenReturn(p);
+
+    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
+    main.execute();
+
+    // Logger used for callback should have debug enabled
+    verify(logs).setDebugEnabled(true);
+    verify(logs).setDisplayStackTrace(true);
+
+    ArgumentCaptor<Properties> propertiesCapture = ArgumentCaptor.forClass(Properties.class);
+    verify(runner).runAnalysis(propertiesCapture.capture());
+
+    Properties analysisProps = propertiesCapture.getValue();
+    assertThat(analysisProps.getProperty("sonar.verbose")).isEqualTo("true");
+  }
+
+  @Test
+  public void should_configure_logging_trace() throws IOException {
+    Properties p = new Properties();
+    p.put("sonar.log.level", "TRACE");
+    when(conf.properties()).thenReturn(p);
+
+    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
+    main.execute();
+
+    // Logger used for callback should have debug enabled
+    verify(logs).setDebugEnabled(true);
+    verify(logs).setDisplayStackTrace(true);
+
+    ArgumentCaptor<Properties> propertiesCapture = ArgumentCaptor.forClass(Properties.class);
+    verify(runner).runAnalysis(propertiesCapture.capture());
+
+    Properties analysisProps = propertiesCapture.getValue();
+    assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("TRACE");
+  }
+
   @Test(timeout = 30000)
   public void test_interactive_mode() throws IOException {
     String inputStr = "qwe" + System.lineSeparator() + "qwe" + System.lineSeparator();
@@ -157,7 +198,7 @@ public class MainTest {
     input.close();
 
     when(cli.isInteractive()).thenReturn(true);
-    when(cli.isDebugMode()).thenReturn(true);
+    when(cli.isDebugEnabled()).thenReturn(true);
     when(cli.isDisplayStackTrace()).thenReturn(true);
 
     Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
