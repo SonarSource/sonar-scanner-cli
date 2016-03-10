@@ -62,7 +62,7 @@ class Cli {
     props.putAll(System.getProperties());
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
-      if (i == 0 && !arg.startsWith("-")) {
+      if (i == 0 && arg.charAt(0) != '-') {
         props.setProperty(RunnerProperties.TASK, arg);
 
       } else if ("-h".equals(arg) || "--help".equals(arg)) {
@@ -118,7 +118,8 @@ class Cli {
   }
 
   private static void appendPropertyTo(String arg, Properties props) {
-    final String key, value;
+    final String key;
+    final String value;
     int j = arg.indexOf('=');
     if (j == -1) {
       key = arg;

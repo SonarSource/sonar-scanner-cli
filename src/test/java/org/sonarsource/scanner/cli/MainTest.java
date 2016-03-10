@@ -38,6 +38,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -98,9 +99,32 @@ public class MainTest {
 
   @Test
   public void show_error_stacktrace() {
+    Exception e = show_error(false, true);
+    verify(logs).error("Error during SonarQube Scanner execution", e);
+    verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
+  }
+
+  @Test
+  public void show_error_debug() {
+    Exception e = show_error(true, false);
+
+    verify(logs).error("Error during SonarQube Scanner execution", e);
+    verify(logs, never()).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
+  }
+
+  @Test
+  public void show_error_debug_stack() {
+    Exception e = show_error(true, true);
+
+    verify(logs).error("Error during SonarQube Scanner execution", e);
+    verify(logs, never()).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
+  }
+
+  private Exception show_error(boolean debugEnabled, boolean stackTraceEnabled) {
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
-    when(cli.isDisplayStackTrace()).thenReturn(true);
+    when(cli.isDebugEnabled()).thenReturn(debugEnabled);
+    when(cli.isDisplayStackTrace()).thenReturn(stackTraceEnabled);
 
     EmbeddedRunner runner = mock(EmbeddedRunner.class);
     doThrow(e).when(runner).runAnalysis(any(Properties.class));
@@ -111,7 +135,7 @@ public class MainTest {
 
     verify(runner).stop();
     verify(shutdown).exit(Exit.ERROR);
-    verify(logs).error("Error during SonarQube Scanner execution", e);
+    return e;
   }
 
   @Test
@@ -164,28 +188,25 @@ public class MainTest {
 
   @Test
   public void should_configure_logging() throws IOException {
-    Properties p = new Properties();
-    p.put("sonar.verbose", "true");
-    when(conf.properties()).thenReturn(p);
-
-    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
-    main.execute();
-
-    // Logger used for callback should have debug enabled
-    verify(logs).setDebugEnabled(true);
-    verify(logs).setDisplayStackTrace(true);
-
-    ArgumentCaptor<Properties> propertiesCapture = ArgumentCaptor.forClass(Properties.class);
-    verify(runner).runAnalysis(propertiesCapture.capture());
-
-    Properties analysisProps = propertiesCapture.getValue();
+    Properties analysisProps = testLogging("sonar.verbose", "true");
     assertThat(analysisProps.getProperty("sonar.verbose")).isEqualTo("true");
   }
 
   @Test
   public void should_configure_logging_trace() throws IOException {
+    Properties analysisProps = testLogging("sonar.log.level", "TRACE");
+    assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("TRACE");
+  }
+
+  @Test
+  public void should_configure_logging_debug() throws IOException {
+    Properties analysisProps = testLogging("sonar.log.level", "DEBUG");
+    assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("DEBUG");
+  }
+
+  private Properties testLogging(String propKey, String propValue) throws IOException {
     Properties p = new Properties();
-    p.put("sonar.log.level", "TRACE");
+    p.put(propKey, propValue);
     when(conf.properties()).thenReturn(p);
 
     Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
@@ -198,8 +219,7 @@ public class MainTest {
     ArgumentCaptor<Properties> propertiesCapture = ArgumentCaptor.forClass(Properties.class);
     verify(runner).runAnalysis(propertiesCapture.capture());
 
-    Properties analysisProps = propertiesCapture.getValue();
-    assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("TRACE");
+    return propertiesCapture.getValue();
   }
 
   @Test(timeout = 30000)
