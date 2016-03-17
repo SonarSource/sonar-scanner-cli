@@ -19,15 +19,16 @@
  */
 package org.sonarsource.scanner.cli;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 class Conf {
@@ -54,14 +55,16 @@ class Conf {
     result.putAll(loadProjectProperties());
     result.putAll(System.getProperties());
     result.putAll(cli.properties());
+    // root project base directory must be present and be absolute
+    result.setProperty(PROPERTY_PROJECT_BASEDIR, getRootProjectBaseDir(result).toString());
     result.remove(PROJECT_HOME);
     return result;
   }
 
   private Properties loadGlobalProperties() throws IOException {
-    File settingsFile = locatePropertiesFile(cli.properties(), RUNNER_HOME, "conf/sonar-runner.properties", RUNNER_SETTINGS);
-    if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
-      logger.info("Scanner configuration file: " + settingsFile.getAbsolutePath());
+    Path settingsFile = locatePropertiesFile(cli.properties(), RUNNER_HOME, "conf/sonar-runner.properties", RUNNER_SETTINGS);
+    if (settingsFile != null && Files.isRegularFile(settingsFile)) {
+      logger.info("Scanner configuration file: " + settingsFile);
       return toProperties(settingsFile);
     }
     logger.info("Scanner configuration file: NONE");
@@ -69,38 +72,57 @@ class Conf {
   }
 
   private Properties loadProjectProperties() throws IOException {
-    Properties cliProps = cli.properties();
-    File rootSettingsFile = locatePropertiesFile(cliProps, cliProps.containsKey(PROPERTY_PROJECT_BASEDIR) ? PROPERTY_PROJECT_BASEDIR : PROJECT_HOME,
-      SONAR_PROJECT_PROPERTIES_FILENAME,
-      PROJECT_SETTINGS);
-    if (rootSettingsFile != null && rootSettingsFile.isFile() && rootSettingsFile.exists()) {
-      logger.info("Project configuration file: " + rootSettingsFile.getAbsolutePath());
-      Properties projectProps = new Properties();
-      Properties rootProps = toProperties(rootSettingsFile);
-      projectProps.putAll(rootProps);
-      initRootProjectBaseDir(cliProps, rootProps);
-      loadModulesProperties(rootProps, projectProps, "");
-      return projectProps;
+    Properties rootProps = new Properties();
+    Properties knownProps = new Properties();
+    
+    knownProps.putAll(System.getProperties());
+    knownProps.putAll(cli.properties());
+
+    Path defaultRootSettingsFile = getRootProjectBaseDir(knownProps).resolve(SONAR_PROJECT_PROPERTIES_FILENAME);
+    Path rootSettingsFile = locatePropertiesFile(defaultRootSettingsFile, knownProps, PROJECT_SETTINGS);
+    if (rootSettingsFile != null && Files.isRegularFile(rootSettingsFile)) {
+      logger.info("Project root configuration file: " + rootSettingsFile);
+      rootProps.putAll(toProperties(rootSettingsFile));
+    } else {
+      logger.info("Project root configuration file: NONE");
     }
-    logger.info("Project configuration file: NONE");
-    return new Properties();
+
+    Properties projectProps = new Properties();
+
+    // include already root base directory and eventually props loaded from root config file
+    projectProps.putAll(rootProps);
+
+    rootProps.putAll(knownProps);
+    rootProps.setProperty(PROPERTY_PROJECT_BASEDIR, getRootProjectBaseDir(rootProps).toString());
+
+    // projectProps will be overridden by any properties found in child project settings
+    loadModulesProperties(rootProps, projectProps, "");
+    return projectProps;
   }
 
-  private static void initRootProjectBaseDir(Properties cliProps, Properties rootProps) {
-    if (!cliProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-      String baseDir = cliProps.getProperty(PROJECT_HOME);
-      rootProps.put(PROPERTY_PROJECT_BASEDIR, baseDir);
+  private static Path getRootProjectBaseDir(Properties cliProps) {
+    Path absoluteProjectHome;
+    if (cliProps.containsKey(PROJECT_HOME)) {
+      absoluteProjectHome = Paths.get(cliProps.getProperty(PROJECT_HOME)).toAbsolutePath();
     } else {
-      rootProps.put(PROPERTY_PROJECT_BASEDIR, cliProps.getProperty(PROPERTY_PROJECT_BASEDIR));
+      // this should always be avoided, as it will resolve symbolic links
+      absoluteProjectHome = Paths.get("").toAbsolutePath();
     }
+
+    if (!cliProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
+      return absoluteProjectHome;
+    }
+
+    return getAbsolutePath(cliProps.getProperty(PROPERTY_PROJECT_BASEDIR), absoluteProjectHome);
   }
 
   private void loadModulesProperties(Properties parentProps, Properties projectProps, String prefix) {
-    File parentBaseDir = new File(parentProps.getProperty(PROPERTY_PROJECT_BASEDIR));
+    Path parentBaseDir = Paths.get(parentProps.getProperty(PROPERTY_PROJECT_BASEDIR));
     if (parentProps.containsKey(PROPERTY_MODULES)) {
       for (String module : getListFromProperty(parentProps, PROPERTY_MODULES)) {
         Properties moduleProps = extractModuleProperties(module, parentProps);
-        moduleProps = loadChildConfigFile(parentBaseDir, moduleProps, module);
+        //higher priority to child configuration files
+        loadModuleConfigFile(parentBaseDir, moduleProps, module);
 
         // the child project may have children as well
         loadModulesProperties(moduleProps, projectProps, prefix + module + ".");
@@ -117,36 +139,34 @@ class Conf {
     }
   }
 
-  private Properties loadChildConfigFile(File parentBaseDir, Properties moduleProps, String moduleId) {
-    final File baseDir;
+  private void loadModuleConfigFile(Path parentAbsBaseDir, Properties moduleProps, String moduleId) {
+    final Path absoluteBaseDir;
+
     if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-      baseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), parentBaseDir);
-      setProjectBaseDir(baseDir, moduleProps, moduleId);
+      absoluteBaseDir = getAbsolutePath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), parentAbsBaseDir);
+      setModuleBaseDir(absoluteBaseDir, moduleProps, moduleId);
       try {
-        if (!parentBaseDir.getCanonicalFile().equals(baseDir.getCanonicalFile())) {
-          tryToFindAndLoadPropsFile(baseDir, moduleProps, moduleId);
+        if (!Files.isSameFile(parentAbsBaseDir, absoluteBaseDir)) {
+          tryToFindAndLoadPropsFile(absoluteBaseDir, moduleProps, moduleId);
         }
       } catch (IOException e) {
         throw new IllegalStateException("Error when resolving baseDir", e);
       }
     } else if (moduleProps.containsKey(PROPERTY_PROJECT_CONFIG_FILE)) {
-      baseDir = loadPropsFile(parentBaseDir, moduleProps, moduleId);
-      setProjectBaseDir(baseDir, moduleProps, moduleId);
+      loadModulePropsFile(parentAbsBaseDir, moduleProps, moduleId);
       moduleProps.remove(PROPERTY_PROJECT_CONFIG_FILE);
     } else {
-      baseDir = new File(parentBaseDir, moduleId);
-      setProjectBaseDir(baseDir, moduleProps, moduleId);
-      tryToFindAndLoadPropsFile(baseDir, moduleProps, moduleId);
+      absoluteBaseDir = parentAbsBaseDir.resolve(moduleId);
+      setModuleBaseDir(absoluteBaseDir, moduleProps, moduleId);
+      tryToFindAndLoadPropsFile(absoluteBaseDir, moduleProps, moduleId);
     }
-
-    return moduleProps;
   }
 
-  private static void setProjectBaseDir(File baseDir, Properties childProps, String moduleId) {
-    if (!baseDir.isDirectory()) {
-      throw new IllegalStateException(MessageFormat.format("The base directory of the module ''{0}'' does not exist: {1}", moduleId, baseDir.getAbsolutePath()));
+  private static void setModuleBaseDir(Path absoluteBaseDir, Properties childProps, String moduleId) {
+    if (!Files.isDirectory(absoluteBaseDir)) {
+      throw new IllegalStateException(MessageFormat.format("The base directory of the module ''{0}'' does not exist: {1}", moduleId, absoluteBaseDir));
     }
-    childProps.put(PROPERTY_PROJECT_BASEDIR, baseDir.getAbsolutePath());
+    childProps.put(PROPERTY_PROJECT_BASEDIR, absoluteBaseDir.toString());
   }
 
   protected static Properties extractModuleProperties(String module, Properties properties) {
@@ -162,94 +182,83 @@ class Conf {
     return moduleProps;
   }
 
-  private static File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
-    File settingsFile = null;
+  private static Path locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
+    Path settingsFile = null;
     String runnerHome = props.getProperty(homeKey, "");
     if (!"".equals(runnerHome)) {
-      settingsFile = new File(runnerHome, relativePathFromHome);
+      settingsFile = Paths.get(runnerHome, relativePathFromHome);
     }
 
-    if (settingsFile == null || !settingsFile.exists()) {
-      String settingsPath = props.getProperty(settingsKey, "");
-      if (!"".equals(settingsPath)) {
-        settingsFile = new File(settingsPath);
-      }
-    }
-    return settingsFile;
+    return locatePropertiesFile(settingsFile, props, settingsKey);
   }
 
-  private static Properties toProperties(File file) {
-    InputStream in = null;
-    try {
-      Properties properties = new Properties();
-      in = new FileInputStream(file);
+  private static Path locatePropertiesFile(Path defaultPath, Properties props, String settingsKey) {
+    Path settingsFile = defaultPath;
+    if (settingsFile == null || !Files.exists(settingsFile)) {
+      String settingsPath = props.getProperty(settingsKey, "");
+      if (!"".equals(settingsPath)) {
+        settingsFile = Paths.get(settingsPath);
+      }
+    }
+
+    if (settingsFile != null) {
+      return settingsFile.toAbsolutePath();
+    }
+    return null;
+  }
+
+  private static Properties toProperties(Path file) {
+    Properties properties = new Properties();
+    try (InputStream in = new FileInputStream(file.toFile())) {
       properties.load(in);
       // Trim properties
       for (String propKey : properties.stringPropertyNames()) {
         properties.setProperty(propKey, properties.getProperty(propKey).trim());
       }
       return properties;
-
     } catch (Exception e) {
-      throw new IllegalStateException("Fail to load file: " + file.getAbsolutePath(), e);
-
-    } finally {
-      if (in != null) {
-        try {
-          in.close();
-        } catch (IOException e) {
-          // Ignore errors
-        }
-      }
+      throw new IllegalStateException("Fail to load file: " + file, e);
     }
   }
 
-  /**
-   * @return baseDir
-   */
-  protected File loadPropsFile(File parentBaseDir, Properties moduleProps, String moduleId) {
-    File propertyFile = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_CONFIG_FILE), parentBaseDir);
-    if (propertyFile.isFile()) {
-      Properties propsFromFile = toProperties(propertyFile);
-      for (Entry<Object, Object> entry : propsFromFile.entrySet()) {
-        moduleProps.put(entry.getKey(), entry.getValue());
-      }
-      File baseDir = null;
+  protected void loadModulePropsFile(Path parentAbsoluteBaseDir, Properties moduleProps, String moduleId) {
+    Path propertyFile = getAbsolutePath(moduleProps.getProperty(PROPERTY_PROJECT_CONFIG_FILE), parentAbsoluteBaseDir);
+    if (Files.isRegularFile(propertyFile)) {
+      moduleProps.putAll(toProperties(propertyFile));
+      Path absoluteBaseDir;
       if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-        baseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParentFile());
+        absoluteBaseDir = getAbsolutePath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParent());
       } else {
-        baseDir = propertyFile.getParentFile();
+        absoluteBaseDir = propertyFile.getParent();
       }
-      setProjectBaseDir(baseDir, moduleProps, moduleId);
-      return baseDir;
+      setModuleBaseDir(absoluteBaseDir, moduleProps, moduleId);
     } else {
-      throw new IllegalStateException("The properties file of the module '" + moduleId + "' does not exist: " + propertyFile.getAbsolutePath());
+      throw new IllegalStateException("The properties file of the module '" + moduleId + "' does not exist: " + propertyFile);
     }
   }
 
-  private static void tryToFindAndLoadPropsFile(File baseDir, Properties moduleProps, String moduleId) {
-    File propertyFile = new File(baseDir, SONAR_PROJECT_PROPERTIES_FILENAME);
-    if (propertyFile.isFile()) {
-      Properties propsFromFile = toProperties(propertyFile);
-      for (Entry<Object, Object> entry : propsFromFile.entrySet()) {
-        moduleProps.put(entry.getKey(), entry.getValue());
-      }
-      if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-        File overwrittenBaseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParentFile());
-        setProjectBaseDir(overwrittenBaseDir, moduleProps, moduleId);
-      }
+  private static void tryToFindAndLoadPropsFile(Path absoluteBaseDir, Properties moduleProps, String moduleId) {
+    Path propertyFile = absoluteBaseDir.resolve(SONAR_PROJECT_PROPERTIES_FILENAME);
+    if (!Files.isRegularFile(propertyFile)) {
+      return;
+    }
+
+    moduleProps.putAll(toProperties(propertyFile));
+    if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
+      Path overwrittenBaseDir = getAbsolutePath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParent());
+      setModuleBaseDir(overwrittenBaseDir, moduleProps, moduleId);
     }
   }
 
   /**
    * Returns the file denoted by the given path, may this path be relative to "baseDir" or absolute.
    */
-  protected static File getFileFromPath(String path, File baseDir) {
-    File propertyFile = new File(path.trim());
+  protected static Path getAbsolutePath(String path, Path baseDir) {
+    Path propertyFile = Paths.get(path.trim());
     if (!propertyFile.isAbsolute()) {
-      propertyFile = new File(baseDir, propertyFile.getPath());
+      propertyFile = baseDir.resolve(propertyFile);
     }
-    return propertyFile;
+    return propertyFile.normalize();
   }
 
   /**
