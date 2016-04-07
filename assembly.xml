@@ -7,16 +7,6 @@
     <format>zip</format>
   </formats>
   <includeBaseDirectory>true</includeBaseDirectory>
-  <dependencySets>
-    <dependencySet>
-      <outputDirectory>lib</outputDirectory>
-      <useTransitiveFiltering>true</useTransitiveFiltering>
-      <useProjectArtifact>true</useProjectArtifact>
-      <excludes>
-        <exclude>org.sonarsource.sonar-runner:sonar-runner-api</exclude>
-      </excludes>
-    </dependencySet>
-  </dependencySets>
   <fileSets>
     <fileSet>
       <directory>src/main/assembly/bin</directory>
@@ -42,6 +32,13 @@
       <outputDirectory>conf</outputDirectory>
       <fileMode>0644</fileMode>
       <lineEnding>dos</lineEnding>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}</directory>
+      <outputDirectory>lib</outputDirectory>
+      <includes>
+        <include>${project.build.finalName}.jar</include>
+      </includes>
     </fileSet>
   </fileSets>
 </assembly>

@@ -20,19 +20,19 @@
 package org.sonarsource.scanner.cli;
 
 import java.util.Properties;
-import org.sonar.runner.api.EmbeddedRunner;
-import org.sonar.runner.api.LogOutput;
+import org.sonarsource.scanner.api.EmbeddedScanner;
+import org.sonarsource.scanner.api.LogOutput;
 
-class RunnerFactory {
+class ScannerFactory {
 
   private final Logs logger;
 
-  public RunnerFactory(Logs logger) {
+  public ScannerFactory(Logs logger) {
     this.logger = logger;
   }
 
-  EmbeddedRunner create(Properties props) {
-    return EmbeddedRunner.create(new DefaultLogOutput()).addGlobalProperties(props);
+  EmbeddedScanner create(Properties props) {
+    return EmbeddedScanner.create(new DefaultLogOutput()).addGlobalProperties(props);
   }
 
   class DefaultLogOutput implements LogOutput {

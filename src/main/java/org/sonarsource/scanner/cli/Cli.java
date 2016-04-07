@@ -20,7 +20,7 @@
 package org.sonarsource.scanner.cli;
 
 import java.util.Properties;
-import org.sonar.runner.api.RunnerProperties;
+import org.sonarsource.scanner.api.ScannerProperties;
 
 class Cli {
 
@@ -63,7 +63,7 @@ class Cli {
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
       if (i == 0 && arg.charAt(0) != '-') {
-        props.setProperty(RunnerProperties.TASK, arg);
+        props.setProperty(ScannerProperties.TASK, arg);
 
       } else if ("-h".equals(arg) || "--help".equals(arg)) {
         printUsage();

@@ -32,7 +32,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.sonar.runner.api.EmbeddedRunner;
+import org.sonarsource.scanner.api.EmbeddedScanner;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -54,9 +54,9 @@ public class MainTest {
   @Mock
   private Properties properties;
   @Mock
-  private RunnerFactory runnerFactory;
+  private ScannerFactory runnerFactory;
   @Mock
-  private EmbeddedRunner runner;
+  private EmbeddedScanner runner;
   @Mock
   private Logs logs;
 
@@ -82,7 +82,7 @@ public class MainTest {
 
   @Test
   public void should_stop_on_error() {
-    EmbeddedRunner runner = mock(EmbeddedRunner.class);
+    EmbeddedScanner runner = mock(EmbeddedScanner.class);
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
     doThrow(e).when(runner).runAnalysis(any(Properties.class));
@@ -126,7 +126,7 @@ public class MainTest {
     when(cli.isDebugEnabled()).thenReturn(debugEnabled);
     when(cli.isDisplayStackTrace()).thenReturn(stackTraceEnabled);
 
-    EmbeddedRunner runner = mock(EmbeddedRunner.class);
+    EmbeddedScanner runner = mock(EmbeddedScanner.class);
     doThrow(e).when(runner).runAnalysis(any(Properties.class));
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
 
@@ -140,7 +140,7 @@ public class MainTest {
 
   @Test
   public void should_not_stop_on_error_in_interactive_mode() throws Exception {
-    EmbeddedRunner runner = mock(EmbeddedRunner.class);
+    EmbeddedScanner runner = mock(EmbeddedScanner.class);
     doThrow(new IllegalStateException("Error")).when(runner).runAnalysis(any(Properties.class));
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
     when(cli.isInteractive()).thenReturn(true);

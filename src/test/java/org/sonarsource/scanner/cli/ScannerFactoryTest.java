@@ -19,10 +19,11 @@
  */
 package org.sonarsource.scanner.cli;
 
-import org.sonar.runner.api.LogOutput.Level;
+import org.sonarsource.scanner.api.EmbeddedScanner;
+import org.sonarsource.scanner.api.LogOutput;
+import org.sonarsource.scanner.api.LogOutput.Level;
 import org.sonarsource.scanner.cli.Logs;
-import org.sonarsource.scanner.cli.RunnerFactory;
-import org.sonar.runner.api.LogOutput;
+import org.sonarsource.scanner.cli.ScannerFactory;
 import org.junit.Before;
 
 import java.util.Properties;
@@ -33,10 +34,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.mock;
 import org.junit.Test;
-import org.sonar.runner.api.EmbeddedRunner;
+
 import static org.fest.assertions.Assertions.assertThat;
 
-public class RunnerFactoryTest {
+public class ScannerFactoryTest {
 
   Properties props = new Properties();
   Logs logs;
@@ -49,15 +50,15 @@ public class RunnerFactoryTest {
   @Test
   public void should_create_embedded_runner() {
     props.setProperty("foo", "bar");
-    EmbeddedRunner runner = new RunnerFactory(logs).create(props);
+    EmbeddedScanner runner = new ScannerFactory(logs).create(props);
 
-    assertThat(runner).isInstanceOf(EmbeddedRunner.class);
+    assertThat(runner).isInstanceOf(EmbeddedScanner.class);
     assertThat(runner.globalProperties().get("foo")).isEqualTo("bar");
   }
 
   @Test
   public void should_fwd_logs() {
-    LogOutput logOutput = new RunnerFactory(logs).new DefaultLogOutput();
+    LogOutput logOutput = new ScannerFactory(logs).new DefaultLogOutput();
 
     String msg = "test";
 

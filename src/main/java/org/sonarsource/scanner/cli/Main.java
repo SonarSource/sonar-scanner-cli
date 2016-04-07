@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
-import org.sonar.runner.api.EmbeddedRunner;
+import org.sonarsource.scanner.api.EmbeddedScanner;
 
 /**
  * Arguments :
@@ -43,12 +43,12 @@ public class Main {
   private final Shutdown shutdown;
   private final Cli cli;
   private final Conf conf;
-  private EmbeddedRunner runner;
+  private EmbeddedScanner runner;
   private BufferedReader inputReader;
-  private RunnerFactory runnerFactory;
+  private ScannerFactory runnerFactory;
   private Logs logger;
 
-  Main(Shutdown shutdown, Cli cli, Conf conf, RunnerFactory runnerFactory, Logs logger) {
+  Main(Shutdown shutdown, Cli cli, Conf conf, ScannerFactory runnerFactory, Logs logger) {
     this.shutdown = shutdown;
     this.cli = cli;
     this.conf = conf;
@@ -62,7 +62,7 @@ public class Main {
     Cli cli = new Cli(exit, logs).parse(args);
     cli.verify();
     Shutdown shutdown = new Shutdown(exit, cli.isInteractive());
-    Main main = new Main(shutdown, cli, new Conf(cli, logs), new RunnerFactory(logs), logs);
+    Main main = new Main(shutdown, cli, new Conf(cli, logs), new ScannerFactory(logs), logs);
     main.execute();
   }
 
