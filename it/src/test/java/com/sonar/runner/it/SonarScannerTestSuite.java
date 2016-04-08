@@ -26,7 +26,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({JavaTest.class, MultimoduleTest.class, CacheTest.class})
+@SuiteClasses({JavaTest.class, MultimoduleTest.class})
 public class SonarScannerTestSuite {
 
   @ClassRule
