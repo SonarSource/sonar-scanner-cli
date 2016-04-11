@@ -32,8 +32,8 @@ import java.util.Map;
 import java.util.Properties;
 
 class Conf {
-  private static final String RUNNER_HOME = "runner.home";
-  private static final String RUNNER_SETTINGS = "runner.settings";
+  private static final String SCANNER_HOME = "scanner.home";
+  private static final String SCANNER_SETTINGS = "scanner.settings";
   private static final String PROJECT_HOME = "project.home";
   private static final String PROJECT_SETTINGS = "project.settings";
   private static final String PROPERTY_MODULES = "sonar.modules";
@@ -62,7 +62,7 @@ class Conf {
   }
 
   private Properties loadGlobalProperties() throws IOException {
-    Path settingsFile = locatePropertiesFile(cli.properties(), RUNNER_HOME, "conf/sonar-runner.properties", RUNNER_SETTINGS);
+    Path settingsFile = locatePropertiesFile(cli.properties(), SCANNER_HOME, "conf/sonar-scanner.properties", SCANNER_SETTINGS);
     if (settingsFile != null && Files.isRegularFile(settingsFile)) {
       logger.info("Scanner configuration file: " + settingsFile);
       return toProperties(settingsFile);
@@ -74,7 +74,7 @@ class Conf {
   private Properties loadProjectProperties() throws IOException {
     Properties rootProps = new Properties();
     Properties knownProps = new Properties();
-    
+
     knownProps.putAll(System.getProperties());
     knownProps.putAll(cli.properties());
 
@@ -121,7 +121,7 @@ class Conf {
     if (parentProps.containsKey(PROPERTY_MODULES)) {
       for (String module : getListFromProperty(parentProps, PROPERTY_MODULES)) {
         Properties moduleProps = extractModuleProperties(module, parentProps);
-        //higher priority to child configuration files
+        // higher priority to child configuration files
         loadModuleConfigFile(parentBaseDir, moduleProps, module);
 
         // the child project may have children as well
@@ -184,9 +184,9 @@ class Conf {
 
   private static Path locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
     Path settingsFile = null;
-    String runnerHome = props.getProperty(homeKey, "");
-    if (!"".equals(runnerHome)) {
-      settingsFile = Paths.get(runnerHome, relativePathFromHome);
+    String scannerHome = props.getProperty(homeKey, "");
+    if (!"".equals(scannerHome)) {
+      settingsFile = Paths.get(scannerHome, relativePathFromHome);
     }
 
     return locatePropertiesFile(settingsFile, props, settingsKey);

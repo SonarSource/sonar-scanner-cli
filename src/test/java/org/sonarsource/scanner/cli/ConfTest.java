@@ -52,7 +52,7 @@ public class ConfTest {
   @Test
   public void should_load_global_settings_by_home() throws Exception {
     Path home = Paths.get(getClass().getResource("ConfTest/shouldLoadRunnerSettingsByHome/").toURI());
-    args.setProperty("runner.home", home.toAbsolutePath().toString());
+    args.setProperty("scanner.home", home.toAbsolutePath().toString());
 
     Properties properties = conf.properties();
     assertThat(properties.get("sonar.prop")).isEqualTo("value");
@@ -81,7 +81,7 @@ public class ConfTest {
   @Test
   public void should_load_conf_by_direct_path() throws Exception {
     Path settings = Paths.get(getClass().getResource("ConfTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
-    args.setProperty("runner.settings", settings.toAbsolutePath().toString());
+    args.setProperty("scanner.settings", settings.toAbsolutePath().toString());
 
     assertThat(conf.properties().get("sonar.prop")).isEqualTo("otherValue");
   }
@@ -90,7 +90,7 @@ public class ConfTest {
   public void shouldLoadCompleteConfiguration() throws Exception {
     Path runnerHome = Paths.get(getClass().getResource("ConfTest/shouldLoadCompleteConfiguration/runner").toURI());
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadCompleteConfiguration/project").toURI());
-    args.setProperty("runner.home", runnerHome.toAbsolutePath().toString());
+    args.setProperty("scanner.home", runnerHome.toAbsolutePath().toString());
     args.setProperty("project.home", projectHome.toAbsolutePath().toString());
 
     Properties properties = conf.properties();
@@ -143,7 +143,7 @@ public class ConfTest {
     assertThat(properties.getProperty("module3.sonar.projectName")).isEqualTo("Module 3");
     assertThat(properties.getProperty("sonar.projectBaseDir")).isEqualTo(projectHome.toString());
   }
-  
+
   @Test
   public void shouldCliOverrideSettingFiles() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());
@@ -159,7 +159,7 @@ public class ConfTest {
     assertThat(properties.getProperty("module3.sonar.projectName")).isEqualTo("mod3");
     assertThat(properties.getProperty("sonar.projectBaseDir")).isEqualTo(projectHome.toString());
   }
-  
+
   @Test
   public void shouldUseCliToDiscoverModules() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());

@@ -13,6 +13,7 @@
       <outputDirectory>bin</outputDirectory>
       <includes>
         <include>sonar-runner.bat</include>
+        <include>sonar-scanner.bat</include>
       </includes>
       <lineEnding>dos</lineEnding>
       <filtered>true</filtered>
@@ -22,6 +23,7 @@
       <outputDirectory>bin</outputDirectory>
       <includes>
         <include>sonar-runner</include>
+        <include>sonar-scanner</include>
       </includes>
       <lineEnding>unix</lineEnding>
       <fileMode>0755</fileMode>

@@ -76,19 +76,19 @@ public class SystemInfoTest {
   public void should_print() {
     mockOs();
     mockJava();
-    when(mockSystem.getenv("SONAR_RUNNER_OPTS")).thenReturn("arg");
+    when(mockSystem.getenv("SONAR_SCANNER_OPTS")).thenReturn("arg");
 
     SystemInfo.print(logs);
 
     verify(mockSystem).getProperty("java.version");
     verify(mockSystem).getProperty("os.version");
-    verify(mockSystem).getenv("SONAR_RUNNER_OPTS");
+    verify(mockSystem).getenv("SONAR_SCANNER_OPTS");
 
     verify(logs, never()).info("SonarQube Scanner null");
     verify(logs).info("SonarQube Scanner " + ScannerVersion.version());
     verify(logs).info("Java 1.9 oracle (64-bit)");
     verify(logs).info("linux 2.5 x64");
-    verify(logs).info("SONAR_RUNNER_OPTS=arg");
+    verify(logs).info("SONAR_SCANNER_OPTS=arg");
     verifyNoMoreInteractions(logs);
   }
 }

@@ -33,9 +33,9 @@ class SystemInfo {
     logger.info("SonarQube Scanner " + ScannerVersion.version());
     logger.info(java());
     logger.info(os());
-    String runnerOpts = system.getenv("SONAR_RUNNER_OPTS");
-    if (runnerOpts != null) {
-      logger.info("SONAR_RUNNER_OPTS=" + runnerOpts);
+    String scannerOpts = system.getenv("SONAR_SCANNER_OPTS");
+    if (scannerOpts != null) {
+      logger.info("SONAR_SCANNER_OPTS=" + scannerOpts);
     }
   }
 

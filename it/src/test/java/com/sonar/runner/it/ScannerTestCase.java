@@ -56,7 +56,8 @@ public abstract class ScannerTestCase {
 
   SonarScanner newScanner(File baseDir, String... keyValueProperties) {
     SonarScanner scannerCli = SonarScanner.create(baseDir, keyValueProperties);
-    scannerCli.setRunnerVersion(artifactVersion().toString());
+    scannerCli.setScannerVersion(artifactVersion().toString());
     return scannerCli;
   }
+
 }

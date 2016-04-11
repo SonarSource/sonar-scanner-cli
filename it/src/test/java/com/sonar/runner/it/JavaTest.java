@@ -20,11 +20,12 @@
 package com.sonar.runner.it;
 
 import com.sonar.orchestrator.build.BuildResult;
-import com.sonar.orchestrator.build.SonarRunner;
+import com.sonar.orchestrator.build.SonarScanner;
 import com.sonar.orchestrator.locator.ResourceLocation;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import org.apache.commons.lang.SystemUtils;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,7 +57,7 @@ public class JavaTest extends ScannerTestCase {
     orchestrator.getServer().provisionProject("java:sample", "Java Sample, with comma");
     orchestrator.getServer().associateProjectToQualityProfile("java:sample", "java", "sonar-way");
 
-    SonarRunner build = newScanner(new File("projects/java-sample"))
+    SonarScanner build = newScanner(new File("projects/java-sample"))
       .setProperty("sonar.verbose", "true")
       .addArguments("-e");
     // SONARPLUGINS-3061
@@ -102,7 +103,7 @@ public class JavaTest extends ScannerTestCase {
     orchestrator.getServer().provisionProject("java:bytecode", "Java Bytecode Sample");
     orchestrator.getServer().associateProjectToQualityProfile("java:bytecode", "java", "requires-bytecode");
 
-    SonarRunner build = newScanner(new File("projects/java-bytecode"));
+    SonarScanner build = newScanner(new File("projects/java-bytecode"));
     orchestrator.executeBuild(build);
 
     Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:bytecode").setMetrics("lcom4", "violations"));
@@ -134,7 +135,7 @@ public class JavaTest extends ScannerTestCase {
     orchestrator.getServer().provisionProject("java:basedir-with-source", "Basedir with source");
     orchestrator.getServer().associateProjectToQualityProfile("java:basedir-with-source", "java", "sonar-way");
 
-    SonarRunner build = newScanner(new File("projects/basedir-with-source"));
+    SonarScanner build = newScanner(new File("projects/basedir-with-source"));
     orchestrator.executeBuild(build);
 
     Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:basedir-with-source").setMetrics("files", "ncloc"));
@@ -151,7 +152,7 @@ public class JavaTest extends ScannerTestCase {
     orchestrator.getServer().provisionProject("SAMPLE", "Java Sample, with comma");
     orchestrator.getServer().associateProjectToQualityProfile("SAMPLE", "java", "sonar-way");
 
-    SonarRunner build = newScanner(new File("projects/java-sample"))
+    SonarScanner build = newScanner(new File("projects/java-sample"))
       .setProjectKey("SAMPLE");
     orchestrator.executeBuild(build);
 
@@ -165,7 +166,7 @@ public class JavaTest extends ScannerTestCase {
    */
   @Test
   public void should_override_working_dir_with_relative_path() {
-    SonarRunner build = newScanner(new File("projects/override-working-dir"))
+    SonarScanner build = newScanner(new File("projects/override-working-dir"))
       .setProperty("sonar.working.directory", ".overridden-relative-sonar");
     orchestrator.executeBuild(build);
 
@@ -179,7 +180,7 @@ public class JavaTest extends ScannerTestCase {
   @Test
   public void should_override_working_dir_with_absolute_path() {
     File projectHome = new File("projects/override-working-dir");
-    SonarRunner build = newScanner(projectHome)
+    SonarScanner build = newScanner(projectHome)
       .setProperty("sonar.working.directory", new File(projectHome, ".overridden-absolute-sonar").getAbsolutePath());
     orchestrator.executeBuild(build);
 
@@ -192,7 +193,7 @@ public class JavaTest extends ScannerTestCase {
    */
   @Test
   public void should_fail_if_source_dir_does_not_exist() {
-    SonarRunner build = newScanner(new File("projects/bad-source-dirs"));
+    SonarScanner build = newScanner(new File("projects/bad-source-dirs"));
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getStatus()).isNotEqualTo(0);
@@ -206,7 +207,7 @@ public class JavaTest extends ScannerTestCase {
   @Test
   public void should_log_message_when_deprecated_properties_are_used() {
     assumeTrue(!orchestrator.getServer().version().isGreaterThanOrEquals("4.3"));
-    SonarRunner build = newScanner(new File("projects/using-deprecated-props"));
+    SonarScanner build = newScanner(new File("projects/using-deprecated-props"));
 
     BuildResult result = orchestrator.executeBuild(build);
     String logs = result.getLogs();
@@ -221,7 +222,7 @@ public class JavaTest extends ScannerTestCase {
    */
   @Test
   public void should_warn_when_analysis_is_platform_dependent() {
-    SonarRunner build = newScanner(new File("projects/java-sample"))
+    SonarScanner build = newScanner(new File("projects/java-sample"))
       // ORCH-243
       .setSourceEncoding("");
     String log = orchestrator.executeBuild(build).getLogs();
@@ -240,7 +241,7 @@ public class JavaTest extends ScannerTestCase {
   public void should_enable_verbose() {
     // this line should appear in all versions (LTS-DEV) in debug only
     String expectedLog = "Available languages:";
-    SonarRunner build = newScanner(new File("projects/java-sample"))
+    SonarScanner build = newScanner(new File("projects/java-sample"))
       .setProperty("sonar.verbose", "true");
     String logs = orchestrator.executeBuild(build).getLogs();
     assertThat(logs).contains(expectedLog);
@@ -248,7 +249,7 @@ public class JavaTest extends ScannerTestCase {
 
   @Test
   public void should_fail_if_unable_to_connect() {
-    SonarRunner build = newScanner(new File("projects/java-sample"))
+    SonarScanner build = newScanner(new File("projects/java-sample"))
       .setProperty("sonar.host.url", "http://foo");
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
@@ -262,7 +263,7 @@ public class JavaTest extends ScannerTestCase {
   @Test
   public void run_from_external_location() throws IOException {
     File tempDir = temp.newFolder();
-    SonarRunner build = newScanner(tempDir)
+    SonarScanner build = newScanner(tempDir)
       .setProperty("sonar.projectBaseDir", new File("projects/java-sample").getAbsolutePath())
       .addArguments("-e");
     orchestrator.executeBuild(build);
@@ -270,6 +271,36 @@ public class JavaTest extends ScannerTestCase {
     Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:sample").setMetrics("files", "ncloc", "classes", "lcom4", "violations"));
     assertThat(project.getDescription()).isEqualTo("This is a Java sample");
     assertThat(project.getVersion()).isEqualTo("1.2.3");
+  }
+
+  @Test
+  public void use_old_script_and_old_env_variable() {
+    SonarScanner build = newScanner(new File("projects/java-sample"))
+      .setUseOldSonarRunnerScript(true)
+      .setEnvironmentVariable("SONAR_RUNNER_OPTS", "-Xmx2m");
+    BuildResult executeBuild = orchestrator.executeBuildQuietly(build);
+    assertThat(executeBuild.getStatus()).isNotEqualTo(0);
+    String logs = executeBuild.getLogs();
+    if (SystemUtils.IS_OS_WINDOWS) {
+      assertThat(logs).contains("WARN: sonar-runner.bat script is deprecated. Please use sonar-scanner.bat instead.");
+      assertThat(logs).contains("WARN: SONAR_RUNNER_OPTS is deprecated. Please use SONAR_SCANNER_OPTS instead.");
+    } else {
+      assertThat(logs).contains("WARN: sonar-runner script is deprecated. Please use sonar-scanner instead.");
+      assertThat(logs).contains("WARN: $SONAR_RUNNER_OPTS is deprecated. Please use $SONAR_SCANNER_OPTS instead.");
+    }
+    assertThat(logs).contains("java.lang.OutOfMemoryError");
+  }
+
+  @Test
+  public void use_new_script_and_new_env_variable() {
+    SonarScanner build = newScanner(new File("projects/java-sample"))
+      .setEnvironmentVariable("SONAR_SCANNER_OPTS", "-Xmx2m");
+    BuildResult executeBuild = orchestrator.executeBuildQuietly(build);
+    assertThat(executeBuild.getStatus()).isNotEqualTo(0);
+    String logs = executeBuild.getLogs();
+    assertThat(logs).doesNotContain("sonar-runner");
+    assertThat(logs).doesNotContain("SONAR_RUNNER_OPTS");
+    assertThat(logs).contains("java.lang.OutOfMemoryError");
   }
 
   private String findbugsFileKey() {
