@@ -20,13 +20,9 @@
 package org.sonarsource.scanner.cli;
 
 import org.junit.Test;
-import org.sonarsource.scanner.cli.Cli;
-import org.sonarsource.scanner.cli.Exit;
-import org.sonarsource.scanner.cli.Logs;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 public class CliTest {
   Exit exit = mock(Exit.class);
@@ -48,13 +44,6 @@ public class CliTest {
     assertThat(cli.properties().get("foo")).isEqualTo("bar");
     assertThat(cli.properties().get("hello")).isEqualTo("world");
     assertThat(cli.properties().get("boolean")).isEqualTo("true");
-  }
-
-  @Test
-  public void dont_allow_interactive_fork() {
-    cli.parse(new String[] {"-i", "-DsonarRunner.mode=fork"});
-    cli.verify();
-    verify(exit).exit(Exit.SUCCESS);
   }
 
   @Test

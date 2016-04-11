@@ -19,11 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +42,7 @@ import static org.mockito.Mockito.when;
 public class MainTest {
 
   @Mock
-  private Shutdown shutdown;
+  private Exit exit;
   @Mock
   private Cli cli;
   @Mock
@@ -69,10 +65,10 @@ public class MainTest {
 
   @Test
   public void should_execute_runner() {
-    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     main.execute();
 
-    verify(shutdown).exit(Exit.SUCCESS);
+    verify(exit).exit(Exit.SUCCESS);
     verify(runnerFactory).create(properties);
 
     verify(runner, times(1)).start();
@@ -88,11 +84,11 @@ public class MainTest {
     doThrow(e).when(runner).runAnalysis(any(Properties.class));
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
 
-    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     main.execute();
 
     verify(runner).stop();
-    verify(shutdown).exit(Exit.ERROR);
+    verify(exit).exit(Exit.ERROR);
     verify(logs).error("Caused by: NPE");
 
   }
@@ -130,31 +126,12 @@ public class MainTest {
     doThrow(e).when(runner).runAnalysis(any(Properties.class));
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
 
-    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     main.execute();
 
     verify(runner).stop();
-    verify(shutdown).exit(Exit.ERROR);
+    verify(exit).exit(Exit.ERROR);
     return e;
-  }
-
-  @Test
-  public void should_not_stop_on_error_in_interactive_mode() throws Exception {
-    EmbeddedScanner runner = mock(EmbeddedScanner.class);
-    doThrow(new IllegalStateException("Error")).when(runner).runAnalysis(any(Properties.class));
-    when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
-    when(cli.isInteractive()).thenReturn(true);
-
-    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
-    BufferedReader inputReader = mock(BufferedReader.class);
-    when(inputReader.readLine()).thenReturn("");
-    when(shutdown.shouldExit()).thenReturn(false).thenReturn(true);
-    main.setInputReader(inputReader);
-    main.execute();
-
-    verify(runner, times(2)).runAnalysis(any(Properties.class));
-    verify(runner).stop();
-    verify(shutdown).exit(Exit.SUCCESS);
   }
 
   @Test
@@ -164,14 +141,14 @@ public class MainTest {
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     main.execute();
 
-    InOrder inOrder = Mockito.inOrder(shutdown, runnerFactory);
+    InOrder inOrder = Mockito.inOrder(exit, runnerFactory);
 
-    inOrder.verify(shutdown, times(1)).exit(Exit.SUCCESS);
+    inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
     inOrder.verify(runnerFactory, times(1)).create(p);
-    inOrder.verify(shutdown, times(1)).exit(Exit.SUCCESS);
+    inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
   }
 
   @Test
@@ -181,7 +158,7 @@ public class MainTest {
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     main.execute();
     verify(logs).info("SonarQube server 5.5");
   }
@@ -209,7 +186,7 @@ public class MainTest {
     p.put(propKey, propValue);
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
     main.execute();
 
     // Logger used for callback should have debug enabled
@@ -222,22 +199,4 @@ public class MainTest {
     return propertiesCapture.getValue();
   }
 
-  @Test(timeout = 30000)
-  public void test_interactive_mode() throws IOException {
-    String inputStr = "qwe" + System.lineSeparator() + "qwe" + System.lineSeparator();
-    InputStream input = new ByteArrayInputStream(inputStr.getBytes(StandardCharsets.UTF_8));
-    System.setIn(input);
-    input.close();
-
-    when(cli.isInteractive()).thenReturn(true);
-    when(cli.isDebugEnabled()).thenReturn(true);
-    when(cli.isDisplayStackTrace()).thenReturn(true);
-
-    Main main = new Main(shutdown, cli, conf, runnerFactory, logs);
-    main.execute();
-
-    verify(runner, times(1)).start();
-    verify(runner, times(3)).runAnalysis(any(Properties.class));
-    verify(runner, times(1)).stop();
-  }
 }

@@ -19,10 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import org.sonarsource.scanner.api.EmbeddedScanner;
 
@@ -40,16 +37,15 @@ import org.sonarsource.scanner.api.EmbeddedScanner;
  */
 public class Main {
 
-  private final Shutdown shutdown;
+  private final Exit exit;
   private final Cli cli;
   private final Conf conf;
   private EmbeddedScanner runner;
-  private BufferedReader inputReader;
   private ScannerFactory runnerFactory;
   private Logs logger;
 
-  Main(Shutdown shutdown, Cli cli, Conf conf, ScannerFactory runnerFactory, Logs logger) {
-    this.shutdown = shutdown;
+  Main(Exit exit, Cli cli, Conf conf, ScannerFactory runnerFactory, Logs logger) {
+    this.exit = exit;
     this.cli = cli;
     this.conf = conf;
     this.runnerFactory = runnerFactory;
@@ -57,56 +53,37 @@ public class Main {
   }
 
   public static void main(String[] args) {
-    Exit exit = new Exit();
     Logs logs = new Logs(System.out, System.err);
+    Exit exit = new Exit();
     Cli cli = new Cli(exit, logs).parse(args);
-    cli.verify();
-    Shutdown shutdown = new Shutdown(exit, cli.isInteractive());
-    Main main = new Main(shutdown, cli, new Conf(cli, logs), new ScannerFactory(logs), logs);
+    Main main = new Main(exit, cli, new Conf(cli, logs), new ScannerFactory(logs), logs);
     main.execute();
   }
 
   void execute() {
     Stats stats = new Stats(logger).start();
-    
+
     try {
       Properties p = conf.properties();
       configureLogging(p);
       init(p);
       runner.start();
       logger.info("SonarQube server " + runner.serverVersion());
-
-      if (cli.isInteractive()) {
-        interactiveLoop(p);
-      } else {
-        runAnalysis(stats, p);
-      }
+      runAnalysis(stats, p);
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
       showError("Error during SonarQube Scanner execution", e, cli.isDisplayStackTrace() || cli.isDebugEnabled());
-      shutdown.exit(Exit.ERROR);
+      exit.exit(Exit.ERROR);
     }
 
     runner.stop();
-    shutdown.exit(Exit.SUCCESS);
-  }
-
-  private void interactiveLoop(Properties p) throws IOException {
-    do {
-      Stats stats = new Stats(logger).start();
-      try {
-        runAnalysis(stats, p);
-      } catch (Exception e) {
-        displayExecutionResult(stats, "FAILURE");
-        showError("Error during SonarQube Scanner execution", e, cli.isDisplayStackTrace() || cli.isDebugEnabled());
-      }
-    } while (waitForUser());
+    exit.exit(Exit.SUCCESS);
   }
 
   private void init(Properties p) throws IOException {
     SystemInfo.print(logger);
     if (cli.isDisplayVersionOnly()) {
-      shutdown.exit(Exit.SUCCESS);
+      exit.exit(Exit.SUCCESS);
     }
 
     if (cli.isDisplayStackTrace()) {
@@ -117,14 +94,14 @@ public class Main {
   }
 
   private void configureLogging(Properties props) throws IOException {
-    if("true".equals(props.getProperty("sonar.verbose"))
-      || "DEBUG".equalsIgnoreCase(props.getProperty("sonar.log.level")) 
-      || "TRACE".equalsIgnoreCase(props.getProperty("sonar.log.level")) ) {
+    if ("true".equals(props.getProperty("sonar.verbose"))
+      || "DEBUG".equalsIgnoreCase(props.getProperty("sonar.log.level"))
+      || "TRACE".equalsIgnoreCase(props.getProperty("sonar.log.level"))) {
       logger.setDebugEnabled(true);
       logger.setDisplayStackTrace(true);
     }
-    
-    if(cli.isDisplayStackTrace()) {
+
+    if (cli.isDisplayStackTrace()) {
       logger.setDisplayStackTrace(true);
     }
   }
@@ -132,30 +109,6 @@ public class Main {
   private void runAnalysis(Stats stats, Properties p) {
     runner.runAnalysis(p);
     displayExecutionResult(stats, "SUCCESS");
-  }
-
-  private boolean waitForUser() throws IOException {
-    if (inputReader == null) {
-      inputReader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
-    }
-
-    shutdown.signalReady(true);
-    if (shutdown.shouldExit()) {
-      // exit before displaying message
-      return false;
-    }
-
-    System.out.println("");
-    System.out.println("<Press enter to restart analysis or Ctrl+C to exit the interactive mode>");
-    String line = inputReader.readLine();
-    shutdown.signalReady(false);
-
-    return line != null;
-  }
-
-  // Visible for testing
-  void setInputReader(BufferedReader inputReader) {
-    this.inputReader = inputReader;
   }
 
   private void displayExecutionResult(Stats stats, String resultMsg) {

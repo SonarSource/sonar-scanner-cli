@@ -27,7 +27,6 @@ class Cli {
   private boolean debugEnabled = false;
   private boolean displayVersionOnly = false;
   private boolean displayStackTrace = false;
-  private boolean interactive = false;
   private final Properties props = new Properties();
   private final Exit exit;
   private final Logs logger;
@@ -47,10 +46,6 @@ class Cli {
 
   boolean isDisplayStackTrace() {
     return displayStackTrace;
-  }
-
-  boolean isInteractive() {
-    return interactive;
   }
 
   Properties properties() {
@@ -93,21 +88,12 @@ class Cli {
         arg = arg.substring(2);
         appendPropertyTo(arg, props);
 
-      } else if ("-i".equals(arg) || "--interactive".equals(arg)) {
-        interactive = true;
-
       } else {
         printError("Unrecognized option: " + arg);
       }
     }
 
     return this;
-  }
-
-  public void verify() {
-    if ("fork".equals(props.getProperty("sonarRunner.mode")) && isInteractive()) {
-      printError("Cannot run interactively in fork mode.");
-    }
   }
 
   private void reset() {
