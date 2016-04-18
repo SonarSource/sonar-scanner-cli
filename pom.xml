@@ -8,7 +8,7 @@
 
   <groupId>org.sonarsource.scanner.cli</groupId>
   <artifactId>sonar-scanner-cli</artifactId>
-  <version>2.6</version>
+  <version>2.7-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>SonarQube Scanner</name>
   <url>http://docs.sonarqube.org/display/SONAR/Analyzing+with+SonarQube+Scanner</url>
@@ -31,7 +31,7 @@
     <connection>scm:git:git@github.com:SonarSource/sonar-scanner-cli.git</connection>
     <developerConnection>scm:git:git@github.com:SonarSource/sonar-scanner-cli.git</developerConnection>
     <url>https://github.com/SonarSource/sonar-scanner-cli</url>
-    <tag>2.6</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
