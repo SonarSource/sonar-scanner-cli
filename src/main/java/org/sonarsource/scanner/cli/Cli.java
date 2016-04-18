@@ -124,7 +124,7 @@ class Cli {
 
   private void printUsage() {
     logger.info("");
-    logger.info("usage: sonar-runner [options]");
+    logger.info("usage: sonar-scanner [options]");
     logger.info("");
     logger.info("Options:");
     logger.info(" -D,--define <arg>     Define property");
