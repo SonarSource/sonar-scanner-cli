@@ -19,23 +19,18 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.util.Properties;
+import org.junit.Before;
+import org.junit.Test;
 import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.LogOutput;
 import org.sonarsource.scanner.api.LogOutput.Level;
-import org.sonarsource.scanner.cli.Logs;
-import org.sonarsource.scanner.cli.ScannerFactory;
-import org.junit.Before;
-
-import java.util.Properties;
-
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class ScannerFactoryTest {
 
@@ -78,7 +73,7 @@ public class ScannerFactoryTest {
     reset(logs);
 
     logOutput.log(msg, Level.WARN);
-    verify(logs).info(msg);
+    verify(logs).warn(msg);
     verifyNoMoreInteractions(logs);
     reset(logs);
 

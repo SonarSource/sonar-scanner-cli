@@ -46,8 +46,10 @@ class ScannerFactory {
         case ERROR:
           logger.error(formattedMessage);
           break;
-        case INFO:
         case WARN:
+          logger.warn(formattedMessage);
+          break;
+        case INFO:
         default:
           logger.info(formattedMessage);
       }
