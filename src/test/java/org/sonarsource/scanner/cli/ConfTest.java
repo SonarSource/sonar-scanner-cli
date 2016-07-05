@@ -25,12 +25,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import org.apache.commons.lang.SystemUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -233,6 +235,7 @@ public class ConfTest {
 
   @Test
   public void shouldNotResolveSymlinks() throws IOException, URISyntaxException {
+    assumeTrue(SystemUtils.IS_OS_UNIX);
     Path root = temp.getRoot().toPath();
     Path realProjectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfiguration/project").toURI());
     Path linkProjectHome = root.resolve("link");

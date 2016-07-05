@@ -9,8 +9,8 @@
       <priority>MINOR</priority>
     </rule>
     <rule>
-      <repositoryKey>findbugs</repositoryKey>
-      <key>DM_EXIT</key>
+      <repositoryKey>squid</repositoryKey>
+      <key>S1147</key>
       <priority>MAJOR</priority>
     </rule>
   </rules>

@@ -36,7 +36,6 @@ import org.sonar.wsclient.services.Resource;
 import org.sonar.wsclient.services.ResourceQuery;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 public class JavaTest extends ScannerTestCase {
 
@@ -70,31 +69,16 @@ public class JavaTest extends ScannerTestCase {
     assertThat(project.getName()).isEqualTo("Java Sample, with comma");
     assertThat(project.getDescription()).isEqualTo("This is a Java sample");
     assertThat(project.getVersion()).isEqualTo("1.2.3");
-    if (!orchestrator.getServer().version().isGreaterThanOrEquals("4.2")) {
-      assertThat(project.getLanguage()).isEqualTo("java");
-    }
     assertThat(project.getMeasureIntValue("files")).isEqualTo(2);
     assertThat(project.getMeasureIntValue("classes")).isEqualTo(2);
     assertThat(project.getMeasureIntValue("ncloc")).isGreaterThan(10);
-    assertThat(project.getMeasureIntValue("lcom4")).isNull(); // no bytecode
-    if (orchestrator.getServer().version().isGreaterThanOrEquals("3.7")) {
-      // the squid rules enabled in sonar-way-profile do not exist in SQ 3.0
-      assertThat(project.getMeasureIntValue("violations")).isGreaterThan(0);
-    }
+    assertThat(project.getMeasureIntValue("violations")).isGreaterThan(0);
 
     Resource file = orchestrator.getServer().getWsClient()
-      .find(new ResourceQuery(helloFileKey()).setMetrics("files", "ncloc", "classes", "lcom4", "violations"));
-    if (orchestrator.getServer().version().isGreaterThanOrEquals("4.2")) {
-      assertThat(file.getName()).isEqualTo("Hello.java");
-    } else {
-      assertThat(file.getName()).isEqualTo("Hello");
-      assertThat(file.getMeasureIntValue("lcom4")).isNull(); // no bytecode
-    }
+      .find(new ResourceQuery("java:sample:src/basic/Hello.java").setMetrics("files", "ncloc", "classes", "violations"));
+    assertThat(file.getName()).isEqualTo("Hello.java");
     assertThat(file.getMeasureIntValue("ncloc")).isEqualTo(7);
-    if (orchestrator.getServer().version().isGreaterThanOrEquals("3.7")) {
-      // the squid rules enabled in sonar-way-profile do not exist in SQ 3.0
-      assertThat(file.getMeasureIntValue("violations")).isGreaterThan(0);
-    }
+    assertThat(file.getMeasureIntValue("violations")).isGreaterThan(0);
   }
 
   @Test
@@ -108,20 +92,16 @@ public class JavaTest extends ScannerTestCase {
 
     Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:bytecode").setMetrics("lcom4", "violations"));
     assertThat(project.getName()).isEqualTo("Java Bytecode Sample");
-    if (!orchestrator.getServer().version().isGreaterThanOrEquals("4.1")) {
-      // SONAR-4853 LCOM4 is no more computed on SQ 4.1
-      assertThat(project.getMeasureIntValue("lcom4")).isGreaterThanOrEqualTo(1);
-    }
     // the squid rules enabled in sonar-way-profile do not exist in SQ 3.0
     assertThat(project.getMeasureIntValue("violations")).isGreaterThan(0);
 
-    Resource file = orchestrator.getServer().getWsClient().find(new ResourceQuery(findbugsFileKey()).setMetrics("lcom4", "violations"));
+    Resource file = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:bytecode:src/HasFindbugsViolation.java").setMetrics("lcom4", "violations"));
     assertThat(file.getMeasureIntValue("violations")).isGreaterThan(0);
 
     // findbugs is executed on bytecode
-    List<Issue> issues = orchestrator.getServer().wsClient().issueClient().find(IssueQuery.create().componentRoots("java:bytecode").rules("findbugs:DM_EXIT")).list();
+    List<Issue> issues = orchestrator.getServer().wsClient().issueClient().find(IssueQuery.create().componentRoots("java:bytecode").rules("squid:S1147")).list();
     assertThat(issues).hasSize(1);
-    assertThat(issues.get(0).ruleKey()).isEqualTo("findbugs:DM_EXIT");
+    assertThat(issues.get(0).ruleKey()).isEqualTo("squid:S1147");
 
     // Squid performs analysis of dependencies
     issues = orchestrator.getServer().wsClient().issueClient().find(IssueQuery.create().componentRoots("java:bytecode").rules("squid:CallToDeprecatedMethod")).list();
@@ -199,22 +179,6 @@ public class JavaTest extends ScannerTestCase {
     assertThat(result.getStatus()).isNotEqualTo(0);
     // with the following message
     assertThat(result.getLogs()).contains("The folder 'bad' does not exist for 'bad-source-dirs'");
-  }
-
-  /**
-   * SONARPLUGINS-2203
-   */
-  @Test
-  public void should_log_message_when_deprecated_properties_are_used() {
-    assumeTrue(!orchestrator.getServer().version().isGreaterThanOrEquals("4.3"));
-    SonarScanner build = newScanner(new File("projects/using-deprecated-props"));
-
-    BuildResult result = orchestrator.executeBuild(build);
-    String logs = result.getLogs();
-    assertThat(logs).contains("/!\\ The 'sources' property is deprecated and is replaced by 'sonar.sources'. Don't forget to update your files.");
-    assertThat(logs).contains("/!\\ The 'tests' property is deprecated and is replaced by 'sonar.tests'. Don't forget to update your files.");
-    assertThat(logs).contains("/!\\ The 'binaries' property is deprecated and is replaced by 'sonar.binaries'. Don't forget to update your files.");
-    assertThat(logs).contains("/!\\ The 'libraries' property is deprecated and is replaced by 'sonar.libraries'. Don't forget to update your files.");
   }
 
   /**
@@ -303,19 +267,4 @@ public class JavaTest extends ScannerTestCase {
     assertThat(logs).contains("java.lang.OutOfMemoryError");
   }
 
-  private String findbugsFileKey() {
-    if (orchestrator.getServer().version().isGreaterThanOrEquals("4.2")) {
-      return "java:bytecode:src/HasFindbugsViolation.java";
-    } else {
-      return "java:bytecode:[default].HasFindbugsViolation";
-    }
-  }
-
-  private String helloFileKey() {
-    if (orchestrator.getServer().version().isGreaterThanOrEquals("4.2")) {
-      return "java:sample:src/basic/Hello.java";
-    } else {
-      return "java:sample:basic.Hello";
-    }
-  }
 }

@@ -33,8 +33,6 @@ public class SonarScannerTestSuite {
   public static final Orchestrator ORCHESTRATOR = Orchestrator.builderEnv()
     .setOrchestratorProperty("javaVersion", "LATEST_RELEASE")
     .addPlugin("java")
-    .setOrchestratorProperty("findbugsVersion", "LATEST_RELEASE")
-    .addPlugin("findbugs")
     .setOrchestratorProperty("javascriptVersion", "LATEST_RELEASE")
     .addPlugin("javascript")
     .build();
