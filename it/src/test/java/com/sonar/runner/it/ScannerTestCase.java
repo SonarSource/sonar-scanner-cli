@@ -26,11 +26,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
+import org.apache.commons.lang.StringUtils;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ScannerTestCase {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ScannerTestCase.class);
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -42,13 +47,19 @@ public abstract class ScannerTestCase {
 
   private static Version artifactVersion() {
     if (artifactVersion == null) {
-      try (FileInputStream fis = new FileInputStream(new File("../target/maven-archiver/pom.properties"))) {
-        Properties props = new Properties();
-        props.load(fis);
-        artifactVersion = Version.create(props.getProperty("version"));
-        return artifactVersion;
-      } catch (IOException e) {
-        throw new IllegalStateException(e);
+      String scannerVersion = System.getProperty("scanner.version");
+      if (StringUtils.isNotBlank(scannerVersion)) {
+        LOG.info("Use provided Scanner version: " + scannerVersion);
+        artifactVersion = Version.create(scannerVersion);
+      } else {
+        try (FileInputStream fis = new FileInputStream(new File("../target/maven-archiver/pom.properties"))) {
+          Properties props = new Properties();
+          props.load(fis);
+          artifactVersion = Version.create(props.getProperty("version"));
+          return artifactVersion;
+        } catch (IOException e) {
+          throw new IllegalStateException(e);
+        }
       }
     }
     return artifactVersion;
