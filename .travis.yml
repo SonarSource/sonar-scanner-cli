@@ -7,11 +7,6 @@ jdk:
 install: true
 script: ./travis.sh
 
-env:
-  matrix:
-    - TARGET=CI
-    - TARGET=IT
-
 cache:
   directories:
     - $HOME/.m2/repository
