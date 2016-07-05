@@ -74,7 +74,7 @@ if "%SONAR_RUNNER_OPTS%" == "" (
   goto run
 ) else (
   echo WARN: SONAR_RUNNER_OPTS is deprecated. Please use SONAR_SCANNER_OPTS instead.
-  if not "%SONAR_SCANNER_OPTS%" == "" (set SONAR_SCANNER_OPTS=%SONAR_RUNNER_OPTS%)
+  if "%SONAR_SCANNER_OPTS%" == "" (set SONAR_SCANNER_OPTS=%SONAR_RUNNER_OPTS%)
 ) 
 
 @REM ==== START RUN ====
