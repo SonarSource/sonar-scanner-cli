@@ -37,12 +37,16 @@ import org.apache.commons.lang.SystemUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 public class ConfTest {
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
 
   Map<String, String> env = new HashMap<>();
   Properties args = new Properties();
@@ -129,6 +133,14 @@ public class ConfTest {
 
     assertThat(props.getProperty("sonar.key1")).isEqualTo("v1");
     assertThat(props.getProperty("sonar.key2")).isEqualTo("v3");
+  }
+
+  @Test
+  public void shouldFailWithInvalidEnvironmentProperties() throws IOException {
+    env.put("SONARQUBE_SCANNER_PARAMS", "{sonar.key1: \"v1\", \"sonar.key2\" : \"v2\"}");
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("JSON");
+    conf.properties();
   }
 
   @Test

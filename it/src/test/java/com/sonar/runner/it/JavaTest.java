@@ -220,9 +220,7 @@ public class JavaTest extends ScannerTestCase {
         "\"sonar.projectDescription\" : \"This is a Java sample\"," +
         "\"sonar.projectVersion\" : \"1.2.3\"," +
         "\"sonar.sources\" : \"src\" }");
-    String logs = orchestrator.executeBuild(build).getLogs();
-    System.out.println(logs);
-
+    orchestrator.executeBuild(build);
   }
 
   @Test
