@@ -212,6 +212,20 @@ public class JavaTest extends ScannerTestCase {
   }
 
   @Test
+  public void should_use_environment_props() {
+    SonarScanner build = newScanner(new File("projects/java-sample-no-properties"))
+      .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS", "{"
+        + "\"sonar.projectKey\" : \"java:sample\"," +
+        "\"sonar.projectName\" : \"Java Sample, with comma\"," +
+        "\"sonar.projectDescription\" : \"This is a Java sample\"," +
+        "\"sonar.projectVersion\" : \"1.2.3\"," +
+        "\"sonar.sources\" : \"src\" }");
+    String logs = orchestrator.executeBuild(build).getLogs();
+    System.out.println(logs);
+
+  }
+
+  @Test
   public void should_fail_if_unable_to_connect() {
     SonarScanner build = newScanner(new File("projects/java-sample"))
       .setProperty("sonar.host.url", "http://foo");

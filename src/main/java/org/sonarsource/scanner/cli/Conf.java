@@ -27,9 +27,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonObject.Member;
+import com.eclipsesource.json.JsonValue;
 
 class Conf {
   private static final String SCANNER_HOME = "scanner.home";
@@ -40,13 +46,16 @@ class Conf {
   private static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
   private static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
   private static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
+  private static final String SONARQUBE_SCANNER_PARAMS = "SONARQUBE_SCANNER_PARAMS";
 
   private final Cli cli;
   private final Logs logger;
+  private final Map<String, String> env;
 
-  Conf(Cli cli, Logs logger) {
+  Conf(Cli cli, Logs logger, Map<String, String> env) {
     this.cli = cli;
     this.logger = logger;
+    this.env = env;
   }
 
   Properties properties() throws IOException {
@@ -54,6 +63,7 @@ class Conf {
     result.putAll(loadGlobalProperties());
     result.putAll(loadProjectProperties());
     result.putAll(System.getProperties());
+    result.putAll(loadEnvironmentProperties());
     result.putAll(cli.properties());
     // root project base directory must be present and be absolute
     result.setProperty(PROPERTY_PROJECT_BASEDIR, getRootProjectBaseDir(result).toString());
@@ -61,8 +71,33 @@ class Conf {
     return result;
   }
 
+  private Properties loadEnvironmentProperties() {
+    Properties props = new Properties();
+
+    String scannerParams = env.get(SONARQUBE_SCANNER_PARAMS);
+    if (scannerParams != null) {
+      try {
+
+        JsonValue jsonValue = Json.parse(scannerParams);
+        JsonObject jsonObject = jsonValue.asObject();
+        Iterator<Member> it = jsonObject.iterator();
+
+        while (it.hasNext()) {
+          Member member = it.next();
+          String key = member.getName();
+          String value = member.getValue().asString();
+          props.put(key, value);
+        }
+      } catch (Exception e) {
+        throw new IllegalStateException("Failed to parse JSON in SONARQUBE_SCANNER_PARAMS environment variable", e);
+      }
+    }
+    return props;
+  }
+
   private Properties loadGlobalProperties() throws IOException {
-    Path settingsFile = locatePropertiesFile(cli.properties(), SCANNER_HOME, "conf/sonar-scanner.properties", SCANNER_SETTINGS);
+    Path settingsFile = locatePropertiesFile(cli.properties(), SCANNER_HOME, "conf/sonar-scanner.properties",
+      SCANNER_SETTINGS);
     if (settingsFile != null && Files.isRegularFile(settingsFile)) {
       logger.info("Scanner configuration file: " + settingsFile);
       return toProperties(settingsFile);
@@ -89,13 +124,15 @@ class Conf {
 
     Properties projectProps = new Properties();
 
-    // include already root base directory and eventually props loaded from root config file
+    // include already root base directory and eventually props loaded from
+    // root config file
     projectProps.putAll(rootProps);
 
     rootProps.putAll(knownProps);
     rootProps.setProperty(PROPERTY_PROJECT_BASEDIR, getRootProjectBaseDir(rootProps).toString());
 
-    // projectProps will be overridden by any properties found in child project settings
+    // projectProps will be overridden by any properties found in child
+    // project settings
     loadModulesProperties(rootProps, projectProps, "");
     return projectProps;
   }
@@ -164,7 +201,8 @@ class Conf {
 
   private static void setModuleBaseDir(Path absoluteBaseDir, Properties childProps, String moduleId) {
     if (!Files.isDirectory(absoluteBaseDir)) {
-      throw new IllegalStateException(MessageFormat.format("The base directory of the module ''{0}'' does not exist: {1}", moduleId, absoluteBaseDir));
+      throw new IllegalStateException(MessageFormat
+        .format("The base directory of the module ''{0}'' does not exist: {1}", moduleId, absoluteBaseDir));
     }
     childProps.put(PROPERTY_PROJECT_BASEDIR, absoluteBaseDir.toString());
   }
@@ -182,7 +220,8 @@ class Conf {
     return moduleProps;
   }
 
-  private static Path locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
+  private static Path locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome,
+    String settingsKey) {
     Path settingsFile = null;
     String scannerHome = props.getProperty(homeKey, "");
     if (!"".equals(scannerHome)) {
@@ -222,18 +261,21 @@ class Conf {
   }
 
   protected void loadModulePropsFile(Path parentAbsoluteBaseDir, Properties moduleProps, String moduleId) {
-    Path propertyFile = getAbsolutePath(moduleProps.getProperty(PROPERTY_PROJECT_CONFIG_FILE), parentAbsoluteBaseDir);
+    Path propertyFile = getAbsolutePath(moduleProps.getProperty(PROPERTY_PROJECT_CONFIG_FILE),
+      parentAbsoluteBaseDir);
     if (Files.isRegularFile(propertyFile)) {
       moduleProps.putAll(toProperties(propertyFile));
       Path absoluteBaseDir;
       if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-        absoluteBaseDir = getAbsolutePath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParent());
+        absoluteBaseDir = getAbsolutePath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR),
+          propertyFile.getParent());
       } else {
         absoluteBaseDir = propertyFile.getParent();
       }
       setModuleBaseDir(absoluteBaseDir, moduleProps, moduleId);
     } else {
-      throw new IllegalStateException("The properties file of the module '" + moduleId + "' does not exist: " + propertyFile);
+      throw new IllegalStateException(
+        "The properties file of the module '" + moduleId + "' does not exist: " + propertyFile);
     }
   }
 
@@ -245,13 +287,15 @@ class Conf {
 
     moduleProps.putAll(toProperties(propertyFile));
     if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-      Path overwrittenBaseDir = getAbsolutePath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParent());
+      Path overwrittenBaseDir = getAbsolutePath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR),
+        propertyFile.getParent());
       setModuleBaseDir(overwrittenBaseDir, moduleProps, moduleId);
     }
   }
 
   /**
-   * Returns the file denoted by the given path, may this path be relative to "baseDir" or absolute.
+   * Returns the file denoted by the given path, may this path be relative to
+   * "baseDir" or absolute.
    */
   protected static Path getAbsolutePath(String path, Path baseDir) {
     Path propertyFile = Paths.get(path.trim());
@@ -262,9 +306,11 @@ class Conf {
   }
 
   /**
-   * Transforms a comma-separated list String property in to a array of trimmed strings.
+   * Transforms a comma-separated list String property in to a array of
+   * trimmed strings.
    *
-   * This works even if they are separated by whitespace characters (space char, EOL, ...)
+   * This works even if they are separated by whitespace characters (space
+   * char, EOL, ...)
    *
    */
   static String[] getListFromProperty(Properties properties, String key) {

@@ -56,7 +56,7 @@ public class Main {
     Logs logs = new Logs(System.out, System.err);
     Exit exit = new Exit();
     Cli cli = new Cli(exit, logs).parse(args);
-    Main main = new Main(exit, cli, new Conf(cli, logs), new ScannerFactory(logs), logs);
+    Main main = new Main(exit, cli, new Conf(cli, logs, System.getenv()), new ScannerFactory(logs), logs);
     main.execute();
   }
 

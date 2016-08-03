@@ -1,0 +1,5 @@
+projectKey=java:sample
+serverUrl=http://localhost:33151
+dashboardUrl=http://localhost:33151/dashboard/index/java:sample
+ceTaskId=AVZQO0KqHsi6TBOtG5xl
+ceTaskUrl=http://localhost:33151/api/ce/task?id=AVZQO0KqHsi6TBOtG5xl

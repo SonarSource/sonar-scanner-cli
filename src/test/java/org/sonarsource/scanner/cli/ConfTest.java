@@ -19,35 +19,40 @@
  */
 package org.sonarsource.scanner.cli;
 
+import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class ConfTest {
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
+  Map<String, String> env = new HashMap<>();
   Properties args = new Properties();
   Logs logs = new Logs(System.out, System.err);
   Cli cli = mock(Cli.class);
-  Conf conf = new Conf(cli, logs);
+  Conf conf = new Conf(cli, logs, env);
 
   @Before
   public void initConf() {
+    env.clear();
     when(cli.properties()).thenReturn(args);
   }
 
@@ -113,6 +118,17 @@ public class ConfTest {
     assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
     assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
     assertThat(properties.getProperty("sonar.projectBaseDir")).isEqualTo(projectHome.toString());
+  }
+
+  @Test
+  public void shouldLoadEnvironmentProperties() throws IOException {
+    env.put("SONARQUBE_SCANNER_PARAMS", "{\"sonar.key1\" : \"v1\", \"sonar.key2\" : \"v2\"}");
+    args.put("sonar.key2", "v3");
+
+    Properties props = conf.properties();
+
+    assertThat(props.getProperty("sonar.key1")).isEqualTo("v1");
+    assertThat(props.getProperty("sonar.key2")).isEqualTo("v3");
   }
 
   @Test

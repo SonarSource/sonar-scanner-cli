@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>31</version>
+    <version>36</version>
   </parent>
 
   <groupId>org.sonarsource.scanner.cli</groupId>
@@ -50,7 +50,12 @@
     <dependency>
       <groupId>org.sonarsource.scanner.api</groupId>
       <artifactId>sonar-scanner-api</artifactId>
-      <version>2.6</version>
+      <version>2.7-build634</version>
+    </dependency>
+    <dependency>
+      <groupId>com.eclipsesource.minimal-json</groupId>
+      <artifactId>minimal-json</artifactId>
+      <version>0.9.4</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -164,8 +169,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>500000</minsize>
-                  <maxsize>510000</maxsize>
+                  <minsize>510000</minsize>
+                  <maxsize>530000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonar-scanner-${project.version}.zip</file>
                   </files>
