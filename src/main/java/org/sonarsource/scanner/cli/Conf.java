@@ -27,15 +27,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonObject.Member;
-import com.eclipsesource.json.JsonValue;
+import org.sonarsource.scanner.api.Utils;
 
 class Conf {
   private static final String SCANNER_HOME = "scanner.home";
@@ -46,7 +42,6 @@ class Conf {
   private static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
   private static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
   private static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
-  private static final String SONARQUBE_SCANNER_PARAMS = "SONARQUBE_SCANNER_PARAMS";
 
   private final Cli cli;
   private final Logs logger;
@@ -72,27 +67,7 @@ class Conf {
   }
 
   private Properties loadEnvironmentProperties() {
-    Properties props = new Properties();
-
-    String scannerParams = env.get(SONARQUBE_SCANNER_PARAMS);
-    if (scannerParams != null) {
-      try {
-
-        JsonValue jsonValue = Json.parse(scannerParams);
-        JsonObject jsonObject = jsonValue.asObject();
-        Iterator<Member> it = jsonObject.iterator();
-
-        while (it.hasNext()) {
-          Member member = it.next();
-          String key = member.getName();
-          String value = member.getValue().asString();
-          props.put(key, value);
-        }
-      } catch (Exception e) {
-        throw new IllegalStateException("Failed to parse JSON in SONARQUBE_SCANNER_PARAMS environment variable", e);
-      }
-    }
-    return props;
+    return Utils.loadEnvironmentProperties(env);
   }
 
   private Properties loadGlobalProperties() throws IOException {
