@@ -76,7 +76,7 @@ if [ -z "$SONAR_SCANNER_HOME" ] ; then
   SONAR_SCANNER_HOME=`dirname "$PRG"`/..
 
   # make it fully qualified
-  SONAR_SCANNER_HOME=`cd "$SONAR_SCANNER_HOME" && pwd`
+  SONAR_SCANNER_HOME=`cd "$SONAR_SCANNER_HOME" && pwd -P`
 fi
 
 # check that the SONAR_SCANNER_HOME has been correctly set
