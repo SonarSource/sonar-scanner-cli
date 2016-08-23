@@ -36,7 +36,7 @@ import org.sonarsource.scanner.api.EmbeddedScanner;
  * @since 1.0
  */
 public class Main {
-
+  private static final String SEPARATOR = "------------------------------------------------------------------------";
   private final Exit exit;
   private final Cli cli;
   private final Conf conf;
@@ -112,11 +112,11 @@ public class Main {
   }
 
   private void displayExecutionResult(Stats stats, String resultMsg) {
-    logger.info("------------------------------------------------------------------------");
+    logger.info(SEPARATOR);
     logger.info("EXECUTION " + resultMsg);
-    logger.info("------------------------------------------------------------------------");
+    logger.info(SEPARATOR);
     stats.stop();
-    logger.info("------------------------------------------------------------------------");
+    logger.info(SEPARATOR);
   }
 
   private void showError(String message, Throwable e, boolean showStackTrace) {

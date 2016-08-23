@@ -232,6 +232,26 @@ public class ConfTest {
   }
 
   @Test
+  public void failModuleBaseDirDoesNotExist() throws IOException {
+    args.setProperty("sonar.modules", "module1");
+    args.setProperty("module1.sonar.projectBaseDir", "invalid");
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("The base directory of the module 'module1' does not exist");
+    conf.properties();
+  }
+
+  @Test
+  public void failModulePropertyFileDoesNotExist() throws IOException {
+    args.setProperty("sonar.modules", "module1");
+    args.setProperty("module1.sonar.projectConfigFile", "invalid");
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("The properties file of the module 'module1' does not exist");
+    conf.properties();
+  }
+
+  @Test
   public void shouldSupportSettingBaseDirFromCli() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfiguration/project").toURI());
     args.setProperty("project.home", temp.newFolder().getCanonicalPath());
