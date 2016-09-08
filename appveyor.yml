@@ -10,8 +10,8 @@ cache:
 install:
   - set MAVEN_VERSION=3.2.5
   - choco install maven -version %MAVEN_VERSION%
-  - set PATH=%PATH%;C:\bin\apache-maven-%MAVEN_VERSION%\bin
-  - set JAVA_HOME=C:\Program Files\Java\jdk1.7.0
+  - set JAVA_HOME=C:\Program Files\Java\jdk1.8.0
+  - set PATH=%JAVA_HOME%\bin;%PATH%;C:\bin\apache-maven-%MAVEN_VERSION%\bin
 
 environment:
   matrix:
