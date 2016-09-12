@@ -22,6 +22,7 @@ package org.sonarsource.scanner.cli;
 import java.io.IOException;
 import java.util.Properties;
 import org.sonarsource.scanner.api.EmbeddedScanner;
+import org.sonarsource.scanner.api.ScanProperties;
 
 /**
  * Arguments :
@@ -65,6 +66,7 @@ public class Main {
 
     try {
       Properties p = conf.properties();
+      checkSkip(p);
       configureLogging(p);
       init(p);
       runner.start();
@@ -78,6 +80,13 @@ public class Main {
 
     runner.stop();
     exit.exit(Exit.SUCCESS);
+  }
+  
+  private void checkSkip(Properties properties) {
+    if ("true".equalsIgnoreCase(properties.getProperty(ScanProperties.SKIP))) {
+      logger.info("SonarQube Scanner analysis skipped");
+      exit.exit(Exit.SUCCESS);
+    }
   }
 
   private void init(Properties p) throws IOException {

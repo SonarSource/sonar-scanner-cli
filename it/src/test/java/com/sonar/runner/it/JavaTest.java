@@ -224,6 +224,16 @@ public class JavaTest extends ScannerTestCase {
   }
 
   @Test
+  public void should_skip_analysis() {
+    SonarScanner build = newScanner(new File("projects/java-sample"))
+      .setProperty("sonar.host.url", "http://foo")
+      .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS", "{ \"sonar.scanner.skip\":\"true\" }");
+
+    BuildResult result = orchestrator.executeBuild(build);
+    assertThat(result.getLogs()).contains("SonarQube Scanner analysis skipped");
+  }
+
+  @Test
   public void should_fail_if_unable_to_connect() {
     SonarScanner build = newScanner(new File("projects/java-sample"))
       .setProperty("sonar.host.url", "http://foo");
