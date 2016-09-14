@@ -71,8 +71,12 @@ if [ -z "$SONAR_RUNNER_HOME" ] ; then
   PRG="$0"
 
   if [ -h "$PRG" ] ; then
-    # resolve symlinks
-    PRG=`real_path "$PRG"`
+    # resolve recursively symlinks
+    R_PRG=`real_path "$PRG"`
+    until [ "$R_PRG" = "$PRG" ]; do
+      PRG="$R_PRG"
+      R_PRG=`real_path "$PRG"`
+    done
   fi
 
   SONAR_RUNNER_HOME=`dirname "$PRG"`/..
