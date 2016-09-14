@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class CliTest {
   Exit exit = mock(Exit.class);
@@ -76,5 +77,24 @@ public class CliTest {
     assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.isDisplayStackTrace()).isFalse();
     assertThat(cli.properties().get("sonar.verbose")).isNull();
+  }
+
+  @Test
+  public void should_show_usage() {
+    logs = mock(Logs.class);
+    cli = new Cli(exit, logs);
+    cli.parse(new String[] {"-h"});
+    verify(logs).info("usage: sonar-scanner [options]");
+    verify(exit).exit(Exit.SUCCESS);
+  }
+
+  @Test
+  public void should_show_usage_on_bad_syntax() {
+    logs = mock(Logs.class);
+    cli = new Cli(exit, logs);
+    cli.parse(new String[] {"-w"});
+    verify(logs).error("Unrecognized option: -w");
+    verify(logs).info("usage: sonar-scanner [options]");
+    verify(exit).exit(Exit.ERROR);
   }
 }

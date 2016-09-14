@@ -62,6 +62,7 @@ class Cli {
 
       } else if ("-h".equals(arg) || "--help".equals(arg)) {
         printUsage();
+        exit.exit(Exit.SUCCESS);
 
       } else if ("-v".equals(arg) || "--version".equals(arg)) {
         displayVersionOnly = true;
@@ -120,6 +121,7 @@ class Cli {
   private void printError(String message) {
     logger.error(message);
     printUsage();
+    exit.exit(Exit.ERROR);
   }
 
   private void printUsage() {
@@ -133,6 +135,5 @@ class Cli {
     logger.info(" -v,--version          Display version information");
     logger.info(" -X,--debug            Produce execution debug output");
     logger.info(" -i,--interactive      Run interactively");
-    exit.exit(Exit.SUCCESS);
   }
 }
