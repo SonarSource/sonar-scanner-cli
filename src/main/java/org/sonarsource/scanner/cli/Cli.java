@@ -26,7 +26,6 @@ class Cli {
 
   private boolean debugEnabled = false;
   private boolean displayVersionOnly = false;
-  private boolean displayStackTrace = false;
   private final Properties props = new Properties();
   private final Exit exit;
   private final Logs logger;
@@ -42,10 +41,6 @@ class Cli {
 
   boolean isDisplayVersionOnly() {
     return displayVersionOnly;
-  }
-
-  boolean isDisplayStackTrace() {
-    return displayStackTrace;
   }
 
   Properties properties() {
@@ -66,10 +61,9 @@ class Cli {
 
       } else if ("-v".equals(arg) || "--version".equals(arg)) {
         displayVersionOnly = true;
-
+        
       } else if ("-e".equals(arg) || "--errors".equals(arg)) {
-        displayStackTrace = true;
-        logger.setDisplayStackTrace(true);
+        logger.info("Option -e/--errors is no longer supported and will be ignored");
 
       } else if ("-X".equals(arg) || "--debug".equals(arg)) {
         props.setProperty("sonar.verbose", "true");
@@ -100,7 +94,6 @@ class Cli {
   private void reset() {
     props.clear();
     debugEnabled = false;
-    displayStackTrace = false;
     displayVersionOnly = false;
   }
 
@@ -130,7 +123,6 @@ class Cli {
     logger.info("");
     logger.info("Options:");
     logger.info(" -D,--define <arg>     Define property");
-    logger.info(" -e,--errors           Produce execution error messages");
     logger.info(" -h,--help             Display help information");
     logger.info(" -v,--version          Display version information");
     logger.info(" -X,--debug            Produce execution debug output");

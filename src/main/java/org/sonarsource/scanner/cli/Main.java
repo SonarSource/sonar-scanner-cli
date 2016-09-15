@@ -74,7 +74,7 @@ public class Main {
       runAnalysis(stats, p);
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
-      showError("Error during SonarQube Scanner execution", e, cli.isDisplayStackTrace() || cli.isDebugEnabled());
+      showError("Error during SonarQube Scanner execution", e, cli.isDebugEnabled());
       exit.exit(Exit.ERROR);
     }
 
@@ -95,10 +95,6 @@ public class Main {
       exit.exit(Exit.SUCCESS);
     }
 
-    if (cli.isDisplayStackTrace()) {
-      logger.info("Error stacktraces are turned on.");
-    }
-
     runner = runnerFactory.create(p);
   }
 
@@ -107,10 +103,6 @@ public class Main {
       || "DEBUG".equalsIgnoreCase(props.getProperty("sonar.log.level"))
       || "TRACE".equalsIgnoreCase(props.getProperty("sonar.log.level"))) {
       logger.setDebugEnabled(true);
-      logger.setDisplayStackTrace(true);
-    }
-
-    if (cli.isDisplayStackTrace()) {
       logger.setDisplayStackTrace(true);
     }
   }
@@ -128,13 +120,9 @@ public class Main {
     logger.info(SEPARATOR);
   }
 
-  private void showError(String message, Throwable e, boolean showStackTrace) {
-    if (showStackTrace) {
+  private void showError(String message, Throwable e, boolean debug) {
+    if (showStackTrace(e, debug)) {
       logger.error(message, e);
-      if (!cli.isDebugEnabled()) {
-        logger.error("");
-        suggestDebugMode();
-      }
     } else {
       logger.error(message);
       if (e != null) {
@@ -147,12 +135,17 @@ public class Main {
           previousMsg = cause.getMessage();
         }
       }
-      logger.error("");
-      logger.error("To see the full stack trace of the errors, re-run SonarQube Scanner with the -e switch.");
-      if (!cli.isDebugEnabled()) {
-        suggestDebugMode();
-      }
     }
+    
+    if (!cli.isDebugEnabled()) {
+      logger.error("");
+      suggestDebugMode();
+    }
+  }
+  
+  private static boolean showStackTrace(Throwable e, boolean debug) {
+    // class not available at compile time (loaded by isolated classloader)
+    return debug || "org.sonar.api.utils.MessageException".equals(e.getClass().getName());
   }
 
   private void suggestDebugMode() {

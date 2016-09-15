@@ -28,6 +28,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.sonar.api.utils.MessageException.MessageException;
 import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.ScanProperties;
 
@@ -95,33 +96,34 @@ public class MainTest {
   }
 
   @Test
-  public void show_error_stacktrace() {
-    Exception e = show_error(false, true);
-    verify(logs).error("Error during SonarQube Scanner execution", e);
+  public void show_error() {
+    Exception e = createException(false, false);
+    testException(e, false);
+
+    verify(logs).error("Error during SonarQube Scanner execution");
+    verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
+  }
+
+  @Test
+  public void show_error_MessageException() {
+    Exception e = createException(false, true);
+    testException(e, false);
+
+    verify(logs).error("Error during SonarQube Scanner execution");
     verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
   }
 
   @Test
   public void show_error_debug() {
-    Exception e = show_error(true, false);
+    Exception e = createException(true, false);
+    testException(e, true);
 
     verify(logs).error("Error during SonarQube Scanner execution", e);
     verify(logs, never()).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
   }
 
-  @Test
-  public void show_error_debug_stack() {
-    Exception e = show_error(true, true);
-
-    verify(logs).error("Error during SonarQube Scanner execution", e);
-    verify(logs, never()).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
-  }
-
-  private Exception show_error(boolean debugEnabled, boolean stackTraceEnabled) {
-    Exception e = new NullPointerException("NPE");
-    e = new IllegalStateException("Error", e);
+  private void testException(Exception e, boolean debugEnabled) {
     when(cli.isDebugEnabled()).thenReturn(debugEnabled);
-    when(cli.isDisplayStackTrace()).thenReturn(stackTraceEnabled);
 
     EmbeddedScanner runner = mock(EmbeddedScanner.class);
     doThrow(e).when(runner).runAnalysis(any(Properties.class));
@@ -132,6 +134,16 @@ public class MainTest {
 
     verify(runner).stop();
     verify(exit).exit(Exit.ERROR);
+  }
+
+  private Exception createException(boolean debugEnabled, boolean messageException) {
+    Exception e;
+    if (messageException) {
+      e = new MessageException("my message");
+    } else {
+      e = new IllegalStateException("Error", new NullPointerException("NPE"));
+    }
+
     return e;
   }
 
@@ -151,7 +163,7 @@ public class MainTest {
     inOrder.verify(runnerFactory, times(1)).create(p);
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
   }
-  
+
   @Test
   public void should_skip() throws IOException {
     Properties p = new Properties();
