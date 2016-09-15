@@ -20,8 +20,11 @@
 package org.sonarsource.scanner.cli;
 
 import java.io.PrintStream;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class Logs {
+  private DateTimeFormatter timeFormatter;
   private boolean debugEnabled = false;
   private boolean displayStackTrace = false;
   private PrintStream stdOut;
@@ -30,6 +33,7 @@ public class Logs {
   public Logs(PrintStream stdOut, PrintStream stdErr) {
     this.stdErr = stdErr;
     this.stdOut = stdOut;
+    this.timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
   }
 
   public void setDebugEnabled(boolean debugEnabled) {
@@ -39,33 +43,45 @@ public class Logs {
   public void setDisplayStackTrace(boolean displayStackTrace) {
     this.displayStackTrace = displayStackTrace;
   }
-  
+
   public boolean isDebugEnabled() {
     return debugEnabled;
   }
 
   public void debug(String message) {
     if (isDebugEnabled()) {
-      stdOut.println("DEBUG: " + message);
+      LocalTime currentTime = LocalTime.now();
+      String timestamp = currentTime.format(timeFormatter);
+      stdOut.println(timestamp + " DEBUG: " + message);
     }
   }
 
   public void info(String message) {
-    stdOut.println("INFO: " + message);
+    print(stdOut, "INFO: " + message);
   }
 
   public void warn(String message) {
-    stdOut.println("WARN: " + message);
+    print(stdErr, "WARN: " + message);
   }
 
   public void error(String message) {
-    stdErr.println("ERROR: " + message);
+    print(stdErr, "ERROR: " + message);
   }
 
   public void error(String message, Throwable t) {
-    stdErr.println("ERROR: " + message);
+    print(stdErr, "ERROR: " + message);
     if (t != null && displayStackTrace) {
       t.printStackTrace(stdErr);
+    }
+  }
+
+  private void print(PrintStream stream, String msg) {
+    if (debugEnabled) {
+      LocalTime currentTime = LocalTime.now();
+      String timestamp = currentTime.format(timeFormatter);
+      stream.println(timestamp + " " + msg);
+    } else {
+      stream.println(msg);
     }
   }
 }

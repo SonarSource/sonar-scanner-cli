@@ -21,6 +21,7 @@ package org.sonarsource.scanner.cli;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.sonarsource.scanner.cli.Logs;
@@ -50,19 +51,19 @@ public class LogsTest {
     verify(stdOut).println("INFO: info");
     verifyNoMoreInteractions(stdOut, stdErr);
   }
-  
+
   @Test
   public void testError() {
     Exception e = new NullPointerException("exception");
     logs.setDisplayStackTrace(false);
     logs.error("error1");
     verify(stdErr).println("ERROR: error1");
-    
+
     logs.error("error2", e);
     verify(stdErr).println("ERROR: error2");
-    
+
     verifyNoMoreInteractions(stdOut, stdErr);
-    
+
     logs.setDisplayStackTrace(true);
     logs.error("error3", e);
     verify(stdErr).println("ERROR: error3");
@@ -74,7 +75,7 @@ public class LogsTest {
     logs.setDebugEnabled(true);
 
     logs.debug("debug");
-    verify(stdOut).println("DEBUG: debug");
+    verify(stdOut).println(Matchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d DEBUG: debug$"));
 
     logs.setDebugEnabled(false);
     logs.debug("debug");
