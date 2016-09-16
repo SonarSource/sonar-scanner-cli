@@ -70,18 +70,12 @@ public class LogsTest {
   @Test
   public void testError() {
     Exception e = new NullPointerException("exception");
-    logs.setDisplayStackTrace(false);
     logs.error("error1");
     verify(stdErr).println("ERROR: error1");
 
     logs.error("error2", e);
     verify(stdErr).println("ERROR: error2");
-
-    verifyNoMoreInteractions(stdOut, stdErr);
-
-    logs.setDisplayStackTrace(true);
-    logs.error("error3", e);
-    verify(stdErr).println("ERROR: error3");
+    verify(stdErr).println(e);
     // other interactions to print the exception..
   }
 

@@ -103,7 +103,6 @@ public class Main {
       || "DEBUG".equalsIgnoreCase(props.getProperty("sonar.log.level"))
       || "TRACE".equalsIgnoreCase(props.getProperty("sonar.log.level"))) {
       logger.setDebugEnabled(true);
-      logger.setDisplayStackTrace(true);
     }
   }
 

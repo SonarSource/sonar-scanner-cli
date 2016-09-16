@@ -69,7 +69,6 @@ class Cli {
         props.setProperty("sonar.verbose", "true");
         debugEnabled = true;
         logger.setDebugEnabled(true);
-        logger.setDisplayStackTrace(true);
 
       } else if ("-D".equals(arg) || "--define".equals(arg)) {
         i++;

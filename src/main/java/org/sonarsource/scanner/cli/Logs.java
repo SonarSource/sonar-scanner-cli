@@ -26,7 +26,6 @@ import java.time.format.DateTimeFormatter;
 public class Logs {
   private DateTimeFormatter timeFormatter;
   private boolean debugEnabled = false;
-  private boolean displayStackTrace = false;
   private PrintStream stdOut;
   private PrintStream stdErr;
 
@@ -38,10 +37,6 @@ public class Logs {
 
   public void setDebugEnabled(boolean debugEnabled) {
     this.debugEnabled = debugEnabled;
-  }
-
-  public void setDisplayStackTrace(boolean displayStackTrace) {
-    this.displayStackTrace = displayStackTrace;
   }
 
   public boolean isDebugEnabled() {
@@ -70,7 +65,7 @@ public class Logs {
 
   public void error(String message, Throwable t) {
     print(stdErr, "ERROR: " + message);
-    if (t != null && displayStackTrace) {
+    if (t != null) {
       t.printStackTrace(stdErr);
     }
   }

@@ -220,7 +220,6 @@ public class MainTest {
 
     // Logger used for callback should have debug enabled
     verify(logs).setDebugEnabled(true);
-    verify(logs).setDisplayStackTrace(true);
 
     ArgumentCaptor<Properties> propertiesCapture = ArgumentCaptor.forClass(Properties.class);
     verify(runner).runAnalysis(propertiesCapture.capture());
