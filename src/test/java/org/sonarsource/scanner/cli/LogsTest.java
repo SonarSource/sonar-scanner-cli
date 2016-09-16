@@ -51,6 +51,21 @@ public class LogsTest {
     verify(stdOut).println("INFO: info");
     verifyNoMoreInteractions(stdOut, stdErr);
   }
+  
+  @Test
+  public void testWarn() {
+    logs.warn("warn");
+    verify(stdErr).println("WARN: warn");
+    verifyNoMoreInteractions(stdOut, stdErr);
+  }
+  
+  @Test
+  public void testWarnWithTimestamp() {
+    logs.setDebugEnabled(true);
+    logs.warn("warn");
+    verify(stdErr).println(Matchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d WARN: warn"));
+    verifyNoMoreInteractions(stdOut, stdErr);
+  }
 
   @Test
   public void testError() {
