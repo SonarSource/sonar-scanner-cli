@@ -14,6 +14,7 @@
       <includes>
         <include>sonar-runner.bat</include>
         <include>sonar-scanner.bat</include>
+        <include>sonar-scanner-debug.bat</include>
       </includes>
       <lineEnding>dos</lineEnding>
       <filtered>true</filtered>
@@ -24,6 +25,7 @@
       <includes>
         <include>sonar-runner</include>
         <include>sonar-scanner</include>
+        <include>sonar-scanner-debug</include>
       </includes>
       <lineEnding>unix</lineEnding>
       <fileMode>0755</fileMode>

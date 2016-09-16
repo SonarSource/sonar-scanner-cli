@@ -92,12 +92,11 @@ public class MainTest {
     verify(runner).stop();
     verify(exit).exit(Exit.ERROR);
     verify(logs).error("Caused by: NPE");
-
   }
 
   @Test
   public void show_error() {
-    Exception e = createException(false, false);
+    Exception e = createException(false);
     testException(e, false);
 
     verify(logs).error("Error during SonarQube Scanner execution");
@@ -106,7 +105,7 @@ public class MainTest {
 
   @Test
   public void show_error_MessageException() {
-    Exception e = createException(false, true);
+    Exception e = createException(true);
     testException(e, false);
 
     verify(logs).error("Error during SonarQube Scanner execution");
@@ -115,7 +114,7 @@ public class MainTest {
 
   @Test
   public void show_error_debug() {
-    Exception e = createException(true, false);
+    Exception e = createException(false);
     testException(e, true);
 
     verify(logs).error("Error during SonarQube Scanner execution", e);
@@ -136,7 +135,7 @@ public class MainTest {
     verify(exit).exit(Exit.ERROR);
   }
 
-  private Exception createException(boolean debugEnabled, boolean messageException) {
+  private Exception createException(boolean messageException) {
     Exception e;
     if (messageException) {
       e = new MessageException("my message");
