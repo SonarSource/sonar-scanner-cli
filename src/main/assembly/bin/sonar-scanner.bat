@@ -74,7 +74,7 @@ echo %SONAR_SCANNER_HOME%
 
 set PROJECT_HOME=%CD%
 
-%JAVA_EXEC% -Djava.awt.headless=true %SONAR_SCANNER_OPTS% -cp "%SONAR_SCANNER_HOME%\lib\sonar-scanner-cli-${project.version}.jar" "-Dscanner.home=%SONAR_SCANNER_HOME%" "-Dproject.home=%PROJECT_HOME%" org.sonarsource.scanner.cli.Main %*
+%JAVA_EXEC% -Djava.awt.headless=true %SONAR_SCANNER_DEBUG_OPTS% %SONAR_SCANNER_OPTS% -cp "%SONAR_SCANNER_HOME%\lib\sonar-scanner-cli-${project.version}.jar" "-Dscanner.home=%SONAR_SCANNER_HOME%" "-Dproject.home=%PROJECT_HOME%" org.sonarsource.scanner.cli.Main %*
 if ERRORLEVEL 1 goto error
 goto end
 
