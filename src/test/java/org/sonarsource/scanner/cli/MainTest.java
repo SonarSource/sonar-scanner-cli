@@ -28,7 +28,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.sonar.api.utils.MessageException.MessageException;
+import org.sonar.api.utils.MessageException;
 import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.ScanProperties;
 
@@ -91,7 +91,7 @@ public class MainTest {
 
     verify(runner).stop();
     verify(exit).exit(Exit.ERROR);
-    verify(logs).error("Caused by: NPE");
+    verify(logs).error("Error during SonarQube Scanner execution", e);
   }
 
   @Test
@@ -99,7 +99,7 @@ public class MainTest {
     Exception e = createException(false);
     testException(e, false);
 
-    verify(logs).error("Error during SonarQube Scanner execution");
+    verify(logs).error("Error during SonarQube Scanner execution", e);
     verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
   }
 

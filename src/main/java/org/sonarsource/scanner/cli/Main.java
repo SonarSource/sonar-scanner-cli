@@ -81,7 +81,7 @@ public class Main {
     runner.stop();
     exit.exit(Exit.SUCCESS);
   }
-  
+
   private void checkSkip(Properties properties) {
     if ("true".equalsIgnoreCase(properties.getProperty(ScanProperties.SKIP))) {
       logger.info("SonarQube Scanner analysis skipped");
@@ -125,27 +125,25 @@ public class Main {
       logger.error(message, e);
     } else {
       logger.error(message);
-      if (e != null) {
-        logger.error(e.getMessage());
-        String previousMsg = "";
-        for (Throwable cause = e.getCause(); cause != null
-          && cause.getMessage() != null
-          && !cause.getMessage().equals(previousMsg); cause = cause.getCause()) {
-          logger.error("Caused by: " + cause.getMessage());
-          previousMsg = cause.getMessage();
-        }
+      logger.error(e.getMessage());
+      String previousMsg = "";
+      for (Throwable cause = e.getCause(); cause != null
+        && cause.getMessage() != null
+        && !cause.getMessage().equals(previousMsg); cause = cause.getCause()) {
+        logger.error("Caused by: " + cause.getMessage());
+        previousMsg = cause.getMessage();
       }
     }
-    
+
     if (!cli.isDebugEnabled()) {
       logger.error("");
       suggestDebugMode();
     }
   }
-  
+
   private static boolean showStackTrace(Throwable e, boolean debug) {
     // class not available at compile time (loaded by isolated classloader)
-    return debug || "org.sonar.api.utils.MessageException".equals(e.getClass().getName());
+    return debug || !"org.sonar.api.utils.MessageException".equals(e.getClass().getName());
   }
 
   private void suggestDebugMode() {
