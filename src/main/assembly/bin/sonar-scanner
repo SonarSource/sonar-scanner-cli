@@ -5,6 +5,7 @@
 # Optional ENV vars:
 #   SONAR_SCANNER_HOME - location of runner's installed home dir
 #   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running SonarQube Scanner
+#   SONAR_SCANNER_DEBUG_OPTS - Extra parameters passed to the Java VM for debugging
 
 # The following notice only apply to real_path function copied from
 # https://sites.google.com/site/jdisnard/realpath
@@ -107,6 +108,7 @@ PROJECT_HOME=`pwd`
 exec "$JAVA_CMD" \
   -Djava.awt.headless=true \
   $SONAR_SCANNER_OPTS \
+  $SONAR_SCANNER_DEBUG_OPTS \
   -classpath  $JAR_FILE \
   "-Dscanner.home=\${SONAR_SCANNER_HOME}" \
   "-Dproject.home=\${PROJECT_HOME}" \
