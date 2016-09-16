@@ -70,6 +70,6 @@ CALLSTACK:$(Get-PSCallStack | Out-String)
     }
 }
 
-
+InstallAppveyorTools
 mvn verify "--batch-mode" "-B" "-e" "-V"
 CheckLastExitCode
