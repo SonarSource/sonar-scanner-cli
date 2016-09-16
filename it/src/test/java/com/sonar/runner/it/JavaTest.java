@@ -178,7 +178,7 @@ public class JavaTest extends ScannerTestCase {
     BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getStatus()).isNotEqualTo(0);
     // with the following message
-    assertThat(result.getLogs()).contains("Invalid value of sonar.rouces for bad-sources-dirs");
+    assertThat(result.getLogs()).contains("Invalid value of sonar.sources for bad-source-dirs");
   }
 
   /**
