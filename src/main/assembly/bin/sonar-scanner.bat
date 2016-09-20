@@ -1,4 +1,4 @@
-@REM SonarQube Runner Startup Script for Windows
+@REM SonarQube Scanner Startup Script for Windows
 @REM
 @REM Required ENV vars:
 @REM   JAVA_HOME - location of a JDK home dir
