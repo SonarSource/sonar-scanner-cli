@@ -6,7 +6,7 @@ SonarQube Scanner
 Official SonarQube Scanner used to start code analysis. Project configuration is read from a sonar-project.properties or passed on command line.
 
 Documentation:
-http://docs.sonarqube.org/display/SONAR/Analyzing+with+SonarQube+Scanner
+http://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner
 
 Issue Tracker:
 http://jira.sonarsource.com/browse/SQSCANNER
