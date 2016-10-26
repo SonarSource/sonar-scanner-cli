@@ -103,7 +103,7 @@
                     String pom = new File(project.basedir, '../pom.xml').getText('UTF-8')
                     def matcher = pom =~ /(?s).*<version>(.*?)-SNAPSHOT<\/version>.*/
                     assert matcher.matches()
-                    project.properties['scanner.version'] = matcher[0][1] + '-build' + System.getenv()['CI_BUILD_NUMBER']
+                    project.properties['scanner.version'] = matcher[0][1] + '.0.' + System.getenv()['CI_BUILD_NUMBER']
                     ]]>
                   </source>
                 </configuration>
