@@ -125,6 +125,5 @@ class Cli {
     logger.info(" -h,--help             Display help information");
     logger.info(" -v,--version          Display version information");
     logger.info(" -X,--debug            Produce execution debug output");
-    logger.info(" -i,--interactive      Run interactively");
   }
 }
