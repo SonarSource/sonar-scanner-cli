@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.annotation.Nullable;
+
 import org.sonarsource.scanner.api.Utils;
 
 class Conf {
@@ -206,7 +208,7 @@ class Conf {
     return locatePropertiesFile(settingsFile, props, settingsKey);
   }
 
-  private static Path locatePropertiesFile(Path defaultPath, Properties props, String settingsKey) {
+  private static Path locatePropertiesFile(@Nullable Path defaultPath, Properties props, String settingsKey) {
     Path settingsFile = defaultPath;
     if (settingsFile == null || !Files.exists(settingsFile)) {
       String settingsPath = props.getProperty(settingsKey, "");

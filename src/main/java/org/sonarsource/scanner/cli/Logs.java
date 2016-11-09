@@ -65,9 +65,7 @@ public class Logs {
 
   public void error(String message, Throwable t) {
     print(stdErr, "ERROR: " + message);
-    if (t != null) {
-      t.printStackTrace(stdErr);
-    }
+    t.printStackTrace(stdErr);
   }
 
   private void print(PrintStream stream, String msg) {
