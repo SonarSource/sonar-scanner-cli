@@ -1,4 +1,3 @@
-$ErrorActionPreference = "Stop"
 
 function FetchAndUnzip
 {
