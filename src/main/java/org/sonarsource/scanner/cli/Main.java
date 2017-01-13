@@ -64,6 +64,7 @@ public class Main {
   void execute() {
     Stats stats = new Stats(logger).start();
 
+    int status = Exit.ERROR;
     try {
       Properties p = conf.properties();
       checkSkip(p);
@@ -72,14 +73,22 @@ public class Main {
       runner.start();
       logger.info("SonarQube server " + runner.serverVersion());
       runAnalysis(stats, p);
+      status = Exit.SUCCESS;
     } catch (Exception e) {
+      status = Exit.ERROR;
       displayExecutionResult(stats, "FAILURE");
       showError("Error during SonarQube Scanner execution", e, cli.isDebugEnabled());
-      exit.exit(Exit.ERROR);
+    } finally {
+      try {
+        runner.stop();
+      } catch (Throwable e) {
+        status = Exit.ERROR;
+        logger.error("Unable to properly stop the scanner", e);
+      } finally {
+        exit.exit(status);
+      }
     }
 
-    runner.stop();
-    exit.exit(Exit.SUCCESS);
   }
 
   private void checkSkip(Properties properties) {
