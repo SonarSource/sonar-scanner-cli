@@ -22,6 +22,8 @@ package org.sonarsource.scanner.cli;
 import java.util.Properties;
 import org.sonarsource.scanner.api.ScannerProperties;
 
+import static java.util.Arrays.asList;
+
 class Cli {
 
   private boolean debugEnabled = false;
@@ -50,44 +52,56 @@ class Cli {
   Cli parse(String[] args) {
     reset();
     props.putAll(System.getProperties());
-    for (int i = 0; i < args.length; i++) {
-      String arg = args[i];
-      if (i == 0 && arg.charAt(0) != '-') {
-        props.setProperty(ScannerProperties.TASK, arg);
-
-      } else if ("-h".equals(arg) || "--help".equals(arg)) {
-        printUsage();
-        exit.exit(Exit.SUCCESS);
-
-      } else if ("-v".equals(arg) || "--version".equals(arg)) {
-        displayVersionOnly = true;
-        
-      } else if ("-e".equals(arg) || "--errors".equals(arg)) {
-        logger.info("Option -e/--errors is no longer supported and will be ignored");
-
-      } else if ("-X".equals(arg) || "--debug".equals(arg)) {
-        props.setProperty("sonar.verbose", "true");
-        debugEnabled = true;
-        logger.setDebugEnabled(true);
-
-      } else if ("-D".equals(arg) || "--define".equals(arg)) {
-        i++;
-        if (i >= args.length) {
-          printError("Missing argument for option --define");
-        }
-        arg = args[i];
-        appendPropertyTo(arg, props);
-
-      } else if (arg.startsWith("-D")) {
-        arg = arg.substring(2);
-        appendPropertyTo(arg, props);
-
-      } else {
-        printError("Unrecognized option: " + arg);
-      }
+    if (args.length > 0) {
+      int pos = 0;
+      do {
+        pos = processNextArg(args, pos);
+      } while (pos < args.length);
     }
-
     return this;
+  }
+
+  private int processNextArg(String[] args, int pos) {
+    String arg = args[pos];
+    if (pos == 0 && arg.charAt(0) != '-') {
+      props.setProperty(ScannerProperties.TASK, arg);
+
+    } else if (asList("-h", "--help").contains(arg)) {
+      printUsage();
+      exit.exit(Exit.SUCCESS);
+
+    } else if (asList("-v", "--version").contains(arg)) {
+      displayVersionOnly = true;
+
+    } else if (asList("-e", "--errors").contains(arg)) {
+      logger.info("Option -e/--errors is no longer supported and will be ignored");
+
+    } else if (asList("-X", "--debug").contains(arg)) {
+      props.setProperty("sonar.verbose", "true");
+      debugEnabled = true;
+      logger.setDebugEnabled(true);
+
+    } else if (asList("-D", "--define").contains(arg)) {
+      return processProp(args, pos);
+
+    } else if (arg.startsWith("-D")) {
+      arg = arg.substring(2);
+      appendPropertyTo(arg, props);
+
+    } else {
+      printErrorAndExit("Unrecognized option: " + arg);
+    }
+    return pos + 1;
+  }
+
+  private int processProp(String[] args, int pos) {
+    int valuePos = pos + 1;
+    if (valuePos >= args.length) {
+      printErrorAndExit("Missing argument for option -D/--define");
+    } else {
+      appendPropertyTo(args[valuePos], props);
+    }
+    return valuePos + 1;
   }
 
   private void reset() {
@@ -110,7 +124,7 @@ class Cli {
     props.setProperty(key, value);
   }
 
-  private void printError(String message) {
+  private void printErrorAndExit(String message) {
     logger.error(message);
     printUsage();
     exit.exit(Exit.ERROR);

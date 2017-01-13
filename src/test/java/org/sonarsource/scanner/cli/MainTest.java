@@ -95,7 +95,23 @@ public class MainTest {
   }
 
   @Test
-  public void show_error() {
+  public void should_exit_on_error() {
+    EmbeddedScanner runner = mock(EmbeddedScanner.class);
+    Exception e = new NullPointerException("NPE");
+    e = new IllegalStateException("Error", e);
+    doThrow(e).when(runner).stop();
+    when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
+
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    main.execute();
+
+    verify(runner).stop();
+    verify(exit).exit(Exit.ERROR);
+    verify(logs).error("Unable to properly stop the scanner", e);
+  }
+
+  @Test
+  public void show_error_with_stacktrace() {
     Exception e = createException(false);
     testException(e, false);
 
@@ -109,6 +125,7 @@ public class MainTest {
     testException(e, false);
 
     verify(logs).error("Error during SonarQube Scanner execution");
+    verify(logs).error("Caused by: NPE");
     verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
   }
 
@@ -138,7 +155,7 @@ public class MainTest {
   private Exception createException(boolean messageException) {
     Exception e;
     if (messageException) {
-      e = new MessageException("my message");
+      e = new MessageException("my message", new NullPointerException("NPE"));
     } else {
       e = new IllegalStateException("Error", new NullPointerException("NPE"));
     }

@@ -47,10 +47,19 @@ public class CliTest {
   }
 
   @Test
+  public void should_fail_on_missing_prop() {
+    logs = mock(Logs.class);
+    cli = new Cli(exit, logs);
+    cli.parse(new String[] {"-D"});
+    verify(logs).error("Missing argument for option -D/--define");
+    verify(exit).exit(Exit.ERROR);
+  }
+
+  @Test
   public void should_not_fail_with_errors_option() {
     cli.parse(new String[] {"-e"});
   }
-  
+
   @Test
   public void should_parse_optional_task() {
     cli.parse(new String[] {"-D", "foo=bar"});
@@ -68,8 +77,34 @@ public class CliTest {
   }
 
   @Test
+  public void should_enable_debug_mode_full() {
+    cli.parse(new String[] {"--debug"});
+    assertThat(cli.isDebugEnabled()).isTrue();
+    assertThat(cli.properties().get("sonar.verbose")).isEqualTo("true");
+  }
+
+  @Test
+  public void should_show_version() {
+    cli.parse(new String[] {"-v"});
+    assertThat(cli.isDisplayVersionOnly()).isTrue();
+  }
+
+  @Test
+  public void should_show_version_full() {
+    cli.parse(new String[] {"--version"});
+    assertThat(cli.isDisplayVersionOnly()).isTrue();
+  }
+
+  @Test
   public void should_enable_stacktrace_log() {
     cli.parse(new String[] {"-e"});
+    assertThat(cli.isDebugEnabled()).isFalse();
+    assertThat(cli.properties().get("sonar.verbose")).isNull();
+  }
+
+  @Test
+  public void should_enable_stacktrace_log_full() {
+    cli.parse(new String[] {"--errors"});
     assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.properties().get("sonar.verbose")).isNull();
   }
@@ -86,6 +121,15 @@ public class CliTest {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
     cli.parse(new String[] {"-h"});
+    verify(logs).info("usage: sonar-scanner [options]");
+    verify(exit).exit(Exit.SUCCESS);
+  }
+
+  @Test
+  public void should_show_usage_full() {
+    logs = mock(Logs.class);
+    cli = new Cli(exit, logs);
+    cli.parse(new String[] {"--help"});
     verify(logs).info("usage: sonar-scanner [options]");
     verify(exit).exit(Exit.SUCCESS);
   }
