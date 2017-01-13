@@ -79,7 +79,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_stop_on_error() {
+  public void should_call_stop_on_error_during_analysis() {
     EmbeddedScanner runner = mock(EmbeddedScanner.class);
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
@@ -90,6 +90,24 @@ public class MainTest {
     main.execute();
 
     verify(runner).stop();
+    verify(exit).exit(Exit.ERROR);
+    verify(logs).error("Error during SonarQube Scanner execution", e);
+  }
+
+  @Test
+  public void should_not_call_stop_on_error_during_start() {
+    EmbeddedScanner runner = mock(EmbeddedScanner.class);
+    Exception e = new NullPointerException("NPE");
+    e = new IllegalStateException("Error", e);
+    doThrow(e).when(runner).start();
+    when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
+
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    main.execute();
+
+    verify(runner).start();
+    verify(runner, never()).runAnalysis(any());
+    verify(runner, never()).stop();
     verify(exit).exit(Exit.ERROR);
     verify(logs).error("Error during SonarQube Scanner execution", e);
   }
