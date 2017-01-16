@@ -25,6 +25,8 @@ import com.sonar.orchestrator.locator.ResourceLocation;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.SystemUtils;
 import org.junit.After;
 import org.junit.Rule;
@@ -32,9 +34,10 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.wsclient.issue.Issue;
 import org.sonar.wsclient.issue.IssueQuery;
-import org.sonar.wsclient.services.Resource;
-import org.sonar.wsclient.services.ResourceQuery;
+import org.sonarqube.ws.WsComponents.Component;
+import org.sonarqube.ws.WsMeasures.Measure;
 
+import static java.lang.Integer.parseInt;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class JavaTest extends ScannerTestCase {
@@ -64,21 +67,23 @@ public class JavaTest extends ScannerTestCase {
     build.setProperty("sonar.host.url", orchestrator.getServer().getUrl() + "/");
     orchestrator.executeBuild(build);
 
-    Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:sample").setMetrics("files", "ncloc", "classes", "lcom4", "violations"));
-    // SONARPLUGINS-2399
+    Component project = getComponent("java:sample");
     assertThat(project.getName()).isEqualTo("Java Sample, with comma");
     assertThat(project.getDescription()).isEqualTo("This is a Java sample");
-    assertThat(project.getVersion()).isEqualTo("1.2.3");
-    assertThat(project.getMeasureIntValue("files")).isEqualTo(2);
-    assertThat(project.getMeasureIntValue("classes")).isEqualTo(2);
-    assertThat(project.getMeasureIntValue("ncloc")).isGreaterThan(10);
-    assertThat(project.getMeasureIntValue("violations")).isGreaterThan(0);
 
-    Resource file = orchestrator.getServer().getWsClient()
-      .find(new ResourceQuery("java:sample:src/basic/Hello.java").setMetrics("files", "ncloc", "classes", "violations"));
+    Map<String, Measure> projectMeasures = getMeasures("java:sample", "files", "ncloc", "classes", "violations");
+    // SONARPLUGINS-2399
+    assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(2);
+    assertThat(parseInt(projectMeasures.get("classes").getValue())).isEqualTo(2);
+    assertThat(parseInt(projectMeasures.get("ncloc").getValue())).isGreaterThan(10);
+    assertThat(parseInt(projectMeasures.get("violations").getValue())).isGreaterThan(0);
+
+    Component file = getComponent("java:sample:src/basic/Hello.java");
     assertThat(file.getName()).isEqualTo("Hello.java");
-    assertThat(file.getMeasureIntValue("ncloc")).isEqualTo(7);
-    assertThat(file.getMeasureIntValue("violations")).isGreaterThan(0);
+
+    Map<String, Measure> fileMeasures = getMeasures("java:sample:src/basic/Hello.java", "files", "ncloc", "classes", "violations");
+    assertThat(parseInt(fileMeasures.get("ncloc").getValue())).isEqualTo(7);
+    assertThat(parseInt(fileMeasures.get("violations").getValue())).isGreaterThan(0);
   }
 
   @Test
@@ -90,13 +95,14 @@ public class JavaTest extends ScannerTestCase {
     SonarScanner build = newScanner(new File("projects/java-bytecode"));
     orchestrator.executeBuild(build);
 
-    Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:bytecode").setMetrics("lcom4", "violations"));
+    Component project = getComponent("java:bytecode");
     assertThat(project.getName()).isEqualTo("Java Bytecode Sample");
-    // the squid rules enabled in sonar-way-profile do not exist in SQ 3.0
-    assertThat(project.getMeasureIntValue("violations")).isGreaterThan(0);
 
-    Resource file = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:bytecode:src/HasFindbugsViolation.java").setMetrics("lcom4", "violations"));
-    assertThat(file.getMeasureIntValue("violations")).isGreaterThan(0);
+    Map<String, Measure> projectMeasures = getMeasures("java:bytecode", "violations");
+    // the squid rules enabled in sonar-way-profile do not exist in SQ 3.0
+    assertThat(parseInt(projectMeasures.get("violations").getValue())).isGreaterThan(0);
+
+    assertThat(getMeasureAsInteger("java:bytecode:src/HasFindbugsViolation.java", "violations")).isGreaterThan(0);
 
     // findbugs is executed on bytecode
     List<Issue> issues = orchestrator.getServer().wsClient().issueClient().find(IssueQuery.create().componentRoots("java:bytecode").rules("squid:S1147")).list();
@@ -118,9 +124,9 @@ public class JavaTest extends ScannerTestCase {
     SonarScanner build = newScanner(new File("projects/basedir-with-source"));
     orchestrator.executeBuild(build);
 
-    Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:basedir-with-source").setMetrics("files", "ncloc"));
-    assertThat(project.getMeasureIntValue("files")).isEqualTo(1);
-    assertThat(project.getMeasureIntValue("ncloc")).isGreaterThan(1);
+    Map<String, Measure> projectMeasures = getMeasures("java:basedir-with-source", "files", "ncloc");
+    assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(1);
+    assertThat(parseInt(projectMeasures.get("ncloc").getValue())).isGreaterThan(1);
   }
 
   /**
@@ -136,9 +142,9 @@ public class JavaTest extends ScannerTestCase {
       .setProjectKey("SAMPLE");
     orchestrator.executeBuild(build);
 
-    Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("SAMPLE").setMetrics("files", "ncloc"));
-    assertThat(project.getMeasureIntValue("files")).isEqualTo(2);
-    assertThat(project.getMeasureIntValue("ncloc")).isGreaterThan(1);
+    Map<String, Measure> projectMeasures = getMeasures("SAMPLE", "files", "ncloc");
+    assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(2);
+    assertThat(parseInt(projectMeasures.get("ncloc").getValue())).isGreaterThan(1);
   }
 
   /**
@@ -254,9 +260,9 @@ public class JavaTest extends ScannerTestCase {
       .addArguments("-e");
     orchestrator.executeBuild(build);
 
-    Resource project = orchestrator.getServer().getWsClient().find(new ResourceQuery("java:sample").setMetrics("files", "ncloc", "classes", "lcom4", "violations"));
-    assertThat(project.getDescription()).isEqualTo("This is a Java sample");
-    assertThat(project.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("java:sample").getDescription()).isEqualTo("This is a Java sample");
+    Map<String, Measure> projectMeasures = getMeasures("java:sample", "files", "ncloc", "classes", "violations");
+    assertThat(projectMeasures.values().stream().filter(measure -> measure.getValue() != null).collect(Collectors.toList())).hasSize(4);
   }
 
   @Test

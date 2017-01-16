@@ -25,13 +25,30 @@ import com.sonar.orchestrator.version.Version;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
 import org.apache.commons.lang.StringUtils;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonarqube.ws.WsComponents;
+import org.sonarqube.ws.WsComponents.Component;
+import org.sonarqube.ws.WsMeasures;
+import org.sonarqube.ws.WsMeasures.Measure;
+import org.sonarqube.ws.client.HttpConnector;
+import org.sonarqube.ws.client.WsClient;
+import org.sonarqube.ws.client.WsClientFactories;
+import org.sonarqube.ws.client.component.ShowWsRequest;
+import org.sonarqube.ws.client.measure.ComponentWsRequest;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 public abstract class ScannerTestCase {
 
@@ -69,6 +86,48 @@ public abstract class ScannerTestCase {
     SonarScanner scannerCli = SonarScanner.create(baseDir, keyValueProperties);
     scannerCli.setScannerVersion(artifactVersion().toString());
     return scannerCli;
+  }
+
+  @CheckForNull
+  static Map<String, Measure> getMeasures(String componentKey, String... metricKeys) {
+    return newWsClient().measures().component(new ComponentWsRequest()
+      .setComponentKey(componentKey)
+      .setMetricKeys(asList(metricKeys)))
+      .getComponent().getMeasuresList()
+      .stream()
+      .collect(Collectors.toMap(Measure::getMetric, Function.identity()));
+  }
+
+  @CheckForNull
+  static Measure getMeasure(String componentKey, String metricKey) {
+    WsMeasures.ComponentWsResponse response = newWsClient().measures().component(new ComponentWsRequest()
+      .setComponentKey(componentKey)
+      .setMetricKeys(singletonList(metricKey)));
+    List<Measure> measures = response.getComponent().getMeasuresList();
+    return measures.size() == 1 ? measures.get(0) : null;
+  }
+
+  @CheckForNull
+  static Integer getMeasureAsInteger(String componentKey, String metricKey) {
+    Measure measure = getMeasure(componentKey, metricKey);
+    return (measure == null) ? null : Integer.parseInt(measure.getValue());
+  }
+
+  @CheckForNull
+  static Double getMeasureAsDouble(String componentKey, String metricKey) {
+    Measure measure = getMeasure(componentKey, metricKey);
+    return (measure == null) ? null : Double.parseDouble(measure.getValue());
+  }
+
+  @CheckForNull
+  static Component getComponent(String componentKey) {
+    return newWsClient().components().show(new ShowWsRequest().setKey(componentKey)).getComponent();
+  }
+
+  static WsClient newWsClient() {
+    return WsClientFactories.getDefault().newClient(HttpConnector.newBuilder()
+      .url(orchestrator.getServer().getUrl())
+      .build());
   }
 
 }

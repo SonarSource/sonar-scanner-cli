@@ -24,8 +24,7 @@ import com.sonar.orchestrator.build.SonarScanner;
 import java.io.File;
 import org.junit.After;
 import org.junit.Test;
-import org.sonar.wsclient.services.Resource;
-import org.sonar.wsclient.services.ResourceQuery;
+import org.sonarqube.ws.WsComponents.Component;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -45,18 +44,12 @@ public class MultimoduleTest extends ScannerTestCase {
 
     orchestrator.executeBuild(build);
 
-    Resource rootProject = findResource("simplest-with-props-on-root");
-    assertThat(rootProject.getName()).isEqualTo("Simplest multi-module project with all properties set on the root project");
-    assertThat(rootProject.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("simplest-with-props-on-root").getName()).isEqualTo("Simplest multi-module project with all properties set on the root project");
 
     // Verify that we have the modules
-    Resource module1 = findResource("simplest-with-props-on-root:module1");
-    assertThat(module1.getName()).isEqualTo("module1");
-    assertThat(module1.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("simplest-with-props-on-root:module1").getName()).isEqualTo("module1");
 
-    Resource module2 = findResource("simplest-with-props-on-root:module2");
-    assertThat(module2.getName()).isEqualTo("module2");
-    assertThat(module2.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("simplest-with-props-on-root:module2").getName()).isEqualTo("module2");
 
     // And verify that the working directories are all located in the root folder
     File workDir = new File("projects/multi-module/simplest/simplest-with-props-on-root/.sonar");
@@ -76,18 +69,12 @@ public class MultimoduleTest extends ScannerTestCase {
 
     orchestrator.executeBuild(build);
 
-    Resource rootProject = findResource("multi-language");
-    assertThat(rootProject.getName()).isEqualTo("Simplest multi-language project");
-    assertThat(rootProject.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("multi-language").getName()).isEqualTo("Simplest multi-language project");
 
     // Verify that we have the modules
-    Resource module1 = findResource("multi-language:java-module");
-    assertThat(module1.getName()).isEqualTo("java-module");
-    assertThat(module1.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("multi-language:java-module").getName()).isEqualTo("java-module");
 
-    Resource module2 = findResource("multi-language:js-module");
-    assertThat(module2.getName()).isEqualTo("js-module");
-    assertThat(module2.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("multi-language:js-module").getName()).isEqualTo("js-module");
   }
 
   /**
@@ -99,18 +86,12 @@ public class MultimoduleTest extends ScannerTestCase {
 
     orchestrator.executeBuild(build);
 
-    Resource rootProject = findResource("simplest-with-props-each-module");
-    assertThat(rootProject.getName()).isEqualTo("Simplest multi-module project with properties set on each module");
-    assertThat(rootProject.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("simplest-with-props-each-module").getName()).isEqualTo("Simplest multi-module project with properties set on each module");
 
     // Verify that we have the modules
-    Resource module1 = findResource("simplest-with-props-each-module:module1");
-    assertThat(module1.getName()).isEqualTo("module1");
-    assertThat(module1.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("simplest-with-props-each-module:module1").getName()).isEqualTo("module1");
 
-    Resource module2 = findResource("simplest-with-props-each-module:overridden-key-for-module2");
-    assertThat(module2.getName()).isEqualTo("Module 2");
-    assertThat(module2.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("simplest-with-props-each-module:overridden-key-for-module2").getName()).isEqualTo("Module 2");
   }
 
   /**
@@ -132,18 +113,12 @@ public class MultimoduleTest extends ScannerTestCase {
 
     orchestrator.executeBuild(build);
 
-    Resource rootProject = findResource("deep-path-for-modules");
-    assertThat(rootProject.getName()).isEqualTo("Project with deep path for modules");
-    assertThat(rootProject.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("deep-path-for-modules").getName()).isEqualTo("Project with deep path for modules");
 
     // Verify that we have the modules
-    Resource module1 = findResource("deep-path-for-modules:mod1");
-    assertThat(module1.getName()).isEqualTo("Module 1");
-    assertThat(module1.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("deep-path-for-modules:mod1").getName()).isEqualTo("Module 1");
 
-    Resource module2 = findResource("deep-path-for-modules:mod2");
-    assertThat(module2.getName()).isEqualTo("Module 2");
-    assertThat(module2.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("deep-path-for-modules:mod2").getName()).isEqualTo("Module 2");
   }
 
   /**
@@ -155,18 +130,12 @@ public class MultimoduleTest extends ScannerTestCase {
 
     orchestrator.executeBuild(build);
 
-    Resource rootProject = findResource("module-path-with-space");
-    assertThat(rootProject.getName()).isEqualTo("Project with module path that contain spaces");
-    assertThat(rootProject.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("module-path-with-space").getName()).isEqualTo("Project with module path that contain spaces");
 
     // Verify that we have the modules
-    Resource module1 = findResource("module-path-with-space:module1");
-    assertThat(module1.getName()).isEqualTo("Module 1");
-    assertThat(module1.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("module-path-with-space:module1").getName()).isEqualTo("Module 1");
 
-    Resource module2 = findResource("module-path-with-space:module2");
-    assertThat(module2.getName()).isEqualTo("Module 2");
-    assertThat(module2.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("module-path-with-space:module2").getName()).isEqualTo("Module 2");
   }
 
   /**
@@ -178,20 +147,17 @@ public class MultimoduleTest extends ScannerTestCase {
 
     orchestrator.executeBuild(build);
 
-    Resource rootProject = findResource("overwriting-parent-properties");
+    Component rootProject = getComponent("overwriting-parent-properties");
     assertThat(rootProject.getName()).isEqualTo("Project with modules that overwrite properties");
-    assertThat(rootProject.getVersion()).isEqualTo("1.2.3");
     assertThat(rootProject.getDescription()).isEqualTo("Description of root project");
 
     // Verify that we have the modules
-    Resource module1 = findResource("overwriting-parent-properties:module1-new-key");
+    Component module1 = getComponent("overwriting-parent-properties:module1-new-key");
     assertThat(module1.getName()).isEqualTo("Module 1");
-    assertThat(module1.getVersion()).isEqualTo("1.2.3");
     assertThat(module1.getDescription()).isEqualTo("Description of module 1");
 
-    Resource module2 = findResource("overwriting-parent-properties:module2-new-key");
+    Component module2 = getComponent("overwriting-parent-properties:module2-new-key");
     assertThat(module2.getName()).isEqualTo("Module 2");
-    assertThat(module2.getVersion()).isEqualTo("1.2.3");
     assertThat(module2.getDescription()).isEqualTo("Description of module 2");
   }
 
@@ -204,18 +170,12 @@ public class MultimoduleTest extends ScannerTestCase {
 
     orchestrator.executeBuild(build);
 
-    Resource rootProject = findResource("using-config-file-prop");
-    assertThat(rootProject.getName()).isEqualTo("Advanced use case - mostly used by the Ant task");
-    assertThat(rootProject.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("using-config-file-prop").getName()).isEqualTo("Advanced use case - mostly used by the Ant task");
 
     // Verify that we have the modules
-    Resource module1 = findResource("using-config-file-prop:module1");
-    assertThat(module1.getName()).isEqualTo("Module 1");
-    assertThat(module1.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("using-config-file-prop:module1").getName()).isEqualTo("Module 1");
 
-    Resource module2 = findResource("using-config-file-prop:module2");
-    assertThat(module2.getName()).isEqualTo("Module 2");
-    assertThat(module2.getVersion()).isEqualTo("1.2.3");
+    assertThat(getComponent("using-config-file-prop:module2").getName()).isEqualTo("Module 2");
   }
 
   /**
@@ -247,7 +207,4 @@ public class MultimoduleTest extends ScannerTestCase {
     assertThat(result.getLogs()).contains("The properties file of the module 'module1' does not exist");
   }
 
-  private Resource findResource(String resourceKey) {
-    return orchestrator.getServer().getWsClient().find(new ResourceQuery(resourceKey));
-  }
 }
