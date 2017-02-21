@@ -95,16 +95,6 @@ public class MultimoduleTest extends ScannerTestCase {
   }
 
   /**
-   * SONARPLUGINS-2295
-   */
-  @Test
-  public void test_warning_when_source_folder_on_root_module() {
-    SonarScanner build = newScanner(new File("projects/multi-module/simplest/simplest-with-props-on-each-module"));
-
-    assertThat(orchestrator.executeBuild(build).getLogs()).contains("/!\\ A multi-module project can't have source folders");
-  }
-
-  /**
    * SONARPLUGINS-2202
    */
   @Test
