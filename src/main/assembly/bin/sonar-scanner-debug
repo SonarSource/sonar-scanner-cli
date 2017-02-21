@@ -3,8 +3,8 @@
 # SonarQube Scanner Startup Script for Unix
 #
 # Optional ENV vars:
-#   SONAR_SCANNER_HOME - location of runner's installed home dir
 #   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running SonarQube Scanner
+#   JAVA_HOME - Location of Java's installation
 
 # The following notice only apply to real_path function copied from
 # https://sites.google.com/site/jdisnard/realpath

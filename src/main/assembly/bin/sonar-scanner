@@ -3,9 +3,9 @@
 # SonarQube Scanner Startup Script for Unix
 #
 # Optional ENV vars:
-#   SONAR_SCANNER_HOME - location of runner's installed home dir
-#   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running SonarQube Scanner
+#   SONAR_SCANNER_OPTS - Parameters passed to the Java VM when running SonarQube Scanner
 #   SONAR_SCANNER_DEBUG_OPTS - Extra parameters passed to the Java VM for debugging
+#   JAVA_HOME - Location of Java's installation
 
 # The following notice only apply to real_path function copied from
 # https://sites.google.com/site/jdisnard/realpath
@@ -66,51 +66,49 @@ real_path () {
   echo "$FOO"
 }
 
-if [ -z "$SONAR_SCANNER_HOME" ] ; then
-  PRG="$0"
+PRG="$0"
 
-  if [ -h "$PRG" ] ; then
-    # resolve recursively symlinks
+if [ -h "$PRG" ] ; then
+  # resolve recursively symlinks
+  R_PRG=`real_path "$PRG"`
+  until [ "$R_PRG" = "$PRG" ]; do
+    PRG="$R_PRG"
     R_PRG=`real_path "$PRG"`
-    until [ "$R_PRG" = "$PRG" ]; do
-      PRG="$R_PRG"
-      R_PRG=`real_path "$PRG"`
-    done
-  fi
-
-  SONAR_SCANNER_HOME=`dirname "$PRG"`/..
-
-  # make it fully qualified
-  SONAR_SCANNER_HOME=`cd "$SONAR_SCANNER_HOME" && pwd -P`
+  done
 fi
 
-# check that the SONAR_SCANNER_HOME has been correctly set
-if [ ! -f "$SONAR_SCANNER_HOME/lib/sonar-scanner-cli-${project.version}.jar" ] ; then
-  echo '$SONAR_SCANNER_HOME' does not point to a valid installation directory: $SONAR_SCANNER_HOME
+sonar_scanner_home=`dirname "$PRG"`/..
+
+# make it fully qualified
+sonar_scanner_home=`cd "$sonar_scanner_home" && pwd -P`
+
+# check that sonar_scanner_home has been correctly set
+if [ ! -f "$sonar_scanner_home/lib/sonar-scanner-cli-${project.version}.jar" ] ; then
+  echo '$sonar_scanner_home' does not point to a valid installation directory: $sonar_scanner_home
   exit 1
 fi
 
 if [ -n "$JAVA_HOME" ]
 then
-  JAVA_CMD="$JAVA_HOME/bin/java"
+  java_cmd="$JAVA_HOME/bin/java"
 else
-  JAVA_CMD="`which java`"
+  java_cmd="`which java`"
 fi
 
-JAR_FILE="${SONAR_SCANNER_HOME}"/lib/sonar-scanner-cli-${project.version}.jar
-PROJECT_HOME=`pwd`
+jar_file="${sonar_scanner_home}"/lib/sonar-scanner-cli-${project.version}.jar
+project_home=`pwd`
 
-#echo "Info: Using sonar-scanner at $SONAR_SCANNER_HOME"
-#echo "Info: Using java at $JAVA_CMD"
-#echo "Info: Using classpath $JAR_FILE"
-#echo "Info: Using project $PROJECT_HOME"
+#echo "Info: Using sonar-scanner at $sonar_scanner_home"
+#echo "Info: Using java at $java_cmd"
+#echo "Info: Using classpath $jar_file"
+#echo "Info: Using project $project_home"
 
-exec "$JAVA_CMD" \
+exec "$java_cmd" \
   -Djava.awt.headless=true \
   $SONAR_SCANNER_OPTS \
   $SONAR_SCANNER_DEBUG_OPTS \
-  -classpath  $JAR_FILE \
-  "-Dscanner.home=\${SONAR_SCANNER_HOME}" \
-  "-Dproject.home=\${PROJECT_HOME}" \
+  -classpath  $jar_file \
+  "-Dscanner.home=\${sonar_scanner_home}" \
+  "-Dproject.home=\${project_home}" \
   org.sonarsource.scanner.cli.Main "$@"
 
