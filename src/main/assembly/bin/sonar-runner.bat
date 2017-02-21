@@ -4,7 +4,6 @@
 @REM   JAVA_HOME - location of a JDK home dir
 @REM
 @REM Optional ENV vars:
-@REM   SONAR_RUNNER_HOME - location of runner's installed home dir
 @REM   SONAR_RUNNER_OPTS - parameters passed to the Java VM when running Sonar
 
 @echo off
@@ -49,24 +48,9 @@ goto error
 :foundJavaExeFromJavaHome
 set JAVA_EXEC="%JAVA_HOME%\bin\java.exe"
 
-@REM *** SONAR RUNNER HOME VALIDATION ***
 :OkJava
-if NOT "%SONAR_RUNNER_HOME%"=="" goto cleanSonarRunnerHome
 set SONAR_RUNNER_HOME=%~dp0..
 goto sonarRunnerOpts
-
-:cleanSonarRunnerHome
-@REM If the property has a trailing backslash, remove it
-if "%SONAR_RUNNER_HOME:~-1%"=="\" set SONAR_RUNNER_HOME=%SONAR_RUNNER_HOME:~0,-1%
-
-@REM Check if the provided SONAR_RUNNER_HOME is a valid install dir
-IF EXIST "%SONAR_RUNNER_HOME%\lib\sonar-scanner-cli-${project.version}.jar" goto sonarRunnerOpts
-
-echo.
-echo ERROR: SONAR_RUNNER_HOME exists but does not point to a valid install
-echo        directory: %SONAR_RUNNER_HOME%
-echo.
-goto error
 
 @REM ==== HANDLE DEPRECATED SONAR_RUNNER_OPTS ====
 :sonarRunnerOpts
