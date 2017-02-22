@@ -66,21 +66,21 @@ real_path () {
   echo "$FOO"
 }
 
-PRG="$0"
+script_path="$0"
 
-if [ -h "$PRG" ] ; then
+if [ -h "$script_path" ] ; then
   # resolve recursively symlinks
-  R_PRG=`real_path "$PRG"`
-  until [ "$R_PRG" = "$PRG" ]; do
-    PRG="$R_PRG"
-    R_PRG=`real_path "$PRG"`
+  r_script_path=$(real_path "$script_path")
+  until [ "$r_script_path" = "$script_path" ]; do
+    script_path="$r_script_path"
+    r_script_path=`real_path "$script_path"`
   done
 fi
 
-sonar_scanner_home=`dirname "$PRG"`/..
+sonar_scanner_home=$(dirname "$script_path")/..
 
 # make it fully qualified
-sonar_scanner_home=`cd "$sonar_scanner_home" && pwd -P`
+sonar_scanner_home=$(cd "$sonar_scanner_home" && pwd -P)
 
 # check that sonar_scanner_home has been correctly set
 if [ ! -f "$sonar_scanner_home/lib/sonar-scanner-cli-${project.version}.jar" ] ; then
@@ -92,11 +92,11 @@ if [ -n "$JAVA_HOME" ]
 then
   java_cmd="$JAVA_HOME/bin/java"
 else
-  java_cmd="`which java`"
+  java_cmd="$(which java)"
 fi
 
-jar_file="${sonar_scanner_home}"/lib/sonar-scanner-cli-${project.version}.jar
-project_home=`pwd`
+jar_file=${sonar_scanner_home}/lib/sonar-scanner-cli-${project.version}.jar
+project_home=$(pwd)
 
 #echo "Info: Using sonar-scanner at $sonar_scanner_home"
 #echo "Info: Using java at $java_cmd"
@@ -108,7 +108,7 @@ exec "$java_cmd" \
   $SONAR_SCANNER_OPTS \
   $SONAR_SCANNER_DEBUG_OPTS \
   -classpath  $jar_file \
-  "-Dscanner.home=\${sonar_scanner_home}" \
-  "-Dproject.home=\${project_home}" \
+  -Dscanner.home=\$sonar_scanner_home \
+  -Dproject.home=\$project_home \
   org.sonarsource.scanner.cli.Main "$@"
 

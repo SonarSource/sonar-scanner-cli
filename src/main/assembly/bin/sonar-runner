@@ -67,21 +67,21 @@ real_path () {
 
 echo WARN: 'sonar-runner' script is deprecated. Please use 'sonar-scanner' instead.
 
-PRG="$0"
+script_path="$0"
 
-if [ -h "$PRG" ] ; then
+if [ -h "$script_path" ] ; then
   # resolve recursively symlinks
-  R_PRG=`real_path "$PRG"`
-  until [ "$R_PRG" = "$PRG" ]; do
-    PRG="$R_PRG"
-    R_PRG=`real_path "$PRG"`
+  r_script_path=$(real_path "$script_path")
+  until [ "$R_script_path" = "$script_path" ]; do
+    script_path="$R_script_path"
+    r_script_path=$(real_path "$script_path")
   done
 fi
 
-sonar_runner_home=`dirname "$PRG"`/..
+sonar_runner_home=$(dirname "$script_path")/..
 
 # make it fully qualified
-sonar_runner_home=`cd "$sonar_runner_home" && pwd`
+sonar_runner_home=$(cd "$sonar_runner_home" && pwd)
 
 # check that the sonar_runner_home has been correctly set
 if [ ! -f "$sonar_runner_home/lib/sonar-scanner-cli-${project.version}.jar" ] ; then
@@ -93,7 +93,7 @@ if [ -n "$JAVA_HOME" ]
 then
   java_cmd="$JAVA_HOME/bin/java"
 else
-  java_cmd="`which java`"
+  java_cmd="$(which java)"
 fi
 
 if [ -n "$SONAR_RUNNER_OPTS" ] ;
@@ -104,8 +104,8 @@ then
   fi
 fi
 
-jar_file="${sonar_runner_home}"/lib/sonar-scanner-cli-${project.version}.jar
-project_home=`pwd`
+jar_file=${sonar_runner_home}/lib/sonar-scanner-cli-${project.version}.jar
+project_home=$(pwd)
 
 #echo "Info: Using sonar-runner at $sonar_runner_home"
 #echo "Info: Using java at $java_cmd"
@@ -116,7 +116,7 @@ exec "$java_cmd" \
   -Djava.awt.headless=true \
   $SONAR_SCANNER_OPTS \
   -classpath  $jar_file \
-  "-Dscanner.home=\${sonar_runner_home}" \
-  "-Dproject.home=\${project_home}" \
+  -Dscanner.home=\$sonar_runner_home \
+  -Dproject.home=\$project_home \
   org.sonarsource.scanner.cli.Main "$@"
 
