@@ -88,7 +88,7 @@ exec "$java_cmd" \
   $SONAR_SCANNER_OPTS \
   $SONAR_SCANNER_DEBUG_OPTS \
   -classpath  "$jar_file" \
-  -Dscanner.home=\$sonar_scanner_home \
-  -Dproject.home=\$project_home \
+  -Dscanner.home="$sonar_scanner_home" \
+  -Dproject.home="$project_home" \
   org.sonarsource.scanner.cli.Main "$@"
 

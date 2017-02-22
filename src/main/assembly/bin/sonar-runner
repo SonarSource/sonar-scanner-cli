@@ -96,7 +96,7 @@ exec "$java_cmd" \
   -Djava.awt.headless=true \
   $SONAR_SCANNER_OPTS \
   -classpath "$jar_file" \
-  -Dscanner.home=\$sonar_runner_home \
-  -Dproject.home=\$project_home \
+  -Dscanner.home="$sonar_runner_home" \
+  -Dproject.home="$project_home" \
   org.sonarsource.scanner.cli.Main "$@"
 
