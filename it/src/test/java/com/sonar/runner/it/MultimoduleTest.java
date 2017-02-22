@@ -52,12 +52,12 @@ public class MultimoduleTest extends ScannerTestCase {
     assertThat(getComponent("simplest-with-props-on-root:module2").getName()).isEqualTo("module2");
 
     // And verify that the working directories are all located in the root folder
-    File workDir = new File("projects/multi-module/simplest/simplest-with-props-on-root/.sonar");
+    File workDir = new File("projects/multi-module/simplest/simplest-with-props-on-root/.scannerwork");
     assertThat(workDir).exists();
     assertThat(new File(workDir, "simplest-with-props-on-root_module1")).exists();
     assertThat(new File(workDir, "simplest-with-props-on-root_module2")).exists();
-    assertThat(new File("projects/multi-module/simplest/simplest-with-props-on-root/module1/.sonar")).doesNotExist();
-    assertThat(new File("projects/multi-module/simplest/simplest-with-props-on-root/module2/.sonar")).doesNotExist();
+    assertThat(new File("projects/multi-module/simplest/simplest-with-props-on-root/module1/.scannerwork")).doesNotExist();
+    assertThat(new File("projects/multi-module/simplest/simplest-with-props-on-root/module2/.scannerwork")).doesNotExist();
   }
 
   /**
