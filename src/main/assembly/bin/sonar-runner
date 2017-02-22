@@ -34,35 +34,19 @@
 # authors and should not be interpreted as representing official policies, either expressed
 # or implied, of Jon Disnard.
 real_path () {
-  OIFS=$IFS
-  IFS='/'
-  for I in $1
-  do
-    # Resolve relative path punctuation.
-    if [ "$I" = "." ] || [ -z "$I" ]
-      then continue
-    elif [ "$I" = ".." ]
-      then FOO="${FOO%%/${FOO##*/}}"
-           continue
-      else FOO="${FOO}/${I}"
-    fi
+  target=$1
 
-    # Dereference symbolic links.
-    if [ -h "$FOO" ] && [ -x "/bin/ls" ]
-      then IFS=$OIFS
-           set `/bin/ls -l "$FOO"`
-           while shift ;
-           do
-             if [ "$1" = "->" ]
-               then FOO=$2
-                    shift $#
-                    break
-             fi
-           done
-    fi
+  (
+  while true; do
+    cd "$(dirname "$target")"
+    target=$(basename "$target")
+    link=$(readlink "$target")
+    test "$link" || break
+    target=$link
   done
-  IFS=$OIFS
-  echo "$FOO"
+
+  echo "$(pwd -P)/$target"
+  )
 }
 
 echo WARN: 'sonar-runner' script is deprecated. Please use 'sonar-scanner' instead.
@@ -71,11 +55,7 @@ script_path="$0"
 
 if [ -h "$script_path" ] ; then
   # resolve recursively symlinks
-  r_script_path=$(real_path "$script_path")
-  until [ "$R_script_path" = "$script_path" ]; do
-    script_path="$R_script_path"
-    r_script_path=$(real_path "$script_path")
-  done
+  script_path=$(real_path "$script_path")
 fi
 
 sonar_runner_home=$(dirname "$script_path")/..
@@ -115,7 +95,7 @@ project_home=$(pwd)
 exec "$java_cmd" \
   -Djava.awt.headless=true \
   $SONAR_SCANNER_OPTS \
-  -classpath  $jar_file \
+  -classpath "$jar_file" \
   -Dscanner.home=\$sonar_runner_home \
   -Dproject.home=\$project_home \
   org.sonarsource.scanner.cli.Main "$@"
