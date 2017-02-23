@@ -32,7 +32,7 @@ import org.sonar.api.utils.MessageException;
 import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.ScanProperties;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -64,7 +64,7 @@ public class MainTest {
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
     when(conf.properties()).thenReturn(properties);
   }
-  
+
   @Test
   public void should_execute_runner() {
     Main main = new Main(exit, cli, conf, runnerFactory, logs);
