@@ -64,7 +64,7 @@ public class MainTest {
     when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
     when(conf.properties()).thenReturn(properties);
   }
-
+  
   @Test
   public void should_execute_runner() {
     Main main = new Main(exit, cli, conf, runnerFactory, logs);
