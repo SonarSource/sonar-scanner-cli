@@ -62,10 +62,17 @@ class Conf {
     result.putAll(System.getProperties());
     result.putAll(loadEnvironmentProperties());
     result.putAll(cli.properties());
+    result = resolve(result);
+    
     // root project base directory must be present and be absolute
     result.setProperty(PROPERTY_PROJECT_BASEDIR, getRootProjectBaseDir(result).toString());
     result.remove(PROJECT_HOME);
     return result;
+  }
+
+  private Properties resolve(Properties props) {
+    PropertyResolver resolver = new PropertyResolver(props, env);
+    return resolver.resolve();
   }
 
   private Properties loadEnvironmentProperties() {
