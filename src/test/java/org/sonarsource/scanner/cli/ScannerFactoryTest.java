@@ -49,6 +49,8 @@ public class ScannerFactoryTest {
 
     assertThat(runner).isInstanceOf(EmbeddedScanner.class);
     assertThat(runner.globalProperties().get("foo")).isEqualTo("bar");
+    assertThat(runner.app()).isEqualTo("ScannerCli");
+    assertThat(runner.appVersion()).isNotNull();
   }
 
   @Test
