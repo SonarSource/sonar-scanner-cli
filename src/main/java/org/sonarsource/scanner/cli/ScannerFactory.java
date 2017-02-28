@@ -32,7 +32,9 @@ class ScannerFactory {
   }
 
   EmbeddedScanner create(Properties props) {
-    return EmbeddedScanner.create(new DefaultLogOutput()).addGlobalProperties(props);
+    return EmbeddedScanner.create(new DefaultLogOutput())
+      .addGlobalProperties(props)
+      .setApp("ScannerCli", ScannerVersion.version());
   }
 
   class DefaultLogOutput implements LogOutput {
