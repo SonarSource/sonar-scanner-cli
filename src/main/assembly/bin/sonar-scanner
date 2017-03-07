@@ -35,9 +35,12 @@ sonar_scanner_home=$(dirname "$script_path")/..
 # make it fully qualified
 sonar_scanner_home=$(cd "$sonar_scanner_home" && pwd -P)
 
+jar_file=$sonar_scanner_home/lib/sonar-scanner-cli-${project.version}.jar
+
 # check that sonar_scanner_home has been correctly set
-if [ ! -f "$sonar_scanner_home/lib/sonar-scanner-cli-${project.version}.jar" ] ; then
-  echo '$sonar_scanner_home' does not point to a valid installation directory: $sonar_scanner_home
+if [ ! -f "$jar_file" ] ; then
+  echo "File does not exist: $jar_file"
+  echo "'$sonar_scanner_home' does not point to a valid installation directory: $sonar_scanner_home"
   exit 1
 fi
 
@@ -48,7 +51,6 @@ else
   java_cmd="$(which java)"
 fi
 
-jar_file=${sonar_scanner_home}/lib/sonar-scanner-cli-${project.version}.jar
 project_home=$(pwd)
 
 #echo "Info: Using sonar-scanner at $sonar_scanner_home"
