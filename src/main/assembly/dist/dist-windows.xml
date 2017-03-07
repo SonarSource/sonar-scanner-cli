@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+  <id>dist-windows</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>true</includeBaseDirectory>
+  <fileSets>
+
+    <!-- jre basic, except bin/ -->
+    <fileSet>
+      <directory>${jre.dir}</directory>
+      <outputDirectory>lib/jre</outputDirectory>
+      <excludes>
+        <exclude>bin/**</exclude>
+        <exclude>man/**</exclude>
+        <exclude>plugin/**</exclude>
+      </excludes>
+    </fileSet>
+
+    <!-- jre bin -->
+    <fileSet>
+      <directory>${jre.dir}/bin</directory>
+      <outputDirectory>lib/jre/bin</outputDirectory>
+      <fileMode>0755</fileMode>
+    </fileSet>
+
+    <!-- scanner files -->
+    <fileSet>
+      <directory>${project.build.directory}</directory>
+      <outputDirectory>lib</outputDirectory>
+      <fileMode>0644</fileMode>
+      <includes>
+        <include>${scanner.jar}</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/assembly/conf</directory>
+      <outputDirectory>conf</outputDirectory>
+      <fileMode>0644</fileMode>
+      <lineEnding>unix</lineEnding>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/assembly/bin</directory>
+      <outputDirectory>bin</outputDirectory>
+      <fileMode>0755</fileMode>
+      <lineEnding>dos</lineEnding>
+      <filtered>true</filtered>
+      <includes>
+        <include>sonar-scanner.bat</include>
+        <include>sonar-scanner-debug.bat</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>

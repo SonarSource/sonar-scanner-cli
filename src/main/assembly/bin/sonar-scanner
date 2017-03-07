@@ -44,6 +44,7 @@ if [ ! -f "$jar_file" ] ; then
   exit 1
 fi
 
+${set_java_home_unix}
 if [ -n "$JAVA_HOME" ]
 then
   java_cmd="$JAVA_HOME/bin/java"

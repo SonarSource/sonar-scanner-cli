@@ -44,6 +44,19 @@
 
     <!-- used for deployment to SonarSource Artifactory -->
     <gitRepositoryName>sonar-scanner-cli</gitRepositoryName>
+
+    <!-- prepare for assembly -->
+    <unpack.dir>${project.build.directory}/unpack</unpack.dir>
+    <!-- TODO -->
+    <jre.version>1.8.0_121</jre.version>
+    <jre-linux.dir>${unpack.dir}/jre${jre.version}</jre-linux.dir>
+    <jre-windows.dir>${unpack.dir}/jre${jre.version}</jre-windows.dir>
+    <jre-macosx.dir>${unpack.dir}/jre${jre.version}.jre</jre-macosx.dir>
+
+    <!-- configure assembly -->
+    <set_java_home_unix>export JAVA_HOME=$sonar_scanner_home/lib/jre</set_java_home_unix>
+    <set_java_home_windows>set JAVA_HOME="%SONAR_SCANNER_HOME%\..\lib\jre"</set_java_home_windows>
+    <scanner.jar>${project.build.finalName}.jar</scanner.jar>
   </properties>
 
   <dependencies>
@@ -129,6 +142,7 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
+            <id>cli</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
@@ -179,5 +193,183 @@
         <module>it</module>
       </modules>
     </profile>
+
+    <profile>
+      <id>dist-linux</id>
+      <properties>
+        <jre.dir>${jre-linux.dir}</jre.dir>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+              <execution>
+                <id>unpack</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <artifactItems>
+                <!-- TODO: replace with proper JRE artifact -->
+                <artifactItem>
+                  <groupId>dummy.jre</groupId>
+                  <artifactId>jre-linux</artifactId>
+                  <version>1.0</version>
+                  <type>tar.gz</type>
+                  <overWrite>true</overWrite>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${unpack.dir}</outputDirectory>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>dist-linux</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>sonar-scanner-linux-${project.version}</finalName>
+                  <appendAssemblyId>false</appendAssemblyId>
+                  <escapeString>\</escapeString>
+                  <descriptors>
+                    <descriptor>src/main/assembly/dist/dist-linux.xml</descriptor>
+                  </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>dist-windows</id>
+      <properties>
+        <jre.dir>${jre-windows.dir}</jre.dir>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+              <execution>
+                <id>unpack</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <artifactItems>
+                <!-- TODO: replace with proper JRE artifact -->
+                <artifactItem>
+                  <groupId>dummy.jre</groupId>
+                  <artifactId>jre-windows</artifactId>
+                  <version>1.0</version>
+                  <type>tar.gz</type>
+                  <overWrite>true</overWrite>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${unpack.dir}</outputDirectory>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>dist-windows</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>sonar-scanner-windows-${project.version}</finalName>
+                  <appendAssemblyId>false</appendAssemblyId>
+                  <escapeString>\</escapeString>
+                  <descriptors>
+                    <descriptor>src/main/assembly/dist/dist-windows.xml</descriptor>
+                  </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>dist-macosx</id>
+      <properties>
+        <jre.dir>${jre-macosx.dir}</jre.dir>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+              <execution>
+                <id>unpack</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <artifactItems>
+                <!-- TODO: replace with proper JRE artifact -->
+                <artifactItem>
+                  <groupId>dummy.jre</groupId>
+                  <artifactId>jre-macosx</artifactId>
+                  <version>1.0</version>
+                  <type>tar.gz</type>
+                  <overWrite>true</overWrite>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${unpack.dir}</outputDirectory>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>dist-macosx</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>sonar-scanner-macosx-${project.version}</finalName>
+                  <appendAssemblyId>false</appendAssemblyId>
+                  <escapeString>\</escapeString>
+                  <descriptors>
+                    <descriptor>src/main/assembly/dist/dist-macosx.xml</descriptor>
+                  </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
+
 </project>
