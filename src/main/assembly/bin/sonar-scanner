@@ -44,7 +44,11 @@ if [ ! -f "$jar_file" ] ; then
   exit 1
 fi
 
-${set_java_home_unix}
+use_embedded_jre=${use_embedded_jre}
+if [ "$use_embedded_jre" = true ]; then
+  export JAVA_HOME=$sonar_scanner_home/lib/jre
+fi
+
 if [ -n "$JAVA_HOME" ]
 then
   java_cmd="$JAVA_HOME/bin/java"

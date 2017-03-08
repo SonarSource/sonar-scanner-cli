@@ -45,18 +45,12 @@
     <!-- used for deployment to SonarSource Artifactory -->
     <gitRepositoryName>sonar-scanner-cli</gitRepositoryName>
 
-    <!-- prepare for assembly -->
+    <!-- configuration for assembly of distributions -->
+    <use_embedded_jre>false</use_embedded_jre>
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
+    <scanner.jar>${project.build.finalName}.jar</scanner.jar>
     <!-- TODO -->
     <jre.version>1.8.0_121</jre.version>
-    <jre-linux.dir>${unpack.dir}/jre${jre.version}</jre-linux.dir>
-    <jre-windows.dir>${unpack.dir}/jre${jre.version}</jre-windows.dir>
-    <jre-macosx.dir>${unpack.dir}/jre${jre.version}.jre</jre-macosx.dir>
-
-    <!-- configure assembly -->
-    <set_java_home_unix>export JAVA_HOME=$sonar_scanner_home/lib/jre</set_java_home_unix>
-    <set_java_home_windows>set JAVA_HOME="%SONAR_SCANNER_HOME%\..\lib\jre"</set_java_home_windows>
-    <scanner.jar>${project.build.finalName}.jar</scanner.jar>
   </properties>
 
   <dependencies>
@@ -197,7 +191,8 @@
     <profile>
       <id>dist-linux</id>
       <properties>
-        <jre.dir>${jre-linux.dir}</jre.dir>
+        <jre.dir>${unpack.dir}/linux/jre${jre.version}</jre.dir>
+        <use_embedded_jre>true</use_embedded_jre>
       </properties>
       <build>
         <plugins>
@@ -225,7 +220,7 @@
                   <overWrite>true</overWrite>
                 </artifactItem>
               </artifactItems>
-              <outputDirectory>${unpack.dir}</outputDirectory>
+              <outputDirectory>${unpack.dir}/linux</outputDirectory>
             </configuration>
           </plugin>
 
@@ -256,7 +251,8 @@
     <profile>
       <id>dist-windows</id>
       <properties>
-        <jre.dir>${jre-windows.dir}</jre.dir>
+        <jre.dir>${unpack.dir}/windows/jre${jre.version}</jre.dir>
+        <use_embedded_jre>true</use_embedded_jre>
       </properties>
       <build>
         <plugins>
@@ -284,7 +280,7 @@
                   <overWrite>true</overWrite>
                 </artifactItem>
               </artifactItems>
-              <outputDirectory>${unpack.dir}</outputDirectory>
+              <outputDirectory>${unpack.dir}/windows</outputDirectory>
             </configuration>
           </plugin>
 
@@ -315,7 +311,8 @@
     <profile>
       <id>dist-macosx</id>
       <properties>
-        <jre.dir>${jre-macosx.dir}</jre.dir>
+        <jre.dir>${unpack.dir}/macosx/jre${jre.version}.jre</jre.dir>
+        <use_embedded_jre>true</use_embedded_jre>
       </properties>
       <build>
         <plugins>
@@ -343,7 +340,7 @@
                   <overWrite>true</overWrite>
                 </artifactItem>
               </artifactItems>
-              <outputDirectory>${unpack.dir}</outputDirectory>
+              <outputDirectory>${unpack.dir}/macosx</outputDirectory>
             </configuration>
           </plugin>
 

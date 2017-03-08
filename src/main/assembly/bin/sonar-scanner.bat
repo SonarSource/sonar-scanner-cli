@@ -17,7 +17,12 @@ set SONAR_SCANNER_HOME=%~dp0..
 
 @REM ==== START VALIDATION ====
 @REM *** JAVA EXEC VALIDATION ***
-${set_java_home_windows}
+
+set use_embedded_jre=${use_embedded_jre}
+if "%use_embedded_jre%" == "true" (
+  set JAVA_HOME="%SONAR_SCANNER_HOME%\..\lib\jre"
+)
+
 if not "%JAVA_HOME%" == "" goto foundJavaHome
 
 for %%i in (java.exe) do set JAVA_EXEC=%%~$PATH:i
