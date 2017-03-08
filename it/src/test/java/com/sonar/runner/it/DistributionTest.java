@@ -70,18 +70,20 @@ public class DistributionTest extends ScannerTestCase {
     unzip(zipFile, workDir);
 
     Path scannerHome = Files.list(workDir).findFirst().get();
-    Path javaPath = scannerHome.resolve("lib/jre/bin/java");
-    assertThat(javaPath).isRegularFile();
+    Path javaPath;
 
     switch (os) {
       case LINUX:
       case MACOSX:
         sonarScannerPath = scannerHome.resolve("bin/sonar-scanner");
         sonarScannerPath.toFile().setExecutable(true);
+        javaPath = scannerHome.resolve("lib/jre/bin/java");
         javaPath.toFile().setExecutable(true);
         break;
       case WINDOWS:
         sonarScannerPath = scannerHome.resolve("bin/sonar-scanner.bat");
+        javaPath = scannerHome.resolve("lib/jre/bin/java.exe");
+        assertThat(javaPath).isRegularFile();
         break;
     }
 
@@ -112,6 +114,8 @@ public class DistributionTest extends ScannerTestCase {
     ProcessBuilder pb = new ProcessBuilder(sonarScannerPath.toString(), "-Dsonar.host.url=" + orchestrator.getServer().getUrl());
     pb.directory(projectDir);
     Process p = pb.start();
+    // needed on windows, otherwise process will not exit
+    p.getInputStream().close();
     p.waitFor(SCRIPT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
     assertThat(p.exitValue()).isEqualTo(0);
 
