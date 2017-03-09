@@ -9,7 +9,7 @@
 
     <!-- jre basic, except bin/ -->
     <fileSet>
-      <directory>${jre.dir}</directory>
+      <directory>${unpack.dir}/windows/jre${jre.version}</directory>
       <outputDirectory>lib/jre</outputDirectory>
       <excludes>
         <exclude>bin/**</exclude>
@@ -20,7 +20,7 @@
 
     <!-- jre bin -->
     <fileSet>
-      <directory>${jre.dir}/bin</directory>
+      <directory>${unpack.dir}/windows/jre${jre.version}/bin</directory>
       <outputDirectory>lib/jre/bin</outputDirectory>
       <fileMode>0755</fileMode>
     </fileSet>

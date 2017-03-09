@@ -177,40 +177,6 @@
           </execution>
         </executions>
       </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>target/sonar-scanner-linux-${project.version}.zip</file>
-                  <type>zip</type>
-                  <classifier>linux</classifier>
-                </artifact>
-                <artifact>
-                  <file>target/sonar-scanner-windows-${project.version}.zip</file>
-                  <type>zip</type>
-                  <classifier>windows</classifier>
-                </artifact>
-                <artifact>
-                  <file>target/sonar-scanner-macosx-${project.version}.zip</file>
-                  <type>zip</type>
-                  <classifier>macosx</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
@@ -224,10 +190,6 @@
 
     <profile>
       <id>dist-linux</id>
-      <properties>
-        <jre.dir>${unpack.dir}/linux/jre${jre.version}</jre.dir>
-        <use_embedded_jre>true</use_embedded_jre>
-      </properties>
       <build>
         <plugins>
           <plugin>
@@ -274,6 +236,9 @@
                   <descriptors>
                     <descriptor>src/main/assembly/dist/dist-linux.xml</descriptor>
                   </descriptors>
+                  <filters>
+                    <filter>src/main/assembly/dist/filter.properties</filter>
+                  </filters>
                 </configuration>
               </execution>
             </executions>
@@ -284,10 +249,6 @@
 
     <profile>
       <id>dist-windows</id>
-      <properties>
-        <jre.dir>${unpack.dir}/windows/jre${jre.version}</jre.dir>
-        <use_embedded_jre>true</use_embedded_jre>
-      </properties>
       <build>
         <plugins>
           <plugin>
@@ -334,6 +295,9 @@
                   <descriptors>
                     <descriptor>src/main/assembly/dist/dist-windows.xml</descriptor>
                   </descriptors>
+                  <filters>
+                    <filter>src/main/assembly/dist/filter.properties</filter>
+                  </filters>
                 </configuration>
               </execution>
             </executions>
@@ -344,10 +308,6 @@
 
     <profile>
       <id>dist-macosx</id>
-      <properties>
-        <jre.dir>${unpack.dir}/macosx/jre${jre.version}.jre</jre.dir>
-        <use_embedded_jre>true</use_embedded_jre>
-      </properties>
       <build>
         <plugins>
           <plugin>
@@ -394,6 +354,9 @@
                   <descriptors>
                     <descriptor>src/main/assembly/dist/dist-macosx.xml</descriptor>
                   </descriptors>
+                  <filters>
+                    <filter>src/main/assembly/dist/filter.properties</filter>
+                  </filters>
                 </configuration>
               </execution>
             </executions>
