@@ -46,7 +46,6 @@
     <gitRepositoryName>sonar-scanner-cli</gitRepositoryName>
 
     <!-- configuration for assembly of distributions -->
-    <use_embedded_jre>false</use_embedded_jre>
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
     <scanner.jar>${project.build.finalName}.jar</scanner.jar>
     <!-- TODO -->
@@ -148,6 +147,9 @@
               <descriptors>
                 <descriptor>${project.basedir}/assembly.xml</descriptor>
               </descriptors>
+              <filters>
+                <filter>src/main/assembly/filter.properties</filter>
+              </filters>
             </configuration>
           </execution>
         </executions>
