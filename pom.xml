@@ -145,10 +145,10 @@
               <appendAssemblyId>false</appendAssemblyId>
               <escapeString>\</escapeString>
               <descriptors>
-                <descriptor>${project.basedir}/assembly.xml</descriptor>
+                <descriptor>src/main/assembly/noarch.xml</descriptor>
               </descriptors>
               <filters>
-                <filter>src/main/assembly/filter.properties</filter>
+                <filter>src/main/assembly/filter-noarch.properties</filter>
               </filters>
             </configuration>
           </execution>
@@ -235,10 +235,10 @@
                   <finalName>sonar-scanner-${project.version}</finalName>
                   <escapeString>\</escapeString>
                   <descriptors>
-                    <descriptor>src/main/assembly/dist/dist-linux.xml</descriptor>
+                    <descriptor>src/main/assembly/dist-linux.xml</descriptor>
                   </descriptors>
                   <filters>
-                    <filter>src/main/assembly/dist/filter.properties</filter>
+                    <filter>src/main/assembly/filter-dist.properties</filter>
                   </filters>
                 </configuration>
               </execution>
@@ -293,10 +293,10 @@
                   <finalName>sonar-scanner-${project.version}</finalName>
                   <escapeString>\</escapeString>
                   <descriptors>
-                    <descriptor>src/main/assembly/dist/dist-windows.xml</descriptor>
+                    <descriptor>src/main/assembly/dist-windows.xml</descriptor>
                   </descriptors>
                   <filters>
-                    <filter>src/main/assembly/dist/filter.properties</filter>
+                    <filter>src/main/assembly/filter-dist.properties</filter>
                   </filters>
                 </configuration>
               </execution>
@@ -351,10 +351,10 @@
                   <finalName>sonar-scanner-${project.version}</finalName>
                   <escapeString>\</escapeString>
                   <descriptors>
-                    <descriptor>src/main/assembly/dist/dist-macosx.xml</descriptor>
+                    <descriptor>src/main/assembly/dist-macosx.xml</descriptor>
                   </descriptors>
                   <filters>
-                    <filter>src/main/assembly/dist/filter.properties</filter>
+                    <filter>src/main/assembly/filter-dist.properties</filter>
                   </filters>
                 </configuration>
               </execution>
