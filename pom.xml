@@ -224,14 +224,12 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
-                <id>dist-linux</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
                 </goals>
                 <configuration>
                   <finalName>sonar-scanner-linux-${project.version}</finalName>
-                  <appendAssemblyId>false</appendAssemblyId>
                   <escapeString>\</escapeString>
                   <descriptors>
                     <descriptor>src/main/assembly/dist/dist-linux.xml</descriptor>
@@ -283,14 +281,12 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
-                <id>dist-windows</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
                 </goals>
                 <configuration>
                   <finalName>sonar-scanner-windows-${project.version}</finalName>
-                  <appendAssemblyId>false</appendAssemblyId>
                   <escapeString>\</escapeString>
                   <descriptors>
                     <descriptor>src/main/assembly/dist/dist-windows.xml</descriptor>
@@ -342,14 +338,12 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
-                <id>dist-macosx</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
                 </goals>
                 <configuration>
                   <finalName>sonar-scanner-macosx-${project.version}</finalName>
-                  <appendAssemblyId>false</appendAssemblyId>
                   <escapeString>\</escapeString>
                   <descriptors>
                     <descriptor>src/main/assembly/dist/dist-macosx.xml</descriptor>
