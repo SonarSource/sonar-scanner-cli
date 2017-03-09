@@ -198,7 +198,7 @@
             <version>3.0.0</version>
             <executions>
               <execution>
-                <id>unpack</id>
+                <id>unpack-linux</id>
                 <phase>package</phase>
                 <goals>
                   <goal>unpack</goal>
@@ -224,6 +224,7 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
+                <id>assemble-linux</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
@@ -255,7 +256,7 @@
             <version>3.0.0</version>
             <executions>
               <execution>
-                <id>unpack</id>
+                <id>unpack-windows</id>
                 <phase>package</phase>
                 <goals>
                   <goal>unpack</goal>
@@ -281,6 +282,7 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
+                <id>assemble-windows</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
@@ -312,7 +314,7 @@
             <version>3.0.0</version>
             <executions>
               <execution>
-                <id>unpack</id>
+                <id>unpack-macosx</id>
                 <phase>package</phase>
                 <goals>
                   <goal>unpack</goal>
@@ -338,6 +340,7 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
+                <id>assemble-macosx</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
