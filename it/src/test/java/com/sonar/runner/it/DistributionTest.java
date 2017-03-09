@@ -113,6 +113,8 @@ public class DistributionTest extends ScannerTestCase {
   private void executeShellScript(File projectDir, String projectKey, Orchestrator orchestrator) throws IOException, InterruptedException {
     ProcessBuilder pb = new ProcessBuilder(sonarScannerPath.toString(), "-Dsonar.host.url=" + orchestrator.getServer().getUrl());
     pb.directory(projectDir);
+    // make sure the script will use embedded JRE
+    pb.environment().put("JAVA_HOME", "nonexistent");
     Process p = pb.start();
     // needed on windows, otherwise process will not exit
     p.getInputStream().close();
