@@ -63,7 +63,7 @@ public class DistributionTest extends ScannerTestCase {
 
     String version = artifactVersion().toString();
     OS os = getOS();
-    String zipPath = String.format("../target/sonar-scanner-%s-%s.zip", os.name().toLowerCase(), version);
+    String zipPath = String.format("../target/sonar-scanner-%s-%s.zip", version, os.name().toLowerCase());
     File zipFile = new File(zipPath);
     assertThat(zipFile).isFile();
 
