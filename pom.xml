@@ -230,7 +230,7 @@
                   <goal>single</goal>
                 </goals>
                 <configuration>
-                  <finalName>sonar-scanner-linux-${project.version}</finalName>
+                  <finalName>sonar-scanner-${project.version}</finalName>
                   <escapeString>\</escapeString>
                   <descriptors>
                     <descriptor>src/main/assembly/dist/dist-linux.xml</descriptor>
@@ -288,7 +288,7 @@
                   <goal>single</goal>
                 </goals>
                 <configuration>
-                  <finalName>sonar-scanner-windows-${project.version}</finalName>
+                  <finalName>sonar-scanner-${project.version}</finalName>
                   <escapeString>\</escapeString>
                   <descriptors>
                     <descriptor>src/main/assembly/dist/dist-windows.xml</descriptor>
@@ -346,7 +346,7 @@
                   <goal>single</goal>
                 </goals>
                 <configuration>
-                  <finalName>sonar-scanner-macosx-${project.version}</finalName>
+                  <finalName>sonar-scanner-${project.version}</finalName>
                   <escapeString>\</escapeString>
                   <descriptors>
                     <descriptor>src/main/assembly/dist/dist-macosx.xml</descriptor>
