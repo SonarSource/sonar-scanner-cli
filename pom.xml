@@ -203,21 +203,21 @@
                 <goals>
                   <goal>unpack</goal>
                 </goals>
+                <configuration>
+                  <artifactItems>
+                    <!-- TODO: replace with proper JRE artifact -->
+                    <artifactItem>
+                      <groupId>dummy.jre</groupId>
+                      <artifactId>jre-linux</artifactId>
+                      <version>1.0</version>
+                      <type>tar.gz</type>
+                      <overWrite>true</overWrite>
+                    </artifactItem>
+                  </artifactItems>
+                  <outputDirectory>${unpack.dir}/linux</outputDirectory>
+                </configuration>
               </execution>
             </executions>
-            <configuration>
-              <artifactItems>
-                <!-- TODO: replace with proper JRE artifact -->
-                <artifactItem>
-                  <groupId>dummy.jre</groupId>
-                  <artifactId>jre-linux</artifactId>
-                  <version>1.0</version>
-                  <type>tar.gz</type>
-                  <overWrite>true</overWrite>
-                </artifactItem>
-              </artifactItems>
-              <outputDirectory>${unpack.dir}/linux</outputDirectory>
-            </configuration>
           </plugin>
 
           <plugin>
@@ -261,21 +261,21 @@
                 <goals>
                   <goal>unpack</goal>
                 </goals>
+                <configuration>
+                  <artifactItems>
+                    <!-- TODO: replace with proper JRE artifact -->
+                    <artifactItem>
+                      <groupId>dummy.jre</groupId>
+                      <artifactId>jre-windows</artifactId>
+                      <version>1.0</version>
+                      <type>tar.gz</type>
+                      <overWrite>true</overWrite>
+                    </artifactItem>
+                  </artifactItems>
+                  <outputDirectory>${unpack.dir}/windows</outputDirectory>
+                </configuration>
               </execution>
             </executions>
-            <configuration>
-              <artifactItems>
-                <!-- TODO: replace with proper JRE artifact -->
-                <artifactItem>
-                  <groupId>dummy.jre</groupId>
-                  <artifactId>jre-windows</artifactId>
-                  <version>1.0</version>
-                  <type>tar.gz</type>
-                  <overWrite>true</overWrite>
-                </artifactItem>
-              </artifactItems>
-              <outputDirectory>${unpack.dir}/windows</outputDirectory>
-            </configuration>
           </plugin>
 
           <plugin>
