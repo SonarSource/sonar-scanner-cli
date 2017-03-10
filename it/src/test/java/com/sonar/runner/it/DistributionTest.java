@@ -21,17 +21,16 @@ package com.sonar.runner.it;
 
 import com.sonar.orchestrator.Orchestrator;
 import com.sonar.orchestrator.build.SonarScanner;
+import com.sonar.orchestrator.build.SonarScannerInstaller;
+import com.sonar.orchestrator.config.Configuration;
 import com.sonar.orchestrator.locator.ResourceLocation;
+import com.sonar.orchestrator.version.Version;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -63,11 +62,11 @@ public class DistributionTest extends ScannerTestCase {
 
     String version = artifactVersion().toString();
     OS os = getOS();
-    String zipPath = String.format("../target/sonar-scanner-%s-%s.zip", version, os.name().toLowerCase());
-    File zipFile = new File(zipPath);
-    assertThat(zipFile).isFile();
+    String classifier = os.name().toLowerCase();
 
-    unzip(zipFile, workDir);
+    Configuration config = Configuration.create();
+    SonarScannerInstaller installer = new SonarScannerInstaller(config.fileSystem());
+    installer.install(Version.create(version), workDir.toFile(), false, classifier);
 
     Path scannerHome = Files.list(workDir).findFirst().get();
     Path javaPath;
@@ -103,14 +102,14 @@ public class DistributionTest extends ScannerTestCase {
     orchestrator.getServer().associateProjectToQualityProfile(projectKey, "java", "sonar-way");
 
     File projectDir = new File("projects/basedir-with-source");
-    executeShellScript(projectDir, projectKey, orchestrator);
+    runScanner(projectDir, projectKey, orchestrator);
 
     Map<String, Measure> projectMeasures = getMeasures(projectKey, "files", "ncloc");
     assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(1);
     assertThat(parseInt(projectMeasures.get("ncloc").getValue())).isGreaterThan(1);
   }
 
-  private void executeShellScript(File projectDir, String projectKey, Orchestrator orchestrator) throws IOException, InterruptedException {
+  private void runScanner(File projectDir, String projectKey, Orchestrator orchestrator) throws IOException, InterruptedException {
     ProcessBuilder pb = new ProcessBuilder(sonarScannerPath.toString(), "-Dsonar.host.url=" + orchestrator.getServer().getUrl());
     pb.directory(projectDir);
     // make sure the script will use embedded JRE
@@ -128,32 +127,6 @@ public class DistributionTest extends ScannerTestCase {
     // re-run an analysis using orchestrator: when this analysis is finished, the original must have finished too
     SonarScanner build = newScanner(projectDir, "sonar.projectKey", projectKey + "-dummy", "sonar.projectName", "dummy");
     orchestrator.executeBuild(build, true);
-  }
-
-  private static void unzip(File zipFile, Path outDir) throws IOException {
-    byte[] buffer = new byte[1024];
-    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
-      while (true) {
-        ZipEntry entry = zis.getNextEntry();
-        if (entry == null) {
-          break;
-        }
-
-        Path opath = outDir.resolve(entry.getName());
-        Files.createDirectories(opath.getParent());
-
-        if (entry.isDirectory()) continue;
-
-        try (FileOutputStream fos = new FileOutputStream(opath.toFile())) {
-          int len;
-          while ((len = zis.read(buffer)) > 0) {
-            fos.write(buffer, 0, len);
-          }
-        }
-      }
-
-      zis.closeEntry();
-    }
   }
 
   private static OS getOS() {
