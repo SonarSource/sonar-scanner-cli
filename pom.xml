@@ -48,8 +48,10 @@
     <!-- configuration for assembly of distributions -->
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
     <scanner.jar>${project.build.finalName}.jar</scanner.jar>
-    <!-- TODO -->
-    <jre.version>1.8.0_121</jre.version>
+    <jre.version>8u121</jre.version>
+    <jre.dirname.linux>jre1.8.0_121</jre.dirname.linux>
+    <jre.dirname.windows>jre1.8.0_121</jre.dirname.windows>
+    <jre.dirname.macosx>jre1.8.0_121.jre/Contents/Home</jre.dirname.macosx>
   </properties>
 
   <dependencies>
@@ -207,11 +209,11 @@
                 </goals>
                 <configuration>
                   <artifactItems>
-                    <!-- TODO: replace with proper JRE artifact -->
                     <artifactItem>
-                      <groupId>dummy.jre</groupId>
-                      <artifactId>jre-linux</artifactId>
-                      <version>1.0</version>
+                      <groupId>com.oracle</groupId>
+                      <artifactId>jre</artifactId>
+                      <version>${jre.version}</version>
+                      <classifier>linux-x64</classifier>
                       <type>tar.gz</type>
                       <overWrite>true</overWrite>
                     </artifactItem>
@@ -265,11 +267,11 @@
                 </goals>
                 <configuration>
                   <artifactItems>
-                    <!-- TODO: replace with proper JRE artifact -->
                     <artifactItem>
-                      <groupId>dummy.jre</groupId>
-                      <artifactId>jre-windows</artifactId>
-                      <version>1.0</version>
+                      <groupId>com.oracle</groupId>
+                      <artifactId>jre</artifactId>
+                      <version>${jre.version}</version>
+                      <classifier>windows-x64</classifier>
                       <type>tar.gz</type>
                       <overWrite>true</overWrite>
                     </artifactItem>
@@ -325,11 +327,11 @@
             </executions>
             <configuration>
               <artifactItems>
-                <!-- TODO: replace with proper JRE artifact -->
                 <artifactItem>
-                  <groupId>dummy.jre</groupId>
-                  <artifactId>jre-macosx</artifactId>
-                  <version>1.0</version>
+                  <groupId>com.oracle</groupId>
+                  <artifactId>jre</artifactId>
+                  <version>${jre.version}</version>
+                  <classifier>macosx-x64</classifier>
                   <type>tar.gz</type>
                   <overWrite>true</overWrite>
                 </artifactItem>

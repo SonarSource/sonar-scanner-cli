@@ -175,7 +175,7 @@ public class DistributionTest extends ScannerTestCase {
   }
 
   private static boolean isMac(String osName) {
-    return osName.contains("max");
+    return osName.contains("mac os x");
   }
 
   private static boolean isUnix(String osName) {

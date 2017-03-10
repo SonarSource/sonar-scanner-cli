@@ -9,7 +9,7 @@
 
     <!-- jre basic, except bin/ -->
     <fileSet>
-      <directory>${unpack.dir}/macosx/jre${jre.version}.jre/Contents/Home</directory>
+      <directory>${unpack.dir}/macosx/${jre.dirname.macosx}</directory>
       <outputDirectory>lib/jre</outputDirectory>
       <excludes>
         <exclude>bin/**</exclude>
@@ -19,7 +19,7 @@
 
     <!-- jre bin/java -->
     <fileSet>
-      <directory>${unpack.dir}/macosx/jre${jre.version}.jre/Contents/Home/bin</directory>
+      <directory>${unpack.dir}/macosx/${jre.dirname.macosx}/bin</directory>
       <outputDirectory>lib/jre/bin</outputDirectory>
       <includes>
         <include>java</include>
