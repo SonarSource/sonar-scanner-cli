@@ -19,75 +19,19 @@
  */
 package com.sonar.runner.it;
 
-import com.sonar.orchestrator.Orchestrator;
 import com.sonar.orchestrator.build.SonarScanner;
-import com.sonar.orchestrator.build.SonarScannerInstaller;
-import com.sonar.orchestrator.config.Configuration;
 import com.sonar.orchestrator.locator.ResourceLocation;
-import com.sonar.orchestrator.version.Version;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.sonarqube.ws.WsMeasures.Measure;
 
 import static java.lang.Integer.parseInt;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DistributionTest extends ScannerTestCase {
-
-  private static final int SCRIPT_TIMEOUT_SECONDS = 15;
-
-  @ClassRule
-  public static TemporaryFolder temp = new TemporaryFolder();
-
-  private static Path sonarScannerPath;
-
-  enum OS {
-    LINUX,
-    WINDOWS,
-    MACOSX
-  }
-
-  @BeforeClass
-  public static void setUpBeforeClass() throws IOException {
-    Path workDir = temp.newFolder().toPath();
-
-    String version = artifactVersion().toString();
-    OS os = getOS();
-    String classifier = os.name().toLowerCase();
-
-    Configuration config = Configuration.create();
-    SonarScannerInstaller installer = new SonarScannerInstaller(config.fileSystem());
-    installer.install(Version.create(version), workDir.toFile(), false, classifier);
-
-    Path scannerHome = Files.list(workDir).findFirst().get();
-    Path javaPath;
-
-    switch (os) {
-      case LINUX:
-      case MACOSX:
-        sonarScannerPath = scannerHome.resolve("bin/sonar-scanner");
-        sonarScannerPath.toFile().setExecutable(true);
-        javaPath = scannerHome.resolve("lib/jre/bin/java");
-        javaPath.toFile().setExecutable(true);
-        break;
-      case WINDOWS:
-        sonarScannerPath = scannerHome.resolve("bin/sonar-scanner.bat");
-        javaPath = scannerHome.resolve("lib/jre/bin/java.exe");
-        assertThat(javaPath).isRegularFile();
-        break;
-    }
-
-    assertThat(sonarScannerPath).isExecutable();
-  }
 
   @After
   public void cleanup() {
@@ -102,56 +46,11 @@ public class DistributionTest extends ScannerTestCase {
     orchestrator.getServer().associateProjectToQualityProfile(projectKey, "java", "sonar-way");
 
     File projectDir = new File("projects/basedir-with-source");
-    runScanner(projectDir, projectKey, orchestrator);
+    SonarScanner build = newScanner(projectDir, "sonar.projectKey", projectKey).useNative();
+    orchestrator.executeBuild(build, true);
 
     Map<String, Measure> projectMeasures = getMeasures(projectKey, "files", "ncloc");
     assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(1);
     assertThat(parseInt(projectMeasures.get("ncloc").getValue())).isGreaterThan(1);
-  }
-
-  private void runScanner(File projectDir, String projectKey, Orchestrator orchestrator) throws IOException, InterruptedException {
-    ProcessBuilder pb = new ProcessBuilder(sonarScannerPath.toString(), "-Dsonar.host.url=" + orchestrator.getServer().getUrl());
-    pb.directory(projectDir);
-    // make sure the script will use embedded JRE
-    pb.environment().put("JAVA_HOME", "nonexistent");
-    Process p = pb.start();
-    // needed on windows, otherwise process will not exit
-    p.getInputStream().close();
-    p.waitFor(SCRIPT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-    assertThat(p.exitValue()).isEqualTo(0);
-
-    waitForAnalysisToComplete(projectDir, orchestrator, projectKey);
-  }
-
-  private void waitForAnalysisToComplete(File projectDir, Orchestrator orchestrator, String projectKey) {
-    // re-run an analysis using orchestrator: when this analysis is finished, the original must have finished too
-    SonarScanner build = newScanner(projectDir, "sonar.projectKey", projectKey + "-dummy", "sonar.projectName", "dummy");
-    orchestrator.executeBuild(build, true);
-  }
-
-  private static OS getOS() {
-    String osName = System.getProperty("os.name").toLowerCase();
-    if (isUnix(osName)) {
-      return OS.LINUX;
-    }
-    if (isWindows(osName)) {
-      return OS.WINDOWS;
-    }
-    if (isMac(osName)) {
-      return OS.MACOSX;
-    }
-    throw new IllegalStateException("Unsupported os: " + osName);
-  }
-
-  private static boolean isWindows(String osName) {
-    return osName.contains("win");
-  }
-
-  private static boolean isMac(String osName) {
-    return osName.contains("mac os x");
-  }
-
-  private static boolean isUnix(String osName) {
-    return osName.contains("nix") || osName.contains("nux");
   }
 }
