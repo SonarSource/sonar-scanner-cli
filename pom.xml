@@ -44,6 +44,14 @@
 
     <!-- used for deployment to SonarSource Artifactory -->
     <gitRepositoryName>sonar-scanner-cli</gitRepositoryName>
+
+    <!-- configuration for assembly of distributions -->
+    <unpack.dir>${project.build.directory}/unpack</unpack.dir>
+    <scanner.jar>${project.build.finalName}.jar</scanner.jar>
+    <jre.version>8u121</jre.version>
+    <jre.dirname.linux>jre1.8.0_121</jre.dirname.linux>
+    <jre.dirname.windows>jre1.8.0_121</jre.dirname.windows>
+    <jre.dirname.macosx>jre1.8.0_121.jre/Contents/Home</jre.dirname.macosx>
   </properties>
 
   <dependencies>
@@ -129,6 +137,7 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
+            <id>cli</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
@@ -138,8 +147,11 @@
               <appendAssemblyId>false</appendAssemblyId>
               <escapeString>\</escapeString>
               <descriptors>
-                <descriptor>${project.basedir}/assembly.xml</descriptor>
+                <descriptor>src/main/assembly/noarch.xml</descriptor>
               </descriptors>
+              <filters>
+                <filter>src/main/assembly/filter-noarch.properties</filter>
+              </filters>
             </configuration>
           </execution>
         </executions>
@@ -179,5 +191,180 @@
         <module>it</module>
       </modules>
     </profile>
+
+    <profile>
+      <id>dist-linux</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+              <execution>
+                <id>unpack-linux</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>com.oracle</groupId>
+                      <artifactId>jre</artifactId>
+                      <version>${jre.version}</version>
+                      <classifier>linux-x64</classifier>
+                      <type>tar.gz</type>
+                      <overWrite>true</overWrite>
+                    </artifactItem>
+                  </artifactItems>
+                  <outputDirectory>${unpack.dir}/linux</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>assemble-linux</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>sonar-scanner-${project.version}</finalName>
+                  <escapeString>\</escapeString>
+                  <descriptors>
+                    <descriptor>src/main/assembly/dist-linux.xml</descriptor>
+                  </descriptors>
+                  <filters>
+                    <filter>src/main/assembly/filter-dist.properties</filter>
+                  </filters>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>dist-windows</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+              <execution>
+                <id>unpack-windows</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>com.oracle</groupId>
+                      <artifactId>jre</artifactId>
+                      <version>${jre.version}</version>
+                      <classifier>windows-x64</classifier>
+                      <type>tar.gz</type>
+                      <overWrite>true</overWrite>
+                    </artifactItem>
+                  </artifactItems>
+                  <outputDirectory>${unpack.dir}/windows</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>assemble-windows</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>sonar-scanner-${project.version}</finalName>
+                  <escapeString>\</escapeString>
+                  <descriptors>
+                    <descriptor>src/main/assembly/dist-windows.xml</descriptor>
+                  </descriptors>
+                  <filters>
+                    <filter>src/main/assembly/filter-dist.properties</filter>
+                  </filters>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>dist-macosx</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+              <execution>
+                <id>unpack-macosx</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.oracle</groupId>
+                  <artifactId>jre</artifactId>
+                  <version>${jre.version}</version>
+                  <classifier>macosx-x64</classifier>
+                  <type>tar.gz</type>
+                  <overWrite>true</overWrite>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${unpack.dir}/macosx</outputDirectory>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>assemble-macosx</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>sonar-scanner-${project.version}</finalName>
+                  <escapeString>\</escapeString>
+                  <descriptors>
+                    <descriptor>src/main/assembly/dist-macosx.xml</descriptor>
+                  </descriptors>
+                  <filters>
+                    <filter>src/main/assembly/filter-dist.properties</filter>
+                  </filters>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
+
 </project>

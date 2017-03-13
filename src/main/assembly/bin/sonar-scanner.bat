@@ -13,8 +13,16 @@ set ERROR_CODE=0
 @REM set local scope for the variables with windows NT shell
 @setlocal
 
+set SONAR_SCANNER_HOME=%~dp0..
+
 @REM ==== START VALIDATION ====
 @REM *** JAVA EXEC VALIDATION ***
+
+set use_embedded_jre=${use_embedded_jre}
+if "%use_embedded_jre%" == "true" (
+  set JAVA_HOME=%SONAR_SCANNER_HOME%\lib\jre
+)
+
 if not "%JAVA_HOME%" == "" goto foundJavaHome
 
 for %%i in (java.exe) do set JAVA_EXEC=%%~$PATH:i
@@ -47,7 +55,6 @@ goto error
 set JAVA_EXEC="%JAVA_HOME%\bin\java.exe"
 
 :OkJava
-set SONAR_SCANNER_HOME=%~dp0..
 goto run
 
 

@@ -31,7 +31,7 @@
     <dependency>
       <groupId>org.sonarsource.orchestrator</groupId>
       <artifactId>sonar-orchestrator</artifactId>
-      <version>3.13</version>
+      <version>3.15.0.974</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -115,6 +115,7 @@
               </execution>
             </executions>
           </plugin>
+
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
@@ -128,6 +129,36 @@
                 </goals>
                 <configuration>
                   <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip</artifact>
+                </configuration>
+              </execution>
+              <execution>
+                <id>get-linux-scanner</id>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>get</goal>
+                </goals>
+                <configuration>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:linux</artifact>
+                </configuration>
+              </execution>
+              <execution>
+                <id>get-windows-scanner</id>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>get</goal>
+                </goals>
+                <configuration>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:windows</artifact>
+                </configuration>
+              </execution>
+              <execution>
+                <id>get-macosx-scanner</id>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>get</goal>
+                </goals>
+                <configuration>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:macosx</artifact>
                 </configuration>
               </execution>
             </executions>
