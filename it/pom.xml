@@ -131,14 +131,6 @@
                   <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip</artifact>
                 </configuration>
               </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.0.0</version>
-            <executions>
               <execution>
                 <id>get-linux-scanner</id>
                 <phase>initialize</phase>
@@ -149,14 +141,6 @@
                   <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:linux</artifact>
                 </configuration>
               </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.0.0</version>
-            <executions>
               <execution>
                 <id>get-windows-scanner</id>
                 <phase>initialize</phase>
@@ -167,14 +151,6 @@
                   <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:windows</artifact>
                 </configuration>
               </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.0.0</version>
-            <executions>
               <execution>
                 <id>get-macosx-scanner</id>
                 <phase>initialize</phase>
