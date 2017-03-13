@@ -19,6 +19,7 @@
  */
 package com.sonar.runner.it;
 
+import com.sonar.orchestrator.build.BuildFailureException;
 import com.sonar.orchestrator.build.SonarScanner;
 import com.sonar.orchestrator.locator.ResourceLocation;
 import java.io.File;
@@ -39,18 +40,33 @@ public class DistributionTest extends ScannerTestCase {
   }
 
   @Test
-  public void script_should_push_report_to_sonarqube() throws IOException, InterruptedException {
+  public void should_succeed_with_self_contained_jre_despite_rubbish_java_home() throws IOException, InterruptedException {
     String projectKey = "java:basedir-with-source";
     orchestrator.getServer().restoreProfile(ResourceLocation.create("/sonar-way-profile.xml"));
     orchestrator.getServer().provisionProject(projectKey, "Basedir with source");
     orchestrator.getServer().associateProjectToQualityProfile(projectKey, "java", "sonar-way");
 
     File projectDir = new File("projects/basedir-with-source");
-    SonarScanner build = newScanner(projectDir, "sonar.projectKey", projectKey).useNative();
+    SonarScanner build = newScanner(projectDir, "sonar.projectKey", projectKey)
+      .setEnvironmentVariable("JAVA_HOME", "nonexistent")
+      .useNative();
     orchestrator.executeBuild(build, true);
 
     Map<String, Measure> projectMeasures = getMeasures(projectKey, "files", "ncloc");
     assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(1);
     assertThat(parseInt(projectMeasures.get("ncloc").getValue())).isGreaterThan(1);
+  }
+
+  @Test(expected = BuildFailureException.class)
+  public void should_fail_without_self_contained_jre_when_rubbish_java_home() throws IOException, InterruptedException {
+    String projectKey = "java:basedir-with-source";
+    orchestrator.getServer().restoreProfile(ResourceLocation.create("/sonar-way-profile.xml"));
+    orchestrator.getServer().provisionProject(projectKey, "Basedir with source");
+    orchestrator.getServer().associateProjectToQualityProfile(projectKey, "java", "sonar-way");
+
+    File projectDir = new File("projects/basedir-with-source");
+    SonarScanner build = newScanner(projectDir, "sonar.projectKey", projectKey)
+      .setEnvironmentVariable("JAVA_HOME", "nonexistent");
+    orchestrator.executeBuild(build, true);
   }
 }
