@@ -62,7 +62,7 @@ public abstract class ScannerTestCase {
 
   private static Version artifactVersion;
 
-  protected static Version artifactVersion() {
+  private static Version artifactVersion() {
     if (artifactVersion == null) {
       String scannerVersion = System.getProperty("scanner.version");
       if (StringUtils.isNotBlank(scannerVersion)) {
