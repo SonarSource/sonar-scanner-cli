@@ -4,7 +4,7 @@
   <formats>
     <format>zip</format>
   </formats>
-  <includeBaseDirectory>true</includeBaseDirectory>
+  <baseDirectory>sonar-scanner-${project.version}-windows</baseDirectory>
   <fileSets>
 
     <!-- jre basic, except bin/ -->
