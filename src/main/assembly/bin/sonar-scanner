@@ -46,7 +46,7 @@ fi
 
 use_embedded_jre=${use_embedded_jre}
 if [ "$use_embedded_jre" = true ]; then
-  export JAVA_HOME=$sonar_scanner_home/lib/jre
+  export JAVA_HOME=$sonar_scanner_home/jre
 fi
 
 if [ -n "$JAVA_HOME" ]

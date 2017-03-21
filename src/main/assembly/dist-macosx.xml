@@ -10,7 +10,7 @@
     <!-- jre basic, except bin/ and misc -->
     <fileSet>
       <directory>${unpack.dir}/macosx/${jre.dirname.macosx}</directory>
-      <outputDirectory>lib/jre</outputDirectory>
+      <outputDirectory>jre</outputDirectory>
       <excludes>
         <exclude>bin/**</exclude>
         <exclude>man/**</exclude>
@@ -21,7 +21,7 @@
     <!-- jre bin/java -->
     <fileSet>
       <directory>${unpack.dir}/macosx/${jre.dirname.macosx}/bin</directory>
-      <outputDirectory>lib/jre/bin</outputDirectory>
+      <outputDirectory>jre/bin</outputDirectory>
       <includes>
         <include>java</include>
       </includes>
@@ -31,7 +31,7 @@
     <!-- jre lib executable files -->
     <fileSet>
       <directory>${unpack.dir}/macosx/${jre.dirname.macosx}/lib</directory>
-      <outputDirectory>lib/jre/lib</outputDirectory>
+      <outputDirectory>jre/lib</outputDirectory>
       <includes>
         <include>jspawnhelper</include>
       </includes>
