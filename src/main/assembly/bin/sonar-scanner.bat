@@ -20,7 +20,7 @@ set SONAR_SCANNER_HOME=%~dp0..
 
 set use_embedded_jre=${use_embedded_jre}
 if "%use_embedded_jre%" == "true" (
-  set JAVA_HOME=%SONAR_SCANNER_HOME%\lib\jre
+  set JAVA_HOME=%SONAR_SCANNER_HOME%\jre
 )
 
 if not "%JAVA_HOME%" == "" goto foundJavaHome

@@ -10,7 +10,7 @@
     <!-- jre basic, except bin/ -->
     <fileSet>
       <directory>${unpack.dir}/linux/${jre.dirname.linux}</directory>
-      <outputDirectory>lib/jre</outputDirectory>
+      <outputDirectory>jre</outputDirectory>
       <excludes>
         <exclude>bin/**</exclude>
         <exclude>man/**</exclude>
@@ -21,7 +21,7 @@
     <!-- jre bin/java -->
     <fileSet>
       <directory>${unpack.dir}/linux/${jre.dirname.linux}/bin</directory>
-      <outputDirectory>lib/jre/bin</outputDirectory>
+      <outputDirectory>jre/bin</outputDirectory>
       <includes>
         <include>java</include>
       </includes>
