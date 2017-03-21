@@ -7,13 +7,14 @@
   <baseDirectory>sonar-scanner-${project.version}-macosx</baseDirectory>
   <fileSets>
 
-    <!-- jre basic, except bin/ -->
+    <!-- jre basic, except bin/ and misc -->
     <fileSet>
       <directory>${unpack.dir}/macosx/${jre.dirname.macosx}</directory>
       <outputDirectory>lib/jre</outputDirectory>
       <excludes>
         <exclude>bin/**</exclude>
         <exclude>man/**</exclude>
+        <exclude>lib/jspawnhelper</exclude>
       </excludes>
     </fileSet>
 
@@ -23,6 +24,16 @@
       <outputDirectory>lib/jre/bin</outputDirectory>
       <includes>
         <include>java</include>
+      </includes>
+      <fileMode>0755</fileMode>
+    </fileSet>
+
+    <!-- jre lib executable files -->
+    <fileSet>
+      <directory>${unpack.dir}/macosx/${jre.dirname.macosx}/lib</directory>
+      <outputDirectory>lib/jre/lib</outputDirectory>
+      <includes>
+        <include>jspawnhelper</include>
       </includes>
       <fileMode>0755</fileMode>
     </fileSet>
