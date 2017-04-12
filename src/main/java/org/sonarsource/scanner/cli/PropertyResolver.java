@@ -67,6 +67,7 @@ public class PropertyResolver {
   private String resolveProperty(String propKey) {
     String propValue = getValue(propKey);
     if (propValue.isEmpty()) {
+      resolved.setProperty(propKey, propValue);
       return propValue;
     }
 

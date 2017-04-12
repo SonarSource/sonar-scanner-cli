@@ -19,15 +19,14 @@
  */
 package org.sonarsource.scanner.cli;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PropertyResolverTest {
   @Rule
@@ -119,5 +118,19 @@ public class PropertyResolverTest {
     exception.expectMessage("variable: B");
     PropertyResolver resolver = new PropertyResolver(map, env);
     resolver.resolve();
+  }
+
+  @Test
+  public void preserve_empty() {
+    Properties map = new Properties();
+    Map<String, String> env = new HashMap<>();
+
+    map.put("A", "");
+    map.put("B", "${A}");
+
+    PropertyResolver resolver = new PropertyResolver(map, env);
+    Properties resolved = resolver.resolve();
+    assertThat(resolved.get("A")).isEqualTo("");
+    assertThat(resolved.get("B")).isEqualTo("");
   }
 }

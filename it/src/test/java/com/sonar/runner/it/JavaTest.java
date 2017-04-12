@@ -60,8 +60,7 @@ public class JavaTest extends ScannerTestCase {
     orchestrator.getServer().associateProjectToQualityProfile("java:sample", "java", "sonar-way");
 
     SonarScanner build = newScanner(new File("projects/java-sample"))
-      .setProperty("sonar.verbose", "true")
-      .addArguments("-e");
+      .setProperty("sonar.verbose", "true");
     // SONARPLUGINS-3061
     // Add a trailing slash
     build.setProperty("sonar.host.url", orchestrator.getServer().getUrl() + "/");
@@ -84,6 +83,26 @@ public class JavaTest extends ScannerTestCase {
     Map<String, Measure> fileMeasures = getMeasures("java:sample:src/basic/Hello.java", "files", "ncloc", "classes", "violations");
     assertThat(parseInt(fileMeasures.get("ncloc").getValue())).isEqualTo(7);
     assertThat(parseInt(fileMeasures.get("violations").getValue())).isGreaterThan(0);
+  }
+
+  /**
+   * Only tests, no sources
+   */
+  @Test
+  public void scan_java_tests() {
+    orchestrator.getServer().restoreProfile(ResourceLocation.create("/sonar-way-profile.xml"));
+    orchestrator.getServer().provisionProject("java:sampletest", "Java Sample");
+    orchestrator.getServer().associateProjectToQualityProfile("java:sampletest", "java", "sonar-way");
+
+    SonarScanner build = newScanner(new File("projects/java-sample"))
+      .setProperty("sonar.projectKey", "java:sampletest")
+      .setProperty("sonar.tests", "src")
+      .setProperty("sonar.sources", "");
+    orchestrator.executeBuild(build);
+
+    Component file = getComponent("java:sampletest:src/basic/Hello.java");
+    assertThat(file.getName()).isEqualTo("Hello.java");
+    assertThat(file.getQualifier()).isEqualTo("UTS");
   }
 
   @Test
