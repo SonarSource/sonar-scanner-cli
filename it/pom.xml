@@ -108,7 +108,11 @@
                     String pom = new File(project.basedir, '../pom.xml').getText('UTF-8')
                     def matcher = pom =~ /(?s).*<version>(.*?)-SNAPSHOT<\/version>.*/
                     assert matcher.matches()
-                    project.properties['scanner.version'] = matcher[0][1] + '.0.' + System.getenv()['CI_BUILD_NUMBER']
+                    def versionNoSnapshot = matcher[0][1]
+                    if (new StringTokenizer(versionNoSnapshot, ".").countTokens() == 2) {
+                      versionNoSnapshot += '.0'
+                    }
+                    project.properties['scanner.version'] = versionNoSnapshot + '.' + System.getenv()['CI_BUILD_NUMBER']
                     ]]>
                   </source>
                 </configuration>
