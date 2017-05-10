@@ -27,7 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PropertyResolver {
-  private static final Pattern placeholderPattern = Pattern.compile("\\$\\{([\\w\\.]+)\\}|\\$([\\w\\.]+)");
+  private static final Pattern placeholderPattern = Pattern.compile("\\$\\{([\\w\\.]+)\\}");
   private final Properties props;
   private final Properties resolved;
   private final List<String> queue;
