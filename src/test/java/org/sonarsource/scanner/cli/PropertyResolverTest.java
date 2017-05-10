@@ -104,13 +104,13 @@ public class PropertyResolverTest {
     assertThat(resolved.get("B")).isEqualTo("value b");
     assertThat(resolved.get("C")).isEqualTo("${A value b}");
   }
-  
+
   @Test
   public void missing_var() {
     Map<String, String> env = new HashMap<>();
     Properties map = new Properties();
-    map.put("A", "/path/$missing var/");
-    
+    map.put("A", "/path/${missing} var/");
+
     PropertyResolver resolver = new PropertyResolver(map, env);
     Properties resolved = resolver.resolve();
     assertThat(resolved.get("A")).isEqualTo("/path/ var/");
