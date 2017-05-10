@@ -19,9 +19,9 @@
  */
 package org.sonarsource.scanner.cli;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -231,9 +231,21 @@ class Conf {
   }
 
   private static Properties toProperties(Path file) {
-    Properties properties = new Properties();
-    try (InputStream in = new FileInputStream(file.toFile())) {
-      properties.load(in);
+    final Properties properties = new Properties();
+    /*
+     * We want to load property files using the platform's default encoding.
+     *
+     * Historically, Java has always expected property files to be encoded using
+     * ISO-8859-1, but in this day and age, this expectation is unreasonable.
+     *
+     * Fortunately, since Java 6, an additional .load() method exists on the
+     * Properties class which uses a Reader instead of an InputStream... We use
+     * that, and we rely on Charset#defaultCharset() to return the encoding of
+     * the current OS/JVM combination.
+     */
+    final Charset charset = Charset.defaultCharset();
+    try (final Reader reader = Files.newBufferedReader(file, charset)) {
+      properties.load(reader);
       // Trim properties
       for (String propKey : properties.stringPropertyNames()) {
         properties.setProperty(propKey, properties.getProperty(propKey).trim());
