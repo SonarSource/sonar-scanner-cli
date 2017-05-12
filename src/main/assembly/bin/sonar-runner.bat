@@ -63,7 +63,6 @@ if "%SONAR_RUNNER_OPTS%" == "" (
 
 @REM ==== START RUN ====
 :run
-echo %SONAR_RUNNER_HOME%
 
 set PROJECT_HOME=%CD%
 

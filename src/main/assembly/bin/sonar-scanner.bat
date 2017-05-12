@@ -62,7 +62,6 @@ goto run
 
 @REM ==== START RUN ====
 :run
-echo %SONAR_SCANNER_HOME%
 
 set PROJECT_HOME=%CD%
 
