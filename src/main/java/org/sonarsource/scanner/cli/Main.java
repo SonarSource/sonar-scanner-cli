@@ -101,6 +101,13 @@ public class Main {
       exit.exit(Exit.SUCCESS);
     }
   }
+  
+  private void checkSkip(Properties properties) {
+    if ("true".equalsIgnoreCase(properties.getProperty(ScanProperties.SKIP))) {
+      logger.info("SonarQube Scanner analysis skipped");
+      exit.exit(Exit.SUCCESS);
+    }
+  }
 
   private void init(Properties p) throws IOException {
     SystemInfo.print(logger);

@@ -197,6 +197,23 @@ public class MainTest {
     inOrder.verify(runnerFactory, times(1)).create(p);
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
   }
+  
+  @Test
+  public void should_skip() throws IOException {
+    Properties p = new Properties();
+    p.setProperty(ScanProperties.SKIP, "true");
+    when(conf.properties()).thenReturn(p);
+
+    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    main.execute();
+
+    verify(logs).info("SonarQube Scanner analysis skipped");
+    InOrder inOrder = Mockito.inOrder(exit, runnerFactory);
+
+    inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
+    inOrder.verify(runnerFactory, times(1)).create(p);
+    inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
+  }
 
   @Test
   public void should_skip() throws IOException {
