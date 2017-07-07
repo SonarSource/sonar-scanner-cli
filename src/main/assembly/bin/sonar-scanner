@@ -14,22 +14,15 @@ real_path () {
   while true; do
     cd "$(dirname "$target")"
     target=$(basename "$target")
-    link=$(readlink "$target")
-    test "$link" || break
-    target=$link
+    test -L "$target" || break
+    target=$(readlink "$target")
   done
 
   echo "$(pwd -P)/$target"
   )
 }
 
-script_path="$0"
-
-if [ -h "$script_path" ] ; then
-  # resolve recursively symlinks
-  script_path=$(real_path "$script_path")
-fi
-
+script_path=$(real_path "$0")
 sonar_scanner_home=$(dirname "$script_path")/..
 
 # make it fully qualified
