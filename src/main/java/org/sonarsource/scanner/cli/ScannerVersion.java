@@ -28,11 +28,8 @@ public enum ScannerVersion {
   private String version;
 
   ScannerVersion() {
-    Scanner scanner = new Scanner(getClass().getResourceAsStream("/version.txt"), "UTF-8");
-    try {
+    try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/version.txt"), "UTF-8")) {
       this.version = scanner.next();
-    } finally {
-      scanner.close();
     }
   }
 
