@@ -19,7 +19,6 @@
  */
 package org.sonarsource.scanner.cli;
 
-import java.io.IOException;
 import java.util.Properties;
 import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.ScanProperties;
@@ -102,7 +101,7 @@ public class Main {
     }
   }
 
-  private void init(Properties p) throws IOException {
+  private void init(Properties p) {
     SystemInfo.print(logger);
     if (cli.isDisplayVersionOnly()) {
       exit.exit(Exit.SUCCESS);
@@ -111,7 +110,7 @@ public class Main {
     runner = runnerFactory.create(p);
   }
 
-  private void configureLogging(Properties props) throws IOException {
+  private void configureLogging(Properties props) {
     if ("true".equals(props.getProperty("sonar.verbose"))
       || "DEBUG".equalsIgnoreCase(props.getProperty("sonar.log.level"))
       || "TRACE".equalsIgnoreCase(props.getProperty("sonar.log.level"))) {
