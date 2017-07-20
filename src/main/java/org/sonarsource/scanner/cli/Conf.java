@@ -55,7 +55,7 @@ class Conf {
     this.env = env;
   }
 
-  Properties properties() throws IOException {
+  Properties properties() {
     Properties result = new Properties();
     result.putAll(loadGlobalProperties());
     result.putAll(loadProjectProperties());
@@ -79,7 +79,7 @@ class Conf {
     return Utils.loadEnvironmentProperties(env);
   }
 
-  private Properties loadGlobalProperties() throws IOException {
+  private Properties loadGlobalProperties() {
     Path settingsFile = locatePropertiesFile(cli.properties(), SCANNER_HOME, "conf/sonar-scanner.properties",
       SCANNER_SETTINGS);
     if (settingsFile != null && Files.isRegularFile(settingsFile)) {
@@ -90,7 +90,7 @@ class Conf {
     return new Properties();
   }
 
-  private Properties loadProjectProperties() throws IOException {
+  private Properties loadProjectProperties() {
     Properties rootProps = new Properties();
     Properties knownProps = new Properties();
 
