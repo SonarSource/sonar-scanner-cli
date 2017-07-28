@@ -12,7 +12,6 @@
       <directory>src/main/assembly/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <includes>
-        <include>sonar-runner.bat</include>
         <include>sonar-scanner.bat</include>
         <include>sonar-scanner-debug.bat</include>
       </includes>
@@ -23,7 +22,6 @@
       <directory>src/main/assembly/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <includes>
-        <include>sonar-runner</include>
         <include>sonar-scanner</include>
         <include>sonar-scanner-debug</include>
       </includes>

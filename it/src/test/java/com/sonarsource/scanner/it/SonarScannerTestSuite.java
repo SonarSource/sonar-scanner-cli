@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.sonar.runner.it;
+package com.sonarsource.scanner.it;
 
 import com.sonar.orchestrator.Orchestrator;
 import org.junit.ClassRule;
