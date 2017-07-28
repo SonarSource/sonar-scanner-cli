@@ -19,6 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.util.Map;
 import java.util.Properties;
 import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.LogOutput;
@@ -32,9 +33,8 @@ class ScannerFactory {
   }
 
   EmbeddedScanner create(Properties props) {
-    return EmbeddedScanner.create(new DefaultLogOutput())
-      .addGlobalProperties(props)
-      .setApp("ScannerCli", ScannerVersion.version());
+    return EmbeddedScanner.create("ScannerCli", ScannerVersion.version(), new DefaultLogOutput())
+      .addGlobalProperties((Map) props);
   }
 
   class DefaultLogOutput implements LogOutput {

@@ -20,6 +20,7 @@
 package org.sonarsource.scanner.cli;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,7 @@ import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.ScanProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -52,80 +53,61 @@ public class MainTest {
   @Mock
   private Properties properties;
   @Mock
-  private ScannerFactory runnerFactory;
+  private ScannerFactory scannerFactory;
   @Mock
-  private EmbeddedScanner runner;
+  private EmbeddedScanner scanner;
   @Mock
   private Logs logs;
 
   @Before
   public void setUp() throws IOException {
     MockitoAnnotations.initMocks(this);
-    when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
+    when(scannerFactory.create(any(Properties.class))).thenReturn(scanner);
     when(conf.properties()).thenReturn(properties);
   }
 
   @Test
   public void should_execute_runner() {
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
     verify(exit).exit(Exit.SUCCESS);
-    verify(runnerFactory).create(properties);
+    verify(scannerFactory).create(properties);
 
-    verify(runner, times(1)).start();
-    verify(runner, times(1)).runAnalysis(properties);
-    verify(runner, times(1)).stop();
+    verify(scanner, times(1)).start();
+    verify(scanner, times(1)).execute((Map) properties);
   }
 
   @Test
-  public void should_call_stop_on_error_during_analysis() {
+  public void should_exit_with_error_on_error_during_analysis() {
     EmbeddedScanner runner = mock(EmbeddedScanner.class);
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
-    doThrow(e).when(runner).runAnalysis(any(Properties.class));
-    when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
+    doThrow(e).when(runner).execute(any(Map.class));
+    when(scannerFactory.create(any(Properties.class))).thenReturn(runner);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
-    verify(runner).stop();
     verify(exit).exit(Exit.ERROR);
     verify(logs).error("Error during SonarQube Scanner execution", e);
   }
 
   @Test
-  public void should_not_call_stop_on_error_during_start() {
+  public void should_exit_with_error_on_error_during_start() {
     EmbeddedScanner runner = mock(EmbeddedScanner.class);
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
     doThrow(e).when(runner).start();
-    when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
+    when(scannerFactory.create(any(Properties.class))).thenReturn(runner);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
     verify(runner).start();
-    verify(runner, never()).runAnalysis(any());
-    verify(runner, never()).stop();
+    verify(runner, never()).execute(any(Map.class));
     verify(exit).exit(Exit.ERROR);
     verify(logs).error("Error during SonarQube Scanner execution", e);
-  }
-
-  @Test
-  public void should_exit_on_error() {
-    EmbeddedScanner runner = mock(EmbeddedScanner.class);
-    Exception e = new NullPointerException("NPE");
-    e = new IllegalStateException("Error", e);
-    doThrow(e).when(runner).stop();
-    when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
-
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
-    main.execute();
-
-    verify(runner).stop();
-    verify(exit).exit(Exit.ERROR);
-    verify(logs).error("Unable to properly stop the scanner", e);
   }
 
   @Test
@@ -160,13 +142,12 @@ public class MainTest {
     when(cli.isDebugEnabled()).thenReturn(debugEnabled);
 
     EmbeddedScanner runner = mock(EmbeddedScanner.class);
-    doThrow(e).when(runner).runAnalysis(any(Properties.class));
-    when(runnerFactory.create(any(Properties.class))).thenReturn(runner);
+    doThrow(e).when(runner).execute(any(Map.class));
+    when(scannerFactory.create(any(Properties.class))).thenReturn(runner);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
-    verify(runner).stop();
     verify(exit).exit(Exit.ERROR);
   }
 
@@ -188,13 +169,13 @@ public class MainTest {
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
-    InOrder inOrder = Mockito.inOrder(exit, runnerFactory);
+    InOrder inOrder = Mockito.inOrder(exit, scannerFactory);
 
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
-    inOrder.verify(runnerFactory, times(1)).create(p);
+    inOrder.verify(scannerFactory, times(1)).create(p);
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
   }
 
@@ -204,25 +185,25 @@ public class MainTest {
     p.setProperty(ScanProperties.SKIP, "true");
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
     verify(logs).info("SonarQube Scanner analysis skipped");
-    InOrder inOrder = Mockito.inOrder(exit, runnerFactory);
+    InOrder inOrder = Mockito.inOrder(exit, scannerFactory);
 
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
-    inOrder.verify(runnerFactory, times(1)).create(p);
+    inOrder.verify(scannerFactory, times(1)).create(p);
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
   }
 
   @Test
   public void shouldLogServerVersion() throws IOException {
-    when(runner.serverVersion()).thenReturn("5.5");
+    when(scanner.serverVersion()).thenReturn("5.5");
     Properties p = new Properties();
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
     verify(logs).info("SonarQube server 5.5");
   }
@@ -250,14 +231,14 @@ public class MainTest {
     p.put(propKey, propValue);
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(exit, cli, conf, runnerFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
     // Logger used for callback should have debug enabled
     verify(logs).setDebugEnabled(true);
 
     ArgumentCaptor<Properties> propertiesCapture = ArgumentCaptor.forClass(Properties.class);
-    verify(runner).runAnalysis(propertiesCapture.capture());
+    verify(scanner).execute((Map) propertiesCapture.capture());
 
     return propertiesCapture.getValue();
   }
