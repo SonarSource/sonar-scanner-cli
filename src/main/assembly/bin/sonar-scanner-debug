@@ -3,7 +3,7 @@
 # SonarQube Scanner Startup Script for Unix
 #
 # Optional ENV vars:
-#   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running SonarQube Scanner
+#   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running the SonarQube Scanner
 #   JAVA_HOME - Location of Java's installation
 
 SONAR_SCANNER_DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"

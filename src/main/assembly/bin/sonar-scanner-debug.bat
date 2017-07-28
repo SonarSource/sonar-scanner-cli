@@ -4,8 +4,7 @@
 @REM   JAVA_HOME - location of a JDK home dir
 @REM
 @REM Optional ENV vars:
-@REM   SONAR_SCANNER_HOME - location of runner's installed home dir
-@REM   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running Sonar
+@REM   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running the SonarQube Scanner
 
 @setlocal
 @set SONAR_SCANNER_DEBUG_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000

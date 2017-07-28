@@ -4,7 +4,7 @@
 @REM   JAVA_HOME - location of a JDK home dir
 @REM
 @REM Optional ENV vars:
-@REM   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running Sonar
+@REM   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running the SonarQube Scanner
 
 @echo off
 

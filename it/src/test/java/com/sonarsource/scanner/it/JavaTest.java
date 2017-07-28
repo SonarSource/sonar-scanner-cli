@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.sonar.runner.it;
+package com.sonarsource.scanner.it;
 
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.SonarScanner;
@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.commons.lang.SystemUtils;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -285,32 +284,12 @@ public class JavaTest extends ScannerTestCase {
   }
 
   @Test
-  public void use_old_script_and_old_env_variable() {
-    SonarScanner build = newScanner(new File("projects/java-sample"))
-      .setUseOldSonarRunnerScript(true)
-      .setEnvironmentVariable("SONAR_RUNNER_OPTS", "-Xmx2m");
-    BuildResult executeBuild = orchestrator.executeBuildQuietly(build);
-    assertThat(executeBuild.getStatus()).isNotEqualTo(0);
-    String logs = executeBuild.getLogs();
-    if (SystemUtils.IS_OS_WINDOWS) {
-      assertThat(logs).contains("WARN: sonar-runner.bat script is deprecated. Please use sonar-scanner.bat instead.");
-      assertThat(logs).contains("WARN: SONAR_RUNNER_OPTS is deprecated. Please use SONAR_SCANNER_OPTS instead.");
-    } else {
-      assertThat(logs).contains("WARN: sonar-runner script is deprecated. Please use sonar-scanner instead.");
-      assertThat(logs).contains("WARN: $SONAR_RUNNER_OPTS is deprecated. Please use $SONAR_SCANNER_OPTS instead.");
-    }
-    assertThat(logs).contains("java.lang.OutOfMemoryError");
-  }
-
-  @Test
-  public void use_new_script_and_new_env_variable() {
+  public void verify_env_variable() {
     SonarScanner build = newScanner(new File("projects/java-sample"))
       .setEnvironmentVariable("SONAR_SCANNER_OPTS", "-Xmx2m");
     BuildResult executeBuild = orchestrator.executeBuildQuietly(build);
     assertThat(executeBuild.getStatus()).isNotEqualTo(0);
     String logs = executeBuild.getLogs();
-    assertThat(logs).doesNotContain("sonar-runner");
-    assertThat(logs).doesNotContain("SONAR_RUNNER_OPTS");
     assertThat(logs).contains("java.lang.OutOfMemoryError");
   }
 
