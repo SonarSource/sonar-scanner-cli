@@ -19,6 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.util.Map;
 import java.util.Properties;
 import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.ScanProperties;
@@ -64,32 +65,20 @@ public class Main {
     Stats stats = new Stats(logger).start();
 
     int status = Exit.ERROR;
-    boolean started = false;
     try {
       Properties p = conf.properties();
       checkSkip(p);
       configureLogging(p);
       init(p);
       runner.start();
-      started = true;
       logger.info("SonarQube server " + runner.serverVersion());
-      runAnalysis(stats, p);
+      execute(stats, p);
       status = Exit.SUCCESS;
     } catch (Throwable e) {
-      status = Exit.ERROR;
       displayExecutionResult(stats, "FAILURE");
       showError("Error during SonarQube Scanner execution", e, cli.isDebugEnabled());
     } finally {
-      try {
-        if (started) {
-          runner.stop();
-        }
-      } catch (Throwable e) {
-        status = Exit.ERROR;
-        logger.error("Unable to properly stop the scanner", e);
-      } finally {
-        exit.exit(status);
-      }
+      exit.exit(status);
     }
 
   }
@@ -118,8 +107,8 @@ public class Main {
     }
   }
 
-  private void runAnalysis(Stats stats, Properties p) {
-    runner.runAnalysis(p);
+  private void execute(Stats stats, Properties p) {
+    runner.execute((Map) p);
     displayExecutionResult(stats, "SUCCESS");
   }
 
