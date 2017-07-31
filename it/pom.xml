@@ -23,7 +23,6 @@
 
   <properties>
     <sonar.buildVersion>5.0</sonar.buildVersion>
-    <surefire.argLine>-server</surefire.argLine>
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
   </properties>
 
