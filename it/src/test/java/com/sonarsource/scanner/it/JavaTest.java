@@ -291,10 +291,11 @@ public class JavaTest extends ScannerTestCase {
     BuildResult executeBuild = orchestrator.executeBuildQuietly(build);
     assertThat(executeBuild.getStatus()).isNotEqualTo(0);
     String logs = executeBuild.getLogs();
-    assertThat(logs).satisfies(new Condition<String>() {
+    assertThat(logs).satisfies(new Condition<String>("Contain error message about OOM") {
       @Override
       public boolean matches(String value) {
-        return value.contains("java.lang.OutOfMemoryError") || value.contains("GC overhead limit exceeded");
+        return value.contains("java.lang.OutOfMemoryError") 
+          || value.contains("GC overhead limit exceeded") || value.contains("Java heap space");
       }
     });
   }
