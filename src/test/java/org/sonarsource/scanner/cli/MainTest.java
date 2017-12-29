@@ -85,7 +85,7 @@ public class MainTest {
     e = new IllegalStateException("Error", e);
     doThrow(e).when(runner).execute(any(Map.class));
     when(scannerFactory.create(any(Properties.class))).thenReturn(runner);
-
+    when(cli.isDebugEnabled()).thenReturn(true);
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
@@ -99,6 +99,7 @@ public class MainTest {
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
     doThrow(e).when(runner).start();
+    when(cli.isDebugEnabled()).thenReturn(true);
     when(scannerFactory.create(any(Properties.class))).thenReturn(runner);
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
@@ -111,15 +112,6 @@ public class MainTest {
   }
 
   @Test
-  public void show_error_with_stacktrace() {
-    Exception e = createException(false);
-    testException(e, false);
-
-    verify(logs).error("Error during SonarQube Scanner execution", e);
-    verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
-  }
-
-  @Test
   public void show_error_MessageException() {
     Exception e = createException(true);
     testException(e, false);
@@ -127,6 +119,16 @@ public class MainTest {
     verify(logs).error("Error during SonarQube Scanner execution");
     verify(logs).error("Caused by: NPE");
     verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
+  }
+  
+  @Test
+  public void show_error_MessageException_debug() {
+    Exception e = createException(true);
+    testException(e, true);
+
+    verify(logs).error("Error during SonarQube Scanner execution");
+    verify(logs).error("my message");
+    verify(logs).error("Caused by: NPE");
   }
 
   @Test

@@ -143,7 +143,7 @@ public class Main {
 
   private static boolean showStackTrace(Throwable e, boolean debug) {
     // class not available at compile time (loaded by isolated classloader)
-    return debug || !"org.sonar.api.utils.MessageException".equals(e.getClass().getName());
+    return debug && !"org.sonar.api.utils.MessageException".equals(e.getClass().getName());
   }
 
   private void suggestDebugMode() {
