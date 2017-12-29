@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.fest.assertions.Condition;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -290,7 +291,12 @@ public class JavaTest extends ScannerTestCase {
     BuildResult executeBuild = orchestrator.executeBuildQuietly(build);
     assertThat(executeBuild.getStatus()).isNotEqualTo(0);
     String logs = executeBuild.getLogs();
-    assertThat(logs).contains("java.lang.OutOfMemoryError");
+    assertThat(logs).satisfies(new Condition<String>() {
+      @Override
+      public boolean matches(String value) {
+        return value.contains("java.lang.OutOfMemoryError") || value.contains("GC overhead limit exceeded");
+      }
+    });
   }
 
 }
