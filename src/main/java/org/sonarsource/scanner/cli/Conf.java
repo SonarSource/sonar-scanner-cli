@@ -19,6 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
+// TODO
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+// TODO
 import javax.annotation.Nullable;
 
 import org.sonarsource.scanner.api.Utils;
@@ -49,6 +51,7 @@ class Conf {
   private final Logs logger;
   private final Map<String, String> env;
 
+  // TODO
   Conf(Cli cli, Logs logger, Map<String, String> env) {
     this.cli = cli;
     this.logger = logger;
