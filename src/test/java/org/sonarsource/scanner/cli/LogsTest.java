@@ -21,14 +21,13 @@ package org.sonarsource.scanner.cli;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.sonarsource.scanner.cli.Logs;
+
 import java.io.PrintStream;
 
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class LogsTest {
   @Mock
@@ -51,19 +50,19 @@ public class LogsTest {
     verify(stdOut).println("INFO: info");
     verifyNoMoreInteractions(stdOut, stdErr);
   }
-  
+
   @Test
   public void testWarn() {
     logs.warn("warn");
     verify(stdErr).println("WARN: warn");
     verifyNoMoreInteractions(stdOut, stdErr);
   }
-  
+
   @Test
   public void testWarnWithTimestamp() {
-    logs.setDebugEnabled(true);
+    logs.setShowTimestamp(true);
     logs.warn("warn");
-    verify(stdErr).println(Matchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d WARN: warn"));
+    verify(stdErr).println(ArgumentMatchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d WARN: warn"));
     verifyNoMoreInteractions(stdOut, stdErr);
   }
 
@@ -80,14 +79,25 @@ public class LogsTest {
   }
 
   @Test
-  public void testDebug() {
-    logs.setDebugEnabled(true);
+  public void should_show_timestamp_if_enabled() {
+    logs.setLogLevel(Logs.LogLevel.DEBUG);
+    logs.setShowTimestamp(true);
 
     logs.debug("debug");
-    verify(stdOut).println(Matchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d DEBUG: debug$"));
+    verify(stdOut).println(ArgumentMatchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d DEBUG: debug$"));
+  }
 
-    logs.setDebugEnabled(false);
-    logs.debug("debug");
-    verifyNoMoreInteractions(stdOut, stdErr);
+  @Test
+  public void should_not_print_info_if_loglevel_is_warn() {
+    logs.setLogLevel(Logs.LogLevel.WARN);
+    logs.info("some information");
+    verifyZeroInteractions(stdErr);
+  }
+
+  @Test
+  public void should_not_print_warn_if_loglevel_is_error() {
+    logs.setLogLevel(Logs.LogLevel.ERROR);
+    logs.warn("warn");
+    verifyZeroInteractions(stdErr);
   }
 }

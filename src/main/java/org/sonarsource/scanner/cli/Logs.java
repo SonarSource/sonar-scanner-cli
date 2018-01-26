@@ -25,42 +25,54 @@ import java.time.format.DateTimeFormatter;
 
 public class Logs {
   private DateTimeFormatter timeFormatter;
-  private boolean debugEnabled = false;
+  private boolean showTimestamp = false;
   private PrintStream stdOut;
   private PrintStream stdErr;
+  private LogLevel logLevel;
 
   public Logs(PrintStream stdOut, PrintStream stdErr) {
-    this.stdErr = stdErr;
+    this(stdOut, stdErr, LogLevel.INFO);
+  }
+
+  public Logs(PrintStream stdOut, PrintStream stdErr, LogLevel logLevel) {
     this.stdOut = stdOut;
+    this.stdErr = stdErr;
+    this.logLevel = logLevel;
     this.timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
   }
 
-  public void setDebugEnabled(boolean debugEnabled) {
-    this.debugEnabled = debugEnabled;
+  public void setShowTimestamp(boolean showTimestamp) {
+    this.showTimestamp = showTimestamp;
   }
 
-  public boolean isDebugEnabled() {
-    return debugEnabled;
+  public void setLogLevel(LogLevel logLevel) {
+    this.logLevel = logLevel;
   }
 
   public void debug(String message) {
-    if (isDebugEnabled()) {
+    if (logLevel.priority <= LogLevel.DEBUG.priority) {
       LocalTime currentTime = LocalTime.now();
       String timestamp = currentTime.format(timeFormatter);
-      stdOut.println(timestamp + " DEBUG: " + message);
+      stdOut.println(timestamp + " " + LogLevel.DEBUG.marker + ": " + message);
     }
   }
 
   public void info(String message) {
-    print(stdOut, "INFO: " + message);
+    if (logLevel.priority <= LogLevel.INFO.priority) {
+      print(stdOut, LogLevel.INFO.marker + ": " + message);
+    }
   }
 
   public void warn(String message) {
-    print(stdErr, "WARN: " + message);
+    if (logLevel.priority <= LogLevel.WARN.priority) {
+      print(stdErr, LogLevel.WARN.marker + ": " + message);
+    }
   }
 
   public void error(String message) {
-    print(stdErr, "ERROR: " + message);
+    if (logLevel.priority <= LogLevel.ERROR.priority) {
+      print(stdErr, LogLevel.ERROR.marker + ": " + message);
+    }
   }
 
   public void error(String message, Throwable t) {
@@ -69,12 +81,24 @@ public class Logs {
   }
 
   private void print(PrintStream stream, String msg) {
-    if (debugEnabled) {
+    if (showTimestamp) {
       LocalTime currentTime = LocalTime.now();
       String timestamp = currentTime.format(timeFormatter);
       stream.println(timestamp + " " + msg);
     } else {
       stream.println(msg);
+    }
+  }
+
+  public enum LogLevel {
+    DEBUG(2, "DEBUG"), INFO(3, "INFO"), WARN(4, "WARN"), ERROR(5, "ERROR");
+
+    private int priority;
+    private String marker;
+
+    LogLevel(int priority, String marker) {
+      this.priority = priority;
+      this.marker = marker;
     }
   }
 }

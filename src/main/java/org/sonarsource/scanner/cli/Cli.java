@@ -79,7 +79,17 @@ class Cli {
     } else if (asList("-X", "--debug").contains(arg)) {
       props.setProperty("sonar.verbose", "true");
       debugEnabled = true;
-      logger.setDebugEnabled(true);
+      logger.setLogLevel(Logs.LogLevel.DEBUG);
+      logger.setShowTimestamp(true);
+
+    } else if (arg.startsWith("-l") || arg.startsWith("--loglevel")) {
+      String logLevelStr = arg.substring(arg.split("\\s")[0].length()).trim();
+      try {
+        logger.setLogLevel(Logs.LogLevel.valueOf(logLevelStr));
+      } catch (IllegalArgumentException e) {
+        logger.info("'" + logLevelStr + "' is not a supported loglevel");
+        exit.exit(Exit.ERROR);
+      }
 
     } else if (asList("-D", "--define").contains(arg)) {
       return processProp(args, pos);
@@ -137,6 +147,7 @@ class Cli {
     logger.info("Options:");
     logger.info(" -D,--define <arg>     Define property");
     logger.info(" -h,--help             Display help information");
+    logger.info(" -l, --loglevel        Set the log level to: INFO, WARN, ERROR");
     logger.info(" -v,--version          Display version information");
     logger.info(" -X,--debug            Produce execution debug output");
   }

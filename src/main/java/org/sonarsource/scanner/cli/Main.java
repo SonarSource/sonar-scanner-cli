@@ -103,7 +103,8 @@ public class Main {
     if ("true".equals(props.getProperty("sonar.verbose"))
       || "DEBUG".equalsIgnoreCase(props.getProperty("sonar.log.level"))
       || "TRACE".equalsIgnoreCase(props.getProperty("sonar.log.level"))) {
-      logger.setDebugEnabled(true);
+      logger.setLogLevel(Logs.LogLevel.DEBUG);
+      logger.setShowTimestamp(true);
     }
   }
 

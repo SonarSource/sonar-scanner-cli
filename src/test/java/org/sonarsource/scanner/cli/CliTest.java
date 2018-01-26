@@ -26,9 +26,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class CliTest {
-  Exit exit = mock(Exit.class);
-  Logs logs = new Logs(System.out, System.err);
-  Cli cli = new Cli(exit, logs);
+  private Exit exit = mock(Exit.class);
+  private Logs logs = new Logs(System.out, System.err);
+  private Cli cli = new Cli(exit, logs);
 
   @Test
   public void should_parse_empty_arguments() {
@@ -141,6 +141,30 @@ public class CliTest {
     cli.parse(new String[] {"-w"});
     verify(logs).error("Unrecognized option: -w");
     verify(logs).info("usage: sonar-scanner [options]");
+    verify(exit).exit(Exit.ERROR);
+  }
+
+  @Test
+  public void should_set_allowed_loglevel_with_l_parameter_correctly() {
+    logs = mock(Logs.class);
+    cli = new Cli(exit, logs);
+    cli.parse(new String[]{"-l INFO"});
+    verify(logs).setLogLevel(Logs.LogLevel.INFO);
+  }
+
+  @Test
+  public void should_set_allowed_loglevel_with_loglevel_parameter_correctly() {
+    logs = mock(Logs.class);
+    cli = new Cli(exit, logs);
+    cli.parse(new String[]{"--loglevel ERROR"});
+    verify(logs).setLogLevel(Logs.LogLevel.ERROR);
+  }
+
+  @Test
+  public void should_exit_with_error_if_loglevel_is_unknown() {
+    logs = mock(Logs.class);
+    cli = new Cli(exit, logs);
+    cli.parse(new String[]{"--loglevel UNKNOWN"});
     verify(exit).exit(Exit.ERROR);
   }
 }

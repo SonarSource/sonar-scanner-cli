@@ -60,7 +60,7 @@ public class MainTest {
   private Logs logs;
 
   @Before
-  public void setUp() throws IOException {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
     when(scannerFactory.create(any(Properties.class))).thenReturn(scanner);
     when(conf.properties()).thenReturn(properties);
@@ -120,7 +120,7 @@ public class MainTest {
     verify(logs).error("Caused by: NPE");
     verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
   }
-  
+
   @Test
   public void show_error_MessageException_debug() {
     Exception e = createException(true);
@@ -165,7 +165,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_only_display_version() throws IOException {
+  public void should_only_display_version() {
 
     Properties p = new Properties();
     when(cli.isDisplayVersionOnly()).thenReturn(true);
@@ -182,7 +182,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_skip() throws IOException {
+  public void should_skip() {
     Properties p = new Properties();
     p.setProperty(ScanProperties.SKIP, "true");
     when(conf.properties()).thenReturn(p);
@@ -199,7 +199,7 @@ public class MainTest {
   }
 
   @Test
-  public void shouldLogServerVersion() throws IOException {
+  public void shouldLogServerVersion() {
     when(scanner.serverVersion()).thenReturn("5.5");
     Properties p = new Properties();
     when(cli.isDisplayVersionOnly()).thenReturn(true);
@@ -211,24 +211,24 @@ public class MainTest {
   }
 
   @Test
-  public void should_configure_logging() throws IOException {
+  public void should_configure_logging() {
     Properties analysisProps = testLogging("sonar.verbose", "true");
     assertThat(analysisProps.getProperty("sonar.verbose")).isEqualTo("true");
   }
 
   @Test
-  public void should_configure_logging_trace() throws IOException {
+  public void should_configure_logging_trace() {
     Properties analysisProps = testLogging("sonar.log.level", "TRACE");
     assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("TRACE");
   }
 
   @Test
-  public void should_configure_logging_debug() throws IOException {
+  public void should_configure_logging_debug() {
     Properties analysisProps = testLogging("sonar.log.level", "DEBUG");
     assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("DEBUG");
   }
 
-  private Properties testLogging(String propKey, String propValue) throws IOException {
+  private Properties testLogging(String propKey, String propValue) {
     Properties p = new Properties();
     p.put(propKey, propValue);
     when(conf.properties()).thenReturn(p);
@@ -237,7 +237,7 @@ public class MainTest {
     main.execute();
 
     // Logger used for callback should have debug enabled
-    verify(logs).setDebugEnabled(true);
+    verify(logs).setShowTimestamp(true);
 
     ArgumentCaptor<Properties> propertiesCapture = ArgumentCaptor.forClass(Properties.class);
     verify(scanner).execute((Map) propertiesCapture.capture());
