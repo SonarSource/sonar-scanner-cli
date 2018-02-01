@@ -24,6 +24,7 @@ import org.sonarsource.scanner.api.ScannerProperties;
 
 import static java.util.Arrays.asList;
 
+// TODO
 class Cli {
 
   private boolean debugEnabled = false;
@@ -33,6 +34,7 @@ class Cli {
   private final Logs logger;
 
   public Cli(Exit exit, Logs logger) {
+      System.out.println("hello");
     this.exit = exit;
     this.logger = logger;
   }
