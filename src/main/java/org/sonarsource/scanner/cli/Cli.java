@@ -28,6 +28,7 @@ class Cli {
 
   private boolean debugEnabled = false;
   private boolean displayVersionOnly = false;
+  private boolean embedded = false;
   private final Properties props = new Properties();
   private final Exit exit;
   private final Logs logger;
@@ -43,6 +44,10 @@ class Cli {
 
   boolean isDisplayVersionOnly() {
     return displayVersionOnly;
+  }
+
+  boolean isEmbedded() {
+    return embedded;
   }
 
   Properties properties() {
@@ -83,6 +88,9 @@ class Cli {
 
     } else if (asList("-D", "--define").contains(arg)) {
       return processProp(args, pos);
+
+    } else if ("--embedded".equals(arg)) {
+      embedded = true;
 
     } else if (arg.startsWith("-D")) {
       arg = arg.substring(2);
