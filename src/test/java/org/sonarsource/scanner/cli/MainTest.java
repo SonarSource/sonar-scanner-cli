@@ -114,17 +114,36 @@ public class MainTest {
   @Test
   public void show_error_MessageException() {
     Exception e = createException(true);
-    testException(e, false);
+    testException(e, false, false);
 
     verify(logs).error("Error during SonarQube Scanner execution");
     verify(logs).error("Caused by: NPE");
     verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
   }
+
+  @Test
+  public void show_error_MessageException_embedded() {
+    Exception e = createException(true);
+    testException(e, false, true);
+
+    verify(logs).error("Error during SonarQube Scanner execution");
+    verify(logs).error("Caused by: NPE");
+  }
   
   @Test
   public void show_error_MessageException_debug() {
     Exception e = createException(true);
-    testException(e, true);
+    testException(e, true, false);
+
+    verify(logs).error("Error during SonarQube Scanner execution");
+    verify(logs).error("my message");
+    verify(logs).error("Caused by: NPE");
+  }
+
+  @Test
+  public void show_error_MessageException_debug_embedded() {
+    Exception e = createException(true);
+    testException(e, true, true);
 
     verify(logs).error("Error during SonarQube Scanner execution");
     verify(logs).error("my message");
@@ -134,14 +153,15 @@ public class MainTest {
   @Test
   public void show_error_debug() {
     Exception e = createException(false);
-    testException(e, true);
+    testException(e, true, false);
 
     verify(logs).error("Error during SonarQube Scanner execution", e);
     verify(logs, never()).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
   }
 
-  private void testException(Exception e, boolean debugEnabled) {
+  private void testException(Exception e, boolean debugEnabled, boolean isEmbedded) {
     when(cli.isDebugEnabled()).thenReturn(debugEnabled);
+    when(cli.isEmbedded()).thenReturn(isEmbedded);
 
     EmbeddedScanner runner = mock(EmbeddedScanner.class);
     doThrow(e).when(runner).execute(any(Map.class));
