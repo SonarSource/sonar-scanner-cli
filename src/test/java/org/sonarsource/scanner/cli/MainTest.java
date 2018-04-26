@@ -128,7 +128,6 @@ public class MainTest {
 
     verify(logs).error("Error during SonarQube Scanner execution");
     verify(logs).error("Caused by: NPE");
-    verify(logs).error("Re-run SonarQube Scanner using the debug mode.");
   }
   
   @Test
@@ -158,7 +157,6 @@ public class MainTest {
 
     verify(logs).error("Error during SonarQube Scanner execution", e);
     verify(logs, never()).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
-    verify(logs, never()).error("Re-run SonarQube Scanner using the debug mode.");
   }
 
   private void testException(Exception e, boolean debugEnabled, boolean isEmbedded) {

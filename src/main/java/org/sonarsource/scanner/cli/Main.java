@@ -147,9 +147,7 @@ public class Main {
   }
 
   private void suggestDebugMode() {
-    if (cli.isEmbedded()) {
-      logger.error("Re-run SonarQube Scanner using the debug mode.");
-    } else {
+    if (!cli.isEmbedded()) {
       logger.error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
     }
   }
