@@ -36,6 +36,7 @@ public class CliTest {
     assertThat(cli.properties()).isNotEmpty();
     assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.isDisplayVersionOnly()).isFalse();
+    assertThat(cli.isEmbedded()).isFalse();
   }
 
   @Test
@@ -142,5 +143,11 @@ public class CliTest {
     verify(logs).error("Unrecognized option: -w");
     verify(logs).info("usage: sonar-scanner [options]");
     verify(exit).exit(Exit.ERROR);
+  }
+
+  @Test
+  public void should_enable_embedded_mode() {
+    cli.parse(new String[] {"--embedded"});
+    assertThat(cli.isEmbedded()).isTrue();
   }
 }
