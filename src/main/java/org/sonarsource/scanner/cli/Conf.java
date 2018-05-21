@@ -48,6 +48,8 @@ class Conf {
   private final Cli cli;
   private final Logs logger;
   private final Map<String, String> env;
+  
+  public int publicField;
 
   Conf(Cli cli, Logs logger, Map<String, String> env) {
     this.cli = cli;
