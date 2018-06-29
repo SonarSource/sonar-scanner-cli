@@ -61,23 +61,6 @@ public class MultimoduleTest extends ScannerTestCase {
   }
 
   /**
-   * SONARPLUGINS-2421
-   */
-  @Test
-  public void test_multi_language_with_same_projectdir() {
-    SonarScanner build = newScanner(new File("projects/multi-module/multi-language"));
-
-    orchestrator.executeBuild(build);
-
-    assertThat(getComponent("multi-language").getName()).isEqualTo("Simplest multi-language project");
-
-    // Verify that we have the modules
-    assertThat(getComponent("multi-language:java-module").getName()).isEqualTo("java-module");
-
-    assertThat(getComponent("multi-language:js-module").getName()).isEqualTo("js-module");
-  }
-
-  /**
    * SONARPLUGINS-2202
    */
   @Test
