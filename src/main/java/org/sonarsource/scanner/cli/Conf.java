@@ -277,11 +277,13 @@ class Conf {
     }
   }
 
+  // TODO
   /**
    * Returns the file denoted by the given path, may this path be relative to
    * "baseDir" or absolute.
    */
   protected static Path getAbsolutePath(String path, Path baseDir) {
+    System.out.println("path = " + path);
     Path propertyFile = Paths.get(path.trim());
     if (!propertyFile.isAbsolute()) {
       propertyFile = baseDir.resolve(propertyFile);
