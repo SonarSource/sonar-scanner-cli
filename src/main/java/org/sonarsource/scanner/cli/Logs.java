@@ -56,7 +56,7 @@ public class Logs {
   }
 
   public void warn(String message) {
-    print(stdErr, "WARN: " + message);
+    print(stdOut, "WARN: " + message);
   }
 
   public void error(String message) {

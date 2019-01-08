@@ -19,16 +19,15 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.io.PrintStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.sonarsource.scanner.cli.Logs;
-import java.io.PrintStream;
 
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class LogsTest {
   @Mock
@@ -51,19 +50,19 @@ public class LogsTest {
     verify(stdOut).println("INFO: info");
     verifyNoMoreInteractions(stdOut, stdErr);
   }
-  
+
   @Test
   public void testWarn() {
     logs.warn("warn");
-    verify(stdErr).println("WARN: warn");
+    verify(stdOut).println("WARN: warn");
     verifyNoMoreInteractions(stdOut, stdErr);
   }
-  
+
   @Test
   public void testWarnWithTimestamp() {
     logs.setDebugEnabled(true);
     logs.warn("warn");
-    verify(stdErr).println(Matchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d WARN: warn"));
+    verify(stdOut).println(Matchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d WARN: warn"));
     verifyNoMoreInteractions(stdOut, stdErr);
   }
 
