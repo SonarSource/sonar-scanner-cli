@@ -11,5 +11,7 @@ configureTravis
 
 export DEPLOY_PULL_REQUEST=true
 
+env | sort
+
 regular_mvn_build_deploy_analyze -Pdist-linux,dist-windows,dist-macosx
 
