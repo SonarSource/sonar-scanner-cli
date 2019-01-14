@@ -25,7 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.fest.assertions.Condition;
+import org.assertj.core.api.Condition;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,7 +33,7 @@ import org.junit.rules.TemporaryFolder;
 import org.sonarqube.ws.WsMeasures.Measure;
 
 import static java.lang.Integer.parseInt;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ScannerTest extends ScannerTestCase {
 
@@ -194,7 +194,7 @@ public class ScannerTest extends ScannerTestCase {
     BuildResult executeBuild = orchestrator.executeBuildQuietly(build);
     assertThat(executeBuild.getStatus()).isNotEqualTo(0);
     String logs = executeBuild.getLogs();
-    assertThat(logs).satisfies(new Condition<String>("Contain error message about OOM") {
+    assertThat(logs).is(new Condition<String>("Contain error message about OOM") {
       @Override
       public boolean matches(String value) {
         return value.contains("java.lang.OutOfMemoryError")

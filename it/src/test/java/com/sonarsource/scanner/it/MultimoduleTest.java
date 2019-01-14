@@ -26,7 +26,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.sonarqube.ws.WsComponents.Component;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MultimoduleTest extends ScannerTestCase {
 
@@ -46,10 +46,15 @@ public class MultimoduleTest extends ScannerTestCase {
 
     assertThat(getComponent("simplest-with-props-on-root").getName()).isEqualTo("Simplest multi-module project with all properties set on the root project");
 
-    // Verify that we have the modules
-    assertThat(getComponent("simplest-with-props-on-root:module1").getName()).isEqualTo("module1");
-
-    assertThat(getComponent("simplest-with-props-on-root:module2").getName()).isEqualTo("module2");
+    if (noMoreModules()) {
+      // Verify that we have the folders
+      assertThat(getComponent("simplest-with-props-on-root:module1/src").getName()).isEqualTo("module1/src");
+      assertThat(getComponent("simplest-with-props-on-root:module2/src").getName()).isEqualTo("module2/src");
+    } else {
+      // Verify that we have the modules
+      assertThat(getComponent("simplest-with-props-on-root:module1").getName()).isEqualTo("module1");
+      assertThat(getComponent("simplest-with-props-on-root:module2").getName()).isEqualTo("module2");
+    }
 
     // And verify that the working directories are all located in the root folder
     File workDir = new File("projects/multi-module/simplest/simplest-with-props-on-root/.scannerwork");
@@ -71,10 +76,14 @@ public class MultimoduleTest extends ScannerTestCase {
 
     assertThat(getComponent("simplest-with-props-each-module").getName()).isEqualTo("Simplest multi-module project with properties set on each module");
 
-    // Verify that we have the modules
-    assertThat(getComponent("simplest-with-props-each-module:module1").getName()).isEqualTo("module1");
-
-    assertThat(getComponent("simplest-with-props-each-module:overridden-key-for-module2").getName()).isEqualTo("Module 2");
+    if (noMoreModules()) {
+      assertThat(getComponent("simplest-with-props-each-module:module1/src").getName()).isEqualTo("module1/src");
+      assertThat(getComponent("simplest-with-props-each-module:module2/src").getName()).isEqualTo("module2/src");
+    } else {
+      // Verify that we have the modules
+      assertThat(getComponent("simplest-with-props-each-module:module1").getName()).isEqualTo("module1");
+      assertThat(getComponent("simplest-with-props-each-module:overridden-key-for-module2").getName()).isEqualTo("Module 2");
+    }
   }
 
   /**
@@ -88,10 +97,14 @@ public class MultimoduleTest extends ScannerTestCase {
 
     assertThat(getComponent("deep-path-for-modules").getName()).isEqualTo("Project with deep path for modules");
 
-    // Verify that we have the modules
-    assertThat(getComponent("deep-path-for-modules:mod1").getName()).isEqualTo("Module 1");
-
-    assertThat(getComponent("deep-path-for-modules:mod2").getName()).isEqualTo("Module 2");
+    if (noMoreModules()) {
+      assertThat(getComponent("deep-path-for-modules:modules/module1/src").getName()).isEqualTo("module1/src");
+      assertThat(getComponent("deep-path-for-modules:modules/module2/src").getName()).isEqualTo("module2/src");
+    } else {
+      // Verify that we have the modules
+      assertThat(getComponent("deep-path-for-modules:mod1").getName()).isEqualTo("Module 1");
+      assertThat(getComponent("deep-path-for-modules:mod2").getName()).isEqualTo("Module 2");
+    }
   }
 
   /**
@@ -105,10 +118,14 @@ public class MultimoduleTest extends ScannerTestCase {
 
     assertThat(getComponent("module-path-with-space").getName()).isEqualTo("Project with module path that contain spaces");
 
-    // Verify that we have the modules
-    assertThat(getComponent("module-path-with-space:module1").getName()).isEqualTo("Module 1");
-
-    assertThat(getComponent("module-path-with-space:module2").getName()).isEqualTo("Module 2");
+    if (noMoreModules()) {
+      assertThat(getComponent("module-path-with-space:my module 1/src").getName()).isEqualTo("my module 1/src");
+      assertThat(getComponent("module-path-with-space:my module 2/src").getName()).isEqualTo("my module 2/src");
+    } else {
+      // Verify that we have the modules
+      assertThat(getComponent("module-path-with-space:module1").getName()).isEqualTo("Module 1");
+      assertThat(getComponent("module-path-with-space:module2").getName()).isEqualTo("Module 2");
+    }
   }
 
   /**
@@ -124,14 +141,19 @@ public class MultimoduleTest extends ScannerTestCase {
     assertThat(rootProject.getName()).isEqualTo("Project with modules that overwrite properties");
     assertThat(rootProject.getDescription()).isEqualTo("Description of root project");
 
-    // Verify that we have the modules
-    Component module1 = getComponent("overwriting-parent-properties:module1-new-key");
-    assertThat(module1.getName()).isEqualTo("Module 1");
-    assertThat(module1.getDescription()).isEqualTo("Description of module 1");
+    if (noMoreModules()) {
+      assertThat(getComponent("overwriting-parent-properties:module1/src1").getName()).isEqualTo("module1/src1");
+      assertThat(getComponent("overwriting-parent-properties:module2/src2").getName()).isEqualTo("module2/src2");
+    } else {
+      // Verify that we have the modules
+      Component module1 = getComponent("overwriting-parent-properties:module1-new-key");
+      assertThat(module1.getName()).isEqualTo("Module 1");
+      assertThat(module1.getDescription()).isEqualTo("Description of module 1");
 
-    Component module2 = getComponent("overwriting-parent-properties:module2-new-key");
-    assertThat(module2.getName()).isEqualTo("Module 2");
-    assertThat(module2.getDescription()).isEqualTo("Description of module 2");
+      Component module2 = getComponent("overwriting-parent-properties:module2-new-key");
+      assertThat(module2.getName()).isEqualTo("Module 2");
+      assertThat(module2.getDescription()).isEqualTo("Description of module 2");
+    }
   }
 
   /**
@@ -145,10 +167,18 @@ public class MultimoduleTest extends ScannerTestCase {
 
     assertThat(getComponent("using-config-file-prop").getName()).isEqualTo("Advanced use case - mostly used by the Ant task");
 
-    // Verify that we have the modules
-    assertThat(getComponent("using-config-file-prop:module1").getName()).isEqualTo("Module 1");
+    if (noMoreModules()) {
+      assertThat(getComponent("using-config-file-prop:module1/src").getName()).isEqualTo("module1/src");
+      assertThat(getComponent("using-config-file-prop:module2/src").getName()).isEqualTo("module2/src");
+    } else {
+      // Verify that we have the modules
+      assertThat(getComponent("using-config-file-prop:module1").getName()).isEqualTo("Module 1");
+      assertThat(getComponent("using-config-file-prop:module2").getName()).isEqualTo("Module 2");
+    }
+  }
 
-    assertThat(getComponent("using-config-file-prop:module2").getName()).isEqualTo("Module 2");
+  private boolean noMoreModules() {
+    return orchestrator.getServer().version().isGreaterThanOrEquals(7, 6);
   }
 
   /**

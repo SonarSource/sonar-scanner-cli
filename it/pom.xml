@@ -22,7 +22,7 @@
   </organization>
 
   <properties>
-    <sonar.buildVersion>5.6</sonar.buildVersion>
+    <sonar.buildVersion>6.7</sonar.buildVersion>
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
   </properties>
 
@@ -36,7 +36,7 @@
     <dependency>
       <groupId>org.sonarsource.orchestrator</groupId>
       <artifactId>sonar-orchestrator</artifactId>
-      <version>3.15.1.1274</version>
+      <version>3.22.0.1791</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -53,18 +53,12 @@
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
       <artifactId>sonar-ws</artifactId>
-      <version>5.6</version>
-    </dependency>
-    <dependency>
-      <groupId>org.easytesting</groupId>
-      <artifactId>fest-assert</artifactId>
-      <version>1.4</version>
-      <scope>test</scope>
+      <version>6.7</version>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>2.1.0</version>
+      <version>3.11.1</version>
     </dependency>
   </dependencies>
 
