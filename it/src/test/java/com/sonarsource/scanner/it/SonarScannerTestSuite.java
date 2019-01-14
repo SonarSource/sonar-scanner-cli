@@ -20,6 +20,7 @@
 package com.sonarsource.scanner.it;
 
 import com.sonar.orchestrator.Orchestrator;
+import com.sonar.orchestrator.locator.MavenLocation;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -31,8 +32,8 @@ public class SonarScannerTestSuite {
 
   @ClassRule
   public static final Orchestrator ORCHESTRATOR = Orchestrator.builderEnv()
-    .setOrchestratorProperty("javascriptVersion", "LATEST_RELEASE")
-    .addPlugin("javascript")
+    .setSonarVersion(System.getProperty("sonar.runtimeVersion", "LATEST_RELEASE[6.7]"))
+    .addPlugin(MavenLocation.of("org.sonarsource.javascript", "sonar-javascript-plugin", "LATEST_RELEASE"))
     .build();
 
 }
