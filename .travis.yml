@@ -17,11 +17,3 @@ notifications:
   webhooks:
     - secure: "KmAKurBY49QiBEePmi2G54NN+i9h5uweiQH32CF0DBKsBB7Coswwp4ULdImYGz0QS/r/xIhA1dOzyq7uQ+tmjQsL0DGoUYXlm6P1KO/oQ8UbLQOxIrNN+tH+QxdzDZwIcpvxFUFiCN8bG8XiXSAyKmHeWVNwYKcsZI6GkacNu307h6FOveKqstGfQJQWUObooMGoaiHhdq7LGd25caWCN2QX+mqnjpwGK1wuY5OLABrU3GJnchJj7DjovjiGmstRCDFf+1Xmq+rJ6Gq2hp9YhNQwYgOIlWGqaNzHt6pdz/Wa/QO92N196FPWg/DAidO5esXJUsu4qCwcMHsatGnyOoMHPsllB7Ob12WCeQJgRk6RifeWzt13mmw0mnnU22ZrtwldZpw3cL5eqT5z0ZxLHuHeNP5wiFVFImKuu/GH6tF1gN8fAerDPfiRDNkYWo6VH31ZqqUOBDWKne2hbe17SGwv0PhKq8nuBpKZreRqRZ/xVSN/UcTgVr065UHHxqon+mbglw8C88aTbUuT05O1V9sMl6D6xObEmbSgLqpIpPtrOCkfDhbld7QeAJGMZuVxs502VNxUxWgd0vlp2a5S3E6WV8B6CvQJeeWUugzPR3q9oVQJYUCj01BmSO7i0wj/L6beGIc4KwEbg19Lxhy5YQHumVRve7vXGEIudLkUIFk="
   on_start: always
-
-addons:
-  apt:
-    packages:
-      # upgrade java 8 as the default version 1.8.0_31 prevents from compiling sources
-      # https://github.com/travis-ci/travis-ci/issues/4042
-      - oracle-java8-installer
-
