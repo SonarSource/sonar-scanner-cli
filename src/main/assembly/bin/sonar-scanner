@@ -49,6 +49,11 @@ else
   java_cmd="$(which java)"
 fi
 
+if [ -z "$java_cmd" -o ! -x "$java_cmd" ] ; then
+  echo "Could not find 'java' executable in JAVA_HOME or PATH."
+  exit 1
+fi
+
 project_home=$(pwd)
 
 #echo "Info: Using sonar-scanner at $sonar_scanner_home"
