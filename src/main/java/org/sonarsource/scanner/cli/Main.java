@@ -59,6 +59,8 @@ public class Main {
     Cli cli = new Cli(exit, logs).parse(args);
     Main main = new Main(exit, cli, new Conf(cli, logs, System.getenv()), new ScannerFactory(logs), logs);
     main.execute();
+    // TODO probably no coverage here ;-)
+    System.out.println("foo");
   }
 
   void execute() {
