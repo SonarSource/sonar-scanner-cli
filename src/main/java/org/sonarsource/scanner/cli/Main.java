@@ -19,10 +19,15 @@
  */
 package org.sonarsource.scanner.cli;
 
-import java.util.Map;
-import java.util.Properties;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
+
 import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.ScanProperties;
+
+import static java.nio.file.FileVisitResult.CONTINUE;
 
 /**
  * Arguments :
@@ -68,6 +73,7 @@ public class Main {
     try {
       Properties p = conf.properties();
       checkSkip(p);
+      expandPaths(p);
       configureLogging(p);
       init(p);
       runner.start();
@@ -87,6 +93,30 @@ public class Main {
     if ("true".equalsIgnoreCase(properties.getProperty(ScanProperties.SKIP))) {
       logger.info("SonarQube Scanner analysis skipped");
       exit.exit(Exit.SUCCESS);
+    }
+  }
+
+  private void expandPaths(Properties properties) {
+    for(int i=0; i<ExpandPathProperties.AllValues.size(); i++) {
+      expand(properties, ExpandPathProperties.AllValues.get(i));
+    }
+  }
+
+  private void expand(Properties properties, String key) {
+    String value = properties.getProperty(key);
+    if (value != null) {
+      logger.info("Glob expanding '"+key+"' with pattern '"+value+"'");
+      String tokens[] = value.split(",");
+      for(int i=0; i<tokens.length; i++) {
+        try {
+          tokens[i] = globExpand(tokens[i].trim());
+        } catch (IOException e) {
+          logger.error("Error expanding paths for key:"+key);
+        }
+      }
+      value = String.join(",", tokens);
+      properties.setProperty(key, value);
+      logger.info("Glob expanded '"+key+"'="+value);
     }
   }
 
@@ -149,6 +179,45 @@ public class Main {
   private void suggestDebugMode() {
     if (!cli.isEmbedded()) {
       logger.error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
+    }
+  }
+
+  private static String globExpand(String pattern) throws IOException {
+    String startPath = ".";
+    if (pattern.startsWith("/")) {
+      startPath = "/";
+    }
+    final PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:"+pattern);
+    List<String> expandedPaths = new ArrayList<>();
+    Files.walkFileTree(Paths.get(startPath), new SimpleFileVisitor<Path>() {
+
+      @Override
+      public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+        return visit(dir, attrs);
+      }
+
+      @Override
+      public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+        return visit(path, attrs);
+      }
+
+      @Override
+      public FileVisitResult visitFileFailed(Path file, IOException exc)
+        throws IOException {
+        return FileVisitResult.CONTINUE;
+      }
+
+      private FileVisitResult visit(Path dir, BasicFileAttributes attrs) throws IOException {
+        if (pathMatcher.matches(dir)) {
+          expandedPaths.add(dir.toString());
+        }
+        return FileVisitResult.CONTINUE;
+      }
+    });
+    if (expandedPaths.size() > 0) {
+      return String.join(",", expandedPaths);
+    } else {
+      return pattern;
     }
   }
 

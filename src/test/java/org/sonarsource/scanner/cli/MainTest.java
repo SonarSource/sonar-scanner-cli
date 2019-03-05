@@ -202,6 +202,17 @@ public class MainTest {
   }
 
   @Test
+  public void should_glob_expand() throws IOException {
+    Properties p = new Properties();
+    p.setProperty(ExpandPathProperties.SONAR_SOURCES, "**/java");
+    when(conf.properties()).thenReturn(p);
+
+    Main main = new Main(exit, cli, conf, scannerFactory, logs);
+    main.execute();
+    assertThat(p.getProperty(ExpandPathProperties.SONAR_SOURCES)).isEqualTo("./it/src/test/java,./src/test/java,./src/main/java");
+  }
+
+  @Test
   public void should_skip() throws IOException {
     Properties p = new Properties();
     p.setProperty(ScanProperties.SKIP, "true");
