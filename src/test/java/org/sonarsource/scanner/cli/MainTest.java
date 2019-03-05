@@ -19,6 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
@@ -209,7 +210,11 @@ public class MainTest {
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
-    assertThat(p.getProperty(ExpandPathProperties.SONAR_SOURCES)).isEqualTo("./it/src/test/java,./src/test/java,./src/main/java");
+    String paths[] = p.getProperty(ExpandPathProperties.SONAR_SOURCES).split(",");
+    for(String path: paths) {
+      File f = new File(path);
+      assertThat(f.exists()).isTrue();
+    }
   }
 
   @Test
