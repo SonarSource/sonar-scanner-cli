@@ -218,6 +218,27 @@ public class MainTest {
   }
 
   @Test
+  public void should_backward_compatible_for_non_glob_expanded_properties() throws IOException {
+    Properties p = new Properties();
+    final String SonarSources = "src,misc,it";
+    final String JacocoPaths = "src/target/jacoco.exec,it/target/jacoco.exec";
+    final String ScoveragePaths = "src/target/scoverage.xml,it/target/scoverage.xml";
+    final String JavaBinaries = "src/target/classes,it/target/classes";
+    p.setProperty(ExpandPathProperties.SONAR_SOURCES, SonarSources);
+    p.setProperty(ExpandPathProperties.JACOCO_PATHS, JacocoPaths);
+    p.setProperty(ExpandPathProperties.SCOVERAGE_PATHS, ScoveragePaths);
+    p.setProperty(ExpandPathProperties.JAVA_BINARIES, JavaBinaries);
+    when(conf.properties()).thenReturn(p);
+
+    Main main = new Main(exit, cli, conf, scannerFactory, logs);
+    main.execute();
+    assertThat(p.getProperty(ExpandPathProperties.SONAR_SOURCES)).matches(SonarSources);
+    assertThat(p.getProperty(ExpandPathProperties.JACOCO_PATHS)).matches(JacocoPaths);
+    assertThat(p.getProperty(ExpandPathProperties.SCOVERAGE_PATHS)).matches(ScoveragePaths);
+    assertThat(p.getProperty(ExpandPathProperties.JAVA_BINARIES)).matches(JavaBinaries);
+  }
+
+  @Test
   public void should_skip() throws IOException {
     Properties p = new Properties();
     p.setProperty(ScanProperties.SKIP, "true");
