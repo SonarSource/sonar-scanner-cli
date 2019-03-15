@@ -64,7 +64,7 @@ public class Main {
   void execute() {
     Stats stats = new Stats(logger).start();
 
-    int status = Exit.ERROR;
+    int status = Exit.INTERNAL_ERROR;
     try {
       Properties p = conf.properties();
       checkSkip(p);
@@ -77,6 +77,7 @@ public class Main {
     } catch (Throwable e) {
       displayExecutionResult(stats, "FAILURE");
       showError("Error during SonarQube Scanner execution", e, cli.isDebugEnabled());
+      status = isUserError(e) ? Exit.USER_ERROR : Exit.INTERNAL_ERROR;
     } finally {
       exit.exit(status);
     }
@@ -121,7 +122,7 @@ public class Main {
   }
 
   private void showError(String message, Throwable e, boolean debug) {
-    if (showStackTrace(e, debug)) {
+    if (debug && !isUserError(e)) {
       logger.error(message, e);
     } else {
       logger.error(message);
@@ -141,9 +142,9 @@ public class Main {
     }
   }
 
-  private static boolean showStackTrace(Throwable e, boolean debug) {
+  private static boolean isUserError(Throwable e) {
     // class not available at compile time (loaded by isolated classloader)
-    return debug && !"org.sonar.api.utils.MessageException".equals(e.getClass().getName());
+    return "org.sonar.api.utils.MessageException".equals(e.getClass().getName());
   }
 
   private void suggestDebugMode() {
