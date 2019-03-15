@@ -26,9 +26,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class CliTest {
-  Exit exit = mock(Exit.class);
-  Logs logs = new Logs(System.out, System.err);
-  Cli cli = new Cli(exit, logs);
+  private Exit exit = mock(Exit.class);
+  private Logs logs = new Logs(System.out, System.err);
+  private Cli cli = new Cli(exit, logs);
 
   @Test
   public void should_parse_empty_arguments() {

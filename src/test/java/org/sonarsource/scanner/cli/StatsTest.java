@@ -19,25 +19,21 @@
  */
 package org.sonarsource.scanner.cli;
 
-import org.mockito.Mockito;
-import org.sonarsource.scanner.cli.Logs;
-import org.sonarsource.scanner.cli.Stats;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class StatsTest {
   private PrintStream stdOut = mock(PrintStream.class);
-  private PrintStream stdErr;
+  private PrintStream stdErr = mock(PrintStream.class);
   private Logs logs = new Logs(stdOut, stdErr);
 
   @Test
-  public void shouldPrintStats() throws UnsupportedEncodingException {
+  public void shouldPrintStats() {
     new Stats(logs).start().stop();
 
     verify(stdOut).println(Mockito.contains("Total time: "));
