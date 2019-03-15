@@ -19,7 +19,6 @@
  */
 package org.sonarsource.scanner.cli;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import org.junit.Before;
@@ -60,7 +59,7 @@ public class MainTest {
   private Logs logs;
 
   @Before
-  public void setUp() throws IOException {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
     when(scannerFactory.create(any(Properties.class))).thenReturn(scanner);
     when(conf.properties()).thenReturn(properties);
@@ -83,7 +82,7 @@ public class MainTest {
     EmbeddedScanner runner = mock(EmbeddedScanner.class);
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
-    doThrow(e).when(runner).execute(any(Map.class));
+    doThrow(e).when(runner).execute(any());
     when(scannerFactory.create(any(Properties.class))).thenReturn(runner);
     when(cli.isDebugEnabled()).thenReturn(true);
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
@@ -106,7 +105,7 @@ public class MainTest {
     main.execute();
 
     verify(runner).start();
-    verify(runner, never()).execute(any(Map.class));
+    verify(runner, never()).execute(any());
     verify(exit).exit(Exit.ERROR);
     verify(logs).error("Error during SonarQube Scanner execution", e);
   }
@@ -164,7 +163,7 @@ public class MainTest {
     when(cli.isEmbedded()).thenReturn(isEmbedded);
 
     EmbeddedScanner runner = mock(EmbeddedScanner.class);
-    doThrow(e).when(runner).execute(any(Map.class));
+    doThrow(e).when(runner).execute(any());
     when(scannerFactory.create(any(Properties.class))).thenReturn(runner);
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
@@ -185,8 +184,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_only_display_version() throws IOException {
-
+  public void should_only_display_version() {
     Properties p = new Properties();
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(conf.properties()).thenReturn(p);
@@ -202,7 +200,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_skip() throws IOException {
+  public void should_skip() {
     Properties p = new Properties();
     p.setProperty(ScanProperties.SKIP, "true");
     when(conf.properties()).thenReturn(p);
@@ -219,7 +217,7 @@ public class MainTest {
   }
 
   @Test
-  public void shouldLogServerVersion() throws IOException {
+  public void shouldLogServerVersion() {
     when(scanner.serverVersion()).thenReturn("5.5");
     Properties p = new Properties();
     when(cli.isDisplayVersionOnly()).thenReturn(true);
@@ -231,24 +229,24 @@ public class MainTest {
   }
 
   @Test
-  public void should_configure_logging() throws IOException {
+  public void should_configure_logging() {
     Properties analysisProps = testLogging("sonar.verbose", "true");
     assertThat(analysisProps.getProperty("sonar.verbose")).isEqualTo("true");
   }
 
   @Test
-  public void should_configure_logging_trace() throws IOException {
+  public void should_configure_logging_trace() {
     Properties analysisProps = testLogging("sonar.log.level", "TRACE");
     assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("TRACE");
   }
 
   @Test
-  public void should_configure_logging_debug() throws IOException {
+  public void should_configure_logging_debug() {
     Properties analysisProps = testLogging("sonar.log.level", "DEBUG");
     assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("DEBUG");
   }
 
-  private Properties testLogging(String propKey, String propValue) throws IOException {
+  private Properties testLogging(String propKey, String propValue) {
     Properties p = new Properties();
     p.put(propKey, propValue);
     when(conf.properties()).thenReturn(p);

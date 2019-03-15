@@ -31,13 +31,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 public class SystemInfoTest {
-  System2 mockSystem;
-  Logs logs;
+  private System2 mockSystem = mock(System2.class);
+  private Logs logs = mock(Logs.class);
 
   @Before
   public void setUp() {
-    mockSystem = mock(System2.class);
-    logs = mock(Logs.class);
     SystemInfo.setSystem(mockSystem);
   }
 

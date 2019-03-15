@@ -20,7 +20,6 @@
 package org.sonarsource.scanner.cli;
 
 import java.util.Properties;
-import org.junit.Before;
 import org.junit.Test;
 import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.LogOutput;
@@ -34,13 +33,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class ScannerFactoryTest {
 
-  Properties props = new Properties();
-  Logs logs;
-
-  @Before
-  public void setUp() {
-    logs = mock(Logs.class);
-  }
+  private Properties props = new Properties();
+  private Logs logs = mock(Logs.class);
 
   @Test
   public void should_create_embedded_runner() {

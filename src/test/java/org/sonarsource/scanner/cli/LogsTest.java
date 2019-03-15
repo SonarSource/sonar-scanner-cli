@@ -22,7 +22,7 @@ package org.sonarsource.scanner.cli;
 import java.io.PrintStream;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -62,7 +62,7 @@ public class LogsTest {
   public void testWarnWithTimestamp() {
     logs.setDebugEnabled(true);
     logs.warn("warn");
-    verify(stdOut).println(Matchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d WARN: warn"));
+    verify(stdOut).println(ArgumentMatchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d WARN: warn"));
     verifyNoMoreInteractions(stdOut, stdErr);
   }
 
@@ -83,7 +83,7 @@ public class LogsTest {
     logs.setDebugEnabled(true);
 
     logs.debug("debug");
-    verify(stdOut).println(Matchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d DEBUG: debug$"));
+    verify(stdOut).println(ArgumentMatchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d DEBUG: debug$"));
 
     logs.setDebugEnabled(false);
     logs.debug("debug");

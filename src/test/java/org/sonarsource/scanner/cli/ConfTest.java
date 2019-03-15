@@ -19,11 +19,6 @@
  */
 package org.sonarsource.scanner.cli;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -32,13 +27,17 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ConfTest {
 
@@ -48,11 +47,11 @@ public class ConfTest {
   @Rule
   public ExpectedException exception = ExpectedException.none();
 
-  Map<String, String> env = new HashMap<>();
-  Properties args = new Properties();
-  Logs logs = new Logs(System.out, System.err);
-  Cli cli = mock(Cli.class);
-  Conf conf = new Conf(cli, logs, env);
+  private Map<String, String> env = new HashMap<>();
+  private Properties args = new Properties();
+  private Logs logs = new Logs(System.out, System.err);
+  private Cli cli = mock(Cli.class);
+  private Conf conf = new Conf(cli, logs, env);
 
   @Before
   public void initConf() {
@@ -70,14 +69,14 @@ public class ConfTest {
   }
 
   @Test
-  public void should_not_fail_if_no_home() throws Exception {
+  public void should_not_fail_if_no_home() {
     assertThat(conf.properties()).isNotEmpty();
     // worst case, use current path
     assertThat(conf.properties().getProperty("sonar.projectBaseDir")).isEqualTo(Paths.get("").toAbsolutePath().toString());
   }
 
   @Test
-  public void base_dir_can_be_relative() throws URISyntaxException, IOException {
+  public void base_dir_can_be_relative() throws URISyntaxException {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfiguration/project").toURI());
     args.setProperty("project.home", projectHome.getParent().toAbsolutePath().toString());
     args.setProperty("sonar.projectBaseDir", "project");
@@ -125,7 +124,7 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldLoadEnvironmentProperties() throws IOException {
+  public void shouldLoadEnvironmentProperties() {
     env.put("SONARQUBE_SCANNER_PARAMS", "{\"sonar.key1\" : \"v1\", \"sonar.key2\" : \"v2\"}");
     args.put("sonar.key2", "v3");
 
@@ -136,7 +135,7 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldFailWithInvalidEnvironmentProperties() throws IOException {
+  public void shouldFailWithInvalidEnvironmentProperties() {
     env.put("SONARQUBE_SCANNER_PARAMS", "{sonar.key1: \"v1\", \"sonar.key2\" : \"v2\"}");
     exception.expect(IllegalStateException.class);
     exception.expectMessage("JSON");
@@ -232,7 +231,7 @@ public class ConfTest {
   }
 
   @Test
-  public void failModuleBaseDirDoesNotExist() throws IOException {
+  public void failModuleBaseDirDoesNotExist() {
     args.setProperty("sonar.modules", "module1");
     args.setProperty("module1.sonar.projectBaseDir", "invalid");
 
@@ -242,7 +241,7 @@ public class ConfTest {
   }
 
   @Test
-  public void failModulePropertyFileDoesNotExist() throws IOException {
+  public void failModulePropertyFileDoesNotExist() {
     args.setProperty("sonar.modules", "module1");
     args.setProperty("module1.sonar.projectConfigFile", "invalid");
 
@@ -299,9 +298,7 @@ public class ConfTest {
       assertThat(properties.getProperty("module1.sonar.projectBaseDir")).isEqualTo(linkProjectHome.resolve("module1").toString());
       assertThat(properties.getProperty("module2.sonar.projectBaseDir")).isEqualTo(linkProjectHome.resolve("module2").toString());
     } finally {
-      if (linkProjectHome != null) {
-        Files.delete(linkProjectHome);
-      }
+      Files.delete(linkProjectHome);
     }
   }
 }
