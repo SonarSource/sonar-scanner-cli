@@ -53,7 +53,7 @@ public class CliTest {
     cli = new Cli(exit, logs);
     cli.parse(new String[] {"-D"});
     verify(logs).error("Missing argument for option -D/--define");
-    verify(exit).exit(Exit.ERROR);
+    verify(exit).exit(Exit.INTERNAL_ERROR);
   }
 
   @Test
@@ -142,7 +142,7 @@ public class CliTest {
     cli.parse(new String[] {"-w"});
     verify(logs).error("Unrecognized option: -w");
     verify(logs).info("usage: sonar-scanner [options]");
-    verify(exit).exit(Exit.ERROR);
+    verify(exit).exit(Exit.INTERNAL_ERROR);
   }
 
   @Test

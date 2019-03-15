@@ -88,7 +88,7 @@ public class MainTest {
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
-    verify(exit).exit(Exit.ERROR);
+    verify(exit).exit(Exit.INTERNAL_ERROR);
     verify(logs).error("Error during SonarQube Scanner execution", e);
   }
 
@@ -106,14 +106,14 @@ public class MainTest {
 
     verify(runner).start();
     verify(runner, never()).execute(any());
-    verify(exit).exit(Exit.ERROR);
+    verify(exit).exit(Exit.INTERNAL_ERROR);
     verify(logs).error("Error during SonarQube Scanner execution", e);
   }
 
   @Test
   public void show_error_MessageException() {
     Exception e = createException(true);
-    testException(e, false, false);
+    testException(e, false, false, Exit.USER_ERROR);
 
     verify(logs).error("Error during SonarQube Scanner execution");
     verify(logs).error("Caused by: NPE");
@@ -123,7 +123,7 @@ public class MainTest {
   @Test
   public void show_error_MessageException_embedded() {
     Exception e = createException(true);
-    testException(e, false, true);
+    testException(e, false, true, Exit.USER_ERROR);
 
     verify(logs).error("Error during SonarQube Scanner execution");
     verify(logs).error("Caused by: NPE");
@@ -132,7 +132,7 @@ public class MainTest {
   @Test
   public void show_error_MessageException_debug() {
     Exception e = createException(true);
-    testException(e, true, false);
+    testException(e, true, false, Exit.USER_ERROR);
 
     verify(logs).error("Error during SonarQube Scanner execution");
     verify(logs).error("my message");
@@ -142,7 +142,7 @@ public class MainTest {
   @Test
   public void show_error_MessageException_debug_embedded() {
     Exception e = createException(true);
-    testException(e, true, true);
+    testException(e, true, true, Exit.USER_ERROR);
 
     verify(logs).error("Error during SonarQube Scanner execution");
     verify(logs).error("my message");
@@ -152,13 +152,13 @@ public class MainTest {
   @Test
   public void show_error_debug() {
     Exception e = createException(false);
-    testException(e, true, false);
+    testException(e, true, false, Exit.INTERNAL_ERROR);
 
     verify(logs).error("Error during SonarQube Scanner execution", e);
     verify(logs, never()).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
   }
 
-  private void testException(Exception e, boolean debugEnabled, boolean isEmbedded) {
+  private void testException(Exception e, boolean debugEnabled, boolean isEmbedded, int expectedExitCode) {
     when(cli.isDebugEnabled()).thenReturn(debugEnabled);
     when(cli.isEmbedded()).thenReturn(isEmbedded);
 
@@ -169,7 +169,7 @@ public class MainTest {
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
-    verify(exit).exit(Exit.ERROR);
+    verify(exit).exit(expectedExitCode);
   }
 
   private Exception createException(boolean messageException) {

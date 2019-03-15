@@ -135,7 +135,7 @@ class Cli {
   private void printErrorAndExit(String message) {
     logger.error(message);
     printUsage();
-    exit.exit(Exit.ERROR);
+    exit.exit(Exit.INTERNAL_ERROR);
   }
 
   private void printUsage() {
