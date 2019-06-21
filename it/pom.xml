@@ -36,7 +36,7 @@
     <dependency>
       <groupId>org.sonarsource.orchestrator</groupId>
       <artifactId>sonar-orchestrator</artifactId>
-      <version>3.22.0.1791</version>
+      <version>3.24.0.1993</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -58,7 +58,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.11.1</version>
+      <version>3.12.2</version>
     </dependency>
   </dependencies>
 
@@ -122,7 +122,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
-            <version>2.10</version>
+            <version>3.0.2</version>
             <executions>
               <execution>
                 <id>download-qa-scanner</id>
