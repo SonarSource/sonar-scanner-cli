@@ -48,10 +48,9 @@
     <!-- configuration for assembly of distributions -->
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
     <scanner.jar>${project.build.finalName}.jar</scanner.jar>
-    <jre.version>8u202</jre.version>
-    <jre.dirname.linux>jre1.8.0_202</jre.dirname.linux>
-    <jre.dirname.windows>jre1.8.0_202</jre.dirname.windows>
-    <jre.dirname.macosx>jre1.8.0_202.jre/Contents/Home</jre.dirname.macosx>
+    <jre.dirname.linux>jdk-11.0.3+7-jre</jre.dirname.linux>
+    <jre.dirname.windows>jdk-11.0.3+7-jre</jre.dirname.windows>
+    <jre.dirname.macosx>jdk-11.0.3+7-jre/Contents/Home</jre.dirname.macosx>
 
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux,${project.groupId}:${project.artifactId}:zip:windows,${project.groupId}:${project.artifactId}:zip:macosx</artifactsToPublish>
@@ -207,33 +206,25 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.0.0</version>
+            <groupId>com.googlecode.maven-download-plugin</groupId>
+	          <artifactId>download-maven-plugin</artifactId>
+	          <version>1.4.2</version>
             <executions>
               <execution>
                 <id>unpack-linux</id>
                 <phase>package</phase>
                 <goals>
-                  <goal>unpack</goal>
+                  <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <artifactItems>
-                    <artifactItem>
-                      <groupId>com.oracle</groupId>
-                      <artifactId>jre</artifactId>
-                      <version>${jre.version}</version>
-                      <classifier>linux-x64</classifier>
-                      <type>tar.gz</type>
-                      <overWrite>true</overWrite>
-                    </artifactItem>
-                  </artifactItems>
+                  <url>https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.3%2B7/OpenJDK11U-jre_x64_linux_hotspot_11.0.3_7.tar.gz</url>
+                  <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/linux</outputDirectory>
+                  <sha512>b7232a3c75a8c4e67f51bd95c8441026b2bfef29cc779768a5f2d300208dc569d672402e06a2d6c6f512450723bc0631c5a18cde80cbc1ec2028c123607df30f</sha512>
                 </configuration>
               </execution>
             </executions>
           </plugin>
-
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
@@ -265,33 +256,25 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.0.0</version>
+            <groupId>com.googlecode.maven-download-plugin</groupId>
+            <artifactId>download-maven-plugin</artifactId>
+            <version>1.4.2</version>
             <executions>
               <execution>
-                <id>unpack-windows</id>
+                <id>unpack-linux</id>
                 <phase>package</phase>
                 <goals>
-                  <goal>unpack</goal>
+                  <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <artifactItems>
-                    <artifactItem>
-                      <groupId>com.oracle</groupId>
-                      <artifactId>jre</artifactId>
-                      <version>${jre.version}</version>
-                      <classifier>windows-x64</classifier>
-                      <type>tar.gz</type>
-                      <overWrite>true</overWrite>
-                    </artifactItem>
-                  </artifactItems>
+                  <url>https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.3%2B7/OpenJDK11U-jre_x64_windows_hotspot_11.0.3_7.zip</url>
+                  <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/windows</outputDirectory>
+                  <sha512>370100688282a5c43fe0ac736980eeff64cf212a0fb573181fff8039c121097cbbbd540a652cc6d17397789b894c820b802b875bbd1743eb2b8469009d5fa8f9</sha512>
                 </configuration>
               </execution>
             </executions>
           </plugin>
-
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
@@ -317,39 +300,30 @@
         </plugins>
       </build>
     </profile>
-
     <profile>
       <id>dist-macosx</id>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.0.0</version>
+            <groupId>com.googlecode.maven-download-plugin</groupId>
+            <artifactId>download-maven-plugin</artifactId>
+            <version>1.4.2</version>
             <executions>
               <execution>
-                <id>unpack-macosx</id>
+                <id>unpack-linux</id>
                 <phase>package</phase>
                 <goals>
-                  <goal>unpack</goal>
+                  <goal>wget</goal>
                 </goals>
+                <configuration>
+                  <url>https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.3%2B7/OpenJDK11U-jre_x64_mac_hotspot_11.0.3_7.tar.gz</url>
+                  <unpack>true</unpack>
+                  <outputDirectory>${unpack.dir}/macosx</outputDirectory>
+                  <sha512>5995c18fa0f2ef9d74c9fb38401d497b16e78b57eaf5b795f19724a8c1f6609add96355627b8cb0564d29421a63d830df11f932b76436a713a535a1253e745e6</sha512>
+                </configuration>
               </execution>
             </executions>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>com.oracle</groupId>
-                  <artifactId>jre</artifactId>
-                  <version>${jre.version}</version>
-                  <classifier>macosx-x64</classifier>
-                  <type>tar.gz</type>
-                  <overWrite>true</overWrite>
-                </artifactItem>
-              </artifactItems>
-              <outputDirectory>${unpack.dir}/macosx</outputDirectory>
-            </configuration>
           </plugin>
-
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
