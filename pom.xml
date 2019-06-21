@@ -48,10 +48,10 @@
     <!-- configuration for assembly of distributions -->
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
     <scanner.jar>${project.build.finalName}.jar</scanner.jar>
-    <jre.version>8u121</jre.version>
-    <jre.dirname.linux>jre1.8.0_121</jre.dirname.linux>
-    <jre.dirname.windows>jre1.8.0_121</jre.dirname.windows>
-    <jre.dirname.macosx>jre1.8.0_121.jre/Contents/Home</jre.dirname.macosx>
+    <jre.version>8u202</jre.version>
+    <jre.dirname.linux>jre1.8.0_202</jre.dirname.linux>
+    <jre.dirname.windows>jre1.8.0_202</jre.dirname.windows>
+    <jre.dirname.macosx>jre1.8.0_202.jre/Contents/Home</jre.dirname.macosx>
 
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux,${project.groupId}:${project.artifactId}:zip:windows,${project.groupId}:${project.artifactId}:zip:macosx</artifactsToPublish>
