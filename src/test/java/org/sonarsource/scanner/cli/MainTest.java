@@ -34,6 +34,7 @@ import org.sonarsource.scanner.api.ScanProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -111,46 +112,59 @@ public class MainTest {
   }
 
   @Test
-  public void show_error_MessageException() {
-    Exception e = createException(true);
-    testException(e, false, false, Exit.USER_ERROR);
+  public void show_stacktrace() {
+    Exception e = createException(false);
+    testException(e, false, false, Exit.INTERNAL_ERROR);
 
-    verify(logs).error("Error during SonarQube Scanner execution");
-    verify(logs).error("Caused by: NPE");
+    verify(logs).error("Error during SonarQube Scanner execution", e);
     verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
   }
 
   @Test
-  public void show_error_MessageException_embedded() {
+  public void dont_show_MessageException_stacktrace() {
+    Exception e = createException(true);
+    testException(e, false, false, Exit.USER_ERROR);
+
+    verify(logs, times(5)).error(anyString());
+    verify(logs).error("Error during SonarQube Scanner execution");
+    verify(logs).error("my message");
+    verify(logs).error("Caused by: A functional cause");
+    verify(logs).error("");
+    verify(logs).error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
+  }
+
+  @Test
+  public void dont_show_MessageException_stacktrace_embedded() {
     Exception e = createException(true);
     testException(e, false, true, Exit.USER_ERROR);
 
+    verify(logs, times(4)).error(anyString());
     verify(logs).error("Error during SonarQube Scanner execution");
-    verify(logs).error("Caused by: NPE");
+    verify(logs).error("my message");
+    verify(logs).error("Caused by: A functional cause");
+    verify(logs).error("");
   }
-  
+
   @Test
-  public void show_error_MessageException_debug() {
+  public void show_MessageException_stacktrace_in_debug() {
     Exception e = createException(true);
     testException(e, true, false, Exit.USER_ERROR);
 
-    verify(logs).error("Error during SonarQube Scanner execution");
-    verify(logs).error("my message");
-    verify(logs).error("Caused by: NPE");
+    verify(logs, times(1)).error(anyString(), any(Throwable.class));
+    verify(logs).error("Error during SonarQube Scanner execution", e);
   }
 
   @Test
-  public void show_error_MessageException_debug_embedded() {
+  public void show_MessageException_stacktrace_in_debug_embedded() {
     Exception e = createException(true);
     testException(e, true, true, Exit.USER_ERROR);
 
-    verify(logs).error("Error during SonarQube Scanner execution");
-    verify(logs).error("my message");
-    verify(logs).error("Caused by: NPE");
+    verify(logs, times(1)).error(anyString(), any(Throwable.class));
+    verify(logs).error("Error during SonarQube Scanner execution", e);
   }
 
   @Test
-  public void show_error_debug() {
+  public void show_stacktrace_in_debug() {
     Exception e = createException(false);
     testException(e, true, false, Exit.INTERNAL_ERROR);
 
@@ -175,7 +189,7 @@ public class MainTest {
   private Exception createException(boolean messageException) {
     Exception e;
     if (messageException) {
-      e = new MessageException("my message", new NullPointerException("NPE"));
+      e = new MessageException("my message", new IllegalStateException("A functional cause"));
     } else {
       e = new IllegalStateException("Error", new NullPointerException("NPE"));
     }

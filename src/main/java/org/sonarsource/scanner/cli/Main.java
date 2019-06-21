@@ -122,7 +122,7 @@ public class Main {
   }
 
   private void showError(String message, Throwable e, boolean debug) {
-    if (debug && !isUserError(e)) {
+    if (debug || !isUserError(e)) {
       logger.error(message, e);
     } else {
       logger.error(message);
