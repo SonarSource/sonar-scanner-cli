@@ -261,7 +261,7 @@
             <version>1.4.2</version>
             <executions>
               <execution>
-                <id>unpack-linux</id>
+                <id>unpack-windows</id>
                 <phase>package</phase>
                 <goals>
                   <goal>wget</goal>
@@ -310,7 +310,7 @@
             <version>1.4.2</version>
             <executions>
               <execution>
-                <id>unpack-linux</id>
+                <id>unpack-macosx</id>
                 <phase>package</phase>
                 <goals>
                   <goal>wget</goal>
