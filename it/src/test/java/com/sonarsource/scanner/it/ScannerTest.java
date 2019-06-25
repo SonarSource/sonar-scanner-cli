@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.assertj.core.api.Condition;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -188,19 +187,15 @@ public class ScannerTest extends ScannerTestCase {
   }
 
   @Test
-  public void verify_env_variable() {
+  public void verify_scanner_opts_env_variable_passed_as_jvm_argument() {
     SonarScanner build = newScanner(new File("projects/simple-sample"))
-      .setEnvironmentVariable("SONAR_SCANNER_OPTS", "-Xmx2m");
+      .setEnvironmentVariable("SONAR_SCANNER_OPTS", "-Xmx1k");
     BuildResult executeBuild = orchestrator.executeBuildQuietly(build);
-    assertThat(executeBuild.getStatus()).isNotEqualTo(0);
+    assertThat(executeBuild.getLastStatus()).isNotEqualTo(0);
     String logs = executeBuild.getLogs();
-    assertThat(logs).is(new Condition<String>("Contain error message about OOM") {
-      @Override
-      public boolean matches(String value) {
-        return value.contains("java.lang.OutOfMemoryError")
-          || value.contains("GC overhead limit exceeded") || value.contains("Java heap space");
-      }
-    });
+    assertThat(logs).contains("Error occurred during initialization of VM");
+    // Not the same message with JRE 8 and 11
+    assertThat(logs).containsPattern("Too small (initial|maximum) heap");
   }
 
 }
