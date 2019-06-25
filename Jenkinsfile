@@ -120,10 +120,9 @@ pipeline {
 
 def runITs(SQ_VERSION) {    
   withMaven(maven: MAVEN_TOOL) {
-    mavenSetBuildVersion()        
-    gitFetchSubmodules()
+    mavenSetBuildVersion()            
     dir("it") {    
-      runMavenOrch(JDK_VERSION,"verify -Dsonar.runtimeVersion=$SONARQUBE_VERSION -U")
+      runMavenOrch(JDK_VERSION,"verify -Dsonar.runtimeVersion=$SQ_VERSION -U")
     }
   }
 }
