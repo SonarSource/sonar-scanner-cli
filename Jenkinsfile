@@ -35,6 +35,9 @@ pipeline {
           agent {
             label 'linux'
           }
+          environment {
+				    JDK_VERSION = 'Java 8'
+				  }
           steps {
             runITs("LATEST_RELEASE[6.7]")
           }
@@ -60,6 +63,9 @@ pipeline {
           agent {
             label 'windows'
           }
+          environment {
+				    JDK_VERSION = 'Java 8'
+				  }
           steps {
             runITs("LATEST_RELEASE[6.7]")
           }
@@ -85,6 +91,9 @@ pipeline {
           agent {
             label 'macosx'
           }
+          environment {
+				    JDK_VERSION = 'Java 8'
+				  }
           steps {
             runITs("LATEST_RELEASE[6.7]")
           }
@@ -120,7 +129,6 @@ pipeline {
 
 def runITs(SQ_VERSION) {    
   withMaven(maven: MAVEN_TOOL) {
-    mavenSetBuildVersion()            
     dir("it") {    
       runMavenOrch(JDK_VERSION,"verify -Dsonar.runtimeVersion=$SQ_VERSION -U")
     }
