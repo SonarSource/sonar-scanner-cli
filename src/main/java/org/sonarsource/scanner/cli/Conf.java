@@ -30,9 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.annotation.Nullable;
-
 import org.sonarsource.scanner.api.Utils;
 
 class Conf {
@@ -63,7 +61,7 @@ class Conf {
     result.putAll(loadEnvironmentProperties());
     result.putAll(cli.properties());
     result = resolve(result);
-    
+
     // root project base directory must be present and be absolute
     result.setProperty(PROPERTY_PROJECT_BASEDIR, getRootProjectBaseDir(result).toString());
     result.remove(PROJECT_HOME);
@@ -204,8 +202,7 @@ class Conf {
     return moduleProps;
   }
 
-  private static Path locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome,
-    String settingsKey) {
+  private static Path locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
     Path settingsFile = null;
     String scannerHome = props.getProperty(homeKey, "");
     if (!"".equals(scannerHome)) {
@@ -216,12 +213,12 @@ class Conf {
   }
 
   private static Path locatePropertiesFile(@Nullable Path defaultPath, Properties props, String settingsKey) {
-    Path settingsFile = defaultPath;
-    if (settingsFile == null || !Files.exists(settingsFile)) {
-      String settingsPath = props.getProperty(settingsKey, "");
-      if (!"".equals(settingsPath)) {
-        settingsFile = Paths.get(settingsPath);
-      }
+    Path settingsFile;
+    String settingsPath = props.getProperty(settingsKey, "");
+    if (!"".equals(settingsPath)) {
+      settingsFile = Paths.get(settingsPath);
+    } else {
+      settingsFile = defaultPath;
     }
 
     if (settingsFile != null) {

@@ -198,4 +198,15 @@ public class ScannerTest extends ScannerTestCase {
     assertThat(logs).containsPattern("Too small (initial|maximum) heap");
   }
 
+  // SQSCANNER-24
+  @Test
+  public void should_override_project_settings_path() {
+    File projectHome = new File("projects/override-project-settings-path");
+    SonarScanner build = newScanner(projectHome)
+      .setProperty("project.settings", new File(projectHome, "conf/sq-project.properties").getAbsolutePath());
+    orchestrator.executeBuild(build);
+
+    assertThat(getComponent("sample-with-custom-settings-path").getName()).isEqualTo("Test with custom settings location");
+  }
+
 }
