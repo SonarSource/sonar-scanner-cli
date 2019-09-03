@@ -301,4 +301,19 @@ public class ConfTest {
       Files.delete(linkProjectHome);
     }
   }
+
+  // SQSCANNER-24
+  @Test
+  public void should_load_project_settings_using_property() throws Exception {
+    Path home = Paths.get(getClass().getResource("ConfTest/shouldOverrideProjectSettingsPath/").toURI());
+    args.setProperty("project.home", home.toAbsolutePath().toString());
+
+    Properties properties = conf.properties();
+    assertThat(properties.get("sonar.prop")).isEqualTo("default");
+
+    args.setProperty("project.settings", home.resolve("conf/sq-project.properties").toAbsolutePath().toString());
+
+    properties = conf.properties();
+    assertThat(properties.get("sonar.prop")).isEqualTo("expected");
+  }
 }
