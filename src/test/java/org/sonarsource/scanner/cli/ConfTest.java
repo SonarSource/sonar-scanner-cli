@@ -316,4 +316,19 @@ public class ConfTest {
     properties = conf.properties();
     assertThat(properties.get("sonar.prop")).isEqualTo("expected");
   }
+
+  // SQSCANNER-61
+  @Test
+  public void should_load_project_settings_using_env() throws Exception {
+    Path home = Paths.get(getClass().getResource("ConfTest/shouldOverrideProjectSettingsPath/").toURI());
+    args.setProperty("project.home", home.toAbsolutePath().toString());
+
+    Properties properties = conf.properties();
+    assertThat(properties.get("sonar.prop")).isEqualTo("default");
+
+    env.put("SONARQUBE_SCANNER_PARAMS", "{\"project.settings\" : \"" + home.resolve("conf/sq-project.properties").toAbsolutePath().toString() + "\"}");
+
+    properties = conf.properties();
+    assertThat(properties.get("sonar.prop")).isEqualTo("expected");
+  }
 }

@@ -78,7 +78,13 @@ class Conf {
   }
 
   private Properties loadGlobalProperties() {
-    Path settingsFile = locatePropertiesFile(cli.properties(), SCANNER_HOME, "conf/sonar-scanner.properties",
+    Properties knownPropsAtThatPoint = new Properties();
+
+    knownPropsAtThatPoint.putAll(System.getProperties());
+    knownPropsAtThatPoint.putAll(loadEnvironmentProperties());
+    knownPropsAtThatPoint.putAll(cli.properties());
+
+    Path settingsFile = locatePropertiesFile(knownPropsAtThatPoint, SCANNER_HOME, "conf/sonar-scanner.properties",
       SCANNER_SETTINGS);
     if (settingsFile != null && Files.isRegularFile(settingsFile)) {
       logger.info("Scanner configuration file: " + settingsFile);
@@ -90,13 +96,14 @@ class Conf {
 
   private Properties loadProjectProperties() {
     Properties rootProps = new Properties();
-    Properties knownProps = new Properties();
+    Properties knownPropsAtThatPoint = new Properties();
 
-    knownProps.putAll(System.getProperties());
-    knownProps.putAll(cli.properties());
+    knownPropsAtThatPoint.putAll(System.getProperties());
+    knownPropsAtThatPoint.putAll(loadEnvironmentProperties());
+    knownPropsAtThatPoint.putAll(cli.properties());
 
-    Path defaultRootSettingsFile = getRootProjectBaseDir(knownProps).resolve(SONAR_PROJECT_PROPERTIES_FILENAME);
-    Path rootSettingsFile = locatePropertiesFile(defaultRootSettingsFile, knownProps, PROJECT_SETTINGS);
+    Path defaultRootSettingsFile = getRootProjectBaseDir(knownPropsAtThatPoint).resolve(SONAR_PROJECT_PROPERTIES_FILENAME);
+    Path rootSettingsFile = locatePropertiesFile(defaultRootSettingsFile, knownPropsAtThatPoint, PROJECT_SETTINGS);
     if (rootSettingsFile != null && Files.isRegularFile(rootSettingsFile)) {
       logger.info("Project root configuration file: " + rootSettingsFile);
       rootProps.putAll(toProperties(rootSettingsFile));
@@ -110,7 +117,7 @@ class Conf {
     // root config file
     projectProps.putAll(rootProps);
 
-    rootProps.putAll(knownProps);
+    rootProps.putAll(knownPropsAtThatPoint);
     rootProps.setProperty(PROPERTY_PROJECT_BASEDIR, getRootProjectBaseDir(rootProps).toString());
 
     // projectProps will be overridden by any properties found in child

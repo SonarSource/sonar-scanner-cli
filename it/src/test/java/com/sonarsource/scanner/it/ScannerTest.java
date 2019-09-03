@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -204,6 +205,18 @@ public class ScannerTest extends ScannerTestCase {
     File projectHome = new File("projects/override-project-settings-path");
     SonarScanner build = newScanner(projectHome)
       .setProperty("project.settings", new File(projectHome, "conf/sq-project.properties").getAbsolutePath());
+    orchestrator.executeBuild(build);
+
+    assertThat(getComponent("sample-with-custom-settings-path").getName()).isEqualTo("Test with custom settings location");
+  }
+
+  // SQSCANNER-61
+  @Test
+  public void should_override_project_settings_path_using_env_variable() {
+    File projectHome = new File("projects/override-project-settings-path");
+    SonarScanner build = newScanner(projectHome)
+      .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS", "{"
+        + "\"project.settings\" : \"" + StringEscapeUtils.escapeJavaScript(new File(projectHome, "conf/sq-project.properties").getAbsolutePath()) + "\"}");
     orchestrator.executeBuild(build);
 
     assertThat(getComponent("sample-with-custom-settings-path").getName()).isEqualTo("Test with custom settings location");
