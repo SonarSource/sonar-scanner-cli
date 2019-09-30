@@ -20,6 +20,7 @@
 package com.sonarsource.scanner.it;
 
 import com.sonar.orchestrator.build.BuildResult;
+import com.sonar.orchestrator.build.BuildRunner;
 import com.sonar.orchestrator.build.SonarScanner;
 import java.io.File;
 import java.io.IOException;
@@ -155,7 +156,9 @@ public class ScannerTest extends ScannerTestCase {
   public void should_use_environment_prop() {
     SonarScanner build = newScanner(new File("projects/simple-sample"))
       .setEnvironmentVariable("SONAR_HOST_URL", "http://from-env.org");
-    BuildResult buildResult = orchestrator.executeBuildQuietly(build);
+
+    BuildRunner runner = new BuildRunner(orchestrator.getConfiguration());
+    BuildResult buildResult = runner.runQuietly(null, build);
 
     assertThat(buildResult.isSuccess()).isFalse();
     assertThat(buildResult.getLogs()).contains("SonarQube server [http://from-env.org] can not be reached");
