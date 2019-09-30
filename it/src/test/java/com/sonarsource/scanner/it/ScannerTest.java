@@ -140,7 +140,7 @@ public class ScannerTest extends ScannerTestCase {
   }
 
   @Test
-  public void should_use_environment_props() {
+  public void should_use_json_environment_props() {
     SonarScanner build = newScanner(new File("projects/simple-sample-no-properties"))
       .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS", "{"
         + "\"sonar.projectKey\" : \"sample\"," +
@@ -149,6 +149,16 @@ public class ScannerTest extends ScannerTestCase {
         "\"sonar.projectVersion\" : \"1.2.3\"," +
         "\"sonar.sources\" : \"src\" }");
     orchestrator.executeBuild(build);
+  }
+
+  @Test
+  public void should_use_environment_prop() {
+    SonarScanner build = newScanner(new File("projects/simple-sample"))
+      .setEnvironmentVariable("SONAR_HOST_URL", "http://from-env.org");
+    BuildResult buildResult = orchestrator.executeBuildQuietly(build);
+
+    assertThat(buildResult.isSuccess()).isFalse();
+    assertThat(buildResult.getLogs()).contains("SonarQube server [http://from-env.org] can not be reached");
   }
 
   @Test
@@ -164,11 +174,13 @@ public class ScannerTest extends ScannerTestCase {
   @Test
   public void should_fail_if_unable_to_connect() {
     SonarScanner build = newScanner(new File("projects/simple-sample"))
+      //env property should be overridden
+      .setEnvironmentVariable("SONAR_HOST_URL", "http://from-env.org")
       .setProperty("sonar.host.url", "http://foo");
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
     // expect build failure
-    assertThat(result.getStatus()).isNotEqualTo(0);
+    assertThat(result.isSuccess()).isFalse();
     // with the following message
     assertThat(result.getLogs()).contains("SonarQube server [http://foo] can not be reached");
   }
