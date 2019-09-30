@@ -33,6 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.sonarsource.scanner.api.internal.shaded.minimaljson.Json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
@@ -326,7 +327,11 @@ public class ConfTest {
     Properties properties = conf.properties();
     assertThat(properties.get("sonar.prop")).isEqualTo("default");
 
-    env.put("SONARQUBE_SCANNER_PARAMS", "{\"project.settings\" : \"" + home.resolve("conf/sq-project.properties").toAbsolutePath().toString() + "\"}");
+    String jsonString = Json.object()
+      .add("project.settings", home.resolve("conf/sq-project.properties").toAbsolutePath().toString())
+      .toString();
+
+    env.put("SONARQUBE_SCANNER_PARAMS", jsonString);
 
     properties = conf.properties();
     assertThat(properties.get("sonar.prop")).isEqualTo("expected");
