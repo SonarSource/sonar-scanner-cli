@@ -33,7 +33,11 @@ public class SonarScannerTestSuite {
   @ClassRule
   public static final Orchestrator ORCHESTRATOR = Orchestrator.builderEnv()
     .setSonarVersion(System.getProperty("sonar.runtimeVersion", "LATEST_RELEASE[6.7]"))
-    .addPlugin(MavenLocation.of("org.sonarsource.javascript", "sonar-javascript-plugin", "LATEST_RELEASE"))
+    // The scanner cli should still be compatible with previous LTS 6.7, and not the 7.9
+    // at the time of writing, so the installed plugins should be compatible with
+    // both 6.7 and 8.x. The latest releases of analysers drop the compatibility with
+    // 6.7, that's why versions are hardcoded here.
+    .addPlugin(MavenLocation.of("org.sonarsource.javascript", "sonar-javascript-plugin", "5.2.1.7778"))
     .build();
 
 }
