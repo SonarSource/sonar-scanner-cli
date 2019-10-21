@@ -22,7 +22,7 @@
   </organization>
 
   <properties>
-    <sonar.buildVersion>6.7</sonar.buildVersion>
+    <sonar.buildVersion>7.9.1</sonar.buildVersion>
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
   </properties>
 
@@ -53,7 +53,7 @@
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
       <artifactId>sonar-ws</artifactId>
-      <version>6.7</version>
+      <version>${sonar.buildVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>

@@ -31,7 +31,7 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.sonarqube.ws.WsMeasures.Measure;
+import org.sonarqube.ws.Measures.Measure;
 
 import static java.lang.Integer.parseInt;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,9 +51,11 @@ public class ScannerTest extends ScannerTestCase {
     SonarScanner build = newScanner(new File("projects/basedir-with-source"));
     orchestrator.executeBuild(build);
 
-    Map<String, Measure> projectMeasures = getMeasures("java:basedir-with-source", "files", "ncloc");
+    Map<String, Measure> projectMeasures = getMeasures(
+      "java:basedir-with-source", "files", "ncloc");
     assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(1);
-    assertThat(parseInt(projectMeasures.get("ncloc").getValue())).isGreaterThan(1);
+    assertThat(parseInt(projectMeasures.get("ncloc").getValue()))
+      .isGreaterThan(1);
   }
 
   /**
@@ -65,9 +67,11 @@ public class ScannerTest extends ScannerTestCase {
       .setProjectKey("SAMPLE");
     orchestrator.executeBuild(build);
 
-    Map<String, Measure> projectMeasures = getMeasures("SAMPLE", "files", "ncloc");
+    Map<String, Measure> projectMeasures = getMeasures("SAMPLE", "files",
+      "ncloc");
     assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(2);
-    assertThat(parseInt(projectMeasures.get("ncloc").getValue())).isGreaterThan(1);
+    assertThat(parseInt(projectMeasures.get("ncloc").getValue()))
+      .isGreaterThan(1);
   }
 
   /**
@@ -80,7 +84,9 @@ public class ScannerTest extends ScannerTestCase {
     orchestrator.executeBuild(build);
 
     assertThat(new File("projects/override-working-dir/.sonar")).doesNotExist();
-    assertThat(new File("projects/override-working-dir/.overridden-relative-sonar")).exists().isDirectory();
+    assertThat(
+      new File("projects/override-working-dir/.overridden-relative-sonar"))
+      .exists().isDirectory();
   }
 
   /**
@@ -90,11 +96,14 @@ public class ScannerTest extends ScannerTestCase {
   public void should_override_working_dir_with_absolute_path() {
     File projectHome = new File("projects/override-working-dir");
     SonarScanner build = newScanner(projectHome)
-      .setProperty("sonar.working.directory", new File(projectHome, ".overridden-absolute-sonar").getAbsolutePath());
+      .setProperty("sonar.working.directory",
+        new File(projectHome, ".overridden-absolute-sonar").getAbsolutePath());
     orchestrator.executeBuild(build);
 
     assertThat(new File("projects/override-working-dir/.sonar")).doesNotExist();
-    assertThat(new File("projects/override-working-dir/.overridden-absolute-sonar")).exists().isDirectory();
+    assertThat(
+      new File("projects/override-working-dir/.overridden-absolute-sonar"))
+      .exists().isDirectory();
   }
 
   /**
@@ -107,7 +116,8 @@ public class ScannerTest extends ScannerTestCase {
     BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getStatus()).isNotEqualTo(0);
     // with the following message
-    assertThat(result.getLogs()).contains("Invalid value of sonar.sources for bad-source-dirs");
+    assertThat(result.getLogs())
+      .contains("Invalid value of sonar.sources for bad-source-dirs");
   }
 
   /**
@@ -142,7 +152,8 @@ public class ScannerTest extends ScannerTestCase {
 
   @Test
   public void should_use_json_environment_props() {
-    SonarScanner build = newScanner(new File("projects/simple-sample-no-properties"))
+    SonarScanner build = newScanner(
+      new File("projects/simple-sample-no-properties"))
       .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS", "{"
         + "\"sonar.projectKey\" : \"sample\"," +
         "\"sonar.projectName\" : \"Sample, with comma\"," +
@@ -161,14 +172,16 @@ public class ScannerTest extends ScannerTestCase {
     BuildResult buildResult = runner.runQuietly(null, build);
 
     assertThat(buildResult.isSuccess()).isFalse();
-    assertThat(buildResult.getLogs()).contains("SonarQube server [http://from-env.org] can not be reached");
+    assertThat(buildResult.getLogs())
+      .contains("SonarQube server [http://from-env.org] can not be reached");
   }
 
   @Test
   public void should_skip_analysis() {
     SonarScanner build = newScanner(new File("projects/simple-sample"))
       .setProperty("sonar.host.url", "http://foo")
-      .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS", "{ \"sonar.scanner.skip\":\"true\" }");
+      .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS",
+        "{ \"sonar.scanner.skip\":\"true\" }");
 
     BuildResult result = orchestrator.executeBuild(build);
     assertThat(result.getLogs()).contains("SonarQube Scanner analysis skipped");
@@ -185,7 +198,8 @@ public class ScannerTest extends ScannerTestCase {
     // expect build failure
     assertThat(result.isSuccess()).isFalse();
     // with the following message
-    assertThat(result.getLogs()).contains("SonarQube server [http://foo] can not be reached");
+    assertThat(result.getLogs())
+      .contains("SonarQube server [http://foo] can not be reached");
   }
 
   // SONARPLUGINS-3574
@@ -193,13 +207,18 @@ public class ScannerTest extends ScannerTestCase {
   public void run_from_external_location() throws IOException {
     File tempDir = temp.newFolder();
     SonarScanner build = newScanner(tempDir)
-      .setProperty("sonar.projectBaseDir", new File("projects/simple-sample").getAbsolutePath())
+      .setProperty("sonar.projectBaseDir",
+        new File("projects/simple-sample").getAbsolutePath())
       .addArguments("-e");
     orchestrator.executeBuild(build);
 
-    assertThat(getComponent("sample").getDescription()).isEqualTo("This is a sample");
-    Map<String, Measure> projectMeasures = getMeasures("sample", "files", "ncloc", "classes", "violations");
-    assertThat(projectMeasures.values().stream().filter(measure -> measure.getValue() != null).collect(Collectors.toList())).hasSize(4);
+    assertThat(getComponent("sample").getDescription())
+      .isEqualTo("This is a sample");
+    Map<String, Measure> projectMeasures = getMeasures("sample", "files",
+      "ncloc", "classes", "violations");
+    assertThat(projectMeasures.values().stream()
+      .filter(measure -> measure.getValue() != null)
+      .collect(Collectors.toList())).hasSize(4);
   }
 
   @Test
@@ -219,10 +238,12 @@ public class ScannerTest extends ScannerTestCase {
   public void should_override_project_settings_path() {
     File projectHome = new File("projects/override-project-settings-path");
     SonarScanner build = newScanner(projectHome)
-      .setProperty("project.settings", new File(projectHome, "conf/sq-project.properties").getAbsolutePath());
+      .setProperty("project.settings",
+        new File(projectHome, "conf/sq-project.properties").getAbsolutePath());
     orchestrator.executeBuild(build);
 
-    assertThat(getComponent("sample-with-custom-settings-path").getName()).isEqualTo("Test with custom settings location");
+    assertThat(getComponent("sample-with-custom-settings-path").getName())
+      .isEqualTo("Test with custom settings location");
   }
 
   // SQSCANNER-61
@@ -231,10 +252,13 @@ public class ScannerTest extends ScannerTestCase {
     File projectHome = new File("projects/override-project-settings-path");
     SonarScanner build = newScanner(projectHome)
       .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS", "{"
-        + "\"project.settings\" : \"" + StringEscapeUtils.escapeJavaScript(new File(projectHome, "conf/sq-project.properties").getAbsolutePath()) + "\"}");
+        + "\"project.settings\" : \"" + StringEscapeUtils.escapeJavaScript(
+        new File(projectHome, "conf/sq-project.properties").getAbsolutePath())
+        + "\"}");
     orchestrator.executeBuild(build);
 
-    assertThat(getComponent("sample-with-custom-settings-path").getName()).isEqualTo("Test with custom settings location");
+    assertThat(getComponent("sample-with-custom-settings-path").getName())
+      .isEqualTo("Test with custom settings location");
   }
 
 }
