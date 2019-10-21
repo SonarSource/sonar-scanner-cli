@@ -37,22 +37,22 @@ import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonarqube.ws.WsComponents;
-import org.sonarqube.ws.WsComponents.Component;
-import org.sonarqube.ws.WsMeasures;
-import org.sonarqube.ws.WsMeasures.Measure;
+import org.sonarqube.ws.Components.Component;
+import org.sonarqube.ws.Measures;
+import org.sonarqube.ws.Measures.Measure;
 import org.sonarqube.ws.client.HttpConnector;
 import org.sonarqube.ws.client.WsClient;
 import org.sonarqube.ws.client.WsClientFactories;
-import org.sonarqube.ws.client.component.ShowWsRequest;
-import org.sonarqube.ws.client.measure.ComponentWsRequest;
+import org.sonarqube.ws.client.components.ShowRequest;
+import org.sonarqube.ws.client.measures.ComponentRequest;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 public abstract class ScannerTestCase {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ScannerTestCase.class);
+  private static final Logger LOG = LoggerFactory
+    .getLogger(ScannerTestCase.class);
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -69,7 +69,8 @@ public abstract class ScannerTestCase {
         LOG.info("Use provided Scanner version: " + scannerVersion);
         artifactVersion = Version.create(scannerVersion);
       } else {
-        try (FileInputStream fis = new FileInputStream(new File("../target/maven-archiver/pom.properties"))) {
+        try (FileInputStream fis = new FileInputStream(
+          new File("../target/maven-archiver/pom.properties"))) {
           Properties props = new Properties();
           props.load(fis);
           artifactVersion = Version.create(props.getProperty("version"));
@@ -89,9 +90,10 @@ public abstract class ScannerTestCase {
   }
 
   @CheckForNull
-  static Map<String, Measure> getMeasures(String componentKey, String... metricKeys) {
-    return newWsClient().measures().component(new ComponentWsRequest()
-      .setComponentKey(componentKey)
+  static Map<String, Measure> getMeasures(String componentKey,
+    String... metricKeys) {
+    return newWsClient().measures().component(new ComponentRequest()
+      .setComponent(componentKey)
       .setMetricKeys(asList(metricKeys)))
       .getComponent().getMeasuresList()
       .stream()
@@ -100,9 +102,10 @@ public abstract class ScannerTestCase {
 
   @CheckForNull
   static Measure getMeasure(String componentKey, String metricKey) {
-    WsMeasures.ComponentWsResponse response = newWsClient().measures().component(new ComponentWsRequest()
-      .setComponentKey(componentKey)
-      .setMetricKeys(singletonList(metricKey)));
+    Measures.ComponentWsResponse response = newWsClient().measures()
+      .component(new ComponentRequest()
+        .setComponent(componentKey)
+        .setMetricKeys(singletonList(metricKey)));
     List<Measure> measures = response.getComponent().getMeasuresList();
     return measures.size() == 1 ? measures.get(0) : null;
   }
@@ -121,7 +124,8 @@ public abstract class ScannerTestCase {
 
   @CheckForNull
   static Component getComponent(String componentKey) {
-    return newWsClient().components().show(new ShowWsRequest().setKey(componentKey)).getComponent();
+    return newWsClient().components()
+      .show(new ShowRequest().setComponent(componentKey)).getComponent();
   }
 
   static WsClient newWsClient() {
