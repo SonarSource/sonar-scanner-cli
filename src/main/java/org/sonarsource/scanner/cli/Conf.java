@@ -70,9 +70,12 @@ class Conf {
     return result;
   }
 
-  boolean isSonarCloud(){
+  boolean isSonarCloud() {
     String hostUrl = properties().getProperty(PROPERTY_SONAR_HOST_URL);
-    return hostUrl.toLowerCase(Locale.getDefault()).contains("sonarcloud") ? true : false;
+    if (hostUrl != null)
+      return hostUrl.toLowerCase(Locale.getDefault()).contains("sonarcloud") || false;
+
+    return false;
   }
 
   private Properties resolve(Properties props) {
