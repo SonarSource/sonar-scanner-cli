@@ -24,6 +24,7 @@
       <outputDirectory>jre/bin</outputDirectory>
       <includes>
         <include>java</include>
+        <include>keytool</include>
       </includes>
       <fileMode>0755</fileMode>
     </fileSet>
