@@ -61,6 +61,11 @@ public class Main {
     main.execute();
   }
 
+  private static boolean isUserError(Throwable e) {
+    // class not available at compile time (loaded by isolated classloader)
+    return "org.sonar.api.utils.MessageException".equals(e.getClass().getName());
+  }
+
   void execute() {
     Stats stats = new Stats(logger).start();
 
@@ -71,11 +76,7 @@ public class Main {
       configureLogging(p);
       init(p);
       runner.start();
-      if(conf.isSonarCloud()) {
-        logger.info("SonarCloud server");
-      }else{
-        logger.info("SonarQube server " + runner.serverVersion());
-      }
+      logger.info(String.format("Analyzing on %s", conf.isSonarCloud() ? "SonarCloud" : "SonarQube server " + runner.serverVersion()));
       execute(stats, p);
       status = Exit.SUCCESS;
     } catch (Throwable e) {
@@ -144,11 +145,6 @@ public class Main {
       logger.error("");
       suggestDebugMode();
     }
-  }
-
-  private static boolean isUserError(Throwable e) {
-    // class not available at compile time (loaded by isolated classloader)
-    return "org.sonar.api.utils.MessageException".equals(e.getClass().getName());
   }
 
   private void suggestDebugMode() {
