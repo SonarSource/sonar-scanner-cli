@@ -28,6 +28,7 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import javax.annotation.Nullable;
@@ -71,7 +72,7 @@ class Conf {
 
   boolean isSonarCloud(){
     String hostUrl = properties().getProperty(PROPERTY_SONAR_HOST_URL);
-    return hostUrl.toLowerCase().contains("sonarcloud") ? true : false;
+    return hostUrl.toLowerCase(Locale.getDefault()).contains("sonarcloud") ? true : false;
   }
 
   private Properties resolve(Properties props) {

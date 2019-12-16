@@ -239,7 +239,7 @@ public class MainTest {
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
-    verify(logs).info("SonarQube server 5.5");
+    verify(logs).info("Analyzing on SonarQube server 5.5");
   }
 
   @Test
@@ -250,7 +250,7 @@ public class MainTest {
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
-    verify(logs).info("SonarCloud server");
+    verify(logs).info("Analyzing on SonarCloud");
   }
 
   @Test
