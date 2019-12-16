@@ -1,9 +1,9 @@
 #!/bin/sh
 #
-# SonarQube Scanner Startup Script for Unix
+# SonarScanner Startup Script for Unix
 #
 # Optional ENV vars:
-#   SONAR_SCANNER_OPTS - Parameters passed to the Java VM when running the SonarQube Scanner
+#   SONAR_SCANNER_OPTS - Parameters passed to the Java VM when running the SonarScanner
 #   SONAR_SCANNER_DEBUG_OPTS - Extra parameters passed to the Java VM for debugging
 #   JAVA_HOME - Location of Java's installation
 

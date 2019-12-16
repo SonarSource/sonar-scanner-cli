@@ -336,4 +336,24 @@ public class ConfTest {
     properties = conf.properties();
     assertThat(properties.get("sonar.prop")).isEqualTo("expected");
   }
+
+  @Test
+  public void should_return_true_is_sonar_cloud() {
+
+    args.setProperty("sonar.host.url", "https://sonarcloud.io");
+
+    Properties properties = conf.properties();
+
+    assertThat(conf.isSonarCloud()).isTrue();
+  }
+
+  @Test
+  public void should_return_false_is_sonar_cloud() {
+
+    args.setProperty("sonar.host.url", "https://mysonarqube.com:9000/");
+
+    Properties properties = conf.properties();
+
+    assertThat(conf.isSonarCloud()).isFalse();
+  }
 }

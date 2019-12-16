@@ -1,10 +1,10 @@
-@REM SonarQube Scanner Startup Script for Windows
+@REM SonarScanner Startup Script for Windows
 @REM
 @REM Required ENV vars:
 @REM   JAVA_HOME - location of a JDK home dir
 @REM
 @REM Optional ENV vars:
-@REM   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running the SonarQube Scanner
+@REM   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running the SonarScanner
 
 @echo off
 

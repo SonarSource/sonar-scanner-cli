@@ -42,6 +42,7 @@ class Conf {
   private static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
   private static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
   private static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
+  private static final String PROPERTY_SONAR_HOST_URL = "sonar.host.url";
 
   private final Cli cli;
   private final Logs logger;
@@ -66,6 +67,11 @@ class Conf {
     result.setProperty(PROPERTY_PROJECT_BASEDIR, getRootProjectBaseDir(result).toString());
     result.remove(PROJECT_HOME);
     return result;
+  }
+
+  boolean isSonarCloud(){
+    String hostUrl = properties().getProperty(PROPERTY_SONAR_HOST_URL);
+    return hostUrl.toLowerCase().contains("sonarcloud") ? true : false;
   }
 
   private Properties resolve(Properties props) {

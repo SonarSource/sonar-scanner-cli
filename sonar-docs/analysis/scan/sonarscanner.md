@@ -4,7 +4,7 @@ url: /analysis/scan/sonarscanner/
 ---
 
 [[info]]
-| **Download SonarScanner 4.0** - Compatible with SonarQube 6.7+ (LTS)  
+| **Download SonarScanner 4.0** - Compatible with SonarQube 6.7+ (LTS) and SonarCloud
 | By [SonarSource](https://www.sonarsource.com/) – GNU LGPL 3 – [Issue Tracker](https://jira.sonarsource.com/browse/SQSCANNER) – [Source](https://github.com/Sonarsource/sonar-scanner-cli)   
 |
 | [Linux 64-bit](https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.0.0.1744-linux.zip) |
