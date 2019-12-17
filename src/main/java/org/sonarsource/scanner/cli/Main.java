@@ -61,11 +61,6 @@ public class Main {
     main.execute();
   }
 
-  private static boolean isUserError(Throwable e) {
-    // class not available at compile time (loaded by isolated classloader)
-    return "org.sonar.api.utils.MessageException".equals(e.getClass().getName());
-  }
-
   void execute() {
     Stats stats = new Stats(logger).start();
 
@@ -145,6 +140,11 @@ public class Main {
       logger.error("");
       suggestDebugMode();
     }
+  }
+
+  private static boolean isUserError(Throwable e) {
+    // class not available at compile time (loaded by isolated classloader)
+    return "org.sonar.api.utils.MessageException".equals(e.getClass().getName());
   }
 
   private void suggestDebugMode() {
