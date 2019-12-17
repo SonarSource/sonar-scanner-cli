@@ -356,4 +356,11 @@ public class ConfTest {
 
     assertThat(conf.isSonarCloud()).isFalse();
   }
+
+  @Test
+  public void should_return_false_is_sonar_cloud_hosturl_is_null() {
+    Properties properties = conf.properties();
+
+    assertThat(conf.isSonarCloud()).isFalse();
+  }
 }
