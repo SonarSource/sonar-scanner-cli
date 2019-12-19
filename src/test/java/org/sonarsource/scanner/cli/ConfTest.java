@@ -364,4 +364,14 @@ public class ConfTest {
 
     assertThat(conf.isSonarCloud()).isFalse();
   }
+
+  // SQSCANNER-57
+  @Test
+  public void should_return_false_is_sonar_cloud_host_is_null() {
+
+    //Testing while host url is null
+    conf.properties();
+
+    assertThat(conf.isSonarCloud()).isFalse();
+  }
 }
