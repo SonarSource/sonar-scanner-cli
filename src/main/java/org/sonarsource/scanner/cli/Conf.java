@@ -71,7 +71,7 @@ class Conf {
   }
 
   boolean isSonarCloud() {
-    String hostUrl = properties().getProperty(PROPERTY_SONAR_HOST_URL) == "[secure]" ? null : properties().getProperty(PROPERTY_SONAR_HOST_URL);
+    String hostUrl = properties().getProperty(PROPERTY_SONAR_HOST_URL);
     logger.info("host url is : " + hostUrl);
     if (hostUrl != null) {
       logger.info("entered hosturl is not null");
