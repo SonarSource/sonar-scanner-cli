@@ -364,6 +364,9 @@ public class ConfTest {
   // SQSCANNER-57
   @Test
   public void should_return_false_is_sonar_cloud_host_is_null() {
+
+    logs.info("should_return_false_is_sonar_cloud_host_is_null");
+
     //Testing while host url is null
     Properties properties = conf.properties();
 
@@ -372,6 +375,10 @@ public class ConfTest {
     properties.remove("sonar.host.url");
 
     when(conf.properties()).thenReturn(properties);
+
+    String sonarHostUrl = properties.getProperty("sonar.host.url");
+
+    logs.info("sonar host url test side : " + sonarHostUrl);
 
     assertThat(properties.getProperty("sonar.host.url")).isNull();
 
