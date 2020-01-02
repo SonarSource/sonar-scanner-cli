@@ -351,7 +351,6 @@ public class ConfTest {
   // SQSCANNER-57
   @Test
   public void should_return_false_is_sonar_cloud() {
-
     //Testing while host url is null
     conf.properties();
 
