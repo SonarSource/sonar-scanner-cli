@@ -351,10 +351,6 @@ public class ConfTest {
   // SQSCANNER-57
   @Test
   public void should_return_false_is_sonar_cloud() {
-    //Testing while host url is null
-    conf.properties();
-
-    assertThat(conf.isSonarCloud()).isFalse();
 
     args.setProperty("sonar.host.url", "https://mysonarqube.com:9000/");
 
@@ -367,9 +363,10 @@ public class ConfTest {
   // SQSCANNER-57
   @Test
   public void should_return_false_is_sonar_cloud_host_is_null() {
-
     //Testing while host url is null
     conf.properties();
+    
+    assertThat(conf.properties().getProperty("sonar.host.url")).isNull();
 
     assertThat(conf.isSonarCloud()).isFalse();
   }
