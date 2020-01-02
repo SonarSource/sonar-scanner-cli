@@ -72,6 +72,7 @@ class Conf {
 
   boolean isSonarCloud() {
     String hostUrl = properties().getProperty(PROPERTY_SONAR_HOST_URL);
+    logger.info("host url is : " + hostUrl);
     if (hostUrl != null) {
       return hostUrl.toLowerCase(Locale.getDefault()).contains("sonarcloud");
     }
