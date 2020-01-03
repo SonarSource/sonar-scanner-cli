@@ -20,7 +20,9 @@
 package org.sonarsource.scanner.cli;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
+import org.graalvm.compiler.nodes.calc.IntegerDivRemNode;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -246,7 +248,7 @@ public class MainTest {
   public void should_log_SonarCloud_server() {
     Properties p = new Properties();
     when(conf.properties()).thenReturn(p);
-    when(conf.isSonarCloud()).thenReturn(true);
+    when(conf.isSonarCloud(Optional.empty())).thenReturn(true);
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();

@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Before;
@@ -343,9 +344,9 @@ public class ConfTest {
 
     args.setProperty("sonar.host.url", "https://sonarcloud.io");
 
-    Properties properties = conf.properties();
+    conf.properties();
 
-    assertThat(conf.isSonarCloud()).isTrue();
+    assertThat(conf.isSonarCloud(Optional.empty())).isTrue();
   }
 
   // SQSCANNER-57
@@ -358,7 +359,7 @@ public class ConfTest {
 
     assertThat(properties.getProperty("sonar.host.url")).isEqualTo("https://mysonarqube.com:9000/");
 
-    assertThat(conf.isSonarCloud()).isFalse();
+    assertThat(conf.isSonarCloud(Optional.empty())).isFalse();
   }
 
   // SQSCANNER-57
@@ -368,9 +369,12 @@ public class ConfTest {
     logs.info("should_return_false_is_sonar_cloud_host_is_null");
 
     Properties emptyProperties = new Properties();
+<<<<<<< origin/feature/mc/SQSCANNER-57
 
     when(cli.properties()).thenReturn(emptyProperties);
     when(conf.properties()).thenReturn(emptyProperties);
+=======
+>>>>>>> local
 
     String sonarHostUrl = emptyProperties.getProperty("sonar.host.url");
 
@@ -378,6 +382,6 @@ public class ConfTest {
 
     assertThat(emptyProperties.getProperty("sonar.host.url")).isNull();
 
-    assertThat(conf.isSonarCloud()).isFalse();
+    assertThat(conf.isSonarCloud(Optional.of(emptyProperties))).isFalse();
   }
 }

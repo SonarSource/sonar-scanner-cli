@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import javax.annotation.Nullable;
 import org.sonarsource.scanner.api.Utils;
@@ -70,8 +71,8 @@ class Conf {
     return result;
   }
 
-  boolean isSonarCloud() {
-    String hostUrl = properties().getProperty(PROPERTY_SONAR_HOST_URL);
+  boolean isSonarCloud(Optional<Properties> defaultProperties) {
+    String hostUrl = defaultProperties.isPresent() ? defaultProperties.get().getProperty(PROPERTY_SONAR_HOST_URL) : properties().getProperty(PROPERTY_SONAR_HOST_URL);
     logger.info("host url is : " + hostUrl);
     if (hostUrl != null) {
       logger.info("entered hosturl is not null");
