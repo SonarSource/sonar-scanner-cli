@@ -373,8 +373,11 @@ public class ConfTest {
     //sonar.host.url is probably set on QA env variables, so
     // removing it here to not interfere and get unexpected behavior
     properties.remove("sonar.host.url");
+    args.remove("sonar.host.url");
+
 
     when(properties.getProperty("sonar.host.url")).thenReturn(null);
+    when(cli.properties().getProperty("sonar.host.url")).thenReturn(null);
     when(cli.properties()).thenReturn(properties);
     when(conf.properties()).thenReturn(properties);
 
