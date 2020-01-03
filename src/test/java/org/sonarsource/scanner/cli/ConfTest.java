@@ -369,12 +369,6 @@ public class ConfTest {
     logs.info("should_return_false_is_sonar_cloud_host_is_null");
 
     Properties emptyProperties = new Properties();
-<<<<<<< origin/feature/mc/SQSCANNER-57
-
-    when(cli.properties()).thenReturn(emptyProperties);
-    when(conf.properties()).thenReturn(emptyProperties);
-=======
->>>>>>> local
 
     String sonarHostUrl = emptyProperties.getProperty("sonar.host.url");
 
