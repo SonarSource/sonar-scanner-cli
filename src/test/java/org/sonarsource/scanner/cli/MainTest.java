@@ -20,9 +20,7 @@
 package org.sonarsource.scanner.cli;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
-import org.graalvm.compiler.nodes.calc.IntegerDivRemNode;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
