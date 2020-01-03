@@ -72,7 +72,7 @@ public class Main {
       configureLogging(p);
       init(p);
       runner.start();
-      logger.info(String.format("Analyzing on %s", conf.isSonarCloud(Optional.empty()) ? "SonarCloud" : ("SonarQube server " + runner.serverVersion())));
+      logger.info(String.format("Analyzing on %s", conf.isSonarCloud(null) ? "SonarCloud" : ("SonarQube server " + runner.serverVersion())));
       execute(stats, p);
       status = Exit.SUCCESS;
     } catch (Throwable e) {

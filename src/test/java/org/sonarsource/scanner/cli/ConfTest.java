@@ -346,7 +346,7 @@ public class ConfTest {
 
     conf.properties();
 
-    assertThat(conf.isSonarCloud(Optional.empty())).isTrue();
+    assertThat(conf.isSonarCloud(null)).isTrue();
   }
 
   // SQSCANNER-57
@@ -359,23 +359,17 @@ public class ConfTest {
 
     assertThat(properties.getProperty("sonar.host.url")).isEqualTo("https://mysonarqube.com:9000/");
 
-    assertThat(conf.isSonarCloud(Optional.empty())).isFalse();
+    assertThat(conf.isSonarCloud(null)).isFalse();
   }
 
   // SQSCANNER-57
   @Test
   public void should_return_false_is_sonar_cloud_host_is_null() {
 
-    logs.info("should_return_false_is_sonar_cloud_host_is_null");
-
     Properties emptyProperties = new Properties();
-
-    String sonarHostUrl = emptyProperties.getProperty("sonar.host.url");
-
-    logs.info("sonar host url test side : " + sonarHostUrl);
 
     assertThat(emptyProperties.getProperty("sonar.host.url")).isNull();
 
-    assertThat(conf.isSonarCloud(Optional.of(emptyProperties))).isFalse();
+    assertThat(conf.isSonarCloud(emptyProperties)).isFalse();
   }
 }

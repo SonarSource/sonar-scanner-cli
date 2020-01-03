@@ -71,11 +71,9 @@ class Conf {
     return result;
   }
 
-  boolean isSonarCloud(Optional<Properties> defaultProperties) {
-    String hostUrl = defaultProperties.isPresent() ? defaultProperties.get().getProperty(PROPERTY_SONAR_HOST_URL) : properties().getProperty(PROPERTY_SONAR_HOST_URL);
-    logger.info("host url is : " + hostUrl);
+  boolean isSonarCloud(Properties testProperties) {
+    String hostUrl = testProperties != null ? testProperties.getProperty(PROPERTY_SONAR_HOST_URL) : properties().getProperty(PROPERTY_SONAR_HOST_URL);
     if (hostUrl != null) {
-      logger.info("entered hosturl is not null");
       return hostUrl.toLowerCase(Locale.getDefault()).contains("sonarcloud");
     }
 

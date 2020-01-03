@@ -248,7 +248,7 @@ public class MainTest {
   public void should_log_SonarCloud_server() {
     Properties p = new Properties();
     when(conf.properties()).thenReturn(p);
-    when(conf.isSonarCloud(Optional.empty())).thenReturn(true);
+    when(conf.isSonarCloud(null)).thenReturn(true);
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
