@@ -375,6 +375,7 @@ public class ConfTest {
     properties.remove("sonar.host.url");
 
     when(properties.getProperty("sonar.host.url")).thenReturn(null);
+    when(cli.properties()).thenReturn(properties);
     when(conf.properties()).thenReturn(properties);
 
     String sonarHostUrl = properties.getProperty("sonar.host.url");
