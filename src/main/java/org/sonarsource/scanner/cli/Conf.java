@@ -70,7 +70,7 @@ class Conf {
     return result;
   }
 
-  boolean isSonarCloud(@javax.annotation.Nullable Properties testProperties) {
+  boolean isSonarCloud(@Nullable Properties testProperties) {
     String hostUrl = testProperties != null ? testProperties.getProperty(PROPERTY_SONAR_HOST_URL) : properties().getProperty(PROPERTY_SONAR_HOST_URL);
     if (hostUrl != null) {
       return hostUrl.toLowerCase(Locale.getDefault()).contains("sonarcloud");

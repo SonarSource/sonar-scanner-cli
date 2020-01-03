@@ -20,7 +20,6 @@
 package org.sonarsource.scanner.cli;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 import org.sonarsource.scanner.api.EmbeddedScanner;
 import org.sonarsource.scanner.api.ScanProperties;
