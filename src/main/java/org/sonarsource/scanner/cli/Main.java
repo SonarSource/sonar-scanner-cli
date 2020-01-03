@@ -71,12 +71,12 @@ public class Main {
       configureLogging(p);
       init(p);
       runner.start();
-      logger.info("SonarQube server " + runner.serverVersion());
+      logger.info(String.format("Analyzing on %s", conf.isSonarCloud(null) ? "SonarCloud" : ("SonarQube server " + runner.serverVersion())));
       execute(stats, p);
       status = Exit.SUCCESS;
     } catch (Throwable e) {
       displayExecutionResult(stats, "FAILURE");
-      showError("Error during SonarQube Scanner execution", e, cli.isDebugEnabled());
+      showError("Error during SonarScanner execution", e, cli.isDebugEnabled());
       status = isUserError(e) ? Exit.USER_ERROR : Exit.INTERNAL_ERROR;
     } finally {
       exit.exit(status);
@@ -86,7 +86,7 @@ public class Main {
 
   private void checkSkip(Properties properties) {
     if ("true".equalsIgnoreCase(properties.getProperty(ScanProperties.SKIP))) {
-      logger.info("SonarQube Scanner analysis skipped");
+      logger.info("SonarScanner analysis skipped");
       exit.exit(Exit.SUCCESS);
     }
   }
@@ -149,7 +149,7 @@ public class Main {
 
   private void suggestDebugMode() {
     if (!cli.isEmbedded()) {
-      logger.error("Re-run SonarQube Scanner using the -X switch to enable full debug logging.");
+      logger.error("Re-run SonarScanner using the -X switch to enable full debug logging.");
     }
   }
 

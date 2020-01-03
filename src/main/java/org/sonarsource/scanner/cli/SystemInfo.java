@@ -30,7 +30,7 @@ class SystemInfo {
   }
 
   static void print(Logs logger) {
-    logger.info("SonarQube Scanner " + ScannerVersion.version());
+    logger.info("SonarScanner " + ScannerVersion.version());
     logger.info(java());
     logger.info(os());
     String scannerOpts = system.getenv("SONAR_SCANNER_OPTS");
