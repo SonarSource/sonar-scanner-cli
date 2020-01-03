@@ -367,25 +367,16 @@ public class ConfTest {
 
     logs.info("should_return_false_is_sonar_cloud_host_is_null");
 
-    //Testing while host url is null
-    Properties properties = conf.properties();
+    Properties emptyProperties = new Properties();
 
-    //sonar.host.url is probably set on QA env variables, so
-    // removing it here to not interfere and get unexpected behavior
-    properties.remove("sonar.host.url");
-    args.remove("sonar.host.url");
+    when(cli.properties()).thenReturn(emptyProperties);
+    when(conf.properties()).thenReturn(emptyProperties);
 
-
-    when(properties.getProperty("sonar.host.url")).thenReturn(null);
-    when(cli.properties().getProperty("sonar.host.url")).thenReturn(null);
-    when(cli.properties()).thenReturn(properties);
-    when(conf.properties()).thenReturn(properties);
-
-    String sonarHostUrl = properties.getProperty("sonar.host.url");
+    String sonarHostUrl = emptyProperties.getProperty("sonar.host.url");
 
     logs.info("sonar host url test side : " + sonarHostUrl);
 
-    assertThat(properties.getProperty("sonar.host.url")).isNull();
+    assertThat(emptyProperties.getProperty("sonar.host.url")).isNull();
 
     assertThat(conf.isSonarCloud()).isFalse();
   }
