@@ -33,6 +33,6 @@ Make sure that you follow our [code style](https://github.com/SonarSource/sonar-
 License
 -------
 
-Copyright 2011-2019 SonarSource.
+Copyright 2011-2020 SonarSource.
 
 Licensed under the [GNU Lesser General Public License, Version 3.0](http://www.gnu.org/licenses/lgpl.txt)
