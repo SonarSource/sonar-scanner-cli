@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>52</version>
+    <version>54</version>
   </parent>
 
   <groupId>org.sonarsource.scanner.cli</groupId>
@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.sonarsource.scanner.api</groupId>
       <artifactId>sonar-scanner-api</artifactId>
-      <version>2.14.0.2002</version>
+      <version>2.15.0.2182</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
