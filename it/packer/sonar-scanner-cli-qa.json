@@ -1,0 +1,29 @@
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "project_id": "ci-cd-215716",
+      "source_image": "windows-server-1809-dc-core-v20200211",
+      "image_name": "sonar-scanner-cli-qa",
+      "disk_size": "50",
+      "machine_type": "n1-standard-1",
+      "communicator": "winrm",
+      "winrm_username": "packer_user",
+      "winrm_insecure": true,
+      "winrm_use_ssl": true,
+      "metadata": {
+        "windows-startup-script-cmd": "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
+      },
+      "zone": "us-central1-a",
+      "tags": ["packer"]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "scripts": [
+        "{{template_dir}}/setup.ps1"
+      ]
+    }
+  ]
+}
