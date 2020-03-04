@@ -68,13 +68,16 @@ public abstract class ScannerTestCase {
       if (StringUtils.isNotBlank(scannerVersion)) {
         LOG.info("Use provided Scanner version: " + scannerVersion);
         artifactVersion = Version.create(scannerVersion);
+      } else if (StringUtils.isNotBlank(System.getenv("PROJECT_VERSION"))) {
+        scannerVersion = System.getenv("PROJECT_VERSION");
+        LOG.info("Use Scanner version from environment: " + scannerVersion);
+        artifactVersion = Version.create(scannerVersion);
       } else {
         try (FileInputStream fis = new FileInputStream(
           new File("../target/maven-archiver/pom.properties"))) {
           Properties props = new Properties();
           props.load(fis);
           artifactVersion = Version.create(props.getProperty("version"));
-          return artifactVersion;
         } catch (IOException e) {
           throw new IllegalStateException(e);
         }
