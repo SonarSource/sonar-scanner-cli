@@ -1,5 +1,5 @@
 /*
- * SonarSource :: IT :: SonarQube Scanner
+ * SonarSource :: IT :: SonarScanner CLI
  * Copyright (C) 2009-2020 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *

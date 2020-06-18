@@ -10,7 +10,7 @@
   <artifactId>sonar-scanner-cli</artifactId>
   <version>4.4-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>SonarQube Scanner</name>
+  <name>SonarScanner CLI</name>
   <url>http://docs.sonarqube.org/display/SONAR/Analyzing+with+SonarQube+Scanner</url>
   <inceptionYear>2011</inceptionYear>
 
