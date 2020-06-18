@@ -29,6 +29,7 @@ class Cli {
   private boolean debugEnabled = false;
   private boolean displayVersionOnly = false;
   private boolean embedded = false;
+  private String invokedFrom = "";
   private final Properties props = new Properties();
   private final Exit exit;
   private final Logs logger;
@@ -48,6 +49,10 @@ class Cli {
 
   boolean isEmbedded() {
     return embedded;
+  }
+
+  String getInvokedFrom() {
+    return invokedFrom;
   }
 
   Properties properties() {
@@ -90,7 +95,12 @@ class Cli {
       return processProp(args, pos);
 
     } else if ("--embedded".equals(arg)) {
+      logger.info("Option --embedded is deprecated and will be removed in a future release.");
       embedded = true;
+
+    } else if (arg.startsWith("--from")) {
+      embedded = true;
+      invokedFrom = arg.substring("--from=".length());
 
     } else if (arg.startsWith("-D")) {
       arg = arg.substring(2);

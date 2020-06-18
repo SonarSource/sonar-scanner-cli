@@ -97,7 +97,7 @@ public class Main {
       exit.exit(Exit.SUCCESS);
     }
 
-    runner = runnerFactory.create(p);
+    runner = runnerFactory.create(p, cli.getInvokedFrom());
   }
 
   private void configureLogging(Properties props) {

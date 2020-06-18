@@ -48,11 +48,11 @@ public class ConfTest {
   @Rule
   public ExpectedException exception = ExpectedException.none();
 
-  private Map<String, String> env = new HashMap<>();
-  private Properties args = new Properties();
-  private Logs logs = new Logs(System.out, System.err);
-  private Cli cli = mock(Cli.class);
-  private Conf conf = new Conf(cli, logs, env);
+  private final Map<String, String> env = new HashMap<>();
+  private final Properties args = new Properties();
+  private final Logs logs = new Logs(System.out, System.err);
+  private final Cli cli = mock(Cli.class);
+  private final Conf conf = new Conf(cli, logs, env);
 
   @Before
   public void initConf() {

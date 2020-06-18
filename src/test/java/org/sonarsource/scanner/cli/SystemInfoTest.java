@@ -31,8 +31,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 public class SystemInfoTest {
-  private System2 mockSystem = mock(System2.class);
-  private Logs logs = mock(Logs.class);
+  private final System2 mockSystem = mock(System2.class);
+  private final Logs logs = mock(Logs.class);
 
   @Before
   public void setUp() {

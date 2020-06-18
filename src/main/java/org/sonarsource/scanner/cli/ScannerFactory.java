@@ -32,8 +32,15 @@ class ScannerFactory {
     this.logger = logger;
   }
 
-  EmbeddedScanner create(Properties props) {
-    return EmbeddedScanner.create("ScannerCli", ScannerVersion.version(), new DefaultLogOutput())
+  EmbeddedScanner create(Properties props, String isInvokedFrom) {
+    String appName = "ScannerCLI";
+    String appVersion = ScannerVersion.version();
+    if (!isInvokedFrom.equals("") && isInvokedFrom.contains("/")) {
+      appName = isInvokedFrom.split("/")[0];
+      appVersion = isInvokedFrom.split("/")[1];
+    }
+
+    return EmbeddedScanner.create(appName, appVersion, new DefaultLogOutput())
       .addGlobalProperties((Map) props);
   }
 
