@@ -118,6 +118,12 @@ public class CliTest {
   }
 
   @Test
+  public void from_argument_is_only_from_let_value_empty() {
+    cli.parse(new String[] {"--from="});
+    assertThat(cli.getInvokedFrom()).isEmpty();
+  }
+
+  @Test
   public void should_disable_debug_mode_and_stacktrace_log_by_default() {
     cli.parse(new String[0]);
     assertThat(cli.isDebugEnabled()).isFalse();

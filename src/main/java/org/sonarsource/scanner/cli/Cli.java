@@ -100,7 +100,9 @@ class Cli {
 
     } else if (arg.startsWith("--from")) {
       embedded = true;
-      invokedFrom = arg.substring("--from=".length());
+      if (arg.length() > "--from=".length()) {
+        invokedFrom = arg.substring("--from=".length());
+      }
 
     } else if (arg.startsWith("-D")) {
       arg = arg.substring(2);
