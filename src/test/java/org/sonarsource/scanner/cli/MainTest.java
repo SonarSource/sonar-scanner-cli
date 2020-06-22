@@ -62,17 +62,18 @@ public class MainTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    when(scannerFactory.create(any(Properties.class))).thenReturn(scanner);
+    when(scannerFactory.create(any(Properties.class), any(String.class))).thenReturn(scanner);
     when(conf.properties()).thenReturn(properties);
   }
 
   @Test
   public void should_execute_runner() {
+    when(cli.getInvokedFrom()).thenReturn("");
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
 
     verify(exit).exit(Exit.SUCCESS);
-    verify(scannerFactory).create(properties);
+    verify(scannerFactory).create(properties, "");
 
     verify(scanner, times(1)).start();
     verify(scanner, times(1)).execute((Map) properties);
@@ -84,7 +85,8 @@ public class MainTest {
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
     doThrow(e).when(runner).execute(any());
-    when(scannerFactory.create(any(Properties.class))).thenReturn(runner);
+    when(cli.getInvokedFrom()).thenReturn("");
+    when(scannerFactory.create(any(Properties.class), any(String.class))).thenReturn(runner);
     when(cli.isDebugEnabled()).thenReturn(true);
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
@@ -99,8 +101,9 @@ public class MainTest {
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
     doThrow(e).when(runner).start();
+    when(cli.getInvokedFrom()).thenReturn("");
     when(cli.isDebugEnabled()).thenReturn(true);
-    when(scannerFactory.create(any(Properties.class))).thenReturn(runner);
+    when(scannerFactory.create(any(Properties.class), any(String.class))).thenReturn(runner);
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
@@ -175,10 +178,12 @@ public class MainTest {
   private void testException(Exception e, boolean debugEnabled, boolean isEmbedded, int expectedExitCode) {
     when(cli.isDebugEnabled()).thenReturn(debugEnabled);
     when(cli.isEmbedded()).thenReturn(isEmbedded);
+    when(cli.getInvokedFrom()).thenReturn("");
 
     EmbeddedScanner runner = mock(EmbeddedScanner.class);
     doThrow(e).when(runner).execute(any());
-    when(scannerFactory.create(any(Properties.class))).thenReturn(runner);
+
+    when(scannerFactory.create(any(Properties.class), any(String.class))).thenReturn(runner);
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
@@ -201,6 +206,7 @@ public class MainTest {
   public void should_only_display_version() {
     Properties p = new Properties();
     when(cli.isDisplayVersionOnly()).thenReturn(true);
+    when(cli.getInvokedFrom()).thenReturn("");
     when(conf.properties()).thenReturn(p);
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
@@ -209,7 +215,7 @@ public class MainTest {
     InOrder inOrder = Mockito.inOrder(exit, scannerFactory);
 
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
-    inOrder.verify(scannerFactory, times(1)).create(p);
+    inOrder.verify(scannerFactory, times(1)).create(p, "");
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
   }
 
@@ -218,6 +224,7 @@ public class MainTest {
     Properties p = new Properties();
     p.setProperty(ScanProperties.SKIP, "true");
     when(conf.properties()).thenReturn(p);
+    when(cli.getInvokedFrom()).thenReturn("");
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
@@ -226,7 +233,7 @@ public class MainTest {
     InOrder inOrder = Mockito.inOrder(exit, scannerFactory);
 
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
-    inOrder.verify(scannerFactory, times(1)).create(p);
+    inOrder.verify(scannerFactory, times(1)).create(p, "");
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
   }
 
@@ -235,6 +242,7 @@ public class MainTest {
     when(scanner.serverVersion()).thenReturn("5.5");
     Properties p = new Properties();
     when(cli.isDisplayVersionOnly()).thenReturn(true);
+    when(cli.getInvokedFrom()).thenReturn("");
     when(conf.properties()).thenReturn(p);
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
@@ -247,6 +255,7 @@ public class MainTest {
     Properties p = new Properties();
     when(conf.properties()).thenReturn(p);
     when(conf.isSonarCloud(null)).thenReturn(true);
+    when(cli.getInvokedFrom()).thenReturn("");
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
@@ -275,6 +284,7 @@ public class MainTest {
     Properties p = new Properties();
     p.put(propKey, propValue);
     when(conf.properties()).thenReturn(p);
+    when(cli.getInvokedFrom()).thenReturn("");
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();

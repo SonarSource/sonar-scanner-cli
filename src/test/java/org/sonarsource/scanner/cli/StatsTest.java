@@ -28,9 +28,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class StatsTest {
-  private PrintStream stdOut = mock(PrintStream.class);
-  private PrintStream stdErr = mock(PrintStream.class);
-  private Logs logs = new Logs(stdOut, stdErr);
+  private final PrintStream stdOut = mock(PrintStream.class);
+  private final PrintStream stdErr = mock(PrintStream.class);
+  private final Logs logs = new Logs(stdOut, stdErr);
 
   @Test
   public void shouldPrintStats() {

@@ -33,17 +33,40 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class ScannerFactoryTest {
 
-  private Properties props = new Properties();
-  private Logs logs = mock(Logs.class);
+  private final Properties props = new Properties();
+  private final Logs logs = mock(Logs.class);
 
   @Test
   public void should_create_embedded_runner() {
     props.setProperty("foo", "bar");
-    EmbeddedScanner runner = new ScannerFactory(logs).create(props);
+    EmbeddedScanner runner = new ScannerFactory(logs).create(props, "");
 
     assertThat(runner).isInstanceOf(EmbeddedScanner.class);
-    assertThat(runner.globalProperties().get("foo")).isEqualTo("bar");
-    assertThat(runner.app()).isEqualTo("ScannerCli");
+    assertThat(runner.globalProperties()).containsEntry("foo", "bar");
+    assertThat(runner.app()).isEqualTo("ScannerCLI");
+    assertThat(runner.appVersion()).isNotNull();
+  }
+
+  @Test
+  public void should_create_embedded_runner_with_scannername_from_argument() {
+    props.setProperty("foo", "bar");
+    EmbeddedScanner runner = new ScannerFactory(logs).create(props, "ScannerMSBuild/4.8.0");
+
+    assertThat(runner).isInstanceOf(EmbeddedScanner.class);
+    assertThat(runner.globalProperties()).containsEntry("foo", "bar");
+    assertThat(runner.app()).isEqualTo("ScannerMSBuild");
+    assertThat(runner.appVersion()).isEqualTo("4.8.0");
+    assertThat(runner.appVersion()).isNotNull();
+  }
+
+  @Test
+  public void should_create_embedded_runner_from_argument_is_not_regex_compliant_revert_to_default_scanner_name() {
+    props.setProperty("foo", "bar");
+    EmbeddedScanner runner = new ScannerFactory(logs).create(props, "ScannerMSBuild4.8.0");
+
+    assertThat(runner).isInstanceOf(EmbeddedScanner.class);
+    assertThat(runner.globalProperties()).containsEntry("foo", "bar");
+    assertThat(runner.app()).isEqualTo("ScannerCLI");
     assertThat(runner.appVersion()).isNotNull();
   }
 
