@@ -67,7 +67,7 @@ linux_qa_task:
   gke_container:
     dockerfile: it/docker/Dockerfile
     builder_image_project: sonarqube-team
-    builder_image_name: docker-builder-v2
+    builder_image_name: docker-builder-v20200819
     cluster_name: cirrus-ci-cluster
     zone: europe-west3-a
     namespace: default
