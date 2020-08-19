@@ -92,7 +92,7 @@ create_win_vm_task:
   skip: "!changesInclude('it/packer/setup.ps1', 'it/packer/sonar-scanner-cli-qa.json')"
   gce_instance:
     image_project: sonarqube-team
-    image_name: packer-builder-v1
+    image_family: packer-builder
     zone: europe-west3-a
     type: n1-standard-8
     use_ssd: true
