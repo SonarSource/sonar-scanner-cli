@@ -1,5 +1,5 @@
 # content of service-account-credentials.json, used to access to Google Cloud Platform
-gcp_credentials: ENCRYPTED[!1fcffe5cc2de4fbbda5befae835ca275a47c1148dabbbb7b5d21334604efba3ef8730d8bc5820952e575c7dd5177e433!]
+gcp_credentials: ENCRYPTED[650ffad2befada420a9dcba93e7efcb5cb0d7af63b42ca3ed64a1e5d0884ce93cf92055fbe7ee9af79ccc4a81c32329b]
 
 #
 # ENV VARIABLES
@@ -32,9 +32,9 @@ env:
 # RE-USABLE CONFIGS
 #
 container_definition: &CONTAINER_DEFINITION
-  image: gcr.io/ci-cd-215716/base:latest
-  cluster_name: cirrus-uscentral1a-cluster
-  zone: us-central1-a
+  image: gcr.io/sonarqube-team/base:mvn-jdk-11
+  cluster_name: cirrus-ci-cluster
+  zone: europe-west4-a
   namespace: default
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
@@ -66,10 +66,10 @@ linux_qa_task:
   <<: *ONLY_SONARSOURCE_QA
   gke_container:
     dockerfile: it/docker/Dockerfile
-    builder_image_project: ci-cd-215716
-    builder_image_name: docker-builder-v2
-    cluster_name: cirrus-uscentral1a-cluster
-    zone: us-central1-a
+    builder_image_project: sonarqube-team
+    builder_image_name: docker-builder-v20200819
+    cluster_name: cirrus-ci-cluster
+    zone: europe-west4-a
     namespace: default
     cpu: 1
     memory: 2G
@@ -91,9 +91,9 @@ create_win_vm_task:
   <<: *ONLY_SONARSOURCE_QA
   skip: "!changesInclude('it/packer/setup.ps1', 'it/packer/sonar-scanner-cli-qa.json')"
   gce_instance:
-    image_project: ci-cd-215716
-    image_name: packer-builder-v1
-    zone: us-central1-a
+    image_project: sonarqube-team
+    image_family: packer-builder
+    zone: europe-west4-a
     type: n1-standard-8
     use_ssd: true
     scopes:
@@ -107,11 +107,11 @@ win_qa_task:
     - build
   <<: *ONLY_SONARSOURCE_QA
   gce_instance:
-    image_project: ci-cd-215716
+    image_project: sonarqube-team
     # This VM is built using Packer, see "create_win_vm_task" above.
     image_name: sonar-scanner-cli-qa
     platform: windows
-    zone: us-central1-a
+    zone: europe-west4-a
     type: n1-standard-8
     use_ssd: true
   env:
