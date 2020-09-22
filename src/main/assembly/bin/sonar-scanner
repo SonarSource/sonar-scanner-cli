@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 #
 # SonarScanner Startup Script for Unix
 #
@@ -12,21 +12,21 @@ real_path () {
 
   (
   while true; do
-    cd "$(dirname "$target")"
-    target=$(basename "$target")
+    cd "`dirname "$target"`"
+    target=`basename "$target"`
     test -L "$target" || break
-    target=$(readlink "$target")
+    target=`readlink "$target"`
   done
 
-  echo "$(pwd -P)/$target"
+  echo "`pwd -P`/$target"
   )
 }
 
-script_path=$(real_path "$0")
-sonar_scanner_home=$(dirname "$script_path")/..
+script_path=`real_path "$0"`
+sonar_scanner_home=`dirname "$script_path"`/..
 
 # make it fully qualified
-sonar_scanner_home=$(cd "$sonar_scanner_home" && pwd -P)
+sonar_scanner_home=`cd "$sonar_scanner_home" && pwd -P`
 
 jar_file=$sonar_scanner_home/lib/sonar-scanner-cli-${project.version}.jar
 
@@ -46,7 +46,7 @@ if [ -n "$JAVA_HOME" ]
 then
   java_cmd="$JAVA_HOME/bin/java"
 else
-  java_cmd="$(which java)"
+  java_cmd="`which java`"
 fi
 
 if [ -z "$java_cmd" -o ! -x "$java_cmd" ] ; then
@@ -54,7 +54,7 @@ if [ -z "$java_cmd" -o ! -x "$java_cmd" ] ; then
   exit 1
 fi
 
-project_home=$(pwd)
+project_home=`pwd`
 
 #echo "Info: Using sonar-scanner at $sonar_scanner_home"
 #echo "Info: Using java at $java_cmd"
