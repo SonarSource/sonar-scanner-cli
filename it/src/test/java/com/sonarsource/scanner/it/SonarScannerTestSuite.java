@@ -41,9 +41,14 @@ public class SonarScannerTestSuite {
     OrchestratorBuilder builder = Orchestrator.builderEnv()
       .setSonarVersion(
         sonarVersion);
+    // The javascript language plugin needs to be installed to allow for
+    // tests to pass. If not installed test fail with a "no languages
+    // installed" error.
     MavenLocation javascriptPlugin = MavenLocation
       .of("org.sonarsource.javascript", "sonar-javascript-plugin",
         "5.2.1.7778");
+    // Since version 8.5 languages are bundled and located in a different
+    // location then other plugins. So install this in the correct location.
     if (sonarVersion.startsWith("LATEST_RELEASE[7.9]")) {
       builder.addPlugin(javascriptPlugin);
     } else {
