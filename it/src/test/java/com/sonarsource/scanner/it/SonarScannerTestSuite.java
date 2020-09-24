@@ -41,14 +41,14 @@ public class SonarScannerTestSuite {
     OrchestratorBuilder builder = Orchestrator.builderEnv()
       .setSonarVersion(
         sonarVersion);
-//    MavenLocation javascriptPlugin = MavenLocation
-//      .of("org.sonarsource.javascript", "sonar-javascript-plugin",
-//        "5.2.1.7778");
-//    if (sonarVersion.startsWith("LATEST_RELEASE[7.9]")) {
-//      builder.addPlugin(javascriptPlugin);
-//    } else {
-//      builder.addBundledPlugin(javascriptPlugin);
-//    }
+    MavenLocation javascriptPlugin = MavenLocation
+      .of("org.sonarsource.javascript", "sonar-javascript-plugin",
+        "5.2.1.7778");
+    if (sonarVersion.startsWith("LATEST_RELEASE[7.9]")) {
+      builder.addPlugin(javascriptPlugin);
+    } else {
+      builder.addBundledPlugin(javascriptPlugin);
+    }
     return builder.build();
   }
 
