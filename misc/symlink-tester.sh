@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 usage() {
     echo usage: $0 path/to/sonar-scanner
@@ -10,10 +10,10 @@ test -f "$1" && test -x "$1" || usage
 scanner=$1
 
 if type mktemp &>/dev/null; then
-    tempdir=$(mktemp -d)
-    tempdir=$(cd "$tempdir"; pwd -P)
+    tempdir=`mktemp -d`
+    tempdir=`cd "$tempdir"; pwd -P`
 else
-    tempdir=/tmp/"$(basename "$0")-$$"
+    tempdir=/tmp/"`basename "$0"`-$$"
     mkdir -p "$tempdir"
 fi
 
@@ -25,7 +25,7 @@ trap 'cleanup; exit 1' 1 2 3 15
 trap 'cleanup; exit 0' 0
 
 abspath() {
-    (cd "$(dirname "$1")"; echo $PWD/"$(basename "$1")")
+    (cd "`dirname "$1"`"; echo $PWD/"`basename "$1"`")
 }
 
 verify() {
@@ -46,10 +46,10 @@ relpath_to_root() {
     )
 }
 
-ln -s "$(abspath "$scanner")" "$tempdir"/scanner
+ln -s "`abspath "$scanner"`" "$tempdir"/scanner
 verify 'launch from abs symlink to abs path' "$tempdir"/scanner -h
 
-ln -s "$(relpath_to_root "$tempdir")$(abspath "$scanner")" "$tempdir"/scanner-rel
+ln -s "`relpath_to_root "$tempdir"``abspath "$scanner"`" "$tempdir"/scanner-rel
 verify 'symlink to rel path is valid' test -e "$tempdir"/scanner-rel
 verify 'launch from abs symlink to rel path' "$tempdir"/scanner-rel -h
 
