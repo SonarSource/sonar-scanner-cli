@@ -84,7 +84,8 @@ class Cli {
       displayVersionOnly = true;
 
     } else if (asList("-e", "--errors").contains(arg)) {
-      logger.info("Option -e/--errors is no longer supported and will be ignored");
+      logger
+        .info("Option -e/--errors is no longer supported and will be ignored");
 
     } else if (asList("-X", "--debug").contains(arg)) {
       props.setProperty("sonar.verbose", "true");
@@ -95,7 +96,8 @@ class Cli {
       return processProp(args, pos);
 
     } else if ("--embedded".equals(arg)) {
-      logger.info("Option --embedded is deprecated and will be removed in a future release.");
+      logger.info(
+        "Option --embedded is deprecated and will be removed in a future release.");
       embedded = true;
 
     } else if (arg.startsWith("--from")) {
@@ -130,7 +132,7 @@ class Cli {
     displayVersionOnly = false;
   }
 
-  private static void appendPropertyTo(String arg, Properties props) {
+  private void appendPropertyTo(String arg, Properties props) {
     final String key;
     final String value;
     int j = arg.indexOf('=');
@@ -141,7 +143,11 @@ class Cli {
       key = arg.substring(0, j);
       value = arg.substring(j + 1);
     }
-    props.setProperty(key, value);
+    Object oldValue = props.setProperty(key, value);
+    if (oldValue != null) {
+      logger.warn("Property '" + key + "' with value '" + oldValue + "' is "
+        + "overridden with value '" + value + "'");
+    }
   }
 
   private void printErrorAndExit(String message) {
