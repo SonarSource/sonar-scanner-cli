@@ -37,21 +37,22 @@ public class SonarScannerTestSuite {
 
   private static Orchestrator createOrchestrator() {
     String sonarVersion = System
-      .getProperty("sonar.runtimeVersion", "LATEST_RELEASE[6.7]");
+      .getProperty("sonar.runtimeVersion", "LATEST_RELEASE[7.9]");
     OrchestratorBuilder builder = Orchestrator.builderEnv()
       .setSonarVersion(
         sonarVersion);
-    // The scanner cli should still be compatible with previous LTS 6.7, and not the 7.9
-    // at the time of writing, so the installed plugins should be compatible with
-    // both 6.7 and 8.x. The latest releases of analysers drop the compatibility with
-    // 6.7, that's why versions are hardcoded here.
+    // The javascript language plugin needs to be installed to allow for
+    // tests to pass. If not installed test fail with a "no languages
+    // installed" error.
     MavenLocation javascriptPlugin = MavenLocation
       .of("org.sonarsource.javascript", "sonar-javascript-plugin",
         "5.2.1.7778");
-    if (sonarVersion.startsWith("DEV")) {
-      builder.addBundledPlugin(javascriptPlugin);
-    } else {
+    // Since version 8.5 languages are bundled and located in a different
+    // location then other plugins. So install this in the correct location.
+    if (sonarVersion.startsWith("LATEST_RELEASE[7.9]")) {
       builder.addPlugin(javascriptPlugin);
+    } else {
+      builder.addBundledPlugin(javascriptPlugin);
     }
     return builder.build();
   }
