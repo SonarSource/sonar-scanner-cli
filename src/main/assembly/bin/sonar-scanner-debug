@@ -2,9 +2,11 @@
 #
 # SonarScanner Startup Script for Unix
 #
+# Required ENV vars:
+#   JAVA_HOME - Location of Java's installation, optional if use_embedded_jre is set
+#
 # Optional ENV vars:
 #   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running the SonarScanner
-#   JAVA_HOME - Location of Java's installation
 
 SONAR_SCANNER_DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"
 
