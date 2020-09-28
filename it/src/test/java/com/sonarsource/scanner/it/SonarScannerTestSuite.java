@@ -20,7 +20,6 @@
 package com.sonarsource.scanner.it;
 
 import com.sonar.orchestrator.Orchestrator;
-import com.sonar.orchestrator.OrchestratorBuilder;
 import com.sonar.orchestrator.locator.MavenLocation;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
@@ -38,23 +37,11 @@ public class SonarScannerTestSuite {
   private static Orchestrator createOrchestrator() {
     String sonarVersion = System
       .getProperty("sonar.runtimeVersion", "LATEST_RELEASE[7.9]");
-    OrchestratorBuilder builder = Orchestrator.builderEnv()
+    return Orchestrator.builderEnv()
       .setSonarVersion(
-        sonarVersion);
-    // The javascript language plugin needs to be installed to allow for
-    // tests to pass. If not installed test fail with a "no languages
-    // installed" error.
-    MavenLocation javascriptPlugin = MavenLocation
-      .of("org.sonarsource.javascript", "sonar-javascript-plugin",
-        "5.2.1.7778");
-    // Since version 8.5 languages are bundled and located in a different
-    // location then other plugins. So install this in the correct location.
-    if (sonarVersion.startsWith("LATEST_RELEASE[7.9]")) {
-      builder.addPlugin(javascriptPlugin);
-    } else {
-      builder.addBundledPlugin(javascriptPlugin);
-    }
-    return builder.build();
+        sonarVersion).addPlugin(MavenLocation
+        .of("org.sonarsource.sonarqube", "sonar-xoo-plugin",
+          sonarVersion)).build();
   }
 
 }
