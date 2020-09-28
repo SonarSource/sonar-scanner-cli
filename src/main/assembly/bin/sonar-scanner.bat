@@ -1,10 +1,11 @@
 @REM SonarScanner Startup Script for Windows
 @REM
 @REM Required ENV vars:
-@REM   JAVA_HOME - location of a JDK home dir
+@REM   JAVA_HOME - Location of Java's installation, optional if use_embedded_jre is set
 @REM
 @REM Optional ENV vars:
 @REM   SONAR_SCANNER_OPTS - parameters passed to the Java VM when running the SonarScanner
+@REM   SONAR_SCANNER_DEBUG_OPTS - Extra parameters passed to the Java VM for debugging
 
 @echo off
 

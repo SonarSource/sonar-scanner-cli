@@ -2,10 +2,12 @@
 #
 # SonarScanner Startup Script for Unix
 #
+# Required ENV vars:
+#   JAVA_HOME - Location of Java's installation, optional if use_embedded_jre is set
+#
 # Optional ENV vars:
 #   SONAR_SCANNER_OPTS - Parameters passed to the Java VM when running the SonarScanner
 #   SONAR_SCANNER_DEBUG_OPTS - Extra parameters passed to the Java VM for debugging
-#   JAVA_HOME - Location of Java's installation
 
 real_path () {
   target=$1
