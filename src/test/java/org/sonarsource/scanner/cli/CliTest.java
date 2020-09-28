@@ -48,6 +48,14 @@ public class CliTest {
   }
 
   @Test
+  public void should_warn_on_duplicate_properties() {
+    logs = mock(Logs.class);
+    cli = new Cli(exit, logs);
+    cli.parse(new String[] {"-D", "foo=bar", "--define", "foo=baz"});
+    verify(logs).warn("Property 'foo' with value 'bar' is overridden with value 'baz'");
+  }
+
+  @Test
   public void should_fail_on_missing_prop() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
