@@ -215,10 +215,10 @@ public class ScannerTest extends ScannerTestCase {
     assertThat(getComponent("sample").getDescription())
       .isEqualTo("This is a sample");
     Map<String, Measure> projectMeasures = getMeasures("sample", "files",
-      "ncloc", "classes", "violations");
+      "ncloc", "violations");
     assertThat(projectMeasures.values().stream()
       .filter(measure -> measure.getValue() != null)
-      .collect(Collectors.toList())).hasSize(4);
+      .collect(Collectors.toList())).hasSize(3);
   }
 
   @Test
