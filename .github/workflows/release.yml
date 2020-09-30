@@ -50,6 +50,18 @@ jobs:
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       with:
         args: "Release successful for {{ GITHUB_REPOSITORY }} by {{ GITHUB_ACTOR }}"
+    - name: Create Release for Docker Image
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.release.tag_name }}
+        release_name: ${{ github.event.release.tag_name }}
+        body: Release containing ScannerCLI version ${{ github.event.release.tag_name }}
+        draft: false
+        prerelease: false
+        repo: SonarSource/sonar-scanner-cli-docker
     - name: Notify failures on Slack
       uses: Ilshidur/action-slack@2.0.0
       if: failure()
