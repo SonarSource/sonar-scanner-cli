@@ -102,8 +102,6 @@ public abstract class ScannerTestCase {
       .withZone(ZoneId.of("UTC"))
       .format(instant);
 
-    LOG.info("Deleting projects analyzed before: " + currentDateTime);
-
     orchestrator.getServer()
       .newHttpCall("/api/projects/bulk_delete")
       .setAdminCredentials()
