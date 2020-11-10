@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -40,11 +39,6 @@ public class ScannerTest extends ScannerTestCase {
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
-
-  @After
-  public void cleanup() {
-    orchestrator.resetData();
-  }
 
   @Test
   public void basedir_contains_sources() {

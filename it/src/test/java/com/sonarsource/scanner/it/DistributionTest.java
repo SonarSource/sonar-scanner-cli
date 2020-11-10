@@ -24,7 +24,6 @@ import com.sonar.orchestrator.build.SonarScanner;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import org.junit.After;
 import org.junit.Test;
 import org.sonarqube.ws.Measures.Measure;
 
@@ -32,11 +31,6 @@ import static java.lang.Integer.parseInt;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DistributionTest extends ScannerTestCase {
-
-  @After
-  public void cleanup() {
-    orchestrator.resetData();
-  }
 
   @Test
   public void should_succeed_with_self_contained_jre_despite_rubbish_java_home()

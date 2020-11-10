@@ -22,18 +22,12 @@ package com.sonarsource.scanner.it;
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.SonarScanner;
 import java.io.File;
-import org.junit.After;
 import org.junit.Test;
 import org.sonarqube.ws.Components.Component;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MultimoduleTest extends ScannerTestCase {
-
-  @After
-  public void cleanup() {
-    orchestrator.resetData();
-  }
 
   /**
    * SONARPLUGINS-2202
