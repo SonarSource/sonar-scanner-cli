@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.sonarsource.scanner.api</groupId>
       <artifactId>sonar-scanner-api</artifactId>
-      <version>2.15.0.2182</version>
+      <version>2.16.0.226</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
