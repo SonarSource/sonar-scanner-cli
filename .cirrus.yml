@@ -32,7 +32,7 @@ env:
 # RE-USABLE CONFIGS
 #
 container_definition: &CONTAINER_DEFINITION
-  image: us.gcr.io/sonarqube-team/base:mvn-jdk-11
+  image: us.gcr.io/sonarqube-team/base:j11-m3-latest
   cluster_name: cirrus-ci-cluster
   zone: us-central1-a
   namespace: default
