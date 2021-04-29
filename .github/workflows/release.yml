@@ -9,7 +9,7 @@ env:
   PYTHONUNBUFFERED: 1
 
 jobs:
-  release:
+  run_release:
     runs-on: ubuntu-latest
     name: Start release process
     timeout-minutes: 60
