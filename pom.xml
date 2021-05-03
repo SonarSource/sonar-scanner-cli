@@ -48,9 +48,9 @@
     <!-- configuration for assembly of distributions -->
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
     <scanner.jar>${project.build.finalName}.jar</scanner.jar>
-    <jre.dirname.linux>jdk-11.0.3+7-jre</jre.dirname.linux>
-    <jre.dirname.windows>jdk-11.0.3+7-jre</jre.dirname.windows>
-    <jre.dirname.macosx>jdk-11.0.3+7-jre/Contents/Home</jre.dirname.macosx>
+    <jre.dirname.linux>jdk-11.0.11+9-jre</jre.dirname.linux>
+    <jre.dirname.windows>jdk-11.0.11+9-jre</jre.dirname.windows>
+    <jre.dirname.macosx>jdk-11.0.11+9-jre/Contents/Home</jre.dirname.macosx>
 
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux,${project.groupId}:${project.artifactId}:zip:windows,${project.groupId}:${project.artifactId}:zip:macosx</artifactsToPublish>
@@ -217,10 +217,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.3%2B7/OpenJDK11U-jre_x64_linux_hotspot_11.0.3_7.tar.gz</url>
+                  <url>https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.11_9.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/linux</outputDirectory>
-                  <sha512>b7232a3c75a8c4e67f51bd95c8441026b2bfef29cc779768a5f2d300208dc569d672402e06a2d6c6f512450723bc0631c5a18cde80cbc1ec2028c123607df30f</sha512>
+                  <sha512>5b8c1c16c5faa467bbb35a1d1e694afc50b0c2dbbe77abb29620f30602187a1a903f60169e2b691dcc81b6d902ed5a17239318f27765f19351281209befb0e96</sha512>
                 </configuration>
               </execution>
             </executions>
@@ -267,10 +267,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.3%2B7/OpenJDK11U-jre_x64_windows_hotspot_11.0.3_7.zip</url>
+                  <url>https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jre_x64_windows_hotspot_11.0.11_9.zip</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/windows</outputDirectory>
-                  <sha512>370100688282a5c43fe0ac736980eeff64cf212a0fb573181fff8039c121097cbbbd540a652cc6d17397789b894c820b802b875bbd1743eb2b8469009d5fa8f9</sha512>
+                  <sha512>a6e5290a9839d64e50d5a52cec6e821f6d7c2de9e42aca67cfef7e9dd75a51c597ceaf397ba7ed0e004c6299043d0c3c679357d31fd68b17e2d85ca3fb0abd6b</sha512>
                 </configuration>
               </execution>
             </executions>
@@ -316,10 +316,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.3%2B7/OpenJDK11U-jre_x64_mac_hotspot_11.0.3_7.tar.gz</url>
+                  <url>https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jre_x64_mac_hotspot_11.0.11_9.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/macosx</outputDirectory>
-                  <sha512>5995c18fa0f2ef9d74c9fb38401d497b16e78b57eaf5b795f19724a8c1f6609add96355627b8cb0564d29421a63d830df11f932b76436a713a535a1253e745e6</sha512>
+                  <sha512>2f9b2c2c7666e44c9212e71d343bf3e5ed980159cb75ec8b217e6e485efcdaff80f3e66efe1f7d91ffe475c792f0a3c38affeb91597561c575e9c7b5cc814b82</sha512>
                 </configuration>
               </execution>
             </executions>
