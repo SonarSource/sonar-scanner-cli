@@ -14,7 +14,7 @@ How to debug this VM image
 --------------------------
 
 1. Log on to [Google Cloud](http://console.cloud.google.com/)
-2. Go to our SonarQube project (ci-cd-215716)
+2. Go to our SonarQube project (`sonarqube-team`)
 3. Under *Compute Engine > Images*, you should see *packer-builder-v1*. Start a new VM with this image.
    This image is pre-configured for using Packer, as well as pushing new VM images to our SonarQube project.
 4. Once started, SSH into this VM (you can do this directly via the browser).
