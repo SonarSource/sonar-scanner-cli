@@ -21,7 +21,6 @@ jobs:
         distribute: true
         publish_to_binaries: true
         attach_artifacts_to_github_release: true
-        run_rules_cov: false
         slack_channel: sonarqube-build
       env:
         ARTIFACTORY_API_KEY: ${{ secrets.ARTIFACTORY_API_KEY }}
