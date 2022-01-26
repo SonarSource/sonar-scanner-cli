@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>59.0.29</version>
+    <version>60.0.52</version>
   </parent>
 
   <groupId>org.sonarsource.scanner.cli</groupId>
@@ -54,6 +54,8 @@
 
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux,${project.groupId}:${project.artifactId}:zip:windows,${project.groupId}:${project.artifactId}:zip:macosx</artifactsToPublish>
+
+    <maven.compiler.release>8</maven.compiler.release>
   </properties>
 
   <dependencies>
