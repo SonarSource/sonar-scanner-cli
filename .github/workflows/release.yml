@@ -31,6 +31,7 @@ jobs:
         slack_channel: sonarqube-build
       env:
         ARTIFACTORY_API_KEY: ${{ secrets.ARTIFACTORY_API_KEY }}
+        BINARIES_AWS_DEPLOY: ${{ secrets.BINARIES_AWS_DEPLOY }}
         BURGRX_USER: ${{ secrets.BURGRX_USER }}
         BURGRX_PASSWORD: ${{ secrets.BURGRX_PASSWORD }}
         CIRRUS_TOKEN: ${{ secrets.CIRRUS_TOKEN }}
