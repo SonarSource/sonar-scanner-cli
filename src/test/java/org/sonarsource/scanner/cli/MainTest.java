@@ -253,13 +253,38 @@ public class MainTest {
   @Test
   public void should_log_SonarCloud_server() {
     Properties p = new Properties();
+    p.setProperty("sonar.host.url", "https://sonarcloud.io");
     when(conf.properties()).thenReturn(p);
-    when(conf.isSonarCloud(null)).thenReturn(true);
     when(cli.getInvokedFrom()).thenReturn("");
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
     verify(logs).info("Analyzing on SonarCloud");
+  }
+
+  // SQSCANNER-57
+  @Test
+  public void should_return_true_is_sonar_cloud() {
+
+    Properties properties = new Properties();
+    properties.setProperty("sonar.host.url", "https://sonarcloud.io");
+
+    assertThat(Main.isSonarCloud(properties)).isTrue();
+  }
+
+  // SQSCANNER-57
+  @Test
+  public void should_return_false_is_sonar_cloud() {
+    Properties properties = new Properties();
+    properties.setProperty("sonar.host.url", "https://mysonarqube.com:9000/");
+
+    assertThat(Main.isSonarCloud(properties)).isFalse();
+  }
+
+  // SQSCANNER-57
+  @Test
+  public void should_return_false_is_sonar_cloud_host_is_null() {
+    assertThat(Main.isSonarCloud(new Properties())).isFalse();
   }
 
   @Test

@@ -28,7 +28,6 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import javax.annotation.Nullable;
@@ -43,7 +42,7 @@ class Conf {
   private static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
   private static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
   private static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
-  private static final String PROPERTY_SONAR_HOST_URL = "sonar.host.url";
+  static final String PROPERTY_SONAR_HOST_URL = "sonar.host.url";
 
   private final Cli cli;
   private final Logs logger;
@@ -68,15 +67,6 @@ class Conf {
     result.setProperty(PROPERTY_PROJECT_BASEDIR, getRootProjectBaseDir(result).toString());
     result.remove(PROJECT_HOME);
     return result;
-  }
-
-  boolean isSonarCloud(@Nullable Properties testProperties) {
-    String hostUrl = testProperties != null ? testProperties.getProperty(PROPERTY_SONAR_HOST_URL) : properties().getProperty(PROPERTY_SONAR_HOST_URL);
-    if (hostUrl != null) {
-      return hostUrl.toLowerCase(Locale.getDefault()).contains("sonarcloud");
-    }
-
-    return false;
   }
 
   private Properties resolve(Properties props) {
