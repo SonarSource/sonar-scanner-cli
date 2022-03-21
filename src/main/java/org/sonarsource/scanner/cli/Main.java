@@ -19,6 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import org.sonarsource.scanner.api.EmbeddedScanner;
@@ -41,9 +42,9 @@ public class Main {
   private final Exit exit;
   private final Cli cli;
   private final Conf conf;
-  private EmbeddedScanner runner;
-  private ScannerFactory runnerFactory;
-  private Logs logger;
+  private EmbeddedScanner embeddedScanner;
+  private final ScannerFactory runnerFactory;
+  private final Logs logger;
 
   Main(Exit exit, Cli cli, Conf conf, ScannerFactory runnerFactory, Logs logger) {
     this.exit = exit;
@@ -70,8 +71,13 @@ public class Main {
       checkSkip(p);
       configureLogging(p);
       init(p);
-      runner.start();
-      logger.info(String.format("Analyzing on %s", conf.isSonarCloud(null) ? "SonarCloud" : ("SonarQube server " + runner.serverVersion())));
+      embeddedScanner.start();
+      if (isSonarCloud(p)) {
+        logger.info("Analyzing on SonarCloud");
+      } else {
+        String serverVersion = embeddedScanner.serverVersion();
+        logger.info(String.format("Analyzing on SonarQube server %s", serverVersion));
+      }
       execute(stats, p);
       status = Exit.SUCCESS;
     } catch (Throwable e) {
@@ -81,7 +87,15 @@ public class Main {
     } finally {
       exit.exit(status);
     }
+  }
 
+  static boolean isSonarCloud(Properties props) {
+    String hostUrl = props.getProperty(Conf.PROPERTY_SONAR_HOST_URL);
+    if (hostUrl != null) {
+      return hostUrl.toLowerCase(Locale.ENGLISH).contains("sonarcloud");
+    }
+
+    return false;
   }
 
   private void checkSkip(Properties properties) {
@@ -97,7 +111,7 @@ public class Main {
       exit.exit(Exit.SUCCESS);
     }
 
-    runner = runnerFactory.create(p, cli.getInvokedFrom());
+    embeddedScanner = runnerFactory.create(p, cli.getInvokedFrom());
   }
 
   private void configureLogging(Properties props) {
@@ -109,7 +123,7 @@ public class Main {
   }
 
   private void execute(Stats stats, Properties p) {
-    runner.execute((Map) p);
+    embeddedScanner.execute((Map) p);
     displayExecutionResult(stats, "SUCCESS");
   }
 
