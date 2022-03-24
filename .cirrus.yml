@@ -78,6 +78,34 @@ linux_qa_task:
   env:
     matrix:
       - SQ_VERSION: LATEST_RELEASE[7.9]
+      - SQ_VERSION: LATEST_RELEASE[8.9]
+      - SQ_VERSION: DEV
+  maven_cache:
+    folder: ${CIRRUS_WORKING_DIR}/.m2/repository
+  qa_script:
+    - source cirrus-env QA
+    - source set_maven_build_version $BUILD_NUMBER
+    - cd it
+    - mvn -B -e -Dsonar.runtimeVersion="$SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify
+  cleanup_before_cache_script:
+    - cleanup_maven_repository
+
+linux_qa_java17_task:
+  depends_on:
+    - build
+  <<: *ONLY_SONARSOURCE_QA
+  gke_container:
+    dockerfile: it/docker/Dockerfile_17
+    builder_image_project: sonarqube-team
+    builder_image_name: docker-builder-v20200915
+    cluster_name: cirrus-ci-cluster
+    zone: us-central1-a
+    namespace: default
+    cpu: 1
+    memory: 2G
+  env:
+    matrix:
+      - SQ_VERSION: LATEST_RELEASE[8.9]
       - SQ_VERSION: DEV
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
