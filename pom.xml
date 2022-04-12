@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>60.0.52</version>
+    <version>61.0.139</version>
   </parent>
 
   <groupId>org.sonarsource.scanner.cli</groupId>
@@ -109,27 +109,6 @@
         <filtering>true</filtering>
       </resource>
     </resources>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.cyclonedx</groupId>
-          <artifactId>cyclonedx-maven-plugin</artifactId>
-          <version>2.5.3</version>
-          <configuration>
-            <projectType>application</projectType>
-            <includeBomSerialNumber>true</includeBomSerialNumber>
-            <includeCompileScope>true</includeCompileScope>
-            <includeProvidedScope>true</includeProvidedScope>
-            <includeRuntimeScope>true</includeRuntimeScope>
-            <includeSystemScope>true</includeSystemScope>
-            <includeTestScope>true</includeTestScope>
-            <includeLicenseText>false</includeLicenseText>
-            <outputFormat>json</outputFormat>
-            <outputName>bom</outputName>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
