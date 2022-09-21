@@ -1,21 +1,29 @@
 {
   "builders": [
     {
-      "type": "googlecompute",
-      "project_id": "sonarqube-team",
-      "source_image": "windows-server-1809-dc-core-v20200813",
-      "image_name": "sonar-scanner-cli-qa",
-      "disk_size": "50",
-      "machine_type": "n1-standard-1",
+      "type": "amazon-ebs",
+      "region": "eu-central-1",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "*Windows_Server-2019-English-Core-EKS_Optimized*",
+          "root-device-type": "ebs"
+        },
+        "most_recent": true,
+        "owners": "amazon"
+      },
+      "instance_type": "t2.medium",
+      "ami_name": "sonar-scanner-cli-qa",
       "communicator": "winrm",
       "winrm_username": "packer_user",
       "winrm_insecure": true,
       "winrm_use_ssl": true,
-      "metadata": {
-        "windows-startup-script-cmd": "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
-      },
-      "zone": "us-central1-a",
-      "tags": ["packer"]
+      "user_data": "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}",
+      "tags": {
+        "Base_AMI": "{{ .SourceAMI }}",
+        "Base_AMI_Name": "{{ .SourceAMIName }}",
+        "Extra": "{{ .SourceAMITags.TagName }}"
+      }
     }
   ],
   "provisioners": [

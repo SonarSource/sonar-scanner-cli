@@ -2,16 +2,15 @@
 # Installs NodeJS, which is needed for running the Linux ITs.
 #
 # Build from the basedir:
-#   docker build -f it/docker/Dockerfile-qa -t sonar-scanner-cli-qa it/docker
+#   docker build -f it/docker/Dockerfile -t sonar-scanner-cli-qa it/docker
 #
 # Verify the content of the image by running a shell session in it:
 #   docker run -it sonar-scanner-cli-qa bash
 #
-# CirrusCI builds the image when needed. No need to manually upload it to
-# Google Cloud Container Registry. See section "gke_container" of .cirrus.yml
+# CirrusCI builds the image when needed. No need to manually upload it.
 #------------------------------------------------------------------------------
 
-FROM us.gcr.io/sonarqube-team/base:j11-m3-latest
+FROM 166916561812.dkr.ecr.eu-central-1.amazonaws.com/base:j11-m3-latest
 
 USER root
 
