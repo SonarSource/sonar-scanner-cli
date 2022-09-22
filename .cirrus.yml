@@ -124,43 +124,43 @@ linux_qa_java17_task:
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
-create_win_vm_task:
-  <<: *ONLY_SONARSOURCE_QA
-  skip: "!changesInclude('it/packer/setup.ps1', 'it/packer/sonar-scanner-cli-qa.json')"
-  ec2_instance:
-    <<: *EC2_INSTANCE
-    image: packer-builder-v*
-  build_script:
-    - packer build -force it/packer/sonar-scanner-cli-qa.json
+#create_win_vm_task:
+#  <<: *ONLY_SONARSOURCE_QA
+#  skip: "!changesInclude('it/packer/setup.ps1', 'it/packer/sonar-scanner-cli-qa.json')"
+#  ec2_instance:
+#    <<: *EC2_INSTANCE
+#    image: packer-builder-v*
+#  build_script:
+#    - packer build -force it/packer/sonar-scanner-cli-qa.json
 
-win_qa_task:
-  depends_on:
-    - create_win_vm
-    - build
-  <<: *ONLY_SONARSOURCE_QA
-  ec2_instance:
-    <<: *EC2_INSTANCE
-    image: sonar-scanner-cli-qa
-    platform: windows
-  env:
-    CIRRUS_SHELL: bash
-    matrix:
-      - SQ_VERSION: LATEST_RELEASE[7.9]
-      - SQ_VERSION: DEV
-  maven_cache:
-    folder: ${CIRRUS_WORKING_DIR}/.m2/repository
-  qa_script:
-    - source cirrus-env QA
-    - source set_maven_build_version $BUILD_NUMBER
-    - cd it
-    - mvn -B -e -Dsonar.runtimeVersion="$SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify
-  cleanup_before_cache_script:
-    - cleanup_maven_repository
+#win_qa_task:
+#  depends_on:
+#    - create_win_vm
+#    - build
+#  <<: *ONLY_SONARSOURCE_QA
+#  ec2_instance:
+#    <<: *EC2_INSTANCE
+#    image: sonar-scanner-cli-qa
+#    platform: windows
+#  env:
+#    CIRRUS_SHELL: bash
+#    matrix:
+#      - SQ_VERSION: LATEST_RELEASE[7.9]
+#      - SQ_VERSION: DEV
+#  maven_cache:
+#    folder: ${CIRRUS_WORKING_DIR}/.m2/repository
+#  qa_script:
+#    - source cirrus-env QA
+#    - source set_maven_build_version $BUILD_NUMBER
+#    - cd it
+#    - mvn -B -e -Dsonar.runtimeVersion="$SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify
+#  cleanup_before_cache_script:
+#    - cleanup_maven_repository
 
 promote_task:
   depends_on:
     - linux_qa
-    - win_qa
+#    - win_qa
   <<: *ONLY_SONARSOURCE_QA
   eks_container:
     <<: *EKS_CONTAINER
