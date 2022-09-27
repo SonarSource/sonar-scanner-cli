@@ -94,13 +94,10 @@ public abstract class ScannerTestCase {
 
   @After
   public void resetData() {
-    // We add one day to ensure that today's entries are deleted.
-    Instant instant = Instant.now().plus(1, ChronoUnit.DAYS);
-
     // The expected format is yyyy-MM-dd.
     String currentDateTime = DateTimeFormatter.ISO_LOCAL_DATE
       .withZone(ZoneId.of("UTC"))
-      .format(instant);
+      .format(Instant.now());
 
     orchestrator.getServer()
       .newHttpCall("/api/projects/bulk_delete")
