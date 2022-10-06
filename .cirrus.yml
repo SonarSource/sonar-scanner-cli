@@ -1,5 +1,5 @@
 aws_credentials:
-  role_arn: arn:aws:iam::166916561812:role/CirrusCI-staging
+  role_arn: arn:aws:iam::275878209202:role/CirrusCI-prod
   role_session_name: cirrus
   region: eu-central-1
 
@@ -33,28 +33,21 @@ env:
 #
 # RE-USABLE CONFIGS
 #
-container_definition: &CONTAINER_DEFINITION
-  region: eu-central-1
-  cluster_name: CirrusCI-staging
-  namespace: default
-
 eks_container: &EKS_CONTAINER
-  <<: *CONTAINER_DEFINITION
-  image: 166916561812.dkr.ecr.eu-central-1.amazonaws.com/base:j11-m3-latest
-
-eks_container_builder: &EKS_DOCKER_BUILDER
-  <<: *CONTAINER_DEFINITION
-  builder_role: cirrus-builder
-  builder_image: docker-builder-v*
-  builder_instance_type: t2.small
-  builder_subnet_id: subnet-0a586a671ae59a796
+  region: eu-central-1
+  cluster_name: CirrusCI-prod
+  namespace: default
+  image: 275878209202.dkr.ecr.eu-central-1.amazonaws.com/base:j11-m3-latest
   cpu: 1
   memory: 2G
 
-ec2_instance: &EC2_INSTANCE
+ec2_instance: &EC2_INSTANCE_WINDOWS
+  experimental: true # see https://github.com/cirruslabs/cirrus-ci-docs/issues/1051
   region: eu-central-1
-  subnet_id: subnet-0a586a671ae59a796
+  subnet_id: subnet-063c427f490da35b9
   type: t2.2xlarge
+  image: lt-base-windows-jdk11-v*
+  platform: windows
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
   only_if: $CIRRUS_USER_COLLABORATOR == 'true' && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == "master" || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BRANCH =~ "dogfood-on-.*")
@@ -66,8 +59,6 @@ only_sonarsource_qa: &ONLY_SONARSOURCE_QA
 build_task:
   eks_container:
     <<: *EKS_CONTAINER
-    cpu: 1
-    memory: 2G
   env:
     SONAR_TOKEN: ENCRYPTED[!b6fd814826c51e64ee61b0b6f3ae621551f6413383f7170f73580e2e141ac78c4b134b506f6288c74faa0dd564c05a29!]
     SONAR_HOST_URL: https://next.sonarqube.com/sonarqube
@@ -86,8 +77,7 @@ linux_qa_task:
     - build
   <<: *ONLY_SONARSOURCE_QA
   eks_container:
-    <<: *EKS_DOCKER_BUILDER
-    dockerfile: it/docker/Dockerfile
+    <<: *EKS_CONTAINER
   env:
     matrix:
       - SQ_VERSION: LATEST_RELEASE[7.9]
@@ -108,8 +98,8 @@ linux_qa_java17_task:
     - build
   <<: *ONLY_SONARSOURCE_QA
   eks_container:
-    <<: *EKS_DOCKER_BUILDER
-    dockerfile: it/docker/Dockerfile_17
+    <<: *EKS_CONTAINER
+    image: 275878209202.dkr.ecr.eu-central-1.amazonaws.com/base:j17-m3-latest
   env:
     matrix:
       - SQ_VERSION: LATEST_RELEASE[8.9]
@@ -124,43 +114,31 @@ linux_qa_java17_task:
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
-#create_win_vm_task:
-#  <<: *ONLY_SONARSOURCE_QA
-#  skip: "!changesInclude('it/packer/setup.ps1', 'it/packer/sonar-scanner-cli-qa.json')"
-#  ec2_instance:
-#    <<: *EC2_INSTANCE
-#    image: packer-builder-v*
-#  build_script:
-#    - packer build -force it/packer/sonar-scanner-cli-qa.json
-
-#win_qa_task:
-#  depends_on:
-#    - create_win_vm
-#    - build
-#  <<: *ONLY_SONARSOURCE_QA
-#  ec2_instance:
-#    <<: *EC2_INSTANCE
-#    image: sonar-scanner-cli-qa
-#    platform: windows
-#  env:
-#    CIRRUS_SHELL: bash
-#    matrix:
-#      - SQ_VERSION: LATEST_RELEASE[7.9]
-#      - SQ_VERSION: DEV
-#  maven_cache:
-#    folder: ${CIRRUS_WORKING_DIR}/.m2/repository
-#  qa_script:
-#    - source cirrus-env QA
-#    - source set_maven_build_version $BUILD_NUMBER
-#    - cd it
-#    - mvn -B -e -Dsonar.runtimeVersion="$SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify
-#  cleanup_before_cache_script:
-#    - cleanup_maven_repository
+win_qa_task:
+  depends_on:
+    - build
+  <<: *ONLY_SONARSOURCE_QA
+  ec2_instance:
+    <<: *EC2_INSTANCE_WINDOWS
+  env:
+    CIRRUS_SHELL: bash
+    matrix:
+      - SQ_VERSION: LATEST_RELEASE[7.9]
+      - SQ_VERSION: DEV
+  maven_cache:
+    folder: ${CIRRUS_WORKING_DIR}/.m2/repository
+  qa_script:
+    - source cirrus-env QA
+    - source set_maven_build_version $BUILD_NUMBER
+    - cd it
+    - mvn -B -e -Dsonar.runtimeVersion="$SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify
+  cleanup_before_cache_script:
+    - cleanup_maven_repository
 
 promote_task:
   depends_on:
     - linux_qa
-#    - win_qa
+    - win_qa
   <<: *ONLY_SONARSOURCE_QA
   eks_container:
     <<: *EKS_CONTAINER
