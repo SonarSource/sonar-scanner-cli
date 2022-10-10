@@ -26,10 +26,10 @@ import com.sonar.orchestrator.version.Version;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -56,6 +56,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 public abstract class ScannerTestCase {
+  private static final String DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+  private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_FORMAT);
 
   private static final Logger LOG = LoggerFactory
     .getLogger(ScannerTestCase.class);
@@ -94,10 +96,7 @@ public abstract class ScannerTestCase {
 
   @After
   public void resetData() {
-    // The expected format is yyyy-MM-dd.
-    String currentDateTime = DateTimeFormatter.ISO_LOCAL_DATE
-      .withZone(ZoneId.of("UTC"))
-      .format(Instant.now());
+    String currentDateTime = ZonedDateTime.now().format(DATETIME_FORMATTER);
 
     orchestrator.getServer()
       .newHttpCall("/api/projects/bulk_delete")
