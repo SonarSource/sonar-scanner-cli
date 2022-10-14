@@ -1,5 +1,7 @@
-# content of service-account-credentials.json, used to access to Google Cloud Platform
-gcp_credentials: ENCRYPTED[!e5f7207bd8d02d383733bef47e18296ac32e3b7d22eb480354e8dd8fdc0004be45a8a4e72c797bd66ee94eb3340fa363!]
+aws_credentials:
+  role_arn: arn:aws:iam::275878209202:role/CirrusCI-prod
+  role_session_name: cirrus
+  region: eu-central-1
 
 #
 # ENV VARIABLES
@@ -31,11 +33,21 @@ env:
 #
 # RE-USABLE CONFIGS
 #
-container_definition: &CONTAINER_DEFINITION
-  image: us.gcr.io/sonarqube-team/base:j11-m3-latest
-  cluster_name: cirrus-ci-cluster
-  zone: us-central1-a
+eks_container: &EKS_CONTAINER
+  region: eu-central-1
+  cluster_name: CirrusCI-prod
   namespace: default
+  image: 275878209202.dkr.ecr.eu-central-1.amazonaws.com/base:j11-m3-latest
+  cpu: 1
+  memory: 2G
+
+ec2_instance: &EC2_INSTANCE_WINDOWS
+  experimental: true # see https://github.com/cirruslabs/cirrus-ci-docs/issues/1051
+  region: eu-central-1
+  subnet_id: subnet-063c427f490da35b9
+  type: t2.2xlarge
+  image: lt-base-windows-jdk11-v*
+  platform: windows
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
   only_if: $CIRRUS_USER_COLLABORATOR == 'true' && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == "master" || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BRANCH =~ "dogfood-on-.*")
@@ -45,10 +57,8 @@ only_sonarsource_qa: &ONLY_SONARSOURCE_QA
 # TASKS
 #
 build_task:
-  gke_container:
-    <<: *CONTAINER_DEFINITION
-    cpu: 1
-    memory: 2G
+  eks_container:
+    <<: *EKS_CONTAINER
   env:
     SONAR_TOKEN: ENCRYPTED[!b6fd814826c51e64ee61b0b6f3ae621551f6413383f7170f73580e2e141ac78c4b134b506f6288c74faa0dd564c05a29!]
     SONAR_HOST_URL: https://next.sonarqube.com/sonarqube
@@ -66,15 +76,8 @@ linux_qa_task:
   depends_on:
     - build
   <<: *ONLY_SONARSOURCE_QA
-  gke_container:
-    dockerfile: it/docker/Dockerfile
-    builder_image_project: sonarqube-team
-    builder_image_name: docker-builder-v20200915
-    cluster_name: cirrus-ci-cluster
-    zone: us-central1-a
-    namespace: default
-    cpu: 1
-    memory: 2G
+  eks_container:
+    <<: *EKS_CONTAINER
   env:
     matrix:
       - SQ_VERSION: LATEST_RELEASE[7.9]
@@ -94,15 +97,9 @@ linux_qa_java17_task:
   depends_on:
     - build
   <<: *ONLY_SONARSOURCE_QA
-  gke_container:
-    dockerfile: it/docker/Dockerfile_17
-    builder_image_project: sonarqube-team
-    builder_image_name: docker-builder-v20200915
-    cluster_name: cirrus-ci-cluster
-    zone: us-central1-a
-    namespace: default
-    cpu: 1
-    memory: 2G
+  eks_container:
+    <<: *EKS_CONTAINER
+    image: 275878209202.dkr.ecr.eu-central-1.amazonaws.com/base:j17-m3-latest
   env:
     matrix:
       - SQ_VERSION: LATEST_RELEASE[8.9]
@@ -117,33 +114,12 @@ linux_qa_java17_task:
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
-create_win_vm_task:
-  <<: *ONLY_SONARSOURCE_QA
-  skip: "!changesInclude('it/packer/setup.ps1', 'it/packer/sonar-scanner-cli-qa.json')"
-  gce_instance:
-    image_project: sonarqube-team
-    image_family: packer-builder
-    zone: us-central1-a
-    type: n1-standard-8
-    use_ssd: true
-    scopes:
-      - cloud-platform
-  build_script:
-    - packer build -force it/packer/sonar-scanner-cli-qa.json
-
 win_qa_task:
   depends_on:
-    - create_win_vm
     - build
   <<: *ONLY_SONARSOURCE_QA
-  gce_instance:
-    image_project: sonarqube-team
-    # This VM is built using Packer, see "create_win_vm_task" above.
-    image_name: sonar-scanner-cli-qa
-    platform: windows
-    zone: us-central1-a
-    type: n1-standard-8
-    use_ssd: true
+  ec2_instance:
+    <<: *EC2_INSTANCE_WINDOWS
   env:
     CIRRUS_SHELL: bash
     matrix:
@@ -164,8 +140,8 @@ promote_task:
     - linux_qa
     - win_qa
   <<: *ONLY_SONARSOURCE_QA
-  gke_container:
-    <<: *CONTAINER_DEFINITION
+  eks_container:
+    <<: *EKS_CONTAINER
     cpu: 0.5
     memory: 500M
   maven_cache:
