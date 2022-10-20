@@ -1,5 +1,5 @@
 aws_credentials:
-  role_arn: arn:aws:iam::275878209202:role/CirrusCI-prod
+  role_arn: arn:aws:iam::275878209202:role/CirrusCI
   role_session_name: cirrus
   region: eu-central-1
 
@@ -35,7 +35,7 @@ env:
 #
 eks_container: &EKS_CONTAINER
   region: eu-central-1
-  cluster_name: CirrusCI-prod
+  cluster_name: CirrusCI
   namespace: default
   image: 275878209202.dkr.ecr.eu-central-1.amazonaws.com/base:j11-m3-latest
   cpu: 1
