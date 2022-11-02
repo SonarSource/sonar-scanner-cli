@@ -1,8 +1,3 @@
-aws_credentials:
-  role_arn: arn:aws:iam::275878209202:role/CirrusCI
-  role_session_name: cirrus
-  region: eu-central-1
-
 #
 # ENV VARIABLES
 #
@@ -35,18 +30,18 @@ env:
 #
 eks_container: &EKS_CONTAINER
   region: eu-central-1
-  cluster_name: CirrusCI
+  cluster_name: ${CIRRUS_CLUSTER_NAME}
   namespace: default
-  image: 275878209202.dkr.ecr.eu-central-1.amazonaws.com/base:j11-m3-latest
+  image: ${CIRRUS_AWS_ACCOUNT}.dkr.ecr.eu-central-1.amazonaws.com/base:j11-m3-latest
   cpu: 1
   memory: 2G
 
 ec2_instance: &EC2_INSTANCE_WINDOWS
   experimental: true # see https://github.com/cirruslabs/cirrus-ci-docs/issues/1051
   region: eu-central-1
-  subnet_id: subnet-063c427f490da35b9
+  subnet_id: ${CIRRUS_AWS_SUBNET}
   type: t2.2xlarge
-  image: lt-base-windows-jdk11-v*
+  image: base-windows-jdk11-v*
   platform: windows
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
@@ -99,7 +94,7 @@ linux_qa_java17_task:
   <<: *ONLY_SONARSOURCE_QA
   eks_container:
     <<: *EKS_CONTAINER
-    image: 275878209202.dkr.ecr.eu-central-1.amazonaws.com/base:j17-m3-latest
+    image: ${CIRRUS_AWS_ACCOUNT}.dkr.ecr.eu-central-1.amazonaws.com/base:j17-m3-latest
   env:
     matrix:
       - SQ_VERSION: LATEST_RELEASE[8.9]
