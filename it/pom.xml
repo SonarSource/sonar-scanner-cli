@@ -38,7 +38,7 @@
     <dependency>
       <groupId>org.sonarsource.orchestrator</groupId>
       <artifactId>sonar-orchestrator</artifactId>
-      <version>3.34.0.2692</version>
+      <version>3.40.0.183</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
