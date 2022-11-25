@@ -10,7 +10,7 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@5.0.1
+    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@28c15313f2bb2ee0cb67ba48cc008c2391851b81 # 5.0.1
     with:
       publishToBinaries: true
       mavenCentralSync: true
@@ -23,7 +23,7 @@ jobs:
     steps:
     - name: get secrets
       id: secrets
-      uses: SonarSource/vault-action-wrapper@8e22afd670393ed80f489f5dbd517d09ea21d75b
+      uses: SonarSource/vault-action-wrapper@8e22afd670393ed80f489f5dbd517d09ea21d75b # 2.4.3-1
       with:
         secrets: |
           development/github/token/SonarSource-sonar-scanner-cli-release token | GITHUB_TOKEN_RELEASE;
