@@ -57,7 +57,7 @@ build_task:
     <<: *EKS_CONTAINER
   env:
     SONAR_TOKEN: VAULT[development/kv/data/next data.token]
-    SONAR_HOST_URL: https://next.sonarqube.com/sonarqube
+    SONAR_HOST_URL: VAULT[development/kv/data/next data.url]
     SIGN_KEY: VAULT[development/kv/data/sign data.key]
     PGP_PASSPHRASE: VAULT[development/kv/data/sign data.passphrase]
   maven_cache:
