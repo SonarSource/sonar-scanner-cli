@@ -16,6 +16,8 @@ jobs:
       mavenCentralSync: true
       slackChannel: sonarqube-build
   release_docker:
+    permissions:
+      id-token: write
     runs-on: ubuntu-latest
     name: Start Docker release process
     needs: release
