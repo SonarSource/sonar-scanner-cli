@@ -25,7 +25,6 @@ env:
   DEPLOY_PULL_REQUEST: true
   ARTIFACTS: org.sonarsource.scanner.cli:sonar-scanner-cli:jar
 
-
 #
 # RE-USABLE CONFIGS
 #
@@ -47,7 +46,6 @@ ec2_instance: &EC2_INSTANCE_WINDOWS
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
   only_if: $CIRRUS_USER_COLLABORATOR == 'true' && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == "master" || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BRANCH =~ "dogfood-on-.*")
-
 
 #
 # TASKS
@@ -75,9 +73,7 @@ linux_qa_java11_task:
   eks_container:
     <<: *EKS_CONTAINER
   env:
-    matrix:
-      - SQ_VERSION: LATEST_RELEASE[8.9]
-      - SQ_VERSION: DEV
+    SQ_VERSION: LATEST_RELEASE[8.9]
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   qa_script:
@@ -117,9 +113,7 @@ win_qa_java11_task:
     <<: *EC2_INSTANCE_WINDOWS
   env:
     CIRRUS_SHELL: bash
-    matrix:
-      - SQ_VERSION: LATEST_RELEASE[8.9]
-      - SQ_VERSION: DEV
+    SQ_VERSION: LATEST_RELEASE[8.9]
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   qa_script:
