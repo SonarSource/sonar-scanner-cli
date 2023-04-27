@@ -24,7 +24,7 @@ env:
   ### Project variables
   DEPLOY_PULL_REQUEST: true
   ARTIFACTS: org.sonarsource.scanner.cli:sonar-scanner-cli:jar
-
+  NIGHTLY_CRON: 'nightly-cron'
 #
 # RE-USABLE CONFIGS
 #
@@ -46,6 +46,9 @@ ec2_instance: &EC2_INSTANCE_WINDOWS
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
   only_if: $CIRRUS_USER_COLLABORATOR == 'true' && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == "master" || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BRANCH =~ "dogfood-on-.*")
+
+except_nightly_cron: &EXCEPT_ON_NIGHTLY_CRON
+  only_if: $CIRRUS_CRON != $NIGHTLY_CRON
 
 #
 # TASKS
@@ -153,6 +156,7 @@ promote_task:
     - win_qa_java11
     - win_qa_java17
   <<: *ONLY_SONARSOURCE_QA
+  <<: *EXCEPT_ON_NIGHTLY_CRON
   eks_container:
     <<: *EKS_CONTAINER
     cpu: 0.5
