@@ -14,7 +14,7 @@ jobs:
     with:
       publishToBinaries: true
       mavenCentralSync: true
-      slackChannel: sonarqube-build
+      slackChannel: team-sonarqube-build
   release_docker:
     permissions:
       id-token: write
@@ -45,7 +45,7 @@ jobs:
       uses: slackapi/slack-github-action@v1.23.0
       if: failure()
       with:
-        channel-id: sonarqube-build
+        channel-id: team-sonarqube-build
         slack-message: "Release failed, see the logs at https://github.com/{{ GITHUB_REPOSITORY }}/actions by {{ GITHUB_ACTOR }}"
       env:
         SLACK_BOT_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).SLACK_BOT_TOKEN }}
