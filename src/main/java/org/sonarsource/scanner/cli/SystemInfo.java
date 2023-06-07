@@ -19,7 +19,16 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 class SystemInfo {
+  private static final Set<String> SENSITIVE_JVM_ARGUMENTS = Set.of(
+      "-Dsonar.login",
+      "-Dsonar.password",
+      "-Dsonar.token");
+  private static final Pattern PATTERN_ARGUMENT_SEPARATOR = Pattern.compile("\\s+");
   private static System2 system = new System2();
 
   private SystemInfo() {
@@ -35,8 +44,22 @@ class SystemInfo {
     logger.info(os());
     String scannerOpts = system.getenv("SONAR_SCANNER_OPTS");
     if (scannerOpts != null) {
-      logger.info("SONAR_SCANNER_OPTS=" + scannerOpts);
+      logger.info("SONAR_SCANNER_OPTS=" + redactSensitiveArguments(scannerOpts));
     }
+  }
+
+  private static String redactSensitiveArguments(String scannerOpts) {
+    return PATTERN_ARGUMENT_SEPARATOR.splitAsStream(scannerOpts)
+      .map(SystemInfo::redactArgumentIfSensistive)
+      .collect(Collectors.joining(" "));
+  }
+
+  private static String redactArgumentIfSensistive(String argument) {
+    String[] elems = argument.split("=");
+    if (elems.length > 0 && SENSITIVE_JVM_ARGUMENTS.contains(elems[0])) {
+      return elems[0] + "=*";
+    }
+    return argument;
   }
 
   static String java() {

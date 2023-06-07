@@ -89,4 +89,16 @@ public class SystemInfoTest {
     verify(logs).info("SONAR_SCANNER_OPTS=arg");
     verifyNoMoreInteractions(logs);
   }
+
+  @Test
+  public void should_not_print_sensitive_data() {
+    mockOs();
+    mockJava();
+    when(mockSystem.getenv("SONAR_SCANNER_OPTS"))
+      .thenReturn("-Dsonar.login=login -Dsonar.whatever=whatever -Dsonar.password=password -Dsonar.whatever2=whatever2 -Dsonar.token=token");
+
+    SystemInfo.print(logs);
+
+    verify(logs).info("SONAR_SCANNER_OPTS=-Dsonar.login=* -Dsonar.whatever=whatever -Dsonar.password=* -Dsonar.whatever2=whatever2 -Dsonar.token=*");
+  }
 }
