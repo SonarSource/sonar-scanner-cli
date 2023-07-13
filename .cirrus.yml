@@ -32,7 +32,7 @@ eks_container: &EKS_CONTAINER
   region: eu-central-1
   cluster_name: ${CIRRUS_CLUSTER_NAME}
   namespace: default
-  image: ${CIRRUS_AWS_ACCOUNT}.dkr.ecr.eu-central-1.amazonaws.com/base:j11-m3-latest
+  image: ${CIRRUS_AWS_ACCOUNT}.dkr.ecr.eu-central-1.amazonaws.com/base:j17-m3-latest
   cpu: 1
   memory: 2G
 
@@ -41,7 +41,7 @@ ec2_instance: &EC2_INSTANCE_WINDOWS
   region: eu-central-1
   subnet_id: ${CIRRUS_AWS_SUBNET}
   type: t2.2xlarge
-  image: base-windows-jdk11-v*
+  image: base-windows-jdk17-v*
   platform: windows
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
@@ -69,54 +69,16 @@ build_task:
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
-linux_qa_java11_task:
-  depends_on:
-    - build
-  <<: *ONLY_SONARSOURCE_QA
-  eks_container:
-    <<: *EKS_CONTAINER
-  env:
-    SQ_VERSION: LATEST_RELEASE[8.9]
-  maven_cache:
-    folder: ${CIRRUS_WORKING_DIR}/.m2/repository
-  qa_script:
-    - source cirrus-env QA
-    - source set_maven_build_version $BUILD_NUMBER
-    - cd it
-    - mvn -B -e -Dsonar.runtimeVersion="$SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify
-  cleanup_before_cache_script:
-    - cleanup_maven_repository
-
 linux_qa_java17_task:
   depends_on:
     - build
   <<: *ONLY_SONARSOURCE_QA
   eks_container:
     <<: *EKS_CONTAINER
-    image: ${CIRRUS_AWS_ACCOUNT}.dkr.ecr.eu-central-1.amazonaws.com/base:j17-m3-latest
   env:
     matrix:
       - SQ_VERSION: LATEST_RELEASE[8.9]
       - SQ_VERSION: DEV
-  maven_cache:
-    folder: ${CIRRUS_WORKING_DIR}/.m2/repository
-  qa_script:
-    - source cirrus-env QA
-    - source set_maven_build_version $BUILD_NUMBER
-    - cd it
-    - mvn -B -e -Dsonar.runtimeVersion="$SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify
-  cleanup_before_cache_script:
-    - cleanup_maven_repository
-
-win_qa_java11_task:
-  depends_on:
-    - build
-  <<: *ONLY_SONARSOURCE_QA
-  ec2_instance:
-    <<: *EC2_INSTANCE_WINDOWS
-  env:
-    CIRRUS_SHELL: bash
-    SQ_VERSION: LATEST_RELEASE[8.9]
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   qa_script:
@@ -133,7 +95,6 @@ win_qa_java17_task:
   <<: *ONLY_SONARSOURCE_QA
   ec2_instance:
     <<: *EC2_INSTANCE_WINDOWS
-    image: base-windows-jdk17-v*
   env:
     CIRRUS_SHELL: bash
     matrix:
@@ -151,9 +112,7 @@ win_qa_java17_task:
 
 promote_task:
   depends_on:
-    - linux_qa_java11
     - linux_qa_java17
-    - win_qa_java11
     - win_qa_java17
   <<: *ONLY_SONARSOURCE_QA
   <<: *EXCEPT_ON_NIGHTLY_CRON

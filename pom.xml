@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>65.0.218</version>
+    <version>68.0.0.247</version>
   </parent>
 
   <groupId>org.sonarsource.scanner.cli</groupId>
@@ -52,14 +52,14 @@
     <!-- configuration for assembly of distributions -->
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
     <scanner.jar>${project.build.finalName}.jar</scanner.jar>
-    <jre.dirname.linux>jdk-11.0.17+8-jre</jre.dirname.linux>
-    <jre.dirname.windows>jdk-11.0.17+8-jre</jre.dirname.windows>
-    <jre.dirname.macosx>jdk-11.0.17+8-jre/Contents/Home</jre.dirname.macosx>
+    <jre.dirname.linux>jdk-17.0.7+7-jre</jre.dirname.linux>
+    <jre.dirname.windows>jdk-17.0.7+7-jre</jre.dirname.windows>
+    <jre.dirname.macosx>jdk-17.0.7+7-jre/Contents/Home</jre.dirname.macosx>
 
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux,${project.groupId}:${project.artifactId}:zip:windows,${project.groupId}:${project.artifactId}:zip:macosx,${project.groupId}:${project.artifactId}:json:cyclonedx</artifactsToPublish>
 
-    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.release>17</maven.compiler.release>
   </properties>
 
   <dependencies>
@@ -126,6 +126,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -193,7 +194,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-      	  <source>11</source>
+      	  <source>17</source>
         </configuration>
       </plugin>
       <plugin>
@@ -235,10 +236,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.17%2B8/OpenJDK11U-jre_x64_linux_hotspot_11.0.17_8.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jre_x64_linux_hotspot_17.0.7_7.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/linux</outputDirectory>
-                  <sha256>752616097e09d7f60a3ad8bd312f90eaf50ac72577e55df229fe6e8091148f79</sha256>
+                  <sha256>bb025133b96266f6415d5084bb9b260340a813968007f1d2d14690f20bd021ca</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -285,10 +286,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.17%2B8/OpenJDK11U-jre_x64_windows_hotspot_11.0.17_8.zip</url>
+                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.7_7.zip</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/windows</outputDirectory>
-                  <sha256>814a731f92dd67ad6cfb11a8b06dfad5f629f67be88ae5ae37d34e6eea6be6f4</sha256>
+                  <sha256>62e82c1afa7509424813e9cb22d8becfec4346d7505e6d2fc8770af4dcd5b9a0</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -334,10 +335,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.17%2B8/OpenJDK11U-jre_x64_mac_hotspot_11.0.17_8.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jre_x64_mac_hotspot_17.0.7_7.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/macosx</outputDirectory>
-                  <sha256>66508958b5da6e36021d960b65490ab70cc7d44851c98301a3d6d3552f305674</sha256>
+                  <sha256>62559a927a8dbac2ea1d7879f590a62fea87d61bfaa92894e578d2045b8d921b</sha256>
                 </configuration>
               </execution>
             </executions>

@@ -25,7 +25,7 @@
     <sonar.buildVersion>7.9.1</sonar.buildVersion>
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
 
-    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.release>17</maven.compiler.release>
   </properties>
 
   <dependencies>
