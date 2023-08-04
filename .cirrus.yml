@@ -82,8 +82,8 @@ linux_qa_java17_task:
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   qa_script:
-    - curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-    - sudo apt-get install -y nodejs
+    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash
+    - apt-get install -y nodejs
     - source cirrus-env QA
     - source set_maven_build_version $BUILD_NUMBER
     - cd it
