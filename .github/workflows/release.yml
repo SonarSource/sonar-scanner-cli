@@ -30,17 +30,6 @@ jobs:
         secrets: |
           development/github/token/SonarSource-sonar-scanner-cli-release token | GITHUB_TOKEN_RELEASE;
           development/kv/data/slack token | SLACK_BOT_TOKEN;
-    - name: Create Release for Docker Image
-      id: create_release
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN_RELEASE }}
-        GITHUB_REPOSITORY: SonarSource/sonar-scanner-cli-docker
-      with:
-        tag_name: ${{ github.event.release.tag_name }}
-        body: Release containing ScannerCLI version ${{ github.event.release.tag_name }}
-        draft: false
-        prerelease: false
     - name: Notify failures on Slack
       uses: slackapi/slack-github-action@v1.23.0
       if: failure()
