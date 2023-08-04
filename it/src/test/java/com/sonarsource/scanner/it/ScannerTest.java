@@ -53,6 +53,20 @@ public class ScannerTest extends ScannerTestCase {
   }
 
   /**
+   * SQSCANNER-117
+   */
+  @Test
+  public void analyzers_can_spawn_processes() {
+    SonarScanner build = newScanner(new File("projects/simple-js"))
+      .useNative()
+      .setProjectKey("SAMPLE");
+    orchestrator.executeBuild(build);
+    Map<String, Measure> projectMeasures = getMeasures("SAMPLE", "files", "ncloc");
+    assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(1);
+    assertThat(parseInt(projectMeasures.get("ncloc").getValue())).isGreaterThan(1);
+  }
+
+  /**
    * Replace the maven format groupId:artifactId by a single key
    */
   @Test
