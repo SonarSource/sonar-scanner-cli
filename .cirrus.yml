@@ -64,6 +64,8 @@ build_task:
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   script:
+    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash
+    - apt-get install -y nodejs
     - source cirrus-env BUILD
     - regular_mvn_build_deploy_analyze -Pdist-linux,dist-windows,dist-macosx
   cleanup_before_cache_script:
