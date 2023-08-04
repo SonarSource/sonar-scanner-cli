@@ -14,6 +14,8 @@
       <excludes>
         <exclude>bin/**</exclude>
         <exclude>man/**</exclude>
+        <exclude>lib/jspawnhelper</exclude>
+        <exclude>lib/jexec</exclude>
         <exclude>plugin/**</exclude>
       </excludes>
     </fileSet>
@@ -24,6 +26,17 @@
       <outputDirectory>jre/bin</outputDirectory>
       <includes>
         <include>java</include>
+      </includes>
+      <fileMode>0755</fileMode>
+    </fileSet>
+
+    <!-- jre lib executable files -->
+    <fileSet>
+      <directory>${unpack.dir}/linux/${jre.dirname.linux}/lib</directory>
+      <outputDirectory>jre/lib</outputDirectory>
+      <includes>
+        <include>jspawnhelper</include>
+        <include>jexec</include>
       </includes>
       <fileMode>0755</fileMode>
     </fileSet>
