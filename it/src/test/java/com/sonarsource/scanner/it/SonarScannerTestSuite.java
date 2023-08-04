@@ -36,13 +36,13 @@ public class SonarScannerTestSuite {
 
   private static Orchestrator createOrchestrator() {
     String sonarVersion = System
-      .getProperty("sonar.runtimeVersion", "LATEST_RELEASE[7.9]");
+      .getProperty("sonar.runtimeVersion", "LATEST_RELEASE[9.9]");
     return Orchestrator.builderEnv()
       .useDefaultAdminCredentialsForBuilds(true)
-      .setSonarVersion(
-        sonarVersion).addPlugin(MavenLocation
-        .of("org.sonarsource.sonarqube", "sonar-xoo-plugin",
-          sonarVersion)).build();
+      .setSonarVersion(sonarVersion)
+      .keepBundledPlugins()
+      .addPlugin(MavenLocation.of("org.sonarsource.sonarqube", "sonar-xoo-plugin", sonarVersion))
+      .build();
   }
 
 }
