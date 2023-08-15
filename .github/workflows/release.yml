@@ -17,7 +17,8 @@ jobs:
       slackChannel: team-sonarqube-build
   release_docker:
     permissions:
-      id-token: write
+      id-token: write # Required by SonarSource/vault-action-wrapper
+      contents: write # Required by softprops/action-gh-release
     runs-on: ubuntu-latest
     name: Start Docker release process
     needs: release
@@ -35,6 +36,6 @@ jobs:
       if: failure()
       with:
         channel-id: team-sonarqube-build
-        slack-message: "Release failed, see the logs at https://github.com/{{ GITHUB_REPOSITORY }}/actions by {{ GITHUB_ACTOR }}"
+        slack-message: "Releasing Docker Image failed, see the logs at https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} by ${{ github.actor }}"
       env:
         SLACK_BOT_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).SLACK_BOT_TOKEN }}
