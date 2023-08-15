@@ -22,6 +22,7 @@ package com.sonarsource.scanner.it;
 import com.sonar.orchestrator.Orchestrator;
 import com.sonar.orchestrator.build.SonarScanner;
 import com.sonar.orchestrator.http.HttpMethod;
+import com.sonar.orchestrator.junit4.OrchestratorRule;
 import com.sonar.orchestrator.version.Version;
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,7 +67,7 @@ public abstract class ScannerTestCase {
   public ExpectedException thrown = ExpectedException.none();
 
   @ClassRule
-  public static Orchestrator orchestrator = SonarScannerTestSuite.ORCHESTRATOR;
+  public static OrchestratorRule orchestrator = SonarScannerTestSuite.ORCHESTRATOR;
 
   private static Version artifactVersion;
 

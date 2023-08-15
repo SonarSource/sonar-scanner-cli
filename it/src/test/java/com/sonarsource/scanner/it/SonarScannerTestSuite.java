@@ -20,6 +20,8 @@
 package com.sonarsource.scanner.it;
 
 import com.sonar.orchestrator.Orchestrator;
+import com.sonar.orchestrator.OrchestratorBuilder;
+import com.sonar.orchestrator.junit4.OrchestratorRule;
 import com.sonar.orchestrator.locator.MavenLocation;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
@@ -32,17 +34,17 @@ import org.junit.runners.Suite.SuiteClasses;
 public class SonarScannerTestSuite {
 
   @ClassRule
-  public static final Orchestrator ORCHESTRATOR = createOrchestrator();
+  public static final OrchestratorRule ORCHESTRATOR = createOrchestrator();
 
-  private static Orchestrator createOrchestrator() {
+  private static OrchestratorRule createOrchestrator() {
     String sonarVersion = System
-      .getProperty("sonar.runtimeVersion", "LATEST_RELEASE[7.9]");
-    return Orchestrator.builderEnv()
+      .getProperty("sonar.runtimeVersion", "LATEST_RELEASE[9.9]");
+    return OrchestratorRule.builderEnv()
       .useDefaultAdminCredentialsForBuilds(true)
-      .setSonarVersion(
-        sonarVersion).addPlugin(MavenLocation
-        .of("org.sonarsource.sonarqube", "sonar-xoo-plugin",
-          sonarVersion)).build();
+      .setSonarVersion(sonarVersion)
+      .addBundledPluginToKeep("sonar-javascript")
+      .addPlugin(MavenLocation.of("org.sonarsource.sonarqube", "sonar-xoo-plugin", sonarVersion))
+      .build();
   }
 
 }
