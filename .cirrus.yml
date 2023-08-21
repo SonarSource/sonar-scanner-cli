@@ -54,6 +54,7 @@ except_nightly_cron: &EXCEPT_ON_NIGHTLY_CRON
 # TASKS
 #
 build_task:
+  skip: $CIRRUS_BRANCH != 'unknown'
   eks_container:
     <<: *EKS_CONTAINER
   env:
