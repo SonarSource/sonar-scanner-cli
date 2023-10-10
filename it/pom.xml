@@ -74,7 +74,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <systemProperties>
-              <scanner.version>${scanner.version}</scanner.version>
+              <scanner.version>${env.PROJECT_VERSION}</scanner.version>
             </systemProperties>
             <includes>
               <include>**/SonarScannerTestSuite.java</include>
@@ -90,39 +90,11 @@
       <id>download-qa-artifacts</id>
       <activation>
         <property>
-          <name>env.CI_BUILD_NUMBER</name>
+          <name>env.PROJECT_VERSION</name>
         </property>
       </activation>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.codehaus.gmaven</groupId>
-            <artifactId>groovy-maven-plugin</artifactId>
-            <version>2.0</version>
-            <executions>
-              <execution>
-                <id>compute-qa-version</id>
-                <phase>initialize</phase>
-                <goals>
-                  <goal>execute</goal>
-                </goals>
-                <configuration>
-                  <source><![CDATA[
-                    String pom = new File(project.basedir, '../pom.xml').getText('UTF-8')
-                    def matcher = pom =~ /(?s).*<version>(.*?)-SNAPSHOT<\/version>.*/
-                    assert matcher.matches()
-                    def versionNoSnapshot = matcher[0][1]
-                    if (new StringTokenizer(versionNoSnapshot, ".").countTokens() == 2) {
-                      versionNoSnapshot += '.0'
-                    }
-                    project.properties['scanner.version'] = versionNoSnapshot + '.' + System.getenv()['CI_BUILD_NUMBER']
-                    ]]>
-                  </source>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
@@ -135,7 +107,7 @@
                   <goal>get</goal>
                 </goals>
                 <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip</artifact>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip</artifact>
                 </configuration>
               </execution>
               <execution>
@@ -145,7 +117,7 @@
                   <goal>get</goal>
                 </goals>
                 <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:linux</artifact>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:linux</artifact>
                 </configuration>
               </execution>
               <execution>
@@ -155,7 +127,7 @@
                   <goal>get</goal>
                 </goals>
                 <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:windows</artifact>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:windows</artifact>
                 </configuration>
               </execution>
               <execution>
@@ -165,7 +137,7 @@
                   <goal>get</goal>
                 </goals>
                 <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:macosx</artifact>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:macosx</artifact>
                 </configuration>
               </execution>
             </executions>
