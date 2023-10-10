@@ -81,6 +81,9 @@ linux_qa_java17_task:
       - SQ_VERSION: DEV
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
+  version_script:
+    - echo java --version
+    - echo mvn --version
   qa_script:
     - nodeVersion=18.17.0
     - nodeName=node-v${nodeVersion}-linux-x64
