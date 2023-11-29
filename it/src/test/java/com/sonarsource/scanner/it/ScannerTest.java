@@ -47,9 +47,8 @@ public class ScannerTest extends ScannerTestCase {
 
     Map<String, Measure> projectMeasures = getMeasures(
       "java:basedir-with-source", "files", "ncloc");
-    assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(1);
-    assertThat(parseInt(projectMeasures.get("ncloc").getValue()))
-      .isGreaterThan(1);
+
+    verifyProjectMeasures(projectMeasures, 1);
   }
 
   /**
@@ -61,9 +60,9 @@ public class ScannerTest extends ScannerTestCase {
       .useNative()
       .setProjectKey("SAMPLE");
     orchestrator.executeBuild(build);
+
     Map<String, Measure> projectMeasures = getMeasures("SAMPLE", "files", "ncloc");
-    assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(1);
-    assertThat(parseInt(projectMeasures.get("ncloc").getValue())).isGreaterThan(1);
+    verifyProjectMeasures(projectMeasures, 1);
   }
 
   /**
@@ -75,11 +74,19 @@ public class ScannerTest extends ScannerTestCase {
       .setProjectKey("SAMPLE");
     orchestrator.executeBuild(build);
 
-    Map<String, Measure> projectMeasures = getMeasures("SAMPLE", "files",
-      "ncloc");
-    assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(2);
-    assertThat(parseInt(projectMeasures.get("ncloc").getValue()))
-      .isGreaterThan(1);
+    Map<String, Measure> projectMeasures = getMeasures("SAMPLE", "files", "ncloc");
+    verifyProjectMeasures(projectMeasures, 2);
+  }
+
+  private void verifyProjectMeasures(Map<String, Measure> projectMeasures, int expectedFiles) {
+    assertThat(projectMeasures).isNotNull()
+      .containsKeys("files", "ncloc");
+    Measure files = projectMeasures.get("files");
+    assertThat(files).isNotNull();
+    assertThat(parseInt(files.getValue())).isEqualTo(expectedFiles);
+    Measure ncloc = projectMeasures.get("ncloc");
+    assertThat(ncloc).isNotNull();
+    assertThat(parseInt(ncloc.getValue())).isGreaterThan(1);
   }
 
   /**
@@ -122,7 +129,7 @@ public class ScannerTest extends ScannerTestCase {
     SonarScanner build = newScanner(new File("projects/bad-source-dirs"));
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
-    assertThat(result.getStatus()).isNotEqualTo(0);
+    assertThat(result.getStatus()).isNotZero();
     // with the following message
     assertThat(result.getLogs())
       .contains("Invalid value of sonar.sources for bad-source-dirs");
@@ -140,9 +147,9 @@ public class ScannerTest extends ScannerTestCase {
 
     // Note: we can't really check the locale value and the charset because the ones used during the Sonar analysis may not be the ones
     // used to launch the tests. But we can check that the analysis is platform dependent (i.e. "sonar.sourceEncoding" hasn't been set).
-    assertThat(log).contains("Default locale:");
-    assertThat(log).contains(", source code encoding:");
-    assertThat(log).contains("(analysis is platform dependent)");
+    assertThat(log).contains("Default locale:")
+      .contains(", source code encoding:")
+      .contains("(analysis is platform dependent)");
   }
 
   /**
@@ -234,11 +241,11 @@ public class ScannerTest extends ScannerTestCase {
     SonarScanner build = newScanner(new File("projects/simple-sample"))
       .setEnvironmentVariable("SONAR_SCANNER_OPTS", "-Xmx1k");
     BuildResult executeBuild = orchestrator.executeBuildQuietly(build);
-    assertThat(executeBuild.getLastStatus()).isNotEqualTo(0);
+    assertThat(executeBuild.getLastStatus()).isNotZero();
     String logs = executeBuild.getLogs();
-    assertThat(logs).contains("Error occurred during initialization of VM");
-    // Not the same message with JRE 8 and 11
-    assertThat(logs).containsPattern("Too small (initial|maximum) heap");
+    assertThat(logs).contains("Error occurred during initialization of VM")
+      // Not the same message with JRE 8 and 11
+      .containsPattern("Too small (initial|maximum) heap");
   }
 
   // SQSCANNER-24
