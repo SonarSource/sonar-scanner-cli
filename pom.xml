@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>68.0.0.247</version>
+    <version>71.0.0.1292</version>
   </parent>
 
   <groupId>org.sonarsource.scanner.cli</groupId>
