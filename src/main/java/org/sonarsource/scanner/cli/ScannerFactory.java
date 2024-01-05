@@ -48,8 +48,7 @@ class ScannerFactory {
     @Override
     public void log(String formattedMessage, Level level) {
       switch (level) {
-        case TRACE:
-        case DEBUG:
+        case TRACE, DEBUG:
           logger.debug(formattedMessage);
           break;
         case ERROR:
