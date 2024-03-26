@@ -241,6 +241,7 @@ public class MainTest {
   public void shouldLogServerVersion() {
     when(scanner.serverVersion()).thenReturn("5.5");
     Properties p = new Properties();
+    p.put(Conf.PROPERTY_SONAR_HOST_URL, "http://localhost:9000");
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(cli.getInvokedFrom()).thenReturn("");
     when(conf.properties()).thenReturn(p);
@@ -283,8 +284,8 @@ public class MainTest {
 
   // SQSCANNER-57
   @Test
-  public void should_return_false_is_sonar_cloud_host_is_null() {
-    assertThat(Main.isSonarCloud(new Properties())).isFalse();
+  public void should_return_true_is_sonar_cloud_host_is_null() {
+    assertThat(Main.isSonarCloud(new Properties())).isTrue();
   }
 
   @Test

@@ -19,6 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -33,7 +34,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
-import org.sonarsource.scanner.api.internal.shaded.minimaljson.Json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
@@ -327,11 +327,10 @@ public class ConfTest {
     Properties properties = conf.properties();
     assertThat(properties.get("sonar.prop")).isEqualTo("default");
 
-    String jsonString = Json.object()
-      .add("project.settings", home.resolve("conf/sq-project.properties").toAbsolutePath().toString())
-      .toString();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("project.settings", home.resolve("conf/sq-project.properties").toAbsolutePath().toString());
 
-    env.put("SONARQUBE_SCANNER_PARAMS", jsonString);
+    env.put("SONARQUBE_SCANNER_PARAMS", jsonObject.toString());
 
     properties = conf.properties();
     assertThat(properties.get("sonar.prop")).isEqualTo("expected");
