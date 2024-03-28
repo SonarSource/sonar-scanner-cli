@@ -43,6 +43,7 @@ class Conf {
   private static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
   private static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
   static final String PROPERTY_SONAR_HOST_URL = "sonar.host.url";
+  static final String PROPERTY_SONARCLOUD_URL = "sonar.scanner.sonarcloud.url";
 
   private final Cli cli;
   private final Logs logger;

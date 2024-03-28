@@ -90,12 +90,14 @@ public class Main {
   }
 
   static boolean isSonarCloud(Properties props) {
+    if (props.containsKey(Conf.PROPERTY_SONARCLOUD_URL)) {
+      return true;
+    }
     String hostUrl = props.getProperty(Conf.PROPERTY_SONAR_HOST_URL);
     if (hostUrl != null) {
       return hostUrl.toLowerCase(Locale.ENGLISH).contains("sonarcloud");
     }
-
-    return false;
+    return true;
   }
 
   private void checkSkip(Properties properties) {
