@@ -31,11 +31,12 @@ import org.apache.commons.lang.SystemUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.sonarsource.scanner.api.internal.shaded.minimaljson.Json;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -44,9 +45,6 @@ public class ConfTest {
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
-
-  @Rule
-  public ExpectedException exception = ExpectedException.none();
 
   private final Map<String, String> env = new HashMap<>();
   private final Properties args = new Properties();
@@ -66,7 +64,7 @@ public class ConfTest {
     args.setProperty("scanner.home", home.toAbsolutePath().toString());
 
     Properties properties = conf.properties();
-    assertThat(properties.get("sonar.prop")).isEqualTo("value");
+    assertThat(properties).containsEntry("sonar.prop", "value");
   }
 
   @Test
@@ -74,6 +72,17 @@ public class ConfTest {
     assertThat(conf.properties()).isNotEmpty();
     // worst case, use current path
     assertThat(conf.properties().getProperty("sonar.projectBaseDir")).isEqualTo(Paths.get("").toAbsolutePath().toString());
+  }
+
+  @Test
+  public void should_set_bootstrap_time_only_once() {
+    Properties properties = conf.properties();
+
+    assertThat(properties).containsKey("sonar.scanner.bootstrapStartTime");
+    String value = properties.getProperty("sonar.scanner.bootstrapStartTime");
+
+    assertThat(conf.properties())
+      .containsEntry("sonar.scanner.bootstrapStartTime", value);
   }
 
   @Test
@@ -94,7 +103,7 @@ public class ConfTest {
     Path settings = Paths.get(getClass().getResource("ConfTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
     args.setProperty("scanner.settings", settings.toAbsolutePath().toString());
 
-    assertThat(conf.properties().get("sonar.prop")).isEqualTo("otherValue");
+    assertThat(conf.properties()).containsEntry("sonar.prop", "otherValue");
   }
 
   @Test
@@ -138,9 +147,10 @@ public class ConfTest {
   @Test
   public void shouldFailWithInvalidEnvironmentProperties() {
     env.put("SONARQUBE_SCANNER_PARAMS", "{sonar.key1: \"v1\", \"sonar.key2\" : \"v2\"}");
-    exception.expect(IllegalStateException.class);
-    exception.expectMessage("JSON");
-    conf.properties();
+
+    assertThatIllegalStateException()
+      .isThrownBy(conf::properties)
+      .withMessage("Failed to parse JSON in SONARQUBE_SCANNER_PARAMS environment variable");
   }
 
   @Test
@@ -236,9 +246,9 @@ public class ConfTest {
     args.setProperty("sonar.modules", "module1");
     args.setProperty("module1.sonar.projectBaseDir", "invalid");
 
-    exception.expect(IllegalStateException.class);
-    exception.expectMessage("The base directory of the module 'module1' does not exist");
-    conf.properties();
+    assertThatIllegalStateException()
+      .isThrownBy(conf::properties)
+      .withMessageStartingWith("The base directory of the module 'module1' does not exist");
   }
 
   @Test
@@ -246,9 +256,9 @@ public class ConfTest {
     args.setProperty("sonar.modules", "module1");
     args.setProperty("module1.sonar.projectConfigFile", "invalid");
 
-    exception.expect(IllegalStateException.class);
-    exception.expectMessage("The properties file of the module 'module1' does not exist");
-    conf.properties();
+    assertThatIllegalStateException()
+      .isThrownBy(conf::properties)
+      .withMessageStartingWith("The properties file of the module 'module1' does not exist");
   }
 
   @Test
@@ -270,7 +280,8 @@ public class ConfTest {
     args.setProperty("project.home", temp.newFolder().getCanonicalPath());
     args.setProperty("sonar.projectBaseDir", projectHome.toAbsolutePath().toString());
 
-    conf.properties();
+    assertThatCode(conf::properties)
+      .doesNotThrowAnyException();
   }
 
   @Test
@@ -310,12 +321,12 @@ public class ConfTest {
     args.setProperty("project.home", home.toAbsolutePath().toString());
 
     Properties properties = conf.properties();
-    assertThat(properties.get("sonar.prop")).isEqualTo("default");
+    assertThat(properties).containsEntry("sonar.prop", "default");
 
     args.setProperty("project.settings", home.resolve("conf/sq-project.properties").toAbsolutePath().toString());
 
     properties = conf.properties();
-    assertThat(properties.get("sonar.prop")).isEqualTo("expected");
+    assertThat(properties).containsEntry("sonar.prop", "expected");
   }
 
   // SQSCANNER-61
@@ -325,7 +336,7 @@ public class ConfTest {
     args.setProperty("project.home", home.toAbsolutePath().toString());
 
     Properties properties = conf.properties();
-    assertThat(properties.get("sonar.prop")).isEqualTo("default");
+    assertThat(properties).containsEntry("sonar.prop", "default");
 
     String jsonString = Json.object()
       .add("project.settings", home.resolve("conf/sq-project.properties").toAbsolutePath().toString())
@@ -334,7 +345,7 @@ public class ConfTest {
     env.put("SONARQUBE_SCANNER_PARAMS", jsonString);
 
     properties = conf.properties();
-    assertThat(properties.get("sonar.prop")).isEqualTo("expected");
+    assertThat(properties).containsEntry("sonar.prop", "expected");
   }
 
 }

@@ -300,22 +300,35 @@ public class MainTest {
   }
 
   @Test
+  public void should_set_bootstrap_start_time_in_millis() {
+    Properties analysisProps = execute("sonar.scanner.bootstrapStartTime", "1714137496104");
+    assertThat(analysisProps.getProperty("sonar.scanner.bootstrapStartTime")).isEqualTo("1714137496104");
+  }
+
+  @Test
   public void should_configure_logging_debug() {
     Properties analysisProps = testLogging("sonar.log.level", "DEBUG");
     assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("DEBUG");
   }
 
   private Properties testLogging(String propKey, String propValue) {
+    Properties actualProps = execute(propKey, propValue);
+
+    // Logger used for callback should have debug enabled
+    verify(logs).setDebugEnabled(true);
+
+    return actualProps;
+  }
+
+  private Properties execute(String propKey, String propValue) {
     Properties p = new Properties();
     p.put(propKey, propValue);
+
     when(conf.properties()).thenReturn(p);
     when(cli.getInvokedFrom()).thenReturn("");
 
     Main main = new Main(exit, cli, conf, scannerFactory, logs);
     main.execute();
-
-    // Logger used for callback should have debug enabled
-    verify(logs).setDebugEnabled(true);
 
     ArgumentCaptor<Properties> propertiesCapture = ArgumentCaptor.forClass(Properties.class);
     verify(scanner).execute((Map) propertiesCapture.capture());
