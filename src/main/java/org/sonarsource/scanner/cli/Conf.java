@@ -43,15 +43,18 @@ class Conf {
   private static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
   private static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
   static final String PROPERTY_SONAR_HOST_URL = "sonar.host.url";
+  private static final String BOOTSTRAP_START_TIME = "sonar.scanner.bootstrapStartTime";
 
   private final Cli cli;
   private final Logs logger;
   private final Map<String, String> env;
+  private final long startTimeMs;
 
   Conf(Cli cli, Logs logger, Map<String, String> env) {
     this.cli = cli;
     this.logger = logger;
     this.env = env;
+    this.startTimeMs = System.currentTimeMillis();
   }
 
   Properties properties() {
@@ -66,6 +69,8 @@ class Conf {
     // root project base directory must be present and be absolute
     result.setProperty(PROPERTY_PROJECT_BASEDIR, getRootProjectBaseDir(result).toString());
     result.remove(PROJECT_HOME);
+
+    result.setProperty(BOOTSTRAP_START_TIME, String.valueOf(startTimeMs));
     return result;
   }
 
