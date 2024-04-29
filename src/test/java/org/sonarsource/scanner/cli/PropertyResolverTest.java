@@ -41,9 +41,10 @@ class PropertyResolverTest {
 
     PropertyResolver resolver = new PropertyResolver(map, env);
     Properties resolved = resolver.resolve();
-    assertThat(resolved.get("A")).isEqualTo("value a");
-    assertThat(resolved.get("B")).isEqualTo("value b");
-    assertThat(resolved.get("C")).isEqualTo("value a value b ");
+    assertThat(resolved)
+      .containsEntry("A", "value a")
+      .containsEntry("B", "value b")
+      .containsEntry("C", "value a value b ");
 
     map.clear();
     map.put("sonar.login", "admin");
@@ -51,7 +52,7 @@ class PropertyResolverTest {
 
     resolver = new PropertyResolver(map, env);
     resolved = resolver.resolve();
-    assertThat(resolved.get("sonar.password")).isEqualTo("admin");
+    assertThat(resolved).containsEntry("sonar.password", "admin");
   }
 
   @Test
@@ -67,9 +68,10 @@ class PropertyResolverTest {
 
     PropertyResolver resolver = new PropertyResolver(map, env);
     Properties resolved = resolver.resolve();
-    assertThat(resolved.get("A")).isEqualTo("invalid");
-    assertThat(resolved.get("B")).isEqualTo("value b");
-    assertThat(resolved.get("C")).isEqualTo("value a value b ");
+    assertThat(resolved)
+      .containsEntry("A", "invalid")
+      .containsEntry("B", "value b")
+      .containsEntry("C", "value a value b ");
   }
 
   @Test
@@ -82,9 +84,10 @@ class PropertyResolverTest {
 
     PropertyResolver resolver = new PropertyResolver(map, env);
     Properties resolved = resolver.resolve();
-    assertThat(resolved.get("A")).isEqualTo("value a");
-    assertThat(resolved.get("B")).isEqualTo("value a");
-    assertThat(resolved.get("C")).isEqualTo("value a value a");
+    assertThat(resolved)
+      .containsEntry("A", "value a")
+      .containsEntry("B", "value a")
+      .containsEntry("C", "value a value a");
   }
 
   @Test
@@ -97,9 +100,10 @@ class PropertyResolverTest {
 
     PropertyResolver resolver = new PropertyResolver(map, env);
     Properties resolved = resolver.resolve();
-    assertThat(resolved.get("A")).isEqualTo("value a");
-    assertThat(resolved.get("B")).isEqualTo("value b");
-    assertThat(resolved.get("C")).isEqualTo("${A value b}");
+    assertThat(resolved)
+      .containsEntry("A", "value a")
+      .containsEntry("B", "value b")
+      .containsEntry("C", "${A value b}");
   }
 
   @Test
@@ -110,7 +114,7 @@ class PropertyResolverTest {
 
     PropertyResolver resolver = new PropertyResolver(map, env);
     Properties resolved = resolver.resolve();
-    assertThat(resolved.get("A")).isEqualTo("/path/ var/");
+    assertThat(resolved).containsEntry("A", "/path/ var/");
 
   }
 
@@ -138,7 +142,8 @@ class PropertyResolverTest {
 
     PropertyResolver resolver = new PropertyResolver(map, env);
     Properties resolved = resolver.resolve();
-    assertThat(resolved.get("A")).isEqualTo("");
-    assertThat(resolved.get("B")).isEqualTo("");
+    assertThat(resolved)
+      .containsEntry("A", "")
+      .containsEntry("B", "");
   }
 }
