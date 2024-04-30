@@ -79,7 +79,7 @@ public class Main {
       }
     } catch (Throwable e) {
       displayExecutionResult(stats, "FAILURE");
-      showError("Error during SonarScanner execution", e, cli.isDebugEnabled());
+      showError("Error during SonarScanner CLI execution", e, cli.isDebugEnabled());
       status = isUserError(e) ? Exit.USER_ERROR : Exit.INTERNAL_ERROR;
     } finally {
       exit.exit(status);
@@ -97,7 +97,7 @@ public class Main {
 
   private void checkSkip(Properties properties) {
     if ("true".equalsIgnoreCase(properties.getProperty(ScanProperties.SKIP))) {
-      logger.info("SonarScanner analysis skipped");
+      logger.info("SonarScanner CLI analysis skipped");
       exit.exit(Exit.SUCCESS);
     }
   }
@@ -155,7 +155,7 @@ public class Main {
 
   private void suggestDebugMode() {
     if (!cli.isEmbedded()) {
-      logger.error("Re-run SonarScanner using the -X switch to enable full debug logging.");
+      logger.error("Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
     }
   }
 

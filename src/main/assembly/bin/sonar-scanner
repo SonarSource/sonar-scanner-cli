@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #
-# SonarScanner Startup Script for Unix
+# SonarScanner CLI Startup Script for Unix
 #
 # Required ENV vars:
 #   JAVA_HOME - Location of Java's installation, optional if use_embedded_jre is set

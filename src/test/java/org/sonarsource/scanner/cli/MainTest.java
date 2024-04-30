@@ -93,7 +93,7 @@ public class MainTest {
     main.analyze();
 
     verify(exit).exit(Exit.INTERNAL_ERROR);
-    verify(logs).error("Error during SonarScanner execution", e);
+    verify(logs).error("Error during SonarScanner CLI execution", e);
   }
 
   @Test
@@ -110,7 +110,7 @@ public class MainTest {
     verify(bootstrapper).bootstrap();
     verify(engine, never()).analyze(any());
     verify(exit).exit(Exit.INTERNAL_ERROR);
-    verify(logs).error("Error during SonarScanner execution", e);
+    verify(logs).error("Error during SonarScanner CLI execution", e);
   }
 
   @Test
@@ -118,8 +118,8 @@ public class MainTest {
     Exception e = createException(false);
     testException(e, false, false, Exit.INTERNAL_ERROR);
 
-    verify(logs).error("Error during SonarScanner execution", e);
-    verify(logs).error("Re-run SonarScanner using the -X switch to enable full debug logging.");
+    verify(logs).error("Error during SonarScanner CLI execution", e);
+    verify(logs).error("Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
   }
 
   @Test
@@ -128,11 +128,11 @@ public class MainTest {
     testException(e, false, false, Exit.USER_ERROR);
 
     verify(logs, times(5)).error(anyString());
-    verify(logs).error("Error during SonarScanner execution");
+    verify(logs).error("Error during SonarScanner CLI execution");
     verify(logs).error("my message");
     verify(logs).error("Caused by: A functional cause");
     verify(logs).error("");
-    verify(logs).error("Re-run SonarScanner using the -X switch to enable full debug logging.");
+    verify(logs).error("Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
   }
 
   @Test
@@ -141,7 +141,7 @@ public class MainTest {
     testException(e, false, true, Exit.USER_ERROR);
 
     verify(logs, times(4)).error(anyString());
-    verify(logs).error("Error during SonarScanner execution");
+    verify(logs).error("Error during SonarScanner CLI execution");
     verify(logs).error("my message");
     verify(logs).error("Caused by: A functional cause");
     verify(logs).error("");
@@ -153,7 +153,7 @@ public class MainTest {
     testException(e, true, false, Exit.USER_ERROR);
 
     verify(logs, times(1)).error(anyString(), any(Throwable.class));
-    verify(logs).error("Error during SonarScanner execution", e);
+    verify(logs).error("Error during SonarScanner CLI execution", e);
   }
 
   @Test
@@ -162,7 +162,7 @@ public class MainTest {
     testException(e, true, true, Exit.USER_ERROR);
 
     verify(logs, times(1)).error(anyString(), any(Throwable.class));
-    verify(logs).error("Error during SonarScanner execution", e);
+    verify(logs).error("Error during SonarScanner CLI execution", e);
   }
 
   @Test
@@ -170,8 +170,8 @@ public class MainTest {
     Exception e = createException(false);
     testException(e, true, false, Exit.INTERNAL_ERROR);
 
-    verify(logs).error("Error during SonarScanner execution", e);
-    verify(logs, never()).error("Re-run SonarScanner using the -X switch to enable full debug logging.");
+    verify(logs).error("Error during SonarScanner CLI execution", e);
+    verify(logs, never()).error("Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
   }
 
   private void testException(Exception e, boolean debugEnabled, boolean isEmbedded, int expectedExitCode) {
@@ -228,7 +228,7 @@ public class MainTest {
     Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
     main.analyze();
 
-    verify(logs).info("SonarScanner analysis skipped");
+    verify(logs).info("SonarScanner CLI analysis skipped");
     InOrder inOrder = Mockito.inOrder(exit, scannerEngineBootstrapperFactory);
 
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);

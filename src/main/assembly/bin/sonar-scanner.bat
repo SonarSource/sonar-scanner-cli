@@ -1,4 +1,4 @@
-@REM SonarScanner Startup Script for Windows
+@REM SonarScanner CLI Startup Script for Windows
 @REM
 @REM Required ENV vars:
 @REM   JAVA_HOME - Location of Java's installation, optional if use_embedded_jre is set
