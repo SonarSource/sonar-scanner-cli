@@ -36,7 +36,7 @@
 
   <issueManagement>
     <system>JIRA</system>
-    <url>https://jira.sonarsource.com/browse/SQSCANNER</url>
+    <url>https://jira.sonarsource.com/browse/SCANCLI</url>
   </issueManagement>
   <ciManagement>
     <system>cirrus-ci</system>
