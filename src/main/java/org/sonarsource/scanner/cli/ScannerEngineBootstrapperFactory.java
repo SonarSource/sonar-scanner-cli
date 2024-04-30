@@ -21,47 +21,31 @@ package org.sonarsource.scanner.cli;
 
 import java.util.Map;
 import java.util.Properties;
-import org.sonarsource.scanner.api.EmbeddedScanner;
-import org.sonarsource.scanner.api.LogOutput;
+import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
 
-class ScannerFactory {
+class ScannerEngineBootstrapperFactory {
 
   private final Logs logger;
 
-  public ScannerFactory(Logs logger) {
+  public ScannerEngineBootstrapperFactory(Logs logger) {
     this.logger = logger;
   }
 
-  EmbeddedScanner create(Properties props, String isInvokedFrom) {
+  ScannerEngineBootstrapper create(Properties props, String isInvokedFrom) {
     String appName = "ScannerCLI";
     String appVersion = ScannerVersion.version();
-    if (!isInvokedFrom.equals("") && isInvokedFrom.contains("/")) {
+    if (isInvokedFrom.contains("/")) {
       appName = isInvokedFrom.split("/")[0];
       appVersion = isInvokedFrom.split("/")[1];
     }
 
-    return EmbeddedScanner.create(appName, appVersion, new DefaultLogOutput())
-      .addGlobalProperties((Map) props);
+    return newScannerEngineBootstrapper(appName, appVersion)
+      .addBootstrapProperties((Map) props);
   }
 
-  class DefaultLogOutput implements LogOutput {
-    @Override
-    public void log(String formattedMessage, Level level) {
-      switch (level) {
-        case TRACE:
-        case DEBUG:
-          logger.debug(formattedMessage);
-          break;
-        case ERROR:
-          logger.error(formattedMessage);
-          break;
-        case WARN:
-          logger.warn(formattedMessage);
-          break;
-        case INFO:
-        default:
-          logger.info(formattedMessage);
-      }
-    }
+  ScannerEngineBootstrapper newScannerEngineBootstrapper(String appName, String appVersion) {
+    return new ScannerEngineBootstrapper(appName, appVersion, logger.getLogOutputAdapter());
   }
+
+
 }

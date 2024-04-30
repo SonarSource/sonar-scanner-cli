@@ -20,7 +20,6 @@
 package org.sonarsource.scanner.cli;
 
 import java.util.Properties;
-import org.sonarsource.scanner.api.ScannerProperties;
 
 import static java.util.Arrays.asList;
 
@@ -73,10 +72,7 @@ class Cli {
 
   private int processNextArg(String[] args, int pos) {
     String arg = args[pos];
-    if (pos == 0 && arg.charAt(0) != '-') {
-      props.setProperty(ScannerProperties.TASK, arg);
-
-    } else if (asList("-h", "--help").contains(arg)) {
+    if (asList("-h", "--help").contains(arg)) {
       printUsage();
       exit.exit(Exit.SUCCESS);
 

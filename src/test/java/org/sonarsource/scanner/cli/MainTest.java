@@ -29,14 +29,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.sonar.api.utils.MessageException;
-import org.sonarsource.scanner.api.EmbeddedScanner;
-import org.sonarsource.scanner.api.ScanProperties;
+import org.sonarsource.scanner.lib.ScanProperties;
+import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
+import org.sonarsource.scanner.lib.ScannerEngineFacade;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,63 +53,62 @@ public class MainTest {
   @Mock
   private Properties properties;
   @Mock
-  private ScannerFactory scannerFactory;
+  private ScannerEngineBootstrapperFactory scannerEngineBootstrapperFactory;
   @Mock
-  private EmbeddedScanner scanner;
+  private ScannerEngineBootstrapper bootstrapper;
+  @Mock
+  private ScannerEngineFacade engine;
   @Mock
   private Logs logs;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    when(scannerFactory.create(any(Properties.class), any(String.class))).thenReturn(scanner);
+    when(scannerEngineBootstrapperFactory.create(any(Properties.class), any(String.class))).thenReturn(bootstrapper);
+    when(bootstrapper.bootstrap()).thenReturn(engine);
     when(conf.properties()).thenReturn(properties);
   }
 
   @Test
-  public void should_execute_runner() {
+  public void should_execute_scanner_engine() {
     when(cli.getInvokedFrom()).thenReturn("");
-    Main main = new Main(exit, cli, conf, scannerFactory, logs);
-    main.execute();
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    main.analyze();
 
     verify(exit).exit(Exit.SUCCESS);
-    verify(scannerFactory).create(properties, "");
+    verify(scannerEngineBootstrapperFactory).create(properties, "");
 
-    verify(scanner, times(1)).start();
-    verify(scanner, times(1)).execute((Map) properties);
+    verify(bootstrapper, times(1)).bootstrap();
+    verify(engine, times(1)).analyze((Map) properties);
   }
 
   @Test
   public void should_exit_with_error_on_error_during_analysis() {
-    EmbeddedScanner runner = mock(EmbeddedScanner.class);
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
-    doThrow(e).when(runner).execute(any());
+    doThrow(e).when(engine).analyze(any());
     when(cli.getInvokedFrom()).thenReturn("");
-    when(scannerFactory.create(any(Properties.class), any(String.class))).thenReturn(runner);
     when(cli.isDebugEnabled()).thenReturn(true);
-    Main main = new Main(exit, cli, conf, scannerFactory, logs);
-    main.execute();
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    main.analyze();
 
     verify(exit).exit(Exit.INTERNAL_ERROR);
     verify(logs).error("Error during SonarScanner execution", e);
   }
 
   @Test
-  public void should_exit_with_error_on_error_during_start() {
-    EmbeddedScanner runner = mock(EmbeddedScanner.class);
+  public void should_exit_with_error_on_error_during_bootstrap() {
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
-    doThrow(e).when(runner).start();
+    doThrow(e).when(bootstrapper).bootstrap();
     when(cli.getInvokedFrom()).thenReturn("");
     when(cli.isDebugEnabled()).thenReturn(true);
-    when(scannerFactory.create(any(Properties.class), any(String.class))).thenReturn(runner);
 
-    Main main = new Main(exit, cli, conf, scannerFactory, logs);
-    main.execute();
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    main.analyze();
 
-    verify(runner).start();
-    verify(runner, never()).execute(any());
+    verify(bootstrapper).bootstrap();
+    verify(engine, never()).analyze(any());
     verify(exit).exit(Exit.INTERNAL_ERROR);
     verify(logs).error("Error during SonarScanner execution", e);
   }
@@ -180,13 +179,13 @@ public class MainTest {
     when(cli.isEmbedded()).thenReturn(isEmbedded);
     when(cli.getInvokedFrom()).thenReturn("");
 
-    EmbeddedScanner runner = mock(EmbeddedScanner.class);
-    doThrow(e).when(runner).execute(any());
 
-    when(scannerFactory.create(any(Properties.class), any(String.class))).thenReturn(runner);
+    doThrow(e).when(engine).analyze(any());
 
-    Main main = new Main(exit, cli, conf, scannerFactory, logs);
-    main.execute();
+    when(scannerEngineBootstrapperFactory.create(any(Properties.class), any(String.class))).thenReturn(bootstrapper);
+
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    main.analyze();
 
     verify(exit).exit(expectedExitCode);
   }
@@ -209,13 +208,13 @@ public class MainTest {
     when(cli.getInvokedFrom()).thenReturn("");
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(exit, cli, conf, scannerFactory, logs);
-    main.execute();
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    main.analyze();
 
-    InOrder inOrder = Mockito.inOrder(exit, scannerFactory);
+    InOrder inOrder = Mockito.inOrder(exit, scannerEngineBootstrapperFactory);
 
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
-    inOrder.verify(scannerFactory, times(1)).create(p, "");
+    inOrder.verify(scannerEngineBootstrapperFactory, times(1)).create(p, "");
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
   }
 
@@ -226,65 +225,41 @@ public class MainTest {
     when(conf.properties()).thenReturn(p);
     when(cli.getInvokedFrom()).thenReturn("");
 
-    Main main = new Main(exit, cli, conf, scannerFactory, logs);
-    main.execute();
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    main.analyze();
 
     verify(logs).info("SonarScanner analysis skipped");
-    InOrder inOrder = Mockito.inOrder(exit, scannerFactory);
+    InOrder inOrder = Mockito.inOrder(exit, scannerEngineBootstrapperFactory);
 
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
-    inOrder.verify(scannerFactory, times(1)).create(p, "");
+    inOrder.verify(scannerEngineBootstrapperFactory, times(1)).create(p, "");
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
   }
 
   @Test
   public void shouldLogServerVersion() {
-    when(scanner.serverVersion()).thenReturn("5.5");
+    when(engine.isSonarCloud()).thenReturn(false);
+    when(engine.getServerVersion()).thenReturn("5.5");
     Properties p = new Properties();
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(cli.getInvokedFrom()).thenReturn("");
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(exit, cli, conf, scannerFactory, logs);
-    main.execute();
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    main.analyze();
     verify(logs).info("Analyzing on SonarQube server 5.5");
   }
 
   @Test
   public void should_log_SonarCloud_server() {
+    when(engine.isSonarCloud()).thenReturn(true);
     Properties p = new Properties();
-    p.setProperty("sonar.host.url", "https://sonarcloud.io");
     when(conf.properties()).thenReturn(p);
     when(cli.getInvokedFrom()).thenReturn("");
 
-    Main main = new Main(exit, cli, conf, scannerFactory, logs);
-    main.execute();
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    main.analyze();
     verify(logs).info("Analyzing on SonarCloud");
-  }
-
-  // SQSCANNER-57
-  @Test
-  public void should_return_true_is_sonar_cloud() {
-
-    Properties properties = new Properties();
-    properties.setProperty("sonar.host.url", "https://sonarcloud.io");
-
-    assertThat(Main.isSonarCloud(properties)).isTrue();
-  }
-
-  // SQSCANNER-57
-  @Test
-  public void should_return_false_is_sonar_cloud() {
-    Properties properties = new Properties();
-    properties.setProperty("sonar.host.url", "https://mysonarqube.com:9000/");
-
-    assertThat(Main.isSonarCloud(properties)).isFalse();
-  }
-
-  // SQSCANNER-57
-  @Test
-  public void should_return_false_is_sonar_cloud_host_is_null() {
-    assertThat(Main.isSonarCloud(new Properties())).isFalse();
   }
 
   @Test
@@ -327,11 +302,11 @@ public class MainTest {
     when(conf.properties()).thenReturn(p);
     when(cli.getInvokedFrom()).thenReturn("");
 
-    Main main = new Main(exit, cli, conf, scannerFactory, logs);
-    main.execute();
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    main.analyze();
 
     ArgumentCaptor<Properties> propertiesCapture = ArgumentCaptor.forClass(Properties.class);
-    verify(scanner).execute((Map) propertiesCapture.capture());
+    verify(engine).analyze((Map) propertiesCapture.capture());
 
     return propertiesCapture.getValue();
   }

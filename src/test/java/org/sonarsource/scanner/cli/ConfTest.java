@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.sonarsource.scanner.api.internal.shaded.minimaljson.Json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -131,26 +130,6 @@ public class ConfTest {
     assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
     assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
     assertThat(properties.getProperty("sonar.projectBaseDir")).isEqualTo(projectHome.toString());
-  }
-
-  @Test
-  public void shouldLoadEnvironmentProperties() {
-    env.put("SONARQUBE_SCANNER_PARAMS", "{\"sonar.key1\" : \"v1\", \"sonar.key2\" : \"v2\"}");
-    args.put("sonar.key2", "v3");
-
-    Properties props = conf.properties();
-
-    assertThat(props.getProperty("sonar.key1")).isEqualTo("v1");
-    assertThat(props.getProperty("sonar.key2")).isEqualTo("v3");
-  }
-
-  @Test
-  public void shouldFailWithInvalidEnvironmentProperties() {
-    env.put("SONARQUBE_SCANNER_PARAMS", "{sonar.key1: \"v1\", \"sonar.key2\" : \"v2\"}");
-
-    assertThatIllegalStateException()
-      .isThrownBy(conf::properties)
-      .withMessage("Failed to parse JSON in SONARQUBE_SCANNER_PARAMS environment variable");
   }
 
   @Test
@@ -324,25 +303,6 @@ public class ConfTest {
     assertThat(properties).containsEntry("sonar.prop", "default");
 
     args.setProperty("project.settings", home.resolve("conf/sq-project.properties").toAbsolutePath().toString());
-
-    properties = conf.properties();
-    assertThat(properties).containsEntry("sonar.prop", "expected");
-  }
-
-  // SQSCANNER-61
-  @Test
-  public void should_load_project_settings_using_env() throws Exception {
-    Path home = Paths.get(getClass().getResource("ConfTest/shouldOverrideProjectSettingsPath/").toURI());
-    args.setProperty("project.home", home.toAbsolutePath().toString());
-
-    Properties properties = conf.properties();
-    assertThat(properties).containsEntry("sonar.prop", "default");
-
-    String jsonString = Json.object()
-      .add("project.settings", home.resolve("conf/sq-project.properties").toAbsolutePath().toString())
-      .toString();
-
-    env.put("SONARQUBE_SCANNER_PARAMS", jsonString);
 
     properties = conf.properties();
     assertThat(properties).containsEntry("sonar.prop", "expected");
