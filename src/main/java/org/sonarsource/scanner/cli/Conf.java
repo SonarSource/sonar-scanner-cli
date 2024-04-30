@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.annotation.Nullable;
-import org.sonarsource.scanner.api.Utils;
+import org.sonarsource.scanner.lib.EnvironmentConfig;
 
 class Conf {
   private static final String SCANNER_HOME = "scanner.home";
@@ -79,8 +79,8 @@ class Conf {
     return resolver.resolve();
   }
 
-  private Properties loadEnvironmentProperties() {
-    return Utils.loadEnvironmentProperties(env);
+  private Map<String, String> loadEnvironmentProperties() {
+    return EnvironmentConfig.load(logger.getLogOutputAdapter());
   }
 
   private Properties loadGlobalProperties() {

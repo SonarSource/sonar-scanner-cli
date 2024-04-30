@@ -25,7 +25,10 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.sonarsource.scanner.lib.LogOutput;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -88,5 +91,38 @@ public class LogsTest {
     logs.setDebugEnabled(false);
     logs.debug("debug");
     verifyNoMoreInteractions(stdOut, stdErr);
+  }
+
+  @Test
+  public void should_forward_logs() {
+    var mockedLogs = mock(Logs.class);
+    var logOutput = new Logs.LogOutputAdapter(mockedLogs);
+
+    String msg = "test";
+
+    logOutput.log(msg, LogOutput.Level.DEBUG);
+    verify(mockedLogs).debug(msg);
+    verifyNoMoreInteractions(mockedLogs);
+    reset(mockedLogs);
+
+    logOutput.log(msg, LogOutput.Level.INFO);
+    verify(mockedLogs).info(msg);
+    verifyNoMoreInteractions(mockedLogs);
+    reset(mockedLogs);
+
+    logOutput.log(msg, LogOutput.Level.ERROR);
+    verify(mockedLogs).error(msg);
+    verifyNoMoreInteractions(mockedLogs);
+    reset(mockedLogs);
+
+    logOutput.log(msg, LogOutput.Level.WARN);
+    verify(mockedLogs).warn(msg);
+    verifyNoMoreInteractions(mockedLogs);
+    reset(mockedLogs);
+
+    logOutput.log(msg, LogOutput.Level.TRACE);
+    verify(mockedLogs).debug(msg);
+    verifyNoMoreInteractions(mockedLogs);
+    reset(mockedLogs);
   }
 }

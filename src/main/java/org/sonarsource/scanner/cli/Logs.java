@@ -22,6 +22,7 @@ package org.sonarsource.scanner.cli;
 import java.io.PrintStream;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import org.sonarsource.scanner.lib.LogOutput;
 
 public class Logs {
   private DateTimeFormatter timeFormatter;
@@ -75,6 +76,39 @@ public class Logs {
       stream.println(timestamp + " " + msg);
     } else {
       stream.println(msg);
+    }
+  }
+
+  /**
+   * Adapter for the scanner library.
+   */
+  public LogOutput getLogOutputAdapter() {
+    return new LogOutputAdapter(this);
+  }
+
+  static class LogOutputAdapter implements LogOutput {
+    private final Logs logs;
+
+    public LogOutputAdapter(Logs logs) {
+      this.logs = logs;
+    }
+
+    @Override
+    public void log(String formattedMessage, Level level) {
+      switch (level) {
+        case TRACE, DEBUG:
+          logs.debug(formattedMessage);
+          break;
+        case ERROR:
+          logs.error(formattedMessage);
+          break;
+        case WARN:
+          logs.warn(formattedMessage);
+          break;
+        case INFO:
+        default:
+          logs.info(formattedMessage);
+      }
     }
   }
 }

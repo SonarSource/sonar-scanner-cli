@@ -19,11 +19,11 @@
  */
 package org.sonarsource.scanner.cli;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import org.sonarsource.scanner.api.EmbeddedScanner;
-import org.sonarsource.scanner.api.ScanProperties;
+import org.sonarsource.scanner.lib.ScanProperties;
+import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
+import org.sonarsource.scanner.lib.ScannerEngineFacade;
 
 /**
  * Arguments :
@@ -42,15 +42,15 @@ public class Main {
   private final Exit exit;
   private final Cli cli;
   private final Conf conf;
-  private EmbeddedScanner embeddedScanner;
-  private final ScannerFactory runnerFactory;
+  private ScannerEngineBootstrapper scannerEngineBootstrapper;
+  private final ScannerEngineBootstrapperFactory bootstrapperFactory;
   private final Logs logger;
 
-  Main(Exit exit, Cli cli, Conf conf, ScannerFactory runnerFactory, Logs logger) {
+  Main(Exit exit, Cli cli, Conf conf, ScannerEngineBootstrapperFactory bootstrapperFactory, Logs logger) {
     this.exit = exit;
     this.cli = cli;
     this.conf = conf;
-    this.runnerFactory = runnerFactory;
+    this.bootstrapperFactory = bootstrapperFactory;
     this.logger = logger;
   }
 
@@ -58,11 +58,11 @@ public class Main {
     Logs logs = new Logs(System.out, System.err);
     Exit exit = new Exit();
     Cli cli = new Cli(exit, logs).parse(args);
-    Main main = new Main(exit, cli, new Conf(cli, logs, System.getenv()), new ScannerFactory(logs), logs);
-    main.execute();
+    Main main = new Main(exit, cli, new Conf(cli, logs, System.getenv()), new ScannerEngineBootstrapperFactory(logs), logs);
+    main.analyze();
   }
 
-  void execute() {
+  void analyze() {
     Stats stats = new Stats(logger).start();
 
     int status = Exit.INTERNAL_ERROR;
@@ -71,15 +71,12 @@ public class Main {
       checkSkip(p);
       configureLogging(p);
       init(p);
-      embeddedScanner.start();
-      if (isSonarCloud(p)) {
-        logger.info("Analyzing on SonarCloud");
-      } else {
-        String serverVersion = embeddedScanner.serverVersion();
-        logger.info(String.format("Analyzing on SonarQube server %s", serverVersion));
+      try (var engine = scannerEngineBootstrapper.bootstrap()) {
+        logServerType(engine);
+        engine.analyze((Map) p);
+        displayExecutionResult(stats, "SUCCESS");
+        status = Exit.SUCCESS;
       }
-      execute(stats, p);
-      status = Exit.SUCCESS;
     } catch (Throwable e) {
       displayExecutionResult(stats, "FAILURE");
       showError("Error during SonarScanner execution", e, cli.isDebugEnabled());
@@ -89,13 +86,13 @@ public class Main {
     }
   }
 
-  static boolean isSonarCloud(Properties props) {
-    String hostUrl = props.getProperty(Conf.PROPERTY_SONAR_HOST_URL);
-    if (hostUrl != null) {
-      return hostUrl.toLowerCase(Locale.ENGLISH).contains("sonarcloud");
+  private void logServerType(ScannerEngineFacade engine) {
+    if (engine.isSonarCloud()) {
+      logger.info("Analyzing on SonarCloud");
+    } else {
+      String serverVersion = engine.getServerVersion();
+      logger.info(String.format("Analyzing on SonarQube server %s", serverVersion));
     }
-
-    return false;
   }
 
   private void checkSkip(Properties properties) {
@@ -111,7 +108,7 @@ public class Main {
       exit.exit(Exit.SUCCESS);
     }
 
-    embeddedScanner = runnerFactory.create(p, cli.getInvokedFrom());
+    scannerEngineBootstrapper = bootstrapperFactory.create(p, cli.getInvokedFrom());
   }
 
   private void configureLogging(Properties props) {
@@ -120,11 +117,6 @@ public class Main {
       || "TRACE".equalsIgnoreCase(props.getProperty("sonar.log.level"))) {
       logger.setDebugEnabled(true);
     }
-  }
-
-  private void execute(Stats stats, Properties p) {
-    embeddedScanner.execute((Map) p);
-    displayExecutionResult(stats, "SUCCESS");
   }
 
   private void displayExecutionResult(Stats stats, String resultMsg) {
