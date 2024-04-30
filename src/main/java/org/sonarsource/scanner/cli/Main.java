@@ -88,10 +88,10 @@ public class Main {
 
   private void logServerType(ScannerEngineFacade engine) {
     if (engine.isSonarCloud()) {
-      logger.info("Analyzing on SonarCloud");
+      logger.info("Communicating with SonarCloud");
     } else {
       String serverVersion = engine.getServerVersion();
-      logger.info(String.format("Analyzing on SonarQube server %s", serverVersion));
+      logger.info(String.format("Communicating with SonarQube Server %s", serverVersion));
     }
   }
 
