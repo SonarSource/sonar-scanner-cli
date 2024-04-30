@@ -199,7 +199,7 @@ public class ScannerTest extends ScannerTestCase {
         "{ \"sonar.scanner.skip\":\"true\" }");
 
     BuildResult result = orchestrator.executeBuild(build);
-    assertThat(result.getLogs()).contains("SonarScanner analysis skipped");
+    assertThat(result.getLogs()).contains("SonarScanner CLI analysis skipped");
   }
 
   @Test

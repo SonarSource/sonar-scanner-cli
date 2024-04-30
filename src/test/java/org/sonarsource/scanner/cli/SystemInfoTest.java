@@ -83,7 +83,7 @@ public class SystemInfoTest {
     verify(mockSystem).getenv("SONAR_SCANNER_OPTS");
 
     verify(logs, never()).info("SonarScanner null");
-    verify(logs).info("SonarScanner " + ScannerVersion.version());
+    verify(logs).info("SonarScanner CLI " + ScannerVersion.version());
     verify(logs).info("Java 1.9 oracle (64-bit)");
     verify(logs).info("linux 2.5 x64");
     verify(logs).info("SONAR_SCANNER_OPTS=arg");

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #
-# SonarScanner Startup Script for Unix
+# SonarScanner CLI Startup Script for Unix
 #
 # Required ENV vars:
 #   JAVA_HOME - Location of Java's installation, optional if use_embedded_jre is set
@@ -10,7 +10,7 @@
 
 SONAR_SCANNER_DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"
 
-echo "Executing SonarScanner in Debug Mode"
+echo "Executing SonarScanner CLI in Debug Mode"
 echo "SONAR_SCANNER_DEBUG_OPTS=\"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000\""
 
 env SONAR_SCANNER_OPTS="$SONAR_SCANNER_OPTS" SONAR_SCANNER_DEBUG_OPTS="$SONAR_SCANNER_DEBUG_OPTS" "`dirname "$0"`"/sonar-scanner "$@"
