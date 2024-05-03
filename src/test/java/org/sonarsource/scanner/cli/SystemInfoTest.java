@@ -21,18 +21,21 @@ package org.sonarsource.scanner.cli;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.event.Level;
 import org.sonarsource.scanner.cli.SystemInfo.System2;
+import testutils.LogTester;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class SystemInfoTest {
+  @RegisterExtension
+  LogTester logTester = new LogTester();
+
   private final System2 mockSystem = mock(System2.class);
-  private final Logs logs = mock(Logs.class);
 
   @BeforeEach
   void setUp() {
@@ -76,18 +79,14 @@ class SystemInfoTest {
     mockJava();
     when(mockSystem.getenv("SONAR_SCANNER_OPTS")).thenReturn("arg");
 
-    SystemInfo.print(logs);
+    SystemInfo.print();
 
     verify(mockSystem).getProperty("java.version");
     verify(mockSystem).getProperty("os.version");
     verify(mockSystem).getenv("SONAR_SCANNER_OPTS");
 
-    verify(logs, never()).info("SonarScanner null");
-    verify(logs).info("SonarScanner CLI " + ScannerVersion.version());
-    verify(logs).info("Java 1.9 oracle (64-bit)");
-    verify(logs).info("linux 2.5 x64");
-    verify(logs).info("SONAR_SCANNER_OPTS=arg");
-    verifyNoMoreInteractions(logs);
+    assertThat(logTester.logs(Level.INFO))
+      .containsOnly("SonarScanner CLI " + ScannerVersion.version(), "Java 1.9 oracle (64-bit)", "linux 2.5 x64", "SONAR_SCANNER_OPTS=arg");
   }
 
   @Test
@@ -97,8 +96,8 @@ class SystemInfoTest {
     when(mockSystem.getenv("SONAR_SCANNER_OPTS"))
       .thenReturn("-Dsonar.login=login -Dsonar.whatever=whatever -Dsonar.password=password -Dsonar.whatever2=whatever2 -Dsonar.token=token");
 
-    SystemInfo.print(logs);
+    SystemInfo.print();
 
-    verify(logs).info("SONAR_SCANNER_OPTS=-Dsonar.login=* -Dsonar.whatever=whatever -Dsonar.password=* -Dsonar.whatever2=whatever2 -Dsonar.token=*");
+    assertThat(logTester.logs(Level.INFO)).contains("SONAR_SCANNER_OPTS=-Dsonar.login=* -Dsonar.whatever=whatever -Dsonar.password=* -Dsonar.whatever2=whatever2 -Dsonar.token=*");
   }
 }

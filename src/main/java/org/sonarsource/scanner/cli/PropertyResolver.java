@@ -31,7 +31,7 @@ public class PropertyResolver {
   private final Properties props;
   private final Properties resolved;
   private final List<String> queue;
-  private Map<String, String> env;
+  private final Map<String, String> env;
 
   public PropertyResolver(Properties props, Map<String, String> env) {
     this.props = props;
@@ -72,7 +72,7 @@ public class PropertyResolver {
     }
 
     Matcher m = placeholderPattern.matcher(propValue);
-    StringBuffer sb = new StringBuffer();
+    var sb = new StringBuilder();
 
     while (m.find()) {
       String varName = (null == m.group(1)) ? m.group(2) : m.group(1);

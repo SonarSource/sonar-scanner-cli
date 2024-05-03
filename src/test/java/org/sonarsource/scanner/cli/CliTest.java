@@ -19,7 +19,14 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.event.Level;
+import testutils.LogTester;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -28,9 +35,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 class CliTest {
+
+  @RegisterExtension
+  LogTester logTester = new LogTester();
+
   private final Exit exit = mock(Exit.class);
-  private Logs logs = new Logs(System.out, System.err);
-  private Cli cli = new Cli(exit, logs);
+  private Cli cli = new Cli(exit);
 
   @Test
   void should_parse_empty_arguments() {
@@ -52,18 +62,16 @@ class CliTest {
 
   @Test
   void should_warn_on_duplicate_properties() {
-    logs = mock(Logs.class);
-    cli = new Cli(exit, logs);
+    cli = new Cli(exit);
     cli.parse(new String[]{"-D", "foo=bar", "--define", "foo=baz"});
-    verify(logs).warn("Property 'foo' with value 'bar' is overridden with value 'baz'");
+    assertThat(logTester.logs(Level.WARN)).contains("Property 'foo' with value 'bar' is overridden with value 'baz'");
   }
 
   @Test
   void should_fail_on_missing_prop() {
-    logs = mock(Logs.class);
-    cli = new Cli(exit, logs);
+    cli = new Cli(exit);
     cli.parse(new String[]{"-D"});
-    verify(logs).error("Missing argument for option -D/--define");
+    assertThat(logTester.logs(Level.ERROR)).contains("Missing argument for option -D/--define");
     verify(exit).exit(Exit.INTERNAL_ERROR);
   }
 
@@ -132,31 +140,32 @@ class CliTest {
     assertThat(cli.properties().get("sonar.verbose")).isNull();
   }
 
-  @Test
-  void should_show_usage() {
-    logs = mock(Logs.class);
-    cli = new Cli(exit, logs);
-    cli.parse(new String[]{"-h"});
-    verify(logs).info("usage: sonar-scanner [options]");
+  @ParameterizedTest
+  @ValueSource(strings = {"-h", "--help"})
+  void should_show_usage(String arg) {
+    var baos = parseAndCaptureStdOut(arg);
+    assertThat(baos.toString()).contains("usage: sonar-scanner [options]");
     verify(exit).exit(Exit.SUCCESS);
   }
 
-  @Test
-  void should_show_usage_full() {
-    logs = mock(Logs.class);
-    cli = new Cli(exit, logs);
-    cli.parse(new String[]{"--help"});
-    verify(logs).info("usage: sonar-scanner [options]");
-    verify(exit).exit(Exit.SUCCESS);
+  private ByteArrayOutputStream parseAndCaptureStdOut(String arg) {
+    var baos = new ByteArrayOutputStream();
+    var savedOut = System.out;
+    try {
+      System.setOut(new PrintStream(baos));
+      cli = new Cli(exit);
+      cli.parse(new String[]{arg});
+    } finally {
+      System.setOut(savedOut);
+    }
+    return baos;
   }
 
   @Test
   void should_show_usage_on_bad_syntax() {
-    logs = mock(Logs.class);
-    cli = new Cli(exit, logs);
-    cli.parse(new String[]{"-w"});
-    verify(logs).error("Unrecognized option: -w");
-    verify(logs).info("usage: sonar-scanner [options]");
+    var baos = parseAndCaptureStdOut("-w");
+    assertThat(baos.toString()).contains("usage: sonar-scanner [options]");
+    assertThat(logTester.logs(Level.ERROR)).contains("Unrecognized option: -w");
     verify(exit).exit(Exit.INTERNAL_ERROR);
   }
 

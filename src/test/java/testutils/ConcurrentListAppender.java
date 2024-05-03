@@ -17,29 +17,16 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.scanner.cli;
+package testutils;
 
-import java.util.Map;
-import java.util.Properties;
-import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
+import ch.qos.logback.core.AppenderBase;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-class ScannerEngineBootstrapperFactory {
+public class ConcurrentListAppender<E> extends AppenderBase<E> {
+  public final Queue<E> list = new ConcurrentLinkedQueue<E>();
 
-  ScannerEngineBootstrapper create(Properties props, String isInvokedFrom) {
-    String appName = "ScannerCLI";
-    String appVersion = ScannerVersion.version();
-    if (isInvokedFrom.contains("/")) {
-      appName = isInvokedFrom.split("/")[0];
-      appVersion = isInvokedFrom.split("/")[1];
-    }
-
-    return newScannerEngineBootstrapper(appName, appVersion)
-      .addBootstrapProperties((Map) props);
+  protected void append(E e) {
+    list.add(e);
   }
-
-  ScannerEngineBootstrapper newScannerEngineBootstrapper(String appName, String appVersion) {
-    return ScannerEngineBootstrapper.create(appName, appVersion, new Slf4jLogOutput());
-  }
-
-
 }

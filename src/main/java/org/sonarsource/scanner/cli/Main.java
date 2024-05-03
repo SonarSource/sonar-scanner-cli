@@ -19,8 +19,11 @@
  */
 package org.sonarsource.scanner.cli;
 
+import ch.qos.logback.classic.Level;
 import java.util.Map;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
 import org.sonarsource.scanner.lib.ScannerEngineFacade;
 import org.sonarsource.scanner.lib.ScannerProperties;
@@ -38,32 +41,31 @@ import org.sonarsource.scanner.lib.ScannerProperties;
  * @since 1.0
  */
 public class Main {
+  private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+
   private static final String SEPARATOR = "------------------------------------------------------------------------";
   private final Exit exit;
   private final Cli cli;
   private final Conf conf;
   private ScannerEngineBootstrapper scannerEngineBootstrapper;
   private final ScannerEngineBootstrapperFactory bootstrapperFactory;
-  private final Logs logger;
 
-  Main(Exit exit, Cli cli, Conf conf, ScannerEngineBootstrapperFactory bootstrapperFactory, Logs logger) {
+  Main(Exit exit, Cli cli, Conf conf, ScannerEngineBootstrapperFactory bootstrapperFactory) {
     this.exit = exit;
     this.cli = cli;
     this.conf = conf;
     this.bootstrapperFactory = bootstrapperFactory;
-    this.logger = logger;
   }
 
   public static void main(String[] args) {
-    Logs logs = new Logs(System.out, System.err);
     Exit exit = new Exit();
-    Cli cli = new Cli(exit, logs).parse(args);
-    Main main = new Main(exit, cli, new Conf(cli, logs, System.getenv()), new ScannerEngineBootstrapperFactory(logs), logs);
+    Cli cli = new Cli(exit).parse(args);
+    Main main = new Main(exit, cli, new Conf(cli, System.getenv()), new ScannerEngineBootstrapperFactory());
     main.analyze();
   }
 
   void analyze() {
-    Stats stats = new Stats(logger).start();
+    Stats stats = new Stats().start();
 
     int status = Exit.INTERNAL_ERROR;
     try {
@@ -86,24 +88,24 @@ public class Main {
     }
   }
 
-  private void logServerType(ScannerEngineFacade engine) {
+  private static void logServerType(ScannerEngineFacade engine) {
     if (engine.isSonarCloud()) {
-      logger.info("Communicating with SonarCloud");
+      LOG.info("Communicating with SonarCloud");
     } else {
       String serverVersion = engine.getServerVersion();
-      logger.info(String.format("Communicating with SonarQube Server %s", serverVersion));
+      LOG.info("Communicating with SonarQube Server {}", serverVersion);
     }
   }
 
   private void checkSkip(Properties properties) {
     if ("true".equalsIgnoreCase(properties.getProperty(ScannerProperties.SKIP))) {
-      logger.info("SonarScanner CLI analysis skipped");
+      LOG.info("SonarScanner CLI analysis skipped");
       exit.exit(Exit.SUCCESS);
     }
   }
 
   private void init(Properties p) {
-    SystemInfo.print(logger);
+    SystemInfo.print();
     if (cli.isDisplayVersionOnly()) {
       exit.exit(Exit.SUCCESS);
     }
@@ -111,39 +113,40 @@ public class Main {
     scannerEngineBootstrapper = bootstrapperFactory.create(p, cli.getInvokedFrom());
   }
 
-  private void configureLogging(Properties props) {
+  private static void configureLogging(Properties props) {
     if ("true".equals(props.getProperty("sonar.verbose"))
       || "DEBUG".equalsIgnoreCase(props.getProperty("sonar.log.level"))
       || "TRACE".equalsIgnoreCase(props.getProperty("sonar.log.level"))) {
-      logger.setDebugEnabled(true);
+      var rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+      rootLogger.setLevel(Level.DEBUG);
     }
   }
 
-  private void displayExecutionResult(Stats stats, String resultMsg) {
-    logger.info(SEPARATOR);
-    logger.info("EXECUTION " + resultMsg);
-    logger.info(SEPARATOR);
+  private static void displayExecutionResult(Stats stats, String resultMsg) {
+    LOG.info(SEPARATOR);
+    LOG.info("EXECUTION {}", resultMsg);
+    LOG.info(SEPARATOR);
     stats.stop();
-    logger.info(SEPARATOR);
+    LOG.info(SEPARATOR);
   }
 
   private void showError(String message, Throwable e, boolean debug) {
     if (debug || !isUserError(e)) {
-      logger.error(message, e);
+      LOG.error(message, e);
     } else {
-      logger.error(message);
-      logger.error(e.getMessage());
+      LOG.error(message);
+      LOG.error(e.getMessage());
       String previousMsg = "";
       for (Throwable cause = e.getCause(); cause != null
         && cause.getMessage() != null
         && !cause.getMessage().equals(previousMsg); cause = cause.getCause()) {
-        logger.error("Caused by: " + cause.getMessage());
+        LOG.error("Caused by: {}", cause.getMessage());
         previousMsg = cause.getMessage();
       }
     }
 
     if (!cli.isDebugEnabled()) {
-      logger.error("");
+      LOG.error("");
       suggestDebugMode();
     }
   }
@@ -155,7 +158,7 @@ public class Main {
 
   private void suggestDebugMode() {
     if (!cli.isEmbedded()) {
-      logger.error("Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
+      LOG.error("Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
     }
   }
 

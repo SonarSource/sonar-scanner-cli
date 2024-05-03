@@ -19,13 +19,12 @@
  */
 package org.sonarsource.scanner.cli;
 
-class Stats {
-  private final Logs logger;
-  private long startTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-  Stats(Logs logger) {
-    this.logger = logger;
-  }
+class Stats {
+  private static final Logger LOG = LoggerFactory.getLogger(Stats.class);
+  private long startTime;
 
   Stats start() {
     startTime = System.currentTimeMillis();
@@ -34,12 +33,12 @@ class Stats {
 
   Stats stop() {
     long stopTime = System.currentTimeMillis() - startTime;
-    logger.info("Total time: " + formatTime(stopTime));
+    LOG.atInfo().addArgument(() -> formatTime(stopTime)).log("Total time: {}");
 
     System.gc();
     Runtime r = Runtime.getRuntime();
     long mb = 1024L * 1024;
-    logger.info("Final Memory: " + (r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb + "M");
+    LOG.atInfo().addArgument((r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb + "M").log("Final Memory: {}");
 
     return this;
   }

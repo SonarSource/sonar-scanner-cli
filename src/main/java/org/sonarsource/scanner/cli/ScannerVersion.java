@@ -19,16 +19,19 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+
+import static java.util.Objects.requireNonNull;
 
 public enum ScannerVersion {
 
   INSTANCE;
 
-  private String version;
+  private final String version;
 
   ScannerVersion() {
-    try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/version.txt"), "UTF-8")) {
+    try (Scanner scanner = new Scanner(requireNonNull(getClass().getResourceAsStream("/version.txt")), StandardCharsets.UTF_8)) {
       this.version = scanner.next();
     }
   }
