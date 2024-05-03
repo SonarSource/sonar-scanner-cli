@@ -20,20 +20,20 @@
 package org.sonarsource.scanner.cli;
 
 import java.io.PrintStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class StatsTest {
+class StatsTest {
   private final PrintStream stdOut = mock(PrintStream.class);
   private final PrintStream stdErr = mock(PrintStream.class);
   private final Logs logs = new Logs(stdOut, stdErr);
 
   @Test
-  public void shouldPrintStats() {
+  void shouldPrintStats() {
     new Stats(logs).start().stop();
 
     verify(stdOut).println(Mockito.contains("Total time: "));
@@ -41,7 +41,7 @@ public class StatsTest {
   }
 
   @Test
-  public void shouldFormatTime() {
+  void shouldFormatTime() {
     assertThat(Stats.formatTime(1 * 60 * 60 * 1000 + 2 * 60 * 1000 + 3 * 1000 + 400)).isEqualTo("1:02:03.400s");
     assertThat(Stats.formatTime(2 * 60 * 1000 + 3 * 1000 + 400)).isEqualTo("2:03.400s");
     assertThat(Stats.formatTime(3 * 1000 + 400)).isEqualTo("3.400s");

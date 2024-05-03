@@ -21,8 +21,8 @@ package org.sonarsource.scanner.cli;
 
 import java.util.Map;
 import java.util.Properties;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -61,8 +61,8 @@ public class MainTest {
   @Mock
   private Logs logs;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     MockitoAnnotations.initMocks(this);
     when(scannerEngineBootstrapperFactory.create(any(Properties.class), any(String.class))).thenReturn(bootstrapper);
     when(bootstrapper.bootstrap()).thenReturn(engine);
@@ -70,7 +70,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_execute_scanner_engine() {
+  void should_execute_scanner_engine() {
     when(cli.getInvokedFrom()).thenReturn("");
     Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
     main.analyze();
@@ -83,7 +83,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_exit_with_error_on_error_during_analysis() {
+  void should_exit_with_error_on_error_during_analysis() {
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
     doThrow(e).when(engine).analyze(any());
@@ -97,7 +97,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_exit_with_error_on_error_during_bootstrap() {
+  void should_exit_with_error_on_error_during_bootstrap() {
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
     doThrow(e).when(bootstrapper).bootstrap();
@@ -114,7 +114,7 @@ public class MainTest {
   }
 
   @Test
-  public void show_stacktrace() {
+  void show_stacktrace() {
     Exception e = createException(false);
     testException(e, false, false, Exit.INTERNAL_ERROR);
 
@@ -123,7 +123,7 @@ public class MainTest {
   }
 
   @Test
-  public void dont_show_MessageException_stacktrace() {
+  void dont_show_MessageException_stacktrace() {
     Exception e = createException(true);
     testException(e, false, false, Exit.USER_ERROR);
 
@@ -136,7 +136,7 @@ public class MainTest {
   }
 
   @Test
-  public void dont_show_MessageException_stacktrace_embedded() {
+  void dont_show_MessageException_stacktrace_embedded() {
     Exception e = createException(true);
     testException(e, false, true, Exit.USER_ERROR);
 
@@ -148,7 +148,7 @@ public class MainTest {
   }
 
   @Test
-  public void show_MessageException_stacktrace_in_debug() {
+  void show_MessageException_stacktrace_in_debug() {
     Exception e = createException(true);
     testException(e, true, false, Exit.USER_ERROR);
 
@@ -157,7 +157,7 @@ public class MainTest {
   }
 
   @Test
-  public void show_MessageException_stacktrace_in_debug_embedded() {
+  void show_MessageException_stacktrace_in_debug_embedded() {
     Exception e = createException(true);
     testException(e, true, true, Exit.USER_ERROR);
 
@@ -166,7 +166,7 @@ public class MainTest {
   }
 
   @Test
-  public void show_stacktrace_in_debug() {
+  void show_stacktrace_in_debug() {
     Exception e = createException(false);
     testException(e, true, false, Exit.INTERNAL_ERROR);
 
@@ -202,7 +202,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_only_display_version() {
+  void should_only_display_version() {
     Properties p = new Properties();
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(cli.getInvokedFrom()).thenReturn("");
@@ -219,7 +219,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_skip() {
+  void should_skip() {
     Properties p = new Properties();
     p.setProperty(ScannerProperties.SKIP, "true");
     when(conf.properties()).thenReturn(p);
@@ -237,7 +237,7 @@ public class MainTest {
   }
 
   @Test
-  public void shouldLogServerVersion() {
+  void shouldLogServerVersion() {
     when(engine.isSonarCloud()).thenReturn(false);
     when(engine.getServerVersion()).thenReturn("5.5");
     Properties p = new Properties();
@@ -251,7 +251,7 @@ public class MainTest {
   }
 
   @Test
-  public void should_log_SonarCloud_server() {
+  void should_log_SonarCloud_server() {
     when(engine.isSonarCloud()).thenReturn(true);
     Properties p = new Properties();
     when(conf.properties()).thenReturn(p);
@@ -263,25 +263,25 @@ public class MainTest {
   }
 
   @Test
-  public void should_configure_logging() {
+  void should_configure_logging() {
     Properties analysisProps = testLogging("sonar.verbose", "true");
     assertThat(analysisProps.getProperty("sonar.verbose")).isEqualTo("true");
   }
 
   @Test
-  public void should_configure_logging_trace() {
+  void should_configure_logging_trace() {
     Properties analysisProps = testLogging("sonar.log.level", "TRACE");
     assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("TRACE");
   }
 
   @Test
-  public void should_set_bootstrap_start_time_in_millis() {
+  void should_set_bootstrap_start_time_in_millis() {
     Properties analysisProps = execute("sonar.scanner.bootstrapStartTime", "1714137496104");
     assertThat(analysisProps.getProperty("sonar.scanner.bootstrapStartTime")).isEqualTo("1714137496104");
   }
 
   @Test
-  public void should_configure_logging_debug() {
+  void should_configure_logging_debug() {
     Properties analysisProps = testLogging("sonar.log.level", "DEBUG");
     assertThat(analysisProps.getProperty("sonar.log.level")).isEqualTo("DEBUG");
   }

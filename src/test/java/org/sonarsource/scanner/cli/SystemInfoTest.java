@@ -19,8 +19,8 @@
  */
 package org.sonarsource.scanner.cli;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.sonarsource.scanner.cli.SystemInfo.System2;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,17 +30,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-public class SystemInfoTest {
+class SystemInfoTest {
   private final System2 mockSystem = mock(System2.class);
   private final Logs logs = mock(Logs.class);
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     SystemInfo.setSystem(mockSystem);
   }
 
   @Test
-  public void test_java() {
+  void test_java() {
     mockJava();
     assertThat(SystemInfo.java()).isEqualTo("Java 1.9 oracle (64-bit)");
 
@@ -52,7 +52,7 @@ public class SystemInfoTest {
   }
 
   @Test
-  public void test_os() {
+  void test_os() {
     mockOs();
 
     assertThat(SystemInfo.os()).isEqualTo("linux 2.5 x64");
@@ -71,7 +71,7 @@ public class SystemInfoTest {
   }
 
   @Test
-  public void should_print() {
+  void should_print() {
     mockOs();
     mockJava();
     when(mockSystem.getenv("SONAR_SCANNER_OPTS")).thenReturn("arg");
@@ -91,7 +91,7 @@ public class SystemInfoTest {
   }
 
   @Test
-  public void should_not_print_sensitive_data() {
+  void should_not_print_sensitive_data() {
     mockOs();
     mockJava();
     when(mockSystem.getenv("SONAR_SCANNER_OPTS"))

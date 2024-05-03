@@ -27,23 +27,19 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.commons.lang.SystemUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.apache.commons.lang3.SystemUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ConfTest {
-
-  @Rule
-  public TemporaryFolder temp = new TemporaryFolder();
+class ConfTest {
 
   private final Map<String, String> env = new HashMap<>();
   private final Properties args = new Properties();
@@ -51,14 +47,14 @@ public class ConfTest {
   private final Cli cli = mock(Cli.class);
   private final Conf conf = new Conf(cli, logs, env);
 
-  @Before
-  public void initConf() {
+  @BeforeEach
+  void initConf() {
     env.clear();
     when(cli.properties()).thenReturn(args);
   }
 
   @Test
-  public void should_load_global_settings_by_home() throws Exception {
+  void should_load_global_settings_by_home() throws Exception {
     Path home = Paths.get(getClass().getResource("ConfTest/shouldLoadRunnerSettingsByHome/").toURI());
     args.setProperty("scanner.home", home.toAbsolutePath().toString());
 
@@ -67,14 +63,14 @@ public class ConfTest {
   }
 
   @Test
-  public void should_not_fail_if_no_home() {
+  void should_not_fail_if_no_home() {
     assertThat(conf.properties()).isNotEmpty();
     // worst case, use current path
     assertThat(conf.properties().getProperty("sonar.projectBaseDir")).isEqualTo(Paths.get("").toAbsolutePath().toString());
   }
 
   @Test
-  public void should_set_bootstrap_time_only_once() {
+  void should_set_bootstrap_time_only_once() {
     Properties properties = conf.properties();
 
     assertThat(properties).containsKey("sonar.scanner.bootstrapStartTime");
@@ -85,7 +81,7 @@ public class ConfTest {
   }
 
   @Test
-  public void base_dir_can_be_relative() throws URISyntaxException {
+  void base_dir_can_be_relative() throws URISyntaxException {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfiguration/project").toURI());
     args.setProperty("project.home", projectHome.getParent().toAbsolutePath().toString());
     args.setProperty("sonar.projectBaseDir", "project");
@@ -98,7 +94,7 @@ public class ConfTest {
   }
 
   @Test
-  public void should_load_conf_by_direct_path() throws Exception {
+  void should_load_conf_by_direct_path() throws Exception {
     Path settings = Paths.get(getClass().getResource("ConfTest/shouldLoadRunnerSettingsByDirectPath/other-conf.properties").toURI());
     args.setProperty("scanner.settings", settings.toAbsolutePath().toString());
 
@@ -106,7 +102,7 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldLoadCompleteConfiguration() throws Exception {
+  void shouldLoadCompleteConfiguration() throws Exception {
     Path runnerHome = Paths.get(getClass().getResource("ConfTest/shouldLoadCompleteConfiguration/runner").toURI());
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadCompleteConfiguration/project").toURI());
     args.setProperty("scanner.home", runnerHome.toAbsolutePath().toString());
@@ -121,7 +117,7 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldLoadModuleConfiguration() throws Exception {
+  void shouldLoadModuleConfiguration() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfiguration/project").toURI());
     args.setProperty("project.home", projectHome.toAbsolutePath().toString());
 
@@ -133,7 +129,7 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldSupportDeepModuleConfigurationInRoot() throws Exception {
+  void shouldSupportDeepModuleConfigurationInRoot() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldSupportDeepModuleConfigurationInRoot/project").toURI());
     args.setProperty("project.home", projectHome.toAbsolutePath().toString());
 
@@ -151,7 +147,7 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldLoadModuleConfigurationOverrideBasedir() throws Exception {
+  void shouldLoadModuleConfigurationOverrideBasedir() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());
     args.setProperty("project.home", projectHome.toAbsolutePath().toString());
 
@@ -164,7 +160,7 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldCliOverrideSettingFiles() throws Exception {
+  void shouldCliOverrideSettingFiles() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());
     args.setProperty("project.home", projectHome.toAbsolutePath().toString());
     args.setProperty("module1.sonar.projectName", "mod1");
@@ -180,7 +176,7 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldUseCliToDiscoverModules() throws Exception {
+  void shouldUseCliToDiscoverModules() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());
     args.setProperty("project.home", projectHome.toAbsolutePath().toString());
     args.setProperty("sonar.modules", "module1");
@@ -195,7 +191,7 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldNotUseCurrentDir() throws Exception {
+  void shouldNotUseCurrentDir() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());
     args.setProperty("project.home", projectHome.toAbsolutePath().toString());
 
@@ -208,7 +204,7 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldLoadModuleConfigurationWithoutRootConf() throws Exception {
+  void shouldLoadModuleConfigurationWithoutRootConf() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfigurationWithoutRootConf/project").toURI());
     args.setProperty("project.home", projectHome.toAbsolutePath().toString());
 
@@ -221,7 +217,7 @@ public class ConfTest {
   }
 
   @Test
-  public void failModuleBaseDirDoesNotExist() {
+  void failModuleBaseDirDoesNotExist() {
     args.setProperty("sonar.modules", "module1");
     args.setProperty("module1.sonar.projectBaseDir", "invalid");
 
@@ -231,7 +227,7 @@ public class ConfTest {
   }
 
   @Test
-  public void failModulePropertyFileDoesNotExist() {
+  void failModulePropertyFileDoesNotExist() {
     args.setProperty("sonar.modules", "module1");
     args.setProperty("module1.sonar.projectConfigFile", "invalid");
 
@@ -241,30 +237,30 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldSupportSettingBaseDirFromCli() throws Exception {
-    Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfiguration/project").toURI());
-    args.setProperty("project.home", temp.newFolder().getCanonicalPath());
-    args.setProperty("sonar.projectBaseDir", projectHome.toAbsolutePath().toString());
+  void shouldSupportSettingBaseDirFromCli(@TempDir Path projectHome) throws Exception {
+    Path projectBaseDir = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfiguration/project").toURI());
+    args.setProperty("project.home", projectHome.toString());
+    args.setProperty("sonar.projectBaseDir", projectBaseDir.toAbsolutePath().toString());
 
     Properties properties = conf.properties();
 
     assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
     assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
-    assertThat(properties.getProperty("sonar.projectBaseDir")).isEqualTo(projectHome.toString());
+    assertThat(properties.getProperty("sonar.projectBaseDir")).isEqualTo(projectBaseDir.toString());
   }
 
   @Test
-  public void ignoreEmptyModule() throws Exception {
-    Path projectHome = Paths.get(getClass().getResource("ConfTest/emptyModules/project").toURI());
-    args.setProperty("project.home", temp.newFolder().getCanonicalPath());
-    args.setProperty("sonar.projectBaseDir", projectHome.toAbsolutePath().toString());
+  void ignoreEmptyModule(@TempDir Path projectHome) throws Exception {
+    Path projectBaseDir = Paths.get(getClass().getResource("ConfTest/emptyModules/project").toURI());
+    args.setProperty("project.home", projectHome.toString());
+    args.setProperty("sonar.projectBaseDir", projectBaseDir.toAbsolutePath().toString());
 
     assertThatCode(conf::properties)
       .doesNotThrowAnyException();
   }
 
   @Test
-  public void shouldGetList() {
+  void shouldGetList() {
     Properties props = new Properties();
 
     props.put("prop", "  foo  ,,  bar  , \n\ntoto,tutu");
@@ -272,9 +268,8 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldNotResolveSymlinks() throws IOException, URISyntaxException {
+  void shouldNotResolveSymlinks(@TempDir Path root) throws IOException, URISyntaxException {
     assumeTrue(SystemUtils.IS_OS_UNIX);
-    Path root = temp.getRoot().toPath();
     Path realProjectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfiguration/project").toURI());
     Path linkProjectHome = root.resolve("link");
     try {
@@ -295,7 +290,7 @@ public class ConfTest {
 
   // SQSCANNER-24
   @Test
-  public void should_load_project_settings_using_property() throws Exception {
+  void should_load_project_settings_using_property() throws Exception {
     Path home = Paths.get(getClass().getResource("ConfTest/shouldOverrideProjectSettingsPath/").toURI());
     args.setProperty("project.home", home.toAbsolutePath().toString());
 
