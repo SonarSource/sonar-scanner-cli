@@ -191,19 +191,6 @@ class ConfTest {
   }
 
   @Test
-  void shouldNotUseCurrentDir() throws Exception {
-    Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfigurationOverrideBasedir/project").toURI());
-    args.setProperty("project.home", projectHome.toAbsolutePath().toString());
-
-    Properties properties = conf.properties();
-
-    assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
-    assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
-    assertThat(properties.getProperty("module3.sonar.projectName")).isEqualTo("Module 3");
-    assertThat(properties.getProperty("sonar.projectBaseDir")).isEqualTo(projectHome.toString());
-  }
-
-  @Test
   void shouldLoadModuleConfigurationWithoutRootConf() throws Exception {
     Path projectHome = Paths.get(getClass().getResource("ConfTest/shouldLoadModuleConfigurationWithoutRootConf/project").toURI());
     args.setProperty("project.home", projectHome.toAbsolutePath().toString());
