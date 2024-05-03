@@ -20,7 +20,7 @@
 package org.sonarsource.scanner.cli;
 
 import java.util.Properties;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,14 +33,14 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class ScannerEngineBootstrapperFactoryTest {
+class ScannerEngineBootstrapperFactoryTest {
 
   private final Properties props = new Properties();
   private final Logs logs = mock(Logs.class);
-  private ScannerEngineBootstrapperFactory underTest = new ScannerEngineBootstrapperFactory(logs);
+  private final ScannerEngineBootstrapperFactory underTest = new ScannerEngineBootstrapperFactory(logs);
 
   @Test
-  public void should_create_engine_bootstrapper_and_pass_app_and_properties() {
+  void should_create_engine_bootstrapper_and_pass_app_and_properties() {
     props.setProperty("foo", "bar");
     var spy = spy(underTest);
     var mockedBootstrapper = mock(ScannerEngineBootstrapper.class);
@@ -55,7 +55,7 @@ public class ScannerEngineBootstrapperFactoryTest {
   }
 
   @Test
-  public void should_create_engine_bootstrapper_with_app_from_argument() {
+  void should_create_engine_bootstrapper_with_app_from_argument() {
     var spy = spy(underTest);
     var mockedBootstrapper = mock(ScannerEngineBootstrapper.class);
     when(mockedBootstrapper.addBootstrapProperties(any())).thenReturn(mockedBootstrapper);
@@ -68,7 +68,7 @@ public class ScannerEngineBootstrapperFactoryTest {
   }
 
   @Test
-  public void if_from_argument_is_not_regex_compliant_revert_to_default_scanner_name() {
+  void if_from_argument_is_not_regex_compliant_revert_to_default_scanner_name() {
     var spy = spy(underTest);
     var mockedBootstrapper = mock(ScannerEngineBootstrapper.class);
     when(mockedBootstrapper.addBootstrapProperties(any())).thenReturn(mockedBootstrapper);

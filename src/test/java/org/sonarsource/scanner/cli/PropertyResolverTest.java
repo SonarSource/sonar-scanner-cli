@@ -22,18 +22,15 @@ package org.sonarsource.scanner.cli;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class PropertyResolverTest {
-  @Rule
-  public ExpectedException exception = ExpectedException.none();
+class PropertyResolverTest {
 
   @Test
-  public void resolve_properties() {
+  void resolve_properties() {
     Properties map = new Properties();
     Map<String, String> env = new HashMap<>();
 
@@ -58,7 +55,7 @@ public class PropertyResolverTest {
   }
 
   @Test
-  public void use_env() {
+  void use_env() {
     Properties map = new Properties();
     Map<String, String> env = new HashMap<>();
 
@@ -76,7 +73,7 @@ public class PropertyResolverTest {
   }
 
   @Test
-  public void resolve_recursively() {
+  void resolve_recursively() {
     Properties map = new Properties();
     Map<String, String> env = new HashMap<>();
     map.put("A", "value a");
@@ -91,7 +88,7 @@ public class PropertyResolverTest {
   }
 
   @Test
-  public void dont_resolve_nested() {
+  void dont_resolve_nested() {
     Properties map = new Properties();
     Map<String, String> env = new HashMap<>();
     map.put("A", "value a");
@@ -106,7 +103,7 @@ public class PropertyResolverTest {
   }
 
   @Test
-  public void missing_var() {
+  void missing_var() {
     Map<String, String> env = new HashMap<>();
     Properties map = new Properties();
     map.put("A", "/path/${missing} var/");
@@ -118,7 +115,7 @@ public class PropertyResolverTest {
   }
 
   @Test
-  public void fail_loop_properties_resolution() {
+  void fail_loop_properties_resolution() {
     Properties map = new Properties();
     Map<String, String> env = new HashMap<>();
 
@@ -126,14 +123,13 @@ public class PropertyResolverTest {
     map.put("A", "${B}");
     map.put("B", "${A}");
 
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("variable: B");
     PropertyResolver resolver = new PropertyResolver(map, env);
-    resolver.resolve();
+
+    assertThatThrownBy(resolver::resolve).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("variable: B");
   }
 
   @Test
-  public void preserve_empty() {
+  void preserve_empty() {
     Properties map = new Properties();
     Map<String, String> env = new HashMap<>();
 

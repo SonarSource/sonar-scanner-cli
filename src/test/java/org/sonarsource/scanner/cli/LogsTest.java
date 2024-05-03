@@ -20,8 +20,8 @@
 package org.sonarsource.scanner.cli;
 
 import java.io.PrintStream;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-public class LogsTest {
+class LogsTest {
   @Mock
   private PrintStream stdOut;
 
@@ -41,28 +41,28 @@ public class LogsTest {
 
   private Logs logs;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     MockitoAnnotations.initMocks(this);
     logs = new Logs(stdOut, stdErr);
   }
 
   @Test
-  public void testInfo() {
+  void testInfo() {
     logs.info("info");
     verify(stdOut).println("INFO: info");
     verifyNoMoreInteractions(stdOut, stdErr);
   }
 
   @Test
-  public void testWarn() {
+  void testWarn() {
     logs.warn("warn");
     verify(stdOut).println("WARN: warn");
     verifyNoMoreInteractions(stdOut, stdErr);
   }
 
   @Test
-  public void testWarnWithTimestamp() {
+  void testWarnWithTimestamp() {
     logs.setDebugEnabled(true);
     logs.warn("warn");
     verify(stdOut).println(ArgumentMatchers.matches("\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d WARN: warn"));
@@ -70,7 +70,7 @@ public class LogsTest {
   }
 
   @Test
-  public void testError() {
+  void testError() {
     Exception e = new NullPointerException("exception");
     logs.error("error1");
     verify(stdErr).println("ERROR: error1");
@@ -82,7 +82,7 @@ public class LogsTest {
   }
 
   @Test
-  public void testDebug() {
+  void testDebug() {
     logs.setDebugEnabled(true);
 
     logs.debug("debug");
@@ -94,7 +94,7 @@ public class LogsTest {
   }
 
   @Test
-  public void should_forward_logs() {
+  void should_forward_logs() {
     var mockedLogs = mock(Logs.class);
     var logOutput = new Logs.LogOutputAdapter(mockedLogs);
 

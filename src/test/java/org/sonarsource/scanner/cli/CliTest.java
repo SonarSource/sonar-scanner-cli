@@ -19,7 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -27,13 +27,13 @@ import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class CliTest {
+class CliTest {
   private final Exit exit = mock(Exit.class);
   private Logs logs = new Logs(System.out, System.err);
   private Cli cli = new Cli(exit, logs);
 
   @Test
-  public void should_parse_empty_arguments() {
+  void should_parse_empty_arguments() {
     cli.parse(new String[0]);
     assertThat(cli.properties()).isNotEmpty();
     assertThat(cli.isDebugEnabled()).isFalse();
@@ -42,7 +42,7 @@ public class CliTest {
   }
 
   @Test
-  public void should_extract_properties() {
+  void should_extract_properties() {
     cli.parse(new String[]{"-D", "foo=bar", "--define", "hello=world", "-Dboolean"});
     assertThat(cli.properties()).contains(
       entry("foo", "bar"),
@@ -51,7 +51,7 @@ public class CliTest {
   }
 
   @Test
-  public void should_warn_on_duplicate_properties() {
+  void should_warn_on_duplicate_properties() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
     cli.parse(new String[]{"-D", "foo=bar", "--define", "foo=baz"});
@@ -59,7 +59,7 @@ public class CliTest {
   }
 
   @Test
-  public void should_fail_on_missing_prop() {
+  void should_fail_on_missing_prop() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
     cli.parse(new String[]{"-D"});
@@ -68,72 +68,72 @@ public class CliTest {
   }
 
   @Test
-  public void should_not_fail_with_errors_option() {
+  void should_not_fail_with_errors_option() {
     assertThatNoException().isThrownBy(() -> cli.parse(new String[]{"-e"}));
   }
 
   @Test
-  public void should_enable_debug_mode() {
+  void should_enable_debug_mode() {
     cli.parse(new String[]{"-X"});
     assertThat(cli.isDebugEnabled()).isTrue();
     assertThat(cli.properties()).containsEntry("sonar.verbose", "true");
   }
 
   @Test
-  public void should_enable_debug_mode_full() {
+  void should_enable_debug_mode_full() {
     cli.parse(new String[]{"--debug"});
     assertThat(cli.isDebugEnabled()).isTrue();
     assertThat(cli.properties()).containsEntry("sonar.verbose", "true");
   }
 
   @Test
-  public void should_show_version() {
+  void should_show_version() {
     cli.parse(new String[]{"-v"});
     assertThat(cli.isDisplayVersionOnly()).isTrue();
   }
 
   @Test
-  public void should_show_version_full() {
+  void should_show_version_full() {
     cli.parse(new String[]{"--version"});
     assertThat(cli.isDisplayVersionOnly()).isTrue();
   }
 
   @Test
-  public void should_enable_stacktrace_log() {
+  void should_enable_stacktrace_log() {
     cli.parse(new String[]{"-e"});
     assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.properties().get("sonar.verbose")).isNull();
   }
 
   @Test
-  public void should_enable_stacktrace_log_full() {
+  void should_enable_stacktrace_log_full() {
     cli.parse(new String[]{"--errors"});
     assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.properties().get("sonar.verbose")).isNull();
   }
 
   @Test
-  public void should_parse_from_argument() {
+  void should_parse_from_argument() {
     cli.parse(new String[]{"--from=ScannerMSBuild/4.8"});
     assertThat(cli.getInvokedFrom()).isNotEmpty();
     assertThat(cli.getInvokedFrom()).isEqualTo("ScannerMSBuild/4.8");
   }
 
   @Test
-  public void from_argument_is_only_from_let_value_empty() {
+  void from_argument_is_only_from_let_value_empty() {
     cli.parse(new String[]{"--from="});
     assertThat(cli.getInvokedFrom()).isEmpty();
   }
 
   @Test
-  public void should_disable_debug_mode_and_stacktrace_log_by_default() {
+  void should_disable_debug_mode_and_stacktrace_log_by_default() {
     cli.parse(new String[0]);
     assertThat(cli.isDebugEnabled()).isFalse();
     assertThat(cli.properties().get("sonar.verbose")).isNull();
   }
 
   @Test
-  public void should_show_usage() {
+  void should_show_usage() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
     cli.parse(new String[]{"-h"});
@@ -142,7 +142,7 @@ public class CliTest {
   }
 
   @Test
-  public void should_show_usage_full() {
+  void should_show_usage_full() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
     cli.parse(new String[]{"--help"});
@@ -151,7 +151,7 @@ public class CliTest {
   }
 
   @Test
-  public void should_show_usage_on_bad_syntax() {
+  void should_show_usage_on_bad_syntax() {
     logs = mock(Logs.class);
     cli = new Cli(exit, logs);
     cli.parse(new String[]{"-w"});
@@ -161,7 +161,7 @@ public class CliTest {
   }
 
   @Test
-  public void should_enable_embedded_mode() {
+  void should_enable_embedded_mode() {
     cli.parse(new String[]{"--embedded"});
     assertThat(cli.isEmbedded()).isTrue();
   }
