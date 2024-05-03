@@ -22,28 +22,30 @@ package org.sonarsource.scanner.cli;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.event.Level;
+import org.sonarsource.scanner.lib.LogOutput;
 import testutils.LogTester;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StatsTest {
+class Slf4jLogOutputTest {
+
   @RegisterExtension
-  LogTester logTester = new LogTester();
+  LogTester logTester = new LogTester().setLevel(Level.TRACE);
 
   @Test
-  void shouldPrintStats() {
-    new Stats().start().stop();
+  void make_coverage_happy() {
+    var underTest = new Slf4jLogOutput();
+    underTest.log("trace", LogOutput.Level.TRACE);
+    underTest.log("debug", LogOutput.Level.DEBUG);
+    underTest.log("info", LogOutput.Level.INFO);
+    underTest.log("warn", LogOutput.Level.WARN);
+    underTest.log("error", LogOutput.Level.ERROR);
 
-    assertThat(logTester.logs(Level.INFO)).hasSize(2);
-    assertThat(logTester.logs(Level.INFO).get(0)).startsWith("Total time: ");
-    assertThat(logTester.logs(Level.INFO).get(1)).startsWith("Final Memory: ");
+    assertThat(logTester.logs(Level.TRACE)).containsOnly("trace");
+    assertThat(logTester.logs(Level.DEBUG)).containsOnly("debug");
+    assertThat(logTester.logs(Level.INFO)).containsOnly("info");
+    assertThat(logTester.logs(Level.WARN)).containsOnly("warn");
+    assertThat(logTester.logs(Level.ERROR)).containsOnly("error");
   }
 
-  @Test
-  void shouldFormatTime() {
-    assertThat(Stats.formatTime(1 * 60 * 60 * 1000 + 2 * 60 * 1000 + 3 * 1000 + 400)).isEqualTo("1:02:03.400s");
-    assertThat(Stats.formatTime(2 * 60 * 1000 + 3 * 1000 + 400)).isEqualTo("2:03.400s");
-    assertThat(Stats.formatTime(3 * 1000 + 400)).isEqualTo("3.400s");
-    assertThat(Stats.formatTime(400)).isEqualTo("0.400s");
-  }
 }

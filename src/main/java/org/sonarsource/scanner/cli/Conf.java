@@ -31,9 +31,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonarsource.scanner.lib.EnvironmentConfig;
 
 class Conf {
+  private static final Logger LOG = LoggerFactory.getLogger(Conf.class);
+
   private static final String SCANNER_HOME = "scanner.home";
   private static final String SCANNER_SETTINGS = "scanner.settings";
   private static final String PROJECT_HOME = "project.home";
@@ -46,13 +50,11 @@ class Conf {
   private static final String BOOTSTRAP_START_TIME = "sonar.scanner.bootstrapStartTime";
 
   private final Cli cli;
-  private final Logs logger;
   private final Map<String, String> env;
   private final long startTimeMs;
 
-  Conf(Cli cli, Logs logger, Map<String, String> env) {
+  Conf(Cli cli, Map<String, String> env) {
     this.cli = cli;
-    this.logger = logger;
     this.env = env;
     this.startTimeMs = System.currentTimeMillis();
   }
@@ -80,7 +82,7 @@ class Conf {
   }
 
   private Map<String, String> loadEnvironmentProperties() {
-    return EnvironmentConfig.load(logger.getLogOutputAdapter());
+    return EnvironmentConfig.load(new Slf4jLogOutput());
   }
 
   private Properties loadGlobalProperties() {
@@ -93,10 +95,10 @@ class Conf {
     Path settingsFile = locatePropertiesFile(knownPropsAtThatPoint, SCANNER_HOME, "conf/sonar-scanner.properties",
       SCANNER_SETTINGS);
     if (settingsFile != null && Files.isRegularFile(settingsFile)) {
-      logger.info("Scanner configuration file: " + settingsFile);
+      LOG.info("Scanner configuration file: {}", settingsFile);
       return toProperties(settingsFile);
     }
-    logger.info("Scanner configuration file: NONE");
+    LOG.info("Scanner configuration file: NONE");
     return new Properties();
   }
 
@@ -111,10 +113,10 @@ class Conf {
     Path defaultRootSettingsFile = getRootProjectBaseDir(knownPropsAtThatPoint).resolve(SONAR_PROJECT_PROPERTIES_FILENAME);
     Path rootSettingsFile = locatePropertiesFile(defaultRootSettingsFile, knownPropsAtThatPoint, PROJECT_SETTINGS);
     if (rootSettingsFile != null && Files.isRegularFile(rootSettingsFile)) {
-      logger.info("Project root configuration file: " + rootSettingsFile);
+      LOG.info("Project root configuration file: {}", rootSettingsFile);
       rootProps.putAll(toProperties(rootSettingsFile));
     } else {
-      logger.info("Project root configuration file: NONE");
+      LOG.info("Project root configuration file: NONE");
     }
 
     Properties projectProps = new Properties();
@@ -302,10 +304,9 @@ class Conf {
   /**
    * Transforms a comma-separated list String property in to a array of
    * trimmed strings.
-   *
+   * <p>
    * This works even if they are separated by whitespace characters (space
    * char, EOL, ...)
-   *
    */
   static String[] getListFromProperty(Properties properties, String key) {
     String value = properties.getProperty(key, "").trim();
@@ -314,12 +315,12 @@ class Conf {
     }
     String[] values = value.split(",");
     List<String> trimmedValues = new ArrayList<>();
-    for (int i = 0; i < values.length; i++) {
-      String trimmedValue = values[i].trim();
+    for (String s : values) {
+      String trimmedValue = s.trim();
       if (!trimmedValue.isEmpty()) {
         trimmedValues.add(trimmedValue);
       }
     }
-    return trimmedValues.toArray(new String[trimmedValues.size()]);
+    return trimmedValues.toArray(new String[0]);
   }
 }

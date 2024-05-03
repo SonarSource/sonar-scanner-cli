@@ -19,27 +19,32 @@
  */
 package org.sonarsource.scanner.cli;
 
-import java.util.Map;
-import java.util.Properties;
-import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sonarsource.scanner.lib.LogOutput;
 
-class ScannerEngineBootstrapperFactory {
+public class Slf4jLogOutput implements LogOutput {
 
-  ScannerEngineBootstrapper create(Properties props, String isInvokedFrom) {
-    String appName = "ScannerCLI";
-    String appVersion = ScannerVersion.version();
-    if (isInvokedFrom.contains("/")) {
-      appName = isInvokedFrom.split("/")[0];
-      appVersion = isInvokedFrom.split("/")[1];
+  private static final Logger LOG = LoggerFactory.getLogger(Slf4jLogOutput.class);
+
+  @Override
+  public void log(String s, Level level) {
+    switch (level) {
+      case TRACE:
+        LOG.trace(s);
+        break;
+      case DEBUG:
+        LOG.debug(s);
+        break;
+      case INFO:
+        LOG.info(s);
+        break;
+      case WARN:
+        LOG.warn(s);
+        break;
+      case ERROR:
+        LOG.error(s);
+        break;
     }
-
-    return newScannerEngineBootstrapper(appName, appVersion)
-      .addBootstrapProperties((Map) props);
   }
-
-  ScannerEngineBootstrapper newScannerEngineBootstrapper(String appName, String appVersion) {
-    return ScannerEngineBootstrapper.create(appName, appVersion, new Slf4jLogOutput());
-  }
-
-
 }

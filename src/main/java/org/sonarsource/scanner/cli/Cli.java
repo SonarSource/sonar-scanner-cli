@@ -19,11 +19,16 @@
  */
 package org.sonarsource.scanner.cli;
 
+import ch.qos.logback.classic.Level;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.util.Arrays.asList;
 
 class Cli {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Cli.class);
 
   private boolean debugEnabled = false;
   private boolean displayVersionOnly = false;
@@ -31,11 +36,9 @@ class Cli {
   private String invokedFrom = "";
   private final Properties props = new Properties();
   private final Exit exit;
-  private final Logs logger;
 
-  public Cli(Exit exit, Logs logger) {
+  public Cli(Exit exit) {
     this.exit = exit;
-    this.logger = logger;
   }
 
   boolean isDebugEnabled() {
@@ -80,19 +83,19 @@ class Cli {
       displayVersionOnly = true;
 
     } else if (asList("-e", "--errors").contains(arg)) {
-      logger
+      LOG
         .info("Option -e/--errors is no longer supported and will be ignored");
 
     } else if (asList("-X", "--debug").contains(arg)) {
       props.setProperty("sonar.verbose", "true");
       debugEnabled = true;
-      logger.setDebugEnabled(true);
-
+      var rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+      rootLogger.setLevel(Level.DEBUG);
     } else if (asList("-D", "--define").contains(arg)) {
       return processProp(args, pos);
 
     } else if ("--embedded".equals(arg)) {
-      logger.info(
+      LOG.info(
         "Option --embedded is deprecated and will be removed in a future release.");
       embedded = true;
 
@@ -128,7 +131,7 @@ class Cli {
     displayVersionOnly = false;
   }
 
-  private void appendPropertyTo(String arg, Properties props) {
+  private static void appendPropertyTo(String arg, Properties props) {
     final String key;
     final String value;
     int j = arg.indexOf('=');
@@ -141,25 +144,24 @@ class Cli {
     }
     Object oldValue = props.setProperty(key, value);
     if (oldValue != null) {
-      logger.warn("Property '" + key + "' with value '" + oldValue + "' is "
-        + "overridden with value '" + value + "'");
+      LOG.warn("Property '{}' with value '{}' is overridden with value '{}'", key, oldValue, value);
     }
   }
 
   private void printErrorAndExit(String message) {
-    logger.error(message);
+    LOG.error(message);
     printUsage();
     exit.exit(Exit.INTERNAL_ERROR);
   }
 
-  private void printUsage() {
-    logger.info("");
-    logger.info("usage: sonar-scanner [options]");
-    logger.info("");
-    logger.info("Options:");
-    logger.info(" -D,--define <arg>     Define property");
-    logger.info(" -h,--help             Display help information");
-    logger.info(" -v,--version          Display version information");
-    logger.info(" -X,--debug            Produce execution debug output");
+  private static void printUsage() {
+    System.out.println();
+    System.out.println("usage: sonar-scanner [options]");
+    System.out.println();
+    System.out.println("Options:");
+    System.out.println(" -D,--define <arg>     Define property");
+    System.out.println(" -h,--help             Display help information");
+    System.out.println(" -v,--version          Display version information");
+    System.out.println(" -X,--debug            Produce execution debug output");
   }
 }

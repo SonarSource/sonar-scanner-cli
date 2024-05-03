@@ -43,9 +43,8 @@ class ConfTest {
 
   private final Map<String, String> env = new HashMap<>();
   private final Properties args = new Properties();
-  private final Logs logs = new Logs(System.out, System.err);
   private final Cli cli = mock(Cli.class);
-  private final Conf conf = new Conf(cli, logs, env);
+  private final Conf conf = new Conf(cli, env);
 
   @BeforeEach
   void initConf() {

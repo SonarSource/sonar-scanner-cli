@@ -22,12 +22,16 @@ package org.sonarsource.scanner.cli;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class SystemInfo {
+  private static final Logger LOG = LoggerFactory.getLogger(SystemInfo.class);
+
   private static final Set<String> SENSITIVE_JVM_ARGUMENTS = Set.of(
-      "-Dsonar.login",
-      "-Dsonar.password",
-      "-Dsonar.token");
+    "-Dsonar.login",
+    "-Dsonar.password",
+    "-Dsonar.token");
   private static final Pattern PATTERN_ARGUMENT_SEPARATOR = Pattern.compile("\\s+");
   private static System2 system = new System2();
 
@@ -38,13 +42,13 @@ class SystemInfo {
     SystemInfo.system = system;
   }
 
-  static void print(Logs logger) {
-    logger.info("SonarScanner CLI " + ScannerVersion.version());
-    logger.info(java());
-    logger.info(os());
+  static void print() {
+    LOG.info("SonarScanner CLI {}", ScannerVersion.version());
+    LOG.atInfo().log(SystemInfo::java);
+    LOG.atInfo().log(SystemInfo::os);
     String scannerOpts = system.getenv("SONAR_SCANNER_OPTS");
     if (scannerOpts != null) {
-      logger.info("SONAR_SCANNER_OPTS=" + redactSensitiveArguments(scannerOpts));
+      LOG.atInfo().addArgument(() -> redactSensitiveArguments(scannerOpts)).log("SONAR_SCANNER_OPTS={}");
     }
   }
 
@@ -77,14 +81,11 @@ class SystemInfo {
   }
 
   static String os() {
-    StringBuilder sb = new StringBuilder();
-    sb
-      .append(system.getProperty("os.name"))
-      .append(" ")
-      .append(system.getProperty("os.version"))
-      .append(" ")
-      .append(system.getProperty("os.arch"));
-    return sb.toString();
+    return system.getProperty("os.name")
+      + " "
+      + system.getProperty("os.version")
+      + " "
+      + system.getProperty("os.arch");
   }
 
   static class System2 {

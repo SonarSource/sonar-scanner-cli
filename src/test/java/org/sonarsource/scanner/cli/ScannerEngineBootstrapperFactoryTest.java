@@ -36,8 +36,7 @@ import static org.mockito.Mockito.when;
 class ScannerEngineBootstrapperFactoryTest {
 
   private final Properties props = new Properties();
-  private final Logs logs = mock(Logs.class);
-  private final ScannerEngineBootstrapperFactory underTest = new ScannerEngineBootstrapperFactory(logs);
+  private final ScannerEngineBootstrapperFactory underTest = new ScannerEngineBootstrapperFactory();
 
   @Test
   void should_create_engine_bootstrapper_and_pass_app_and_properties() {

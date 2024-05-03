@@ -23,47 +23,42 @@ import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.sonar.api.utils.MessageException;
 import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
 import org.sonarsource.scanner.lib.ScannerEngineFacade;
 import org.sonarsource.scanner.lib.ScannerProperties;
+import testutils.LogTester;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class MainTest {
+class MainTest {
 
-  @Mock
-  private Exit exit;
-  @Mock
-  private Cli cli;
-  @Mock
-  private Conf conf;
-  @Mock
-  private Properties properties;
-  @Mock
-  private ScannerEngineBootstrapperFactory scannerEngineBootstrapperFactory;
-  @Mock
-  private ScannerEngineBootstrapper bootstrapper;
-  @Mock
-  private ScannerEngineFacade engine;
-  @Mock
-  private Logs logs;
+  @RegisterExtension
+  LogTester logTester = new LogTester();
+
+  private final Exit exit = mock();
+  private final Cli cli = mock();
+  private final Conf conf = mock();
+  private final Properties properties = mock();
+  private final ScannerEngineBootstrapperFactory scannerEngineBootstrapperFactory = mock();
+  private final ScannerEngineBootstrapper bootstrapper = mock();
+  private final ScannerEngineFacade engine = mock();
 
   @BeforeEach
   void setUp() {
-    MockitoAnnotations.initMocks(this);
     when(scannerEngineBootstrapperFactory.create(any(Properties.class), any(String.class))).thenReturn(bootstrapper);
     when(bootstrapper.bootstrap()).thenReturn(engine);
     when(conf.properties()).thenReturn(properties);
@@ -72,7 +67,7 @@ public class MainTest {
   @Test
   void should_execute_scanner_engine() {
     when(cli.getInvokedFrom()).thenReturn("");
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
     main.analyze();
 
     verify(exit).exit(Exit.SUCCESS);
@@ -89,11 +84,11 @@ public class MainTest {
     doThrow(e).when(engine).analyze(any());
     when(cli.getInvokedFrom()).thenReturn("");
     when(cli.isDebugEnabled()).thenReturn(true);
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
     main.analyze();
 
     verify(exit).exit(Exit.INTERNAL_ERROR);
-    verify(logs).error("Error during SonarScanner CLI execution", e);
+    assertThat(logTester.logs(Level.ERROR)).contains("Error during SonarScanner CLI execution");
   }
 
   @Test
@@ -104,13 +99,13 @@ public class MainTest {
     when(cli.getInvokedFrom()).thenReturn("");
     when(cli.isDebugEnabled()).thenReturn(true);
 
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
     main.analyze();
 
     verify(bootstrapper).bootstrap();
     verify(engine, never()).analyze(any());
     verify(exit).exit(Exit.INTERNAL_ERROR);
-    verify(logs).error("Error during SonarScanner CLI execution", e);
+    assertThat(logTester.logs(Level.ERROR)).contains("Error during SonarScanner CLI execution");
   }
 
   @Test
@@ -118,8 +113,8 @@ public class MainTest {
     Exception e = createException(false);
     testException(e, false, false, Exit.INTERNAL_ERROR);
 
-    verify(logs).error("Error during SonarScanner CLI execution", e);
-    verify(logs).error("Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
+    assertThat(logTester.logs(Level.ERROR)).contains("Error during SonarScanner CLI execution");
+    assertThat(logTester.logs(Level.ERROR)).contains("Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
   }
 
   @Test
@@ -127,12 +122,11 @@ public class MainTest {
     Exception e = createException(true);
     testException(e, false, false, Exit.USER_ERROR);
 
-    verify(logs, times(5)).error(anyString());
-    verify(logs).error("Error during SonarScanner CLI execution");
-    verify(logs).error("my message");
-    verify(logs).error("Caused by: A functional cause");
-    verify(logs).error("");
-    verify(logs).error("Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
+    assertThat(logTester.logs(Level.ERROR)).containsOnly("Error during SonarScanner CLI execution",
+      "my message",
+      "Caused by: A functional cause",
+      "",
+      "Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
   }
 
   @Test
@@ -140,11 +134,10 @@ public class MainTest {
     Exception e = createException(true);
     testException(e, false, true, Exit.USER_ERROR);
 
-    verify(logs, times(4)).error(anyString());
-    verify(logs).error("Error during SonarScanner CLI execution");
-    verify(logs).error("my message");
-    verify(logs).error("Caused by: A functional cause");
-    verify(logs).error("");
+    assertThat(logTester.logs(Level.ERROR)).containsOnly("Error during SonarScanner CLI execution",
+      "my message",
+      "Caused by: A functional cause",
+      "");
   }
 
   @Test
@@ -152,8 +145,7 @@ public class MainTest {
     Exception e = createException(true);
     testException(e, true, false, Exit.USER_ERROR);
 
-    verify(logs, times(1)).error(anyString(), any(Throwable.class));
-    verify(logs).error("Error during SonarScanner CLI execution", e);
+    assertThat(logTester.logs(Level.ERROR)).containsOnly("Error during SonarScanner CLI execution");
   }
 
   @Test
@@ -161,8 +153,7 @@ public class MainTest {
     Exception e = createException(true);
     testException(e, true, true, Exit.USER_ERROR);
 
-    verify(logs, times(1)).error(anyString(), any(Throwable.class));
-    verify(logs).error("Error during SonarScanner CLI execution", e);
+    assertThat(logTester.logs(Level.ERROR)).containsOnly("Error during SonarScanner CLI execution");
   }
 
   @Test
@@ -170,8 +161,7 @@ public class MainTest {
     Exception e = createException(false);
     testException(e, true, false, Exit.INTERNAL_ERROR);
 
-    verify(logs).error("Error during SonarScanner CLI execution", e);
-    verify(logs, never()).error("Re-run SonarScanner CLI using the -X switch to enable full debug logging.");
+    assertThat(logTester.logs(Level.ERROR)).containsOnly("Error during SonarScanner CLI execution");
   }
 
   private void testException(Exception e, boolean debugEnabled, boolean isEmbedded, int expectedExitCode) {
@@ -184,7 +174,7 @@ public class MainTest {
 
     when(scannerEngineBootstrapperFactory.create(any(Properties.class), any(String.class))).thenReturn(bootstrapper);
 
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
     main.analyze();
 
     verify(exit).exit(expectedExitCode);
@@ -208,7 +198,7 @@ public class MainTest {
     when(cli.getInvokedFrom()).thenReturn("");
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
     main.analyze();
 
     InOrder inOrder = Mockito.inOrder(exit, scannerEngineBootstrapperFactory);
@@ -225,10 +215,10 @@ public class MainTest {
     when(conf.properties()).thenReturn(p);
     when(cli.getInvokedFrom()).thenReturn("");
 
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
     main.analyze();
 
-    verify(logs).info("SonarScanner CLI analysis skipped");
+    assertThat(logTester.logs(Level.INFO)).contains("SonarScanner CLI analysis skipped");
     InOrder inOrder = Mockito.inOrder(exit, scannerEngineBootstrapperFactory);
 
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
@@ -245,9 +235,9 @@ public class MainTest {
     when(cli.getInvokedFrom()).thenReturn("");
     when(conf.properties()).thenReturn(p);
 
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
     main.analyze();
-    verify(logs).info("Communicating with SonarQube Server 5.5");
+    assertThat(logTester.logs(Level.INFO)).contains("Communicating with SonarQube Server 5.5");
   }
 
   @Test
@@ -257,9 +247,9 @@ public class MainTest {
     when(conf.properties()).thenReturn(p);
     when(cli.getInvokedFrom()).thenReturn("");
 
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
     main.analyze();
-    verify(logs).info("Communicating with SonarCloud");
+    assertThat(logTester.logs(Level.INFO)).contains("Communicating with SonarCloud");
   }
 
   @Test
@@ -290,7 +280,7 @@ public class MainTest {
     Properties actualProps = execute(propKey, propValue);
 
     // Logger used for callback should have debug enabled
-    verify(logs).setDebugEnabled(true);
+    assertThat(LoggerFactory.getLogger(getClass()).isDebugEnabled()).isTrue();
 
     return actualProps;
   }
@@ -302,7 +292,7 @@ public class MainTest {
     when(conf.properties()).thenReturn(p);
     when(cli.getInvokedFrom()).thenReturn("");
 
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, logs);
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
     main.analyze();
 
     ArgumentCaptor<Properties> propertiesCapture = ArgumentCaptor.forClass(Properties.class);
