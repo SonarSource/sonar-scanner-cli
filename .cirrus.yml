@@ -14,7 +14,7 @@ env:
   ARTIFACTORY_DEPLOY_PASSWORD: VAULT[development/artifactory/token/SonarSource-sonar-scanner-cli-qa-deployer access_token]
   ARTIFACTORY_DEPLOY_REPO: sonarsource-public-qa
   ARTIFACTORY_PROMOTE_ACCESS_TOKEN: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promoter access_token]
-  
+
   BURGR_URL: VAULT[development/kv/data/burgr data.url]
   BURGR_USERNAME: VAULT[development/kv/data/burgr data.cirrus_username]
   BURGR_PASSWORD: VAULT[development/kv/data/burgr data.cirrus_password]
@@ -76,7 +76,7 @@ linux_qa_java17_task:
   env:
     matrix:
       - SQ_VERSION: LATEST_RELEASE[9.9]
-      - SQ_VERSION: DEV
+      - SQ_VERSION: LATEST_RELEASE
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   qa_script:
@@ -102,7 +102,7 @@ win_qa_java17_task:
     CIRRUS_SHELL: bash
     matrix:
       - SQ_VERSION: LATEST_RELEASE[9.9]
-      - SQ_VERSION: DEV
+      - SQ_VERSION: LATEST_RELEASE
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   qa_script:
