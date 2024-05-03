@@ -29,9 +29,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.sonar.api.utils.MessageException;
-import org.sonarsource.scanner.lib.ScanProperties;
 import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
 import org.sonarsource.scanner.lib.ScannerEngineFacade;
+import org.sonarsource.scanner.lib.ScannerProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -221,7 +221,7 @@ public class MainTest {
   @Test
   public void should_skip() {
     Properties p = new Properties();
-    p.setProperty(ScanProperties.SKIP, "true");
+    p.setProperty(ScannerProperties.SKIP, "true");
     when(conf.properties()).thenReturn(p);
     when(cli.getInvokedFrom()).thenReturn("");
 

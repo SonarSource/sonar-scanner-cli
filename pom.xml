@@ -66,7 +66,7 @@
     <dependency>
       <groupId>org.sonarsource.scanner.lib</groupId>
       <artifactId>sonar-scanner-java-library</artifactId>
-      <version>3.0.0.76</version>
+      <version>3.0.0.114</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -188,8 +188,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>3000000</minsize>
-                  <maxsize>3100000</maxsize>
+                  <minsize>3400000</minsize>
+                  <maxsize>3500000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonar-scanner-${project.version}.zip</file>
                   </files>

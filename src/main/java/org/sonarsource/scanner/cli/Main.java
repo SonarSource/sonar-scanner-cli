@@ -21,9 +21,9 @@ package org.sonarsource.scanner.cli;
 
 import java.util.Map;
 import java.util.Properties;
-import org.sonarsource.scanner.lib.ScanProperties;
 import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
 import org.sonarsource.scanner.lib.ScannerEngineFacade;
+import org.sonarsource.scanner.lib.ScannerProperties;
 
 /**
  * Arguments :
@@ -96,7 +96,7 @@ public class Main {
   }
 
   private void checkSkip(Properties properties) {
-    if ("true".equalsIgnoreCase(properties.getProperty(ScanProperties.SKIP))) {
+    if ("true".equalsIgnoreCase(properties.getProperty(ScannerProperties.SKIP))) {
       logger.info("SonarScanner CLI analysis skipped");
       exit.exit(Exit.SUCCESS);
     }

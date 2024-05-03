@@ -188,7 +188,10 @@ public class ScannerTest extends ScannerTestCase {
 
     assertThat(buildResult.isSuccess()).isFalse();
     assertThat(buildResult.getLogs())
-      .contains("SonarQube server [http://from-env.org] can not be reached");
+      .containsAnyOf(
+        "No such host is known (from-env.org)", // Windows
+        "from-env.org: Name or service not known" // Linux
+      );
   }
 
   @Test
@@ -214,7 +217,10 @@ public class ScannerTest extends ScannerTestCase {
     assertThat(result.isSuccess()).isFalse();
     // with the following message
     assertThat(result.getLogs())
-      .contains("SonarQube server [http://foo] can not be reached");
+      .containsAnyOf(
+        "No such host is known (foo)", // Windows
+        "foo: No address associated with hostname" // Linux
+      );
   }
 
   // SONARPLUGINS-3574

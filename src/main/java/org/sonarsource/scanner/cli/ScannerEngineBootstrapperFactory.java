@@ -44,7 +44,7 @@ class ScannerEngineBootstrapperFactory {
   }
 
   ScannerEngineBootstrapper newScannerEngineBootstrapper(String appName, String appVersion) {
-    return new ScannerEngineBootstrapper(appName, appVersion, logger.getLogOutputAdapter());
+    return ScannerEngineBootstrapper.create(appName, appVersion, logger.getLogOutputAdapter());
   }
 
 
