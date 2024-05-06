@@ -66,7 +66,7 @@
     <dependency>
       <groupId>org.sonarsource.scanner.lib</groupId>
       <artifactId>sonar-scanner-java-library</artifactId>
-      <version>3.0.0.114</version>
+      <version>3.0.0.141</version>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -213,8 +213,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>4100000</minsize>
-                  <maxsize>4200000</maxsize>
+                  <minsize>4300000</minsize>
+                  <maxsize>4400000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonar-scanner-${project.version}.zip</file>
                   </files>

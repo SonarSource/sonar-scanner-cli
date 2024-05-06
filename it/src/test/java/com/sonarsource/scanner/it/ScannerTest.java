@@ -164,17 +164,14 @@ public class ScannerTest extends ScannerTestCase {
   @Test
   public void should_use_environment_prop() {
     SonarScanner build = newScanner(new File("projects/simple-sample"))
-      .setEnvironmentVariable("SONAR_HOST_URL", "http://from-env.org");
+      .setEnvironmentVariable("SONAR_HOST_URL", "http://www.google.com/404");
 
     BuildRunner runner = new BuildRunner(orchestrator.getConfiguration());
     BuildResult buildResult = runner.runQuietly(null, build);
 
     assertThat(buildResult.isSuccess()).isFalse();
     assertThat(buildResult.getLogs())
-      .containsAnyOf(
-        "No such host is known (from-env.org)", // Windows
-        "from-env.org: Name or service not known" // Linux
-      );
+      .contains("Error status returned by url [http://www.google.com/404/api/v2/analysis/version]: 404");
   }
 
   @Test
@@ -192,18 +189,15 @@ public class ScannerTest extends ScannerTestCase {
   public void should_fail_if_unable_to_connect() {
     SonarScanner build = newScanner(new File("projects/simple-sample"))
       //env property should be overridden
-      .setEnvironmentVariable("SONAR_HOST_URL", "http://from-env.org")
-      .setProperty("sonar.host.url", "http://foo");
+      .setEnvironmentVariable("SONAR_HOST_URL", "http://www.google.com")
+      .setProperty("sonar.host.url", "http://www.google.com/404");
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
     // expect build failure
     assertThat(result.isSuccess()).isFalse();
     // with the following message
     assertThat(result.getLogs())
-      .containsAnyOf(
-        "No such host is known (foo)", // Windows
-        "foo: No address associated with hostname" // Linux
-      );
+      .contains("Error status returned by url [http://www.google.com/404/api/v2/analysis/version]: 404");
   }
 
   // SONARPLUGINS-3574
