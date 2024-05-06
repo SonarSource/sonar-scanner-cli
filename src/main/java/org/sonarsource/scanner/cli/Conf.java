@@ -81,8 +81,8 @@ class Conf {
     return resolver.resolve();
   }
 
-  private Map<String, String> loadEnvironmentProperties() {
-    return EnvironmentConfig.load(new Slf4jLogOutput());
+  private static Map<String, String> loadEnvironmentProperties() {
+    return EnvironmentConfig.load();
   }
 
   private Properties loadGlobalProperties() {

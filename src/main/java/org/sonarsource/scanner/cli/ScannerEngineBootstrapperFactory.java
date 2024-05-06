@@ -38,7 +38,7 @@ class ScannerEngineBootstrapperFactory {
   }
 
   ScannerEngineBootstrapper newScannerEngineBootstrapper(String appName, String appVersion) {
-    return ScannerEngineBootstrapper.create(appName, appVersion, new Slf4jLogOutput());
+    return ScannerEngineBootstrapper.create(appName, appVersion);
   }
 
 

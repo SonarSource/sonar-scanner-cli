@@ -38,7 +38,7 @@ public class SonarScannerTestSuite {
 
   private static OrchestratorRule createOrchestrator() {
     String sonarVersion = System
-      .getProperty("sonar.runtimeVersion", "LATEST_RELEASE[9.9]");
+      .getProperty("sonar.runtimeVersion", "DEV");
     return OrchestratorRule.builderEnv()
       .useDefaultAdminCredentialsForBuilds(true)
       .setSonarVersion(sonarVersion)
