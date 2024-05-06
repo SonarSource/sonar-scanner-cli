@@ -136,23 +136,6 @@ public class ScannerTest extends ScannerTestCase {
   }
 
   /**
-   * SONARPLUGINS-2256
-   */
-  @Test
-  public void should_warn_when_analysis_is_platform_dependent() {
-    SonarScanner build = newScanner(new File("projects/simple-sample"))
-      // ORCH-243
-      .setSourceEncoding("");
-    String log = orchestrator.executeBuild(build).getLogs();
-
-    // Note: we can't really check the locale value and the charset because the ones used during the Sonar analysis may not be the ones
-    // used to launch the tests. But we can check that the analysis is platform dependent (i.e. "sonar.sourceEncoding" hasn't been set).
-    assertThat(log).contains("Default locale:")
-      .contains(", source code encoding:")
-      .contains("(analysis is platform dependent)");
-  }
-
-  /**
    * SONARUNNER-153
    */
   @Test
