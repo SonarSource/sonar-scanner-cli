@@ -43,7 +43,6 @@ import org.sonarsource.scanner.lib.ScannerProperties;
 public class Main {
   private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
-  private static final String SEPARATOR = "------------------------------------------------------------------------";
   private final Exit exit;
   private final Cli cli;
   private final Conf conf;
@@ -75,13 +74,18 @@ public class Main {
       init(p);
       try (var engine = scannerEngineBootstrapper.bootstrap()) {
         logServerType(engine);
-        engine.analyze((Map) p);
-        displayExecutionResult(stats, "SUCCESS");
-        status = Exit.SUCCESS;
+        var success = engine.analyze((Map) p);
+        if (success) {
+          displayExecutionResult(stats, "SUCCESS");
+          status = Exit.SUCCESS;
+        } else {
+          displayExecutionResult(stats, "FAILURE");
+          status = Exit.SCANNER_ENGINE_ERROR;
+        }
       }
     } catch (Throwable e) {
       displayExecutionResult(stats, "FAILURE");
-      showError("Error during SonarScanner CLI execution", e, cli.isDebugEnabled());
+      showError(e, cli.isDebugEnabled());
       status = isUserError(e) ? Exit.USER_ERROR : Exit.INTERNAL_ERROR;
     } finally {
       exit.exit(status);
@@ -123,14 +127,12 @@ public class Main {
   }
 
   private static void displayExecutionResult(Stats stats, String resultMsg) {
-    LOG.info(SEPARATOR);
     LOG.info("EXECUTION {}", resultMsg);
-    LOG.info(SEPARATOR);
     stats.stop();
-    LOG.info(SEPARATOR);
   }
 
-  private void showError(String message, Throwable e, boolean debug) {
+  private void showError(Throwable e, boolean debug) {
+    var message = "Error during SonarScanner CLI execution";
     if (debug || !isUserError(e)) {
       LOG.error(message, e);
     } else {
