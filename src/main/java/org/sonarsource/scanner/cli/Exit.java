@@ -23,6 +23,7 @@ class Exit {
   static final int SUCCESS = 0;
   static final int INTERNAL_ERROR = 1;
   static final int USER_ERROR = 2;
+  static final int SCANNER_ENGINE_ERROR = 3;
 
   void exit(int status) {
     System.exit(status);

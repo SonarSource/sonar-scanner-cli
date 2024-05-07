@@ -61,6 +61,7 @@ class MainTest {
   void setUp() {
     when(scannerEngineBootstrapperFactory.create(any(Properties.class), any(String.class))).thenReturn(bootstrapper);
     when(bootstrapper.bootstrap()).thenReturn(engine);
+    when(engine.analyze(any())).thenReturn(true);
     when(conf.properties()).thenReturn(properties);
   }
 
@@ -223,7 +224,6 @@ class MainTest {
 
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
     inOrder.verify(scannerEngineBootstrapperFactory, times(1)).create(p, "");
-    inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
   }
 
   @Test

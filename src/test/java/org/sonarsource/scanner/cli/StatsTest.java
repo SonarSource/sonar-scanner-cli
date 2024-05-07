@@ -34,9 +34,8 @@ class StatsTest {
   void shouldPrintStats() {
     new Stats().start().stop();
 
-    assertThat(logTester.logs(Level.INFO)).hasSize(2);
+    assertThat(logTester.logs(Level.INFO)).hasSize(1);
     assertThat(logTester.logs(Level.INFO).get(0)).startsWith("Total time: ");
-    assertThat(logTester.logs(Level.INFO).get(1)).startsWith("Final Memory: ");
   }
 
   @Test

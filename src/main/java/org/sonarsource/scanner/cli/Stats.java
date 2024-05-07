@@ -34,12 +34,6 @@ class Stats {
   Stats stop() {
     long stopTime = System.currentTimeMillis() - startTime;
     LOG.atInfo().addArgument(() -> formatTime(stopTime)).log("Total time: {}");
-
-    System.gc();
-    Runtime r = Runtime.getRuntime();
-    long mb = 1024L * 1024;
-    LOG.atInfo().addArgument((r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb + "M").log("Final Memory: {}");
-
     return this;
   }
 
