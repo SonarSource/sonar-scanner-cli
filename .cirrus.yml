@@ -43,7 +43,7 @@ ec2_instance: &EC2_INSTANCE_WINDOWS
   platform: windows
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
-  only_if: $CIRRUS_USER_COLLABORATOR == 'true' && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == "master" || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BRANCH =~ "dogfood-on-.*")
+  only_if: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_TAG == "" && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == $CIRRUS_DEFAULT_BRANCH || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BUILD_SOURCE == 'api' )
 
 except_nightly_cron: &EXCEPT_ON_NIGHTLY_CRON
   only_if: $CIRRUS_CRON != $NIGHTLY_CRON
@@ -52,6 +52,7 @@ except_nightly_cron: &EXCEPT_ON_NIGHTLY_CRON
 # TASKS
 #
 build_task:
+  <<: *ONLY_SONARSOURCE_QA
   eks_container:
     <<: *EKS_CONTAINER
   env:
@@ -66,6 +67,30 @@ build_task:
     - regular_mvn_build_deploy_analyze -Pdist-linux,dist-windows,dist-macosx
   cleanup_before_cache_script:
     - cleanup_maven_repository
+
+mend_scan_task:
+  depends_on:
+    - build
+  eks_container:
+    <<: *EKS_CONTAINER
+    cpu: 2
+    memory: 2G
+  # run only on master and long-term branches
+  only_if: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_TAG == "" && ($CIRRUS_BRANCH == $CIRRUS_DEFAULT_BRANCH || $CIRRUS_BRANCH =~ "branch-.*")
+  env:
+    WS_APIKEY: VAULT[development/kv/data/mend data.apikey]
+  maven_cache:
+    folder: ${CIRRUS_WORKING_DIR}/.m2/repository
+  whitesource_script:
+    - source cirrus-env QA
+    - source set_maven_build_version $BUILD_NUMBER
+    - mvn clean install -DskipTests --batch-mode
+    - source ws_scan.sh
+  cleanup_before_cache_script: cleanup_maven_repository
+  allow_failures: "true"
+  always:
+    ws_artifacts:
+      path: "whitesource/**/*"
 
 linux_qa_java17_task:
   depends_on:
