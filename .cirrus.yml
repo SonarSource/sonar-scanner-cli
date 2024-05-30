@@ -45,8 +45,8 @@ ec2_instance: &EC2_INSTANCE_WINDOWS
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
   only_if: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_TAG == "" && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == $CIRRUS_DEFAULT_BRANCH || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BUILD_SOURCE == 'api' )
 
-except_nightly_cron: &EXCEPT_ON_NIGHTLY_CRON
-  only_if: $CIRRUS_CRON != $NIGHTLY_CRON
+except_nightly_cron: &ONLY_SONARSOURCE_QA_EXCEPT_ON_NIGHTLY_CRON
+  only_if: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_TAG == "" && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == $CIRRUS_DEFAULT_BRANCH || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BUILD_SOURCE == 'api' ) && $CIRRUS_CRON != $NIGHTLY_CRON
 
 #
 # TASKS
@@ -144,8 +144,7 @@ promote_task:
   depends_on:
     - linux_qa_java17
     - win_qa_java17
-  <<: *ONLY_SONARSOURCE_QA
-  <<: *EXCEPT_ON_NIGHTLY_CRON
+  <<: *ONLY_SONARSOURCE_QA_EXCEPT_ON_NIGHTLY_CRON
   eks_container:
     <<: *EKS_CONTAINER
     cpu: 0.5
