@@ -38,7 +38,7 @@ public class DistributionTest extends ScannerTestCase {
     String projectKey = "basedir-with-source";
 
     File projectDir = new File("projects/basedir-with-source");
-    SonarScanner build = newScanner(projectDir, "sonar.projectKey", projectKey)
+    SonarScanner build = newScannerWithAdminCredentials(projectDir, "sonar.projectKey", projectKey)
       .setEnvironmentVariable("JAVA_HOME", "nonexistent")
       .useNative();
     orchestrator.executeBuild(build, true);
@@ -56,7 +56,7 @@ public class DistributionTest extends ScannerTestCase {
     String projectKey = "basedir-with-source";
 
     File projectDir = new File("projects/basedir-with-source");
-    SonarScanner build = newScanner(projectDir, "sonar.projectKey", projectKey)
+    SonarScanner build = newScannerWithAdminCredentials(projectDir, "sonar.projectKey", projectKey)
       .setEnvironmentVariable("JAVA_HOME", "nonexistent");
     orchestrator.executeBuild(build, true);
   }

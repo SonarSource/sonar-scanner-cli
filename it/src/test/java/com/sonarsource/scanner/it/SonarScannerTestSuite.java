@@ -40,7 +40,7 @@ public class SonarScannerTestSuite {
     String sonarVersion = System
       .getProperty("sonar.runtimeVersion", "DEV");
     return OrchestratorRule.builderEnv()
-      .useDefaultAdminCredentialsForBuilds(true)
+      .defaultForceAuthentication()
       .setSonarVersion(sonarVersion)
       .addBundledPluginToKeep("sonar-javascript")
       .addPlugin(MavenLocation.of("org.sonarsource.sonarqube", "sonar-xoo-plugin", sonarVersion))
