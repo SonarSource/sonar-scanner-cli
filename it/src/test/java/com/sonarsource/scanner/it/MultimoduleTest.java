@@ -34,7 +34,7 @@ public class MultimoduleTest extends ScannerTestCase {
    */
   @Test
   public void test_simplest_with_props_on_root() {
-    SonarScanner build = newScanner(
+    SonarScanner build = newScannerWithAdminCredentials(
       new File("projects/multi-module/simplest/simplest-with-props-on-root"));
 
     orchestrator.executeBuild(build);
@@ -79,7 +79,7 @@ public class MultimoduleTest extends ScannerTestCase {
    */
   @Test
   public void test_simplest_with_props_on_each_module() {
-    SonarScanner build = newScanner(new File(
+    SonarScanner build = newScannerWithAdminCredentials(new File(
       "projects/multi-module/simplest/simplest-with-props-on-each-module"));
 
     orchestrator.executeBuild(build);
@@ -111,7 +111,7 @@ public class MultimoduleTest extends ScannerTestCase {
    */
   @Test
   public void test_deep_path_for_modules() {
-    SonarScanner build = newScanner(
+    SonarScanner build = newScannerWithAdminCredentials(
       new File("projects/multi-module/customization/deep-path-for-modules"));
 
     orchestrator.executeBuild(build);
@@ -140,7 +140,7 @@ public class MultimoduleTest extends ScannerTestCase {
    */
   @Test
   public void test_module_path_with_space() {
-    SonarScanner build = newScanner(
+    SonarScanner build = newScannerWithAdminCredentials(
       new File("projects/multi-module/customization/module-path-with-space"));
 
     orchestrator.executeBuild(build);
@@ -169,7 +169,7 @@ public class MultimoduleTest extends ScannerTestCase {
    */
   @Test
   public void test_overwriting_parent_properties() {
-    SonarScanner build = newScanner(new File(
+    SonarScanner build = newScannerWithAdminCredentials(new File(
       "projects/multi-module/customization/overwriting-parent-properties"));
 
     orchestrator.executeBuild(build);
@@ -206,7 +206,7 @@ public class MultimoduleTest extends ScannerTestCase {
    */
   @Test
   public void test_using_config_file_property() {
-    SonarScanner build = newScanner(
+    SonarScanner build = newScannerWithAdminCredentials(
       new File("projects/multi-module/advanced/using-config-file-prop"));
 
     orchestrator.executeBuild(build);
@@ -237,7 +237,7 @@ public class MultimoduleTest extends ScannerTestCase {
    */
   @Test
   public void should_fail_if_unexisting_base_dir() {
-    SonarScanner build = newScanner(
+    SonarScanner build = newScannerWithAdminCredentials(
       new File("projects/multi-module/failures/unexisting-base-dir"));
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
@@ -254,7 +254,7 @@ public class MultimoduleTest extends ScannerTestCase {
    */
   @Test
   public void should_fail_if_unexisting_config_file() {
-    SonarScanner build = newScanner(
+    SonarScanner build = newScannerWithAdminCredentials(
       new File("projects/multi-module/failures/unexisting-config-file"));
 
     BuildResult result = orchestrator.executeBuildQuietly(build);

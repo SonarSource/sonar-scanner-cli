@@ -27,22 +27,41 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonarqube.ws.Measures.Measure;
+import org.sonarqube.ws.client.usertokens.GenerateRequest;
+import org.sonarqube.ws.client.usertokens.RevokeRequest;
 
 import static java.lang.Integer.parseInt;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ScannerTest extends ScannerTestCase {
 
+  public static final String TOKEN_NAME = "Integration Tests";
+  private static String analysisToken;
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
+  @BeforeClass
+  public static void generateToken() {
+    analysisToken = newAdminWsClient().userTokens()
+      .generate(new GenerateRequest().setName(TOKEN_NAME))
+      .getToken();
+  }
+
+  @AfterClass
+  public static void cleanup() throws Exception {
+    newAdminWsClient().userTokens()
+      .revoke(new RevokeRequest().setName(TOKEN_NAME));
+  }
+
   @Test
   public void basedir_contains_sources() {
-    SonarScanner build = newScanner(new File("projects/basedir-with-source"));
+    SonarScanner build = newScannerWithToken(new File("projects/basedir-with-source"), analysisToken);
     orchestrator.executeBuild(build);
 
     Map<String, Measure> projectMeasures = getMeasures(
@@ -56,7 +75,7 @@ public class ScannerTest extends ScannerTestCase {
    */
   @Test
   public void analyzers_can_spawn_processes() {
-    SonarScanner build = newScanner(new File("projects/simple-js"))
+    SonarScanner build = newScannerWithToken(new File("projects/simple-js"), analysisToken)
       .useNative()
       .setProjectKey("SAMPLE");
     orchestrator.executeBuild(build);
@@ -70,7 +89,7 @@ public class ScannerTest extends ScannerTestCase {
    */
   @Test
   public void should_support_simple_project_keys() {
-    SonarScanner build = newScanner(new File("projects/simple-sample"))
+    SonarScanner build = newScannerWithToken(new File("projects/simple-sample"), analysisToken)
       .setProjectKey("SAMPLE");
     orchestrator.executeBuild(build);
 
@@ -94,7 +113,7 @@ public class ScannerTest extends ScannerTestCase {
    */
   @Test
   public void should_override_working_dir_with_relative_path() {
-    SonarScanner build = newScanner(new File("projects/override-working-dir"))
+    SonarScanner build = newScannerWithToken(new File("projects/override-working-dir"), analysisToken)
       .setProperty("sonar.working.directory", ".overridden-relative-sonar");
     orchestrator.executeBuild(build);
 
@@ -110,7 +129,7 @@ public class ScannerTest extends ScannerTestCase {
   @Test
   public void should_override_working_dir_with_absolute_path() {
     File projectHome = new File("projects/override-working-dir");
-    SonarScanner build = newScanner(projectHome)
+    SonarScanner build = newScannerWithToken(projectHome, analysisToken)
       .setProperty("sonar.working.directory",
         new File(projectHome, ".overridden-absolute-sonar").getAbsolutePath());
     orchestrator.executeBuild(build);
@@ -126,7 +145,7 @@ public class ScannerTest extends ScannerTestCase {
    */
   @Test
   public void should_fail_if_source_dir_does_not_exist() {
-    SonarScanner build = newScanner(new File("projects/bad-source-dirs"));
+    SonarScanner build = newScannerWithToken(new File("projects/bad-source-dirs"), analysisToken);
 
     BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getStatus()).isNotZero();
@@ -142,7 +161,7 @@ public class ScannerTest extends ScannerTestCase {
   public void should_enable_verbose() {
     // this line should appear in all versions (LTS-DEV) in debug only
     String expectedLog = "Available languages:";
-    SonarScanner build = newScanner(new File("projects/simple-sample"))
+    SonarScanner build = newScannerWithToken(new File("projects/simple-sample"), analysisToken)
       .setProperty("sonar.verbose", "true");
     String logs = orchestrator.executeBuild(build).getLogs();
     assertThat(logs).contains(expectedLog);
@@ -150,8 +169,8 @@ public class ScannerTest extends ScannerTestCase {
 
   @Test
   public void should_use_json_environment_props() {
-    SonarScanner build = newScanner(
-      new File("projects/simple-sample-no-properties"))
+    SonarScanner build = newScannerWithToken(
+      new File("projects/simple-sample-no-properties"), analysisToken)
       .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS", "{"
         + "\"sonar.projectKey\" : \"sample\"," +
         "\"sonar.projectName\" : \"Sample, with comma\"," +
@@ -163,7 +182,7 @@ public class ScannerTest extends ScannerTestCase {
 
   @Test
   public void should_use_environment_prop() {
-    SonarScanner build = newScanner(new File("projects/simple-sample"))
+    SonarScanner build = newScannerWithToken(new File("projects/simple-sample"), analysisToken)
       .setEnvironmentVariable("SONAR_HOST_URL", "http://www.google.com/404");
 
     BuildRunner runner = new BuildRunner(orchestrator.getConfiguration());
@@ -176,7 +195,7 @@ public class ScannerTest extends ScannerTestCase {
 
   @Test
   public void should_skip_analysis() {
-    SonarScanner build = newScanner(new File("projects/simple-sample"))
+    SonarScanner build = newScannerWithToken(new File("projects/simple-sample"), analysisToken)
       .setProperty("sonar.host.url", "http://foo")
       .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS",
         "{ \"sonar.scanner.skip\":\"true\" }");
@@ -187,7 +206,7 @@ public class ScannerTest extends ScannerTestCase {
 
   @Test
   public void should_fail_if_unable_to_connect() {
-    SonarScanner build = newScanner(new File("projects/simple-sample"))
+    SonarScanner build = newScannerWithToken(new File("projects/simple-sample"), analysisToken)
       //env property should be overridden
       .setEnvironmentVariable("SONAR_HOST_URL", "http://www.google.com")
       .setProperty("sonar.host.url", "http://www.google.com/404");
@@ -204,7 +223,7 @@ public class ScannerTest extends ScannerTestCase {
   @Test
   public void run_from_external_location() throws IOException {
     File tempDir = temp.newFolder();
-    SonarScanner build = newScanner(tempDir)
+    SonarScanner build = newScannerWithToken(tempDir, analysisToken)
       .setProperty("sonar.projectBaseDir",
         new File("projects/simple-sample").getAbsolutePath())
       .addArguments("-e");
@@ -221,7 +240,7 @@ public class ScannerTest extends ScannerTestCase {
 
   @Test
   public void verify_scanner_opts_env_variable_passed_as_jvm_argument() {
-    SonarScanner build = newScanner(new File("projects/simple-sample"))
+    SonarScanner build = newScannerWithToken(new File("projects/simple-sample"), analysisToken)
       .setEnvironmentVariable("SONAR_SCANNER_OPTS", "-Xmx1k");
     BuildResult executeBuild = orchestrator.executeBuildQuietly(build);
     assertThat(executeBuild.getLastStatus()).isNotZero();
@@ -235,7 +254,7 @@ public class ScannerTest extends ScannerTestCase {
   @Test
   public void should_override_project_settings_path() {
     File projectHome = new File("projects/override-project-settings-path");
-    SonarScanner build = newScanner(projectHome)
+    SonarScanner build = newScannerWithToken(projectHome, analysisToken)
       .setProperty("project.settings",
         new File(projectHome, "conf/sq-project.properties").getAbsolutePath());
     orchestrator.executeBuild(build);
@@ -248,7 +267,7 @@ public class ScannerTest extends ScannerTestCase {
   @Test
   public void should_override_project_settings_path_using_env_variable() {
     File projectHome = new File("projects/override-project-settings-path");
-    SonarScanner build = newScanner(projectHome)
+    SonarScanner build = newScannerWithToken(projectHome, analysisToken)
       .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS", "{"
         + "\"project.settings\" : \"" + StringEscapeUtils.escapeJavaScript(
         new File(projectHome, "conf/sq-project.properties").getAbsolutePath())
