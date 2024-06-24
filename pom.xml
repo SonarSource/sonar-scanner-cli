@@ -59,7 +59,7 @@
     <jre.dirname.macosx>jdk-17.0.11+9-jre/Contents/Home</jre.dirname.macosx>
 
     <!-- Release: enable publication to Bintray -->
-    <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux,${project.groupId}:${project.artifactId}:zip:windows,${project.groupId}:${project.artifactId}:zip:macosx,${project.groupId}:${project.artifactId}:json:cyclonedx</artifactsToPublish>
+    <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux-x64,${project.groupId}:${project.artifactId}:zip:linux-aarch64,${project.groupId}:${project.artifactId}:zip:windows-x64,${project.groupId}:${project.artifactId}:zip:macosx-x64,${project.groupId}:${project.artifactId}:zip:macosx-aarch64,${project.groupId}:${project.artifactId}:json:cyclonedx</artifactsToPublish>
 
     <maven.compiler.release>17</maven.compiler.release>
   </properties>
@@ -255,7 +255,7 @@
 
   <profiles>
     <profile>
-      <id>dist-linux</id>
+      <id>dist-linux-x64</id>
       <build>
         <plugins>
           <plugin>
@@ -263,7 +263,7 @@
 	          <artifactId>download-maven-plugin</artifactId>
             <executions>
               <execution>
-                <id>unpack-linux</id>
+                <id>unpack-linux-x64</id>
                 <phase>package</phase>
                 <goals>
                   <goal>wget</goal>
@@ -271,7 +271,7 @@
                 <configuration>
                   <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_x64_linux_hotspot_17.0.11_9.tar.gz</url>
                   <unpack>true</unpack>
-                  <outputDirectory>${unpack.dir}/linux</outputDirectory>
+                  <outputDirectory>${unpack.dir}/linux-x64</outputDirectory>
                   <sha256>bcb1b7b8ad68c93093f09b591b7cb17161d39891f7d29d33a586f5a328603707</sha256>
                 </configuration>
               </execution>
@@ -281,7 +281,7 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
-                <id>assemble-linux</id>
+                <id>assemble-linux-x64</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
@@ -290,7 +290,7 @@
                   <finalName>sonar-scanner-${project.version}</finalName>
                   <escapeString>\</escapeString>
                   <descriptors>
-                    <descriptor>src/main/assembly/dist-linux.xml</descriptor>
+                    <descriptor>src/main/assembly/dist-linux-x64.xml</descriptor>
                   </descriptors>
                   <filters>
                     <filter>src/main/assembly/filter-dist.properties</filter>
@@ -302,9 +302,56 @@
         </plugins>
       </build>
     </profile>
-
     <profile>
-      <id>dist-windows</id>
+      <id>dist-linux-aarch64</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.googlecode.maven-download-plugin</groupId>
+	          <artifactId>download-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>unpack-linux-aarch64</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>wget</goal>
+                </goals>
+                <configuration>
+                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_aarch64_linux_hotspot_17.0.11_9.tar.gz</url>
+                  <unpack>true</unpack>
+                  <outputDirectory>${unpack.dir}/linux-aarch64</outputDirectory>
+                  <sha256>ccfa23c25790475c84df983cc5f729b94c04d9ea9863912deb15c6266782cf16</sha256>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>assemble-linux-aarch64</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>sonar-scanner-${project.version}</finalName>
+                  <escapeString>\</escapeString>
+                  <descriptors>
+                    <descriptor>src/main/assembly/dist-linux-aarch64.xml</descriptor>
+                  </descriptors>
+                  <filters>
+                    <filter>src/main/assembly/filter-dist.properties</filter>
+                  </filters>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>dist-windows-x64</id>
       <build>
         <plugins>
           <plugin>
@@ -312,7 +359,7 @@
             <artifactId>download-maven-plugin</artifactId>
             <executions>
               <execution>
-                <id>unpack-windows</id>
+                <id>unpack-windows-x64</id>
                 <phase>package</phase>
                 <goals>
                   <goal>wget</goal>
@@ -320,7 +367,7 @@
                 <configuration>
                   <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_x64_windows_hotspot_17.0.11_9.zip</url>
                   <unpack>true</unpack>
-                  <outputDirectory>${unpack.dir}/windows</outputDirectory>
+                  <outputDirectory>${unpack.dir}/windows-x64</outputDirectory>
                   <sha256>4bafe2e94439c8193fc8c68247cb0dbaf4e80265b903288f63f128304f129bbe</sha256>
                 </configuration>
               </execution>
@@ -330,7 +377,7 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
-                <id>assemble-windows</id>
+                <id>assemble-windows-x64</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
@@ -339,7 +386,7 @@
                   <finalName>sonar-scanner-${project.version}</finalName>
                   <escapeString>\</escapeString>
                   <descriptors>
-                    <descriptor>src/main/assembly/dist-windows.xml</descriptor>
+                    <descriptor>src/main/assembly/dist-windows-x64.xml</descriptor>
                   </descriptors>
                   <filters>
                     <filter>src/main/assembly/filter-dist.properties</filter>
@@ -352,7 +399,7 @@
       </build>
     </profile>
     <profile>
-      <id>dist-macosx</id>
+      <id>dist-macosx-x64</id>
       <build>
         <plugins>
           <plugin>
@@ -360,7 +407,7 @@
             <artifactId>download-maven-plugin</artifactId>
             <executions>
               <execution>
-                <id>unpack-macosx</id>
+                <id>unpack-macosx-x64</id>
                 <phase>package</phase>
                 <goals>
                   <goal>wget</goal>
@@ -368,7 +415,7 @@
                 <configuration>
                   <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_x64_mac_hotspot_17.0.11_9.tar.gz</url>
                   <unpack>true</unpack>
-                  <outputDirectory>${unpack.dir}/macosx</outputDirectory>
+                  <outputDirectory>${unpack.dir}/macosx-x64</outputDirectory>
                   <sha256>232c40bebd6ddbb673862e86e7e6e09bcfe399e5a53c8a6b77bf1ceab8edefd0</sha256>
                 </configuration>
               </execution>
@@ -378,7 +425,7 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
               <execution>
-                <id>assemble-macosx</id>
+                <id>assemble-macosx-x64</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
@@ -387,7 +434,55 @@
                   <finalName>sonar-scanner-${project.version}</finalName>
                   <escapeString>\</escapeString>
                   <descriptors>
-                    <descriptor>src/main/assembly/dist-macosx.xml</descriptor>
+                    <descriptor>src/main/assembly/dist-macosx-x64.xml</descriptor>
+                  </descriptors>
+                  <filters>
+                    <filter>src/main/assembly/filter-dist.properties</filter>
+                  </filters>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>dist-macosx-aarch64</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.googlecode.maven-download-plugin</groupId>
+            <artifactId>download-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>unpack-macosx-aarch64</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>wget</goal>
+                </goals>
+                <configuration>
+                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_aarch64_mac_hotspot_17.0.11_9.tar.gz</url>
+                  <unpack>true</unpack>
+                  <outputDirectory>${unpack.dir}/macosx-aarch64</outputDirectory>
+                  <sha256>003d3e0a65a2f0633b8bfed42be133724b490acb323c174c708d3a446d5fc660</sha256>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>assemble-macosx-aarch64</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>sonar-scanner-${project.version}</finalName>
+                  <escapeString>\</escapeString>
+                  <descriptors>
+                    <descriptor>src/main/assembly/dist-macosx-aarch64.xml</descriptor>
                   </descriptors>
                   <filters>
                     <filter>src/main/assembly/filter-dist.properties</filter>

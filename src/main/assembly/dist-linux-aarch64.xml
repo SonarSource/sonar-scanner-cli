@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <assembly>
-  <id>macosx</id>
+  <id>linux-aarch64</id>
   <formats>
     <format>zip</format>
   </formats>
-  <baseDirectory>sonar-scanner-${project.version}-macosx</baseDirectory>
+  <baseDirectory>sonar-scanner-${project.version}-linux-aarch64</baseDirectory>
   <fileSets>
 
-    <!-- jre basic, except bin/ and misc -->
+    <!-- jre basic, except bin/ -->
     <fileSet>
-      <directory>${unpack.dir}/macosx/${jre.dirname.macosx}</directory>
+      <directory>${unpack.dir}/linux-aarch64/${jre.dirname.linux}</directory>
       <outputDirectory>jre</outputDirectory>
       <excludes>
         <exclude>bin/**</exclude>
         <exclude>man/**</exclude>
         <exclude>lib/jspawnhelper</exclude>
+        <exclude>lib/jexec</exclude>
+        <exclude>plugin/**</exclude>
       </excludes>
     </fileSet>
 
     <!-- jre bin/java -->
     <fileSet>
-      <directory>${unpack.dir}/macosx/${jre.dirname.macosx}/bin</directory>
+      <directory>${unpack.dir}/linux-aarch64/${jre.dirname.linux}/bin</directory>
       <outputDirectory>jre/bin</outputDirectory>
       <includes>
         <include>java</include>
@@ -30,10 +32,11 @@
 
     <!-- jre lib executable files -->
     <fileSet>
-      <directory>${unpack.dir}/macosx/${jre.dirname.macosx}/lib</directory>
+      <directory>${unpack.dir}/linux-aarch64/${jre.dirname.linux}/lib</directory>
       <outputDirectory>jre/lib</outputDirectory>
       <includes>
         <include>jspawnhelper</include>
+        <include>jexec</include>
       </includes>
       <fileMode>0755</fileMode>
     </fileSet>

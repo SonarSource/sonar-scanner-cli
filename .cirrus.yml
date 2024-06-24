@@ -64,7 +64,7 @@ build_task:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   script:
     - source cirrus-env BUILD
-    - regular_mvn_build_deploy_analyze -Pdist-linux,dist-windows,dist-macosx
+    - regular_mvn_build_deploy_analyze -Pdist-linux-x64,dist-linux-aarch64,dist-windows-x64,dist-macosx-x64,dist-macosx-aarch64
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
@@ -92,7 +92,7 @@ mend_scan_task:
     ws_artifacts:
       path: "whitesource/**/*"
 
-linux_qa_java17_task:
+linux_x64_qa_java17_task:
   depends_on:
     - build
   <<: *ONLY_SONARSOURCE_QA
@@ -118,7 +118,7 @@ linux_qa_java17_task:
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
-win_qa_java17_task:
+win_x64_qa_java17_task:
   depends_on:
     - build
   <<: *ONLY_SONARSOURCE_QA
@@ -142,8 +142,8 @@ win_qa_java17_task:
 
 promote_task:
   depends_on:
-    - linux_qa_java17
-    - win_qa_java17
+    - linux_x64_qa_java17
+    - win_x64_qa_java17
   <<: *ONLY_SONARSOURCE_QA_EXCEPT_ON_NIGHTLY_CRON
   eks_container:
     <<: *EKS_CONTAINER
