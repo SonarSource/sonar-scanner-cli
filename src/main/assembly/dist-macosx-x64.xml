@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+  <id>macosx-x64</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <baseDirectory>sonar-scanner-${project.version}-macosx-x64</baseDirectory>
+  <fileSets>
+
+    <!-- jre basic, except bin/ and misc -->
+    <fileSet>
+      <directory>${unpack.dir}/macosx-x64/${jre.dirname.macosx}</directory>
+      <outputDirectory>jre</outputDirectory>
+      <excludes>
+        <exclude>bin/**</exclude>
+        <exclude>man/**</exclude>
+        <exclude>lib/jspawnhelper</exclude>
+      </excludes>
+    </fileSet>
+
+    <!-- jre bin/java -->
+    <fileSet>
+      <directory>${unpack.dir}/macosx-x64/${jre.dirname.macosx}/bin</directory>
+      <outputDirectory>jre/bin</outputDirectory>
+      <includes>
+        <include>java</include>
+      </includes>
+      <fileMode>0755</fileMode>
+    </fileSet>
+
+    <!-- jre lib executable files -->
+    <fileSet>
+      <directory>${unpack.dir}/macosx-x64/${jre.dirname.macosx}/lib</directory>
+      <outputDirectory>jre/lib</outputDirectory>
+      <includes>
+        <include>jspawnhelper</include>
+      </includes>
+      <fileMode>0755</fileMode>
+    </fileSet>
+
+    <!-- scanner files -->
+    <fileSet>
+      <directory>${project.build.directory}</directory>
+      <outputDirectory>lib</outputDirectory>
+      <fileMode>0644</fileMode>
+      <includes>
+        <include>${scanner.jar}</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/assembly/conf</directory>
+      <outputDirectory>conf</outputDirectory>
+      <fileMode>0644</fileMode>
+      <lineEnding>unix</lineEnding>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/assembly/bin</directory>
+      <outputDirectory>bin</outputDirectory>
+      <fileMode>0755</fileMode>
+      <lineEnding>unix</lineEnding>
+      <filtered>true</filtered>
+      <includes>
+        <include>sonar-scanner</include>
+        <include>sonar-scanner-debug</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>

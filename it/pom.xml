@@ -26,7 +26,7 @@
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
 
     <maven.compiler.release>17</maven.compiler.release>
-    <orchestrator.version>4.1.0.495</orchestrator.version>
+    <orchestrator.version>5.0.0.2065</orchestrator.version>
   </properties>
 
   <dependencies>
@@ -117,33 +117,23 @@
                 </configuration>
               </execution>
               <execution>
-                <id>get-linux-scanner</id>
+                <id>get-linux-x64-scanner</id>
                 <phase>initialize</phase>
                 <goals>
                   <goal>get</goal>
                 </goals>
                 <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:linux</artifact>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:linux-x64</artifact>
                 </configuration>
               </execution>
               <execution>
-                <id>get-windows-scanner</id>
+                <id>get-windows-x64-scanner</id>
                 <phase>initialize</phase>
                 <goals>
                   <goal>get</goal>
                 </goals>
                 <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:windows</artifact>
-                </configuration>
-              </execution>
-              <execution>
-                <id>get-macosx-scanner</id>
-                <phase>initialize</phase>
-                <goals>
-                  <goal>get</goal>
-                </goals>
-                <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:macosx</artifact>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:windows-x64</artifact>
                 </configuration>
               </execution>
             </executions>
