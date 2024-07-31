@@ -15,13 +15,8 @@ env:
   ARTIFACTORY_DEPLOY_REPO: sonarsource-public-qa
   ARTIFACTORY_PROMOTE_ACCESS_TOKEN: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promoter access_token]
 
-  BURGR_URL: VAULT[development/kv/data/burgr data.url]
-  BURGR_USERNAME: VAULT[development/kv/data/burgr data.cirrus_username]
-  BURGR_PASSWORD: VAULT[development/kv/data/burgr data.cirrus_password]
-
   ### Project variables
   DEPLOY_PULL_REQUEST: true
-  ARTIFACTS: org.sonarsource.scanner.cli:sonar-scanner-cli:jar
   NIGHTLY_CRON: 'nightly-cron'
 #
 # RE-USABLE CONFIGS
@@ -60,6 +55,8 @@ build_task:
     SONAR_HOST_URL: VAULT[development/kv/data/next data.url]
     SIGN_KEY: VAULT[development/kv/data/sign data.key]
     PGP_PASSPHRASE: VAULT[development/kv/data/sign data.passphrase]
+    # Fetch all commit history so that Sonar has exact blame information for issue auto-assignment
+    CIRRUS_CLONE_DEPTH: "0"
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   script:
