@@ -15,10 +15,6 @@ env:
   ARTIFACTORY_DEPLOY_REPO: sonarsource-public-qa
   ARTIFACTORY_PROMOTE_ACCESS_TOKEN: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promoter access_token]
 
-  BURGR_URL: VAULT[development/kv/data/burgr data.url]
-  BURGR_USERNAME: VAULT[development/kv/data/burgr data.cirrus_username]
-  BURGR_PASSWORD: VAULT[development/kv/data/burgr data.cirrus_password]
-
   ### Project variables
   DEPLOY_PULL_REQUEST: true
   ARTIFACTS: org.sonarsource.scanner.cli:sonar-scanner-cli:jar
