@@ -30,9 +30,7 @@ eks_container: &EKS_CONTAINER
   memory: 4G
 
 ec2_instance: &EC2_INSTANCE_WINDOWS
-  experimental: true # see https://github.com/cirruslabs/cirrus-ci-docs/issues/1051
   region: eu-central-1
-  subnet_id: ${CIRRUS_AWS_SUBNET}
   type: t2.2xlarge
   image: base-windows-jdk17-v*
   platform: windows
