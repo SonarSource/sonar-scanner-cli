@@ -48,7 +48,7 @@ if [ -n "$JAVA_HOME" ]
 then
   java_cmd="$JAVA_HOME/bin/java"
 else
-  java_cmd="`which java`"
+  java_cmd="`\\unset -f command; \\command -v java`"
 fi
 
 if [ -z "$java_cmd" -o ! -x "$java_cmd" ] ; then
