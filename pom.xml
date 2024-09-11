@@ -80,7 +80,7 @@
     <dependency>
       <groupId>org.sonarsource.scanner.lib</groupId>
       <artifactId>sonar-scanner-java-library</artifactId>
-      <version>3.0.2.187</version>
+      <version>3.1.0.234</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -181,6 +181,12 @@
                     <include>**</include>
                   </includes>
                 </filter>
+                <filter>
+                  <artifact>org.bouncycastle:bcprov-jdk18on</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
               </filters>
             </configuration>
           </execution>
@@ -225,8 +231,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>4300000</minsize>
-                  <maxsize>4400000</maxsize>
+                  <minsize>11100000</minsize>
+                  <maxsize>11200000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonar-scanner-${project.version}.zip</file>
                   </files>
