@@ -54,9 +54,9 @@
     <!-- configuration for assembly of distributions -->
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
     <scanner.jar>${project.build.finalName}.jar</scanner.jar>
-    <jre.dirname.linux>jdk-17.0.11+9-jre</jre.dirname.linux>
-    <jre.dirname.windows>jdk-17.0.11+9-jre</jre.dirname.windows>
-    <jre.dirname.macosx>jdk-17.0.11+9-jre/Contents/Home</jre.dirname.macosx>
+    <jre.dirname.linux>jdk-17.0.12+7-jre</jre.dirname.linux>
+    <jre.dirname.windows>jdk-17.0.12+7-jre</jre.dirname.windows>
+    <jre.dirname.macosx>jdk-17.0.12+7-jre/Contents/Home</jre.dirname.macosx>
 
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux-x64,${project.groupId}:${project.artifactId}:zip:linux-aarch64,${project.groupId}:${project.artifactId}:zip:windows-x64,${project.groupId}:${project.artifactId}:zip:macosx-x64,${project.groupId}:${project.artifactId}:zip:macosx-aarch64,${project.groupId}:${project.artifactId}:json:cyclonedx</artifactsToPublish>
@@ -274,10 +274,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_x64_linux_hotspot_17.0.11_9.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_x64_linux_hotspot_17.0.12_7.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/linux-x64</outputDirectory>
-                  <sha256>bcb1b7b8ad68c93093f09b591b7cb17161d39891f7d29d33a586f5a328603707</sha256>
+                  <sha256>0e8088d7a3a7496faba7ac8787db09dc0264c2bc6f568ea8024fd775a783e13c</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -322,10 +322,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_aarch64_linux_hotspot_17.0.11_9.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_aarch64_linux_hotspot_17.0.12_7.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/linux-aarch64</outputDirectory>
-                  <sha256>ccfa23c25790475c84df983cc5f729b94c04d9ea9863912deb15c6266782cf16</sha256>
+                  <sha256>9dfe4c56463690ae67d22268980d8861eb46b907d7914f8f2e6fc7b25778c8ec</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -370,10 +370,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_x64_windows_hotspot_17.0.11_9.zip</url>
+                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.12_7.zip</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/windows-x64</outputDirectory>
-                  <sha256>4bafe2e94439c8193fc8c68247cb0dbaf4e80265b903288f63f128304f129bbe</sha256>
+                  <sha256>646f1f60286670da309b586d0905f1df1a5c2f674d24006823d688bca65388f4</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -418,10 +418,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_x64_mac_hotspot_17.0.11_9.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_x64_mac_hotspot_17.0.12_7.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/macosx-x64</outputDirectory>
-                  <sha256>232c40bebd6ddbb673862e86e7e6e09bcfe399e5a53c8a6b77bf1ceab8edefd0</sha256>
+                  <sha256>331aceddc402263c5e47529234965927573ead684ea2b7a0358fbb6c279c1510</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -466,10 +466,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_aarch64_mac_hotspot_17.0.11_9.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_aarch64_mac_hotspot_17.0.12_7.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/macosx-aarch64</outputDirectory>
-                  <sha256>003d3e0a65a2f0633b8bfed42be133724b490acb323c174c708d3a446d5fc660</sha256>
+                  <sha256>5c1cb2cbd2ef3f2b529e2733d0ab55381e10c4c3607f4d62f2bf12f0942198bf</sha256>
                 </configuration>
               </execution>
             </executions>
