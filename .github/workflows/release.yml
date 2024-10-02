@@ -14,4 +14,4 @@ jobs:
     with:
       publishToBinaries: true
       mavenCentralSync: true
-      slackChannel: team-sonarqube-build
+      slackChannel: squad-analysis-experience
