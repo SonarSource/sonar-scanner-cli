@@ -1,6 +1,6 @@
-# Scanner CLI for SonarQube and SonarCloud
+# Scanner CLI for SonarQube (Server, Cloud)
 
-The official scanner used to run code analysis on SonarQube and SonarCloud. Project configuration is read from file `sonar-project.properties` or passed on the command line.
+The official scanner used to run code analysis on SonarQube (Server, Cloud). Project configuration is read from file `sonar-project.properties` or passed on the command line.
 
 Sonar's [Clean Code solution](https://www.sonarsource.com/solutions/clean-code/) helps developers deliver high-quality, efficient code standards that benefit the entire team or organization. 
 
