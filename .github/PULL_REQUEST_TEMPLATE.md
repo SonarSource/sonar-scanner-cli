@@ -1,3 +1,10 @@
+<!-- 
+  Only for standalone PRs without Jira issue in the PR title: 
+    * Replace this comment with Epic ID to create a new Task in Jira
+    * Replace this comment with Issue ID to create a new Sub-Task in Jira
+    * Ignore or delete this note to create a new Task in Jira without a parent 
+-->
+
 Please be aware that we are not actively looking for feature contributions. The truth is that it's extremely difficult for someone outside SonarSource to comply with our roadmap and expectations. Therefore, we typically only accept minor cosmetic changes and typo fixes. If you would like to see a new feature, please create a new thread in the forum ["Suggest new features"](https://community.sonarsource.com/c/suggestions/features).
 
 With that in mind, if you would like to submit a code contribution, make sure that you adhere to the following guidelines and all tests are passing:
