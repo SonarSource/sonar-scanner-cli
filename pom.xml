@@ -70,7 +70,7 @@
 			<dependency>
 				<groupId>org.junit</groupId>
 				<artifactId>junit-bom</artifactId>
-				<version>5.11.0</version>
+				<version>5.11.4</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -91,7 +91,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.5.8</version>
+      <version>1.5.12</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -115,7 +115,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.13.0</version>
+      <version>5.14.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -240,8 +240,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>11100000</minsize>
-                  <maxsize>11200000</maxsize>
+                  <minsize>11200000</minsize>
+                  <maxsize>11300000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonar-scanner-${project.version}.zip</file>
                   </files>

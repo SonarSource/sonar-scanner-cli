@@ -27,14 +27,14 @@
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
 
     <maven.compiler.release>17</maven.compiler.release>
-    <orchestrator.version>5.0.0.2065</orchestrator.version>
+    <orchestrator.version>5.1.0.2274</orchestrator.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>2.0.3</version>
+      <version>3.0.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
