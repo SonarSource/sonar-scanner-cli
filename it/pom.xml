@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>77.0.0.2082</version>
+    <version>82.0.0.2314</version>
     <relativePath />
   </parent>
 
@@ -22,6 +22,7 @@
   </organization>
 
   <properties>
+    <license.name>GNU LGPL v3</license.name>
     <sonar.buildVersion>7.9.1</sonar.buildVersion>
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
 
