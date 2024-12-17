@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>77.0.0.2082</version>
+    <version>82.0.0.2314</version>
     <relativePath />
   </parent>
 
@@ -22,18 +22,19 @@
   </organization>
 
   <properties>
+    <license.name>GNU LGPL v3</license.name>
     <sonar.buildVersion>7.9.1</sonar.buildVersion>
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
 
     <maven.compiler.release>17</maven.compiler.release>
-    <orchestrator.version>5.0.0.2065</orchestrator.version>
+    <orchestrator.version>5.1.0.2274</orchestrator.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>2.0.3</version>
+      <version>3.0.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -104,7 +105,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.0.2</version>
+            <version>3.8.1</version>
             <executions>
               <execution>
                 <id>download-qa-scanner</id>
