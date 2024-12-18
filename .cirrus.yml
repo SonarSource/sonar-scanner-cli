@@ -135,6 +135,33 @@ win_x64_qa_java17_task:
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
+macos_qa_java17_task:
+  depends_on:
+    - build
+  <<: *ONLY_SONARSOURCE_QA
+  persistent_worker:
+    resources:
+      tart-vms: 1
+    labels:
+      envname: prod
+    isolation:
+      tart:
+        image: ghcr.io/cirruslabs/macos-sonoma-xcode:latest
+        cpu: 4
+        memory: 8G
+  env:
+    matrix:
+      - SQ_VERSION: LATEST_RELEASE
+  maven_cache:
+    folder: ${CIRRUS_WORKING_DIR}/.m2/repository
+  qa_script:
+    - source cirrus-env QA
+    - source set_maven_build_version $BUILD_NUMBER
+    - cd it
+    - mvn -B -e -Dsonar.runtimeVersion="$SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify
+  cleanup_before_cache_script:
+    - cleanup_maven_repository
+
 promote_task:
   depends_on:
     - linux_x64_qa_java17
