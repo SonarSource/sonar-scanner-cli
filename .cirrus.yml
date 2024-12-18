@@ -60,6 +60,11 @@ build_task:
   script:
     - source cirrus-env BUILD
     - regular_mvn_build_deploy_analyze -Pdist-linux-x64,dist-linux-aarch64,dist-windows-x64,dist-macosx-x64,dist-macosx-aarch64
+  always:
+    junit_artifacts:
+      path: "**/surefire-reports/**.xml"
+      type: text/xml
+      format: junit
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
