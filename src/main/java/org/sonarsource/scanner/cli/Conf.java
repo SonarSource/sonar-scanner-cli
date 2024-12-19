@@ -21,7 +21,7 @@ package org.sonarsource.scanner.cli;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,6 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarsource.scanner.lib.EnvironmentConfig;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 class Conf {
   private static final Logger LOG = LoggerFactory.getLogger(Conf.class);
 
@@ -46,7 +48,6 @@ class Conf {
   private static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
   private static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
   private static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
-  static final String PROPERTY_SONAR_HOST_URL = "sonar.host.url";
   private static final String BOOTSTRAP_START_TIME = "sonar.scanner.bootstrapStartTime";
 
   private final Cli cli;
@@ -92,8 +93,7 @@ class Conf {
     knownPropsAtThatPoint.putAll(loadEnvironmentProperties());
     knownPropsAtThatPoint.putAll(cli.properties());
 
-    Path settingsFile = locatePropertiesFile(knownPropsAtThatPoint, SCANNER_HOME, "conf/sonar-scanner.properties",
-      SCANNER_SETTINGS);
+    Path settingsFile = locatePropertiesFile(knownPropsAtThatPoint);
     if (settingsFile != null && Files.isRegularFile(settingsFile)) {
       LOG.info("Scanner configuration file: {}", settingsFile);
       return toProperties(settingsFile);
@@ -217,14 +217,14 @@ class Conf {
     return moduleProps;
   }
 
-  private static Path locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
+  private static Path locatePropertiesFile(Properties props) {
     Path settingsFile = null;
-    String scannerHome = props.getProperty(homeKey, "");
+    String scannerHome = props.getProperty(Conf.SCANNER_HOME, "");
     if (!"".equals(scannerHome)) {
-      settingsFile = Paths.get(scannerHome, relativePathFromHome);
+      settingsFile = Paths.get(scannerHome, "conf/sonar-scanner.properties");
     }
 
-    return locatePropertiesFile(settingsFile, props, settingsKey);
+    return locatePropertiesFile(settingsFile, props, Conf.SCANNER_SETTINGS);
   }
 
   private static Path locatePropertiesFile(@Nullable Path defaultPath, Properties props, String settingsKey) {
@@ -244,8 +244,8 @@ class Conf {
 
   private static Properties toProperties(Path file) {
     Properties properties = new Properties();
-    try (InputStream in = new FileInputStream(file.toFile())) {
-      properties.load(in);
+    try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file.toFile()), UTF_8)) {
+      properties.load(reader);
       // Trim properties
       for (String propKey : properties.stringPropertyNames()) {
         properties.setProperty(propKey, properties.getProperty(propKey).trim());

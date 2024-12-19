@@ -289,4 +289,13 @@ class ConfTest {
     assertThat(properties).containsEntry("sonar.prop", "expected");
   }
 
+  @Test
+  void should_handle_non_latin_characters() throws Exception  {
+    Path home = Paths.get(getClass().getResource("ConfTest/shouldHandleNonLatinChars/project").toURI());
+    args.setProperty("project.home", home.toAbsolutePath().toString());
+
+    Properties properties = conf.properties();
+    assertThat(properties).containsEntry("project.nonlatin", "Non Latin ÇŞĞIİÖÜ");
+  }
+
 }
