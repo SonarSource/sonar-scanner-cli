@@ -1,6 +1,6 @@
 /*
  * SonarScanner CLI
- * Copyright (C) 2011-2024 SonarSource SA
+ * Copyright (C) 2011-2025 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
