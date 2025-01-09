@@ -116,8 +116,12 @@ public abstract class ScannerTestCase {
   SonarScanner newScannerWithAdminCredentials(File baseDir, String... keyValueProperties) {
     SonarScanner scannerCli = SonarScanner.create(baseDir, keyValueProperties);
     scannerCli.setScannerVersion(artifactVersion().toString());
-    scannerCli.setProperty("sonar.login", Server.ADMIN_LOGIN);
-    scannerCli.setProperty("sonar.password", Server.ADMIN_PASSWORD);
+    if (orchestrator.getServer().version().isGreaterThanOrEquals(25, 1)) {
+      scannerCli.setProperty("sonar.token", orchestrator.getDefaultAdminToken());
+    } else {
+      scannerCli.setProperty("sonar.login", Server.ADMIN_LOGIN);
+      scannerCli.setProperty("sonar.password", Server.ADMIN_PASSWORD);
+    }
     return scannerCli;
   }
 
