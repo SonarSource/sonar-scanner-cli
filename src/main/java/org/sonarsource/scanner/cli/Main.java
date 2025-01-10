@@ -25,7 +25,6 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
-import org.sonarsource.scanner.lib.ScannerEngineFacade;
 import org.sonarsource.scanner.lib.ScannerProperties;
 
 /**
@@ -73,7 +72,6 @@ public class Main {
       configureLogging(p);
       init(p);
       try (var engine = scannerEngineBootstrapper.bootstrap()) {
-        logServerType(engine);
         var success = engine.analyze((Map) p);
         if (success) {
           displayExecutionResult(stats, "SUCCESS");
@@ -89,15 +87,6 @@ public class Main {
       status = isUserError(e) ? Exit.USER_ERROR : Exit.INTERNAL_ERROR;
     } finally {
       exit.exit(status);
-    }
-  }
-
-  private static void logServerType(ScannerEngineFacade engine) {
-    if (engine.isSonarCloud()) {
-      LOG.info("Communicating with SonarCloud");
-    } else {
-      String serverVersion = engine.getServerVersion();
-      LOG.info("Communicating with SonarQube Server {}", serverVersion);
     }
   }
 

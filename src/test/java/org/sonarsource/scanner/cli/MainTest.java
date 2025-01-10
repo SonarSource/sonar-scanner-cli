@@ -227,32 +227,6 @@ class MainTest {
   }
 
   @Test
-  void shouldLogServerVersion() {
-    when(engine.isSonarCloud()).thenReturn(false);
-    when(engine.getServerVersion()).thenReturn("5.5");
-    Properties p = new Properties();
-    when(cli.isDisplayVersionOnly()).thenReturn(true);
-    when(cli.getInvokedFrom()).thenReturn("");
-    when(conf.properties()).thenReturn(p);
-
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
-    main.analyze();
-    assertThat(logTester.logs(Level.INFO)).contains("Communicating with SonarQube Server 5.5");
-  }
-
-  @Test
-  void should_log_SonarCloud_server() {
-    when(engine.isSonarCloud()).thenReturn(true);
-    Properties p = new Properties();
-    when(conf.properties()).thenReturn(p);
-    when(cli.getInvokedFrom()).thenReturn("");
-
-    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
-    main.analyze();
-    assertThat(logTester.logs(Level.INFO)).contains("Communicating with SonarCloud");
-  }
-
-  @Test
   void should_configure_logging() {
     Properties analysisProps = testLogging("sonar.verbose", "true");
     assertThat(analysisProps.getProperty("sonar.verbose")).isEqualTo("true");
