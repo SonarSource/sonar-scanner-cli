@@ -41,6 +41,8 @@ import org.sonarsource.scanner.lib.ScannerProperties;
  */
 public class Main {
   private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+  private static final String FAILURE = "FAILURE";
+  private static final String SUCCESS = "SUCCESS";
 
   private final Exit exit;
   private final Cli cli;
@@ -71,18 +73,25 @@ public class Main {
       checkSkip(p);
       configureLogging(p);
       init(p);
-      try (var engine = scannerEngineBootstrapper.bootstrap()) {
-        var success = engine.analyze((Map) p);
-        if (success) {
-          displayExecutionResult(stats, "SUCCESS");
-          status = Exit.SUCCESS;
+      try (var result = scannerEngineBootstrapper.bootstrap()) {
+        if (result.isSuccessful()) {
+          var engine = result.getEngineFacade();
+          var success = engine.analyze((Map) p);
+          if (success) {
+            displayExecutionResult(stats, SUCCESS);
+            status = Exit.SUCCESS;
+          } else {
+            displayExecutionResult(stats, FAILURE);
+            status = Exit.SCANNER_ENGINE_ERROR;
+          }
         } else {
-          displayExecutionResult(stats, "FAILURE");
-          status = Exit.SCANNER_ENGINE_ERROR;
+          LOG.debug("Scanner engine bootstrapping failed");
+          displayExecutionResult(stats, FAILURE);
+          status = Exit.INTERNAL_ERROR;
         }
       }
     } catch (Throwable e) {
-      displayExecutionResult(stats, "FAILURE");
+      displayExecutionResult(stats, FAILURE);
       showError(e, cli.isDebugEnabled());
       status = isUserError(e) ? Exit.USER_ERROR : Exit.INTERNAL_ERROR;
     } finally {
