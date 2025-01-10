@@ -14,4 +14,4 @@ jobs:
     with:
       publishToBinaries: true
       mavenCentralSync: true
-      slackChannel: squad-analysis-experience
+      slackChannel: ops-analysis-experience
