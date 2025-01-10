@@ -190,7 +190,7 @@ public class ScannerTest extends ScannerTestCase {
 
     assertThat(buildResult.isSuccess()).isFalse();
     assertThat(buildResult.getLogs())
-      .contains("Error status returned by url [http://www.google.com/404/api/v2/analysis/version]: 404");
+      .contains("Failed to query server version: Not Found");
   }
 
   @Test
@@ -216,7 +216,7 @@ public class ScannerTest extends ScannerTestCase {
     assertThat(result.isSuccess()).isFalse();
     // with the following message
     assertThat(result.getLogs())
-      .contains("Error status returned by url [http://www.google.com/404/api/v2/analysis/version]: 404");
+      .contains("Failed to query server version: Not Found");
   }
 
   // SONARPLUGINS-3574

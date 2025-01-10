@@ -30,6 +30,7 @@ import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.sonar.api.utils.MessageException;
+import org.sonarsource.scanner.lib.ScannerEngineBootstrapResult;
 import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
 import org.sonarsource.scanner.lib.ScannerEngineFacade;
 import org.sonarsource.scanner.lib.ScannerProperties;
@@ -56,11 +57,14 @@ class MainTest {
   private final ScannerEngineBootstrapperFactory scannerEngineBootstrapperFactory = mock();
   private final ScannerEngineBootstrapper bootstrapper = mock();
   private final ScannerEngineFacade engine = mock();
+  private final ScannerEngineBootstrapResult result = mock();
 
   @BeforeEach
   void setUp() {
     when(scannerEngineBootstrapperFactory.create(any(Properties.class), any(String.class))).thenReturn(bootstrapper);
-    when(bootstrapper.bootstrap()).thenReturn(engine);
+    when(result.isSuccessful()).thenReturn(true);
+    when(result.getEngineFacade()).thenReturn(engine);
+    when(bootstrapper.bootstrap()).thenReturn(result);
     when(engine.analyze(any())).thenReturn(true);
     when(conf.properties()).thenReturn(properties);
   }
@@ -79,7 +83,7 @@ class MainTest {
   }
 
   @Test
-  void should_exit_with_error_on_error_during_analysis() {
+  void should_exit_with_error_on_exception_during_analysis() {
     Exception e = new NullPointerException("NPE");
     e = new IllegalStateException("Error", e);
     doThrow(e).when(engine).analyze(any());
@@ -94,9 +98,7 @@ class MainTest {
 
   @Test
   void should_exit_with_error_on_error_during_bootstrap() {
-    Exception e = new NullPointerException("NPE");
-    e = new IllegalStateException("Error", e);
-    doThrow(e).when(bootstrapper).bootstrap();
+    when(result.isSuccessful()).thenReturn(false);
     when(cli.getInvokedFrom()).thenReturn("");
     when(cli.isDebugEnabled()).thenReturn(true);
 
@@ -106,7 +108,21 @@ class MainTest {
     verify(bootstrapper).bootstrap();
     verify(engine, never()).analyze(any());
     verify(exit).exit(Exit.INTERNAL_ERROR);
-    assertThat(logTester.logs(Level.ERROR)).contains("Error during SonarScanner CLI execution");
+    assertThat(logTester.logs(Level.INFO)).contains("EXECUTION FAILURE");
+  }
+
+  @Test
+  void should_exit_with_error_on_error_during_analysis() {
+    when(engine.analyze(any())).thenReturn(false);
+    when(cli.getInvokedFrom()).thenReturn("");
+    when(cli.isDebugEnabled()).thenReturn(true);
+
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
+    main.analyze();
+
+    verify(bootstrapper).bootstrap();
+    verify(exit).exit(Exit.SCANNER_ENGINE_ERROR);
+    assertThat(logTester.logs(Level.INFO)).contains("EXECUTION FAILURE");
   }
 
   @Test
