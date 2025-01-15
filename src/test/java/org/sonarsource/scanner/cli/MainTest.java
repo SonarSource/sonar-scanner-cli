@@ -30,6 +30,7 @@ import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.sonar.api.utils.MessageException;
+import org.sonarsource.scanner.lib.ScannerEngineBootstrapResult;
 import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
 import org.sonarsource.scanner.lib.ScannerEngineFacade;
 import org.sonarsource.scanner.lib.ScannerProperties;
@@ -60,7 +61,10 @@ class MainTest {
   @BeforeEach
   void setUp() {
     when(scannerEngineBootstrapperFactory.create(any(Properties.class), any(String.class))).thenReturn(bootstrapper);
-    when(bootstrapper.bootstrap()).thenReturn(engine);
+    var result = mock(ScannerEngineBootstrapResult.class);
+    when(result.isSuccessful()).thenReturn(true);
+    when(result.getEngineFacade()).thenReturn(engine);
+    when(bootstrapper.bootstrap()).thenReturn(result);
     when(engine.analyze(any())).thenReturn(true);
     when(conf.properties()).thenReturn(properties);
   }

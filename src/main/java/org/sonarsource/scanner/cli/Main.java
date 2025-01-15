@@ -71,14 +71,20 @@ public class Main {
       checkSkip(p);
       configureLogging(p);
       init(p);
-      try (var engine = scannerEngineBootstrapper.bootstrap()) {
-        var success = engine.analyze((Map) p);
-        if (success) {
-          displayExecutionResult(stats, "SUCCESS");
-          status = Exit.SUCCESS;
+      try (var result = scannerEngineBootstrapper.bootstrap()) {
+        if (result.isSuccessful()) {
+          var engine = result.getEngineFacade();
+          var success = engine.analyze((Map) p);
+          if (success) {
+            displayExecutionResult(stats, "SUCCESS");
+            status = Exit.SUCCESS;
+          } else {
+            displayExecutionResult(stats, "FAILURE");
+            status = Exit.SCANNER_ENGINE_ERROR;
+          }
         } else {
           displayExecutionResult(stats, "FAILURE");
-          status = Exit.SCANNER_ENGINE_ERROR;
+          status = Exit.INTERNAL_ERROR;
         }
       }
     } catch (Throwable e) {
