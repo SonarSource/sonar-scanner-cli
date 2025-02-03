@@ -10,7 +10,7 @@
 
   <groupId>org.sonarsource.scanner.cli</groupId>
   <artifactId>sonar-scanner-cli</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>SonarScanner CLI</name>
   <url>https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/sonarscanner/</url>
@@ -81,7 +81,7 @@
     <dependency>
       <groupId>org.sonarsource.scanner.lib</groupId>
       <artifactId>sonar-scanner-java-library</artifactId>
-      <version>3.2.0.370</version>
+      <version>3.2.1.385</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
