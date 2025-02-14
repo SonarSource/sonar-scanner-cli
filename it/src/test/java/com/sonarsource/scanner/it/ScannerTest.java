@@ -190,7 +190,7 @@ public class ScannerTest extends ScannerTestCase {
 
     assertThat(buildResult.isSuccess()).isFalse();
     assertThat(buildResult.getLogs())
-      .contains("Failed to query server version: Not Found");
+      .contains("Failed to query server version: HTTP 404 Not Found");
   }
 
   @Test
@@ -216,7 +216,7 @@ public class ScannerTest extends ScannerTestCase {
     assertThat(result.isSuccess()).isFalse();
     // with the following message
     assertThat(result.getLogs())
-      .contains("Failed to query server version: Not Found");
+      .contains("Failed to query server version: HTTP 404 Not Found");
   }
 
   // SONARPLUGINS-3574
