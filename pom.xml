@@ -10,7 +10,7 @@
 
   <groupId>org.sonarsource.scanner.cli</groupId>
   <artifactId>sonar-scanner-cli</artifactId>
-  <version>7.0.2-SNAPSHOT</version>
+  <version>7.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>SonarScanner CLI</name>
   <url>https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/sonarscanner/</url>
