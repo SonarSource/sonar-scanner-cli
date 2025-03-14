@@ -190,7 +190,7 @@ public class ScannerTest extends ScannerTestCase {
 
     assertThat(buildResult.isSuccess()).isFalse();
     assertThat(buildResult.getLogs())
-      .contains("Failed to query server version: HTTP 404 Not Found");
+      .contains("Failed to query server version: GET http://www.google.com/404/api/server/version failed with HTTP 404 Not Found");
   }
 
   @Test
@@ -207,7 +207,7 @@ public class ScannerTest extends ScannerTestCase {
   @Test
   public void should_fail_if_unable_to_connect() {
     SonarScanner build = newScannerWithToken(new File("projects/simple-sample"), analysisToken)
-      //env property should be overridden
+      //env property should be overridden by command line property
       .setEnvironmentVariable("SONAR_HOST_URL", "http://www.google.com")
       .setProperty("sonar.host.url", "http://www.google.com/404");
 
@@ -216,7 +216,7 @@ public class ScannerTest extends ScannerTestCase {
     assertThat(result.isSuccess()).isFalse();
     // with the following message
     assertThat(result.getLogs())
-      .contains("Failed to query server version: HTTP 404 Not Found");
+      .contains("Failed to query server version: GET http://www.google.com/404/api/server/version failed with HTTP 404 Not Found");
   }
 
   // SONARPLUGINS-3574

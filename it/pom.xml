@@ -27,7 +27,7 @@
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
 
     <maven.compiler.release>17</maven.compiler.release>
-    <orchestrator.version>5.1.0.2274</orchestrator.version>
+    <orchestrator.version>5.3.0.2465</orchestrator.version>
   </properties>
 
   <dependencies>
