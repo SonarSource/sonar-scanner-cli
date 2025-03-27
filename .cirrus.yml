@@ -100,7 +100,7 @@ linux_x64_qa_java17_task:
     <<: *EKS_CONTAINER
   env:
     matrix:
-      - SQ_VERSION: LATEST_RELEASE[9.9]
+      - SQ_VERSION: LATEST_RELEASE[2025.1]
       - SQ_VERSION: LATEST_RELEASE
       - SQ_VERSION: DEV
   maven_cache:
@@ -127,7 +127,7 @@ win_x64_qa_java17_task:
   env:
     CIRRUS_SHELL: bash
     matrix:
-      - SQ_VERSION: LATEST_RELEASE[9.9]
+      - SQ_VERSION: LATEST_RELEASE[2025.1]
       - SQ_VERSION: LATEST_RELEASE
       - SQ_VERSION: DEV
   maven_cache:
