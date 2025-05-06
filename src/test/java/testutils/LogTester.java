@@ -28,6 +28,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
+import static java.util.stream.Collectors.*;
+
 public class LogTester implements BeforeEachCallback, AfterEachCallback {
 
   private final ConcurrentListAppender<ILoggingEvent> listAppender = new ConcurrentListAppender<>();
@@ -55,7 +57,7 @@ public class LogTester implements BeforeEachCallback, AfterEachCallback {
   public List<String> logs() {
     return listAppender.list.stream().map(e -> (LoggingEvent) e)
       .map(LoggingEvent::getFormattedMessage)
-      .toList();
+      .collect(toList());
   }
 
   /**
@@ -66,7 +68,7 @@ public class LogTester implements BeforeEachCallback, AfterEachCallback {
     return listAppender.list.stream().map(e -> (LoggingEvent) e)
       .filter(e -> e.getLevel().equals(ch.qos.logback.classic.Level.fromLocationAwareLoggerInteger(level.toInt())))
       .map(LoggingEvent::getFormattedMessage)
-      .toList();
+      .collect(toList());
   }
 
   public LogTester clear() {
