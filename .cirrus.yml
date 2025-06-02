@@ -13,13 +13,7 @@ env:
   ARTIFACTORY_DEPLOY_USERNAME: vault-${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-qa-deployer
   ARTIFACTORY_DEPLOY_PASSWORD: VAULT[development/artifactory/token/SonarSource-sonar-scanner-cli-qa-deployer access_token]
   ARTIFACTORY_DEPLOY_REPO: sonarsource-public-qa
-
-  GCF_ACCESS_TOKEN: VAULT[development/kv/data/promote data.token]
-  PROMOTE_URL: VAULT[development/kv/data/promote data.url]
-
-  BURGR_URL: VAULT[development/kv/data/burgr data.url]
-  BURGR_USERNAME: VAULT[development/kv/data/burgr data.cirrus_username]
-  BURGR_PASSWORD: VAULT[development/kv/data/burgr data.cirrus_password]
+  ARTIFACTORY_PROMOTE_ACCESS_TOKEN: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promoter access_token]
 
   ### Project variables
   DEPLOY_PULL_REQUEST: true
@@ -34,18 +28,16 @@ eks_container: &EKS_CONTAINER
   namespace: default
   image: ${CIRRUS_AWS_ACCOUNT}.dkr.ecr.eu-central-1.amazonaws.com/base:j17-m3-latest
   cpu: 1
-  memory: 2G
+  memory: 4G
 
 ec2_instance: &EC2_INSTANCE_WINDOWS
-  experimental: true # see https://github.com/cirruslabs/cirrus-ci-docs/issues/1051
   region: eu-central-1
-  subnet_id: ${CIRRUS_AWS_SUBNET}
   type: t2.2xlarge
   image: base-windows-jdk17-v*
   platform: windows
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
-  only_if: $CIRRUS_USER_COLLABORATOR == 'true' && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == "master" || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BRANCH =~ "dogfood-on-.*")
+  only_if: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_TAG == "" && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == $CIRRUS_DEFAULT_BRANCH || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BUILD_SOURCE == 'api' )
 
 except_nightly_cron: &EXCEPT_ON_NIGHTLY_CRON
   only_if: $CIRRUS_CRON != $NIGHTLY_CRON
@@ -54,6 +46,7 @@ except_nightly_cron: &EXCEPT_ON_NIGHTLY_CRON
 # TASKS
 #
 build_task:
+  <<: *ONLY_SONARSOURCE_QA
   eks_container:
     <<: *EKS_CONTAINER
   env:
@@ -61,6 +54,8 @@ build_task:
     SONAR_HOST_URL: VAULT[development/kv/data/next data.url]
     SIGN_KEY: VAULT[development/kv/data/sign data.key]
     PGP_PASSPHRASE: VAULT[development/kv/data/sign data.passphrase]
+    # Fetch all commit history so that Sonar has exact blame information for issue auto-assignment
+    CIRRUS_CLONE_DEPTH: "0"
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   script:
