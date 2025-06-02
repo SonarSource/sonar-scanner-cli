@@ -64,9 +64,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.sonarsource.scanner.api</groupId>
+      <groupId>org.sonarsource.scanner.lib</groupId>
       <artifactId>sonar-scanner-api</artifactId>
-      <version>2.16.3.1081</version>
+      <version>2.16.4.483</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
