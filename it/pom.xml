@@ -22,28 +22,37 @@
   </organization>
 
   <properties>
-    <sonar.buildVersion>7.9.1</sonar.buildVersion>
+    <license.name>GNU LGPL v3</license.name>
+    <sonar.buildVersion>25.5.0.107428</sonar.buildVersion>
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
 
     <maven.compiler.release>17</maven.compiler.release>
+    <orchestrator.version>5.5.0.2535</orchestrator.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>2.0.3</version>
+      <version>3.0.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.sonarsource.orchestrator</groupId>
       <artifactId>sonar-orchestrator</artifactId>
-      <version>3.40.0.183</version>
+      <version>${orchestrator.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonarsource.orchestrator</groupId>
+      <artifactId>sonar-orchestrator-junit4</artifactId>
+      <version>${orchestrator.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -54,27 +63,33 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.12.2</version>
+      <version>3.26.3</version>
     </dependency>
   </dependencies>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <systemProperties>
-              <scanner.version>${scanner.version}</scanner.version>
-            </systemProperties>
-            <includes>
-              <include>**/SonarScannerTestSuite.java</include>
-            </includes>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- Some tests are asserting on localized messages or dates -->
+          <systemPropertyVariables>
+            <user.language>en</user.language>
+            <user.country>US</user.country>
+          </systemPropertyVariables>
+          <environmentVariables>
+            <LANGUAGE>en_US</LANGUAGE>
+          </environmentVariables>
+          <systemProperties>
+            <scanner.version>${env.PROJECT_VERSION}</scanner.version>
+          </systemProperties>
+          <includes>
+            <include>**/SonarScannerTestSuite.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 
   <profiles>
@@ -82,43 +97,15 @@
       <id>download-qa-artifacts</id>
       <activation>
         <property>
-          <name>env.CI_BUILD_NUMBER</name>
+          <name>env.PROJECT_VERSION</name>
         </property>
       </activation>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.codehaus.gmaven</groupId>
-            <artifactId>groovy-maven-plugin</artifactId>
-            <version>2.0</version>
-            <executions>
-              <execution>
-                <id>compute-qa-version</id>
-                <phase>initialize</phase>
-                <goals>
-                  <goal>execute</goal>
-                </goals>
-                <configuration>
-                  <source><![CDATA[
-                    String pom = new File(project.basedir, '../pom.xml').getText('UTF-8')
-                    def matcher = pom =~ /(?s).*<version>(.*?)-SNAPSHOT<\/version>.*/
-                    assert matcher.matches()
-                    def versionNoSnapshot = matcher[0][1]
-                    if (new StringTokenizer(versionNoSnapshot, ".").countTokens() == 2) {
-                      versionNoSnapshot += '.0'
-                    }
-                    project.properties['scanner.version'] = versionNoSnapshot + '.' + System.getenv()['CI_BUILD_NUMBER']
-                    ]]>
-                  </source>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.0.2</version>
+            <version>3.8.1</version>
             <executions>
               <execution>
                 <id>download-qa-scanner</id>
@@ -127,7 +114,7 @@
                   <goal>get</goal>
                 </goals>
                 <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip</artifact>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip</artifact>
                 </configuration>
               </execution>
               <execution>
@@ -137,7 +124,7 @@
                   <goal>get</goal>
                 </goals>
                 <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:linux</artifact>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:linux</artifact>
                 </configuration>
               </execution>
               <execution>
@@ -147,7 +134,7 @@
                   <goal>get</goal>
                 </goals>
                 <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:windows</artifact>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:windows</artifact>
                 </configuration>
               </execution>
               <execution>
@@ -157,7 +144,7 @@
                   <goal>get</goal>
                 </goals>
                 <configuration>
-                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${scanner.version}:zip:macosx</artifact>
+                  <artifact>org.sonarsource.scanner.cli:sonar-scanner-cli:${env.PROJECT_VERSION}:zip:macosx</artifact>
                 </configuration>
               </execution>
             </executions>

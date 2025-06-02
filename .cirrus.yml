@@ -17,7 +17,6 @@ env:
 
   ### Project variables
   DEPLOY_PULL_REQUEST: true
-  ARTIFACTS: org.sonarsource.scanner.cli:sonar-scanner-cli:jar
   NIGHTLY_CRON: 'nightly-cron'
 #
 # RE-USABLE CONFIGS
