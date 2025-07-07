@@ -92,7 +92,7 @@ mend_scan_task:
     ws_artifacts:
       path: "whitesource/**/*"
 
-linux_x64_qa_java17_task:
+linux_x64_qa_java11_task:
   depends_on:
     - build
   <<: *ONLY_SONARSOURCE_QA
@@ -113,6 +113,9 @@ linux_x64_qa_java17_task:
     - export PATH=$PATH:/tmp/${nodeName}/bin
     - source cirrus-env QA
     - source set_maven_build_version $BUILD_NUMBER
+    - wget -O OpenJDK11U-jre_x64_linux_hotspot_11.0.27_6.tar.gz https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.27%2B6/OpenJDK11U-jre_x64_linux_hotspot_11.0.27_6.tar.gz
+    - tar xzf OpenJDK11U-jre_x64_linux_hotspot_11.0.27_6.tar.gz -C /tmp
+    - export JAVA_11_HOME=/tmp/jdk-11.0.27+6-jre
     - cd it
     - mvn -B -e -Dsonar.runtimeVersion="$SQ_VERSION" -Dmaven.test.redirectTestOutputToFile=false verify
   cleanup_before_cache_script:
@@ -142,7 +145,7 @@ win_x64_qa_java17_task:
 
 promote_task:
   depends_on:
-    - linux_x64_qa_java17
+    - linux_x64_qa_java11
     - win_x64_qa_java17
   <<: *ONLY_SONARSOURCE_QA_EXCEPT_ON_NIGHTLY_CRON
   eks_container:
