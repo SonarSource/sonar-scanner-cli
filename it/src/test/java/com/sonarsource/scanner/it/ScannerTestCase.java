@@ -103,6 +103,9 @@ public abstract class ScannerTestCase {
 
   SonarScanner newScannerWithToken(File baseDir, String token, String... keyValueProperties) {
     SonarScanner scannerCli = SonarScanner.create(baseDir, keyValueProperties);
+    if (System.getenv().containsKey("JAVA_11_HOME")) {
+      scannerCli.getEnvironmentVariables().put("JAVA_HOME", System.getenv("JAVA_11_HOME"));
+    }
     scannerCli.setScannerVersion(artifactVersion().toString());
     if (orchestrator.getServer().version().isGreaterThanOrEquals(10, 0)) {
       scannerCli.setProperty("sonar.token", token);
@@ -115,6 +118,9 @@ public abstract class ScannerTestCase {
 
   SonarScanner newScannerWithAdminCredentials(File baseDir, String... keyValueProperties) {
     SonarScanner scannerCli = SonarScanner.create(baseDir, keyValueProperties);
+    if (System.getenv().containsKey("JAVA_11_HOME")) {
+      scannerCli.getEnvironmentVariables().put("JAVA_HOME", System.getenv("JAVA_11_HOME"));
+    }
     scannerCli.setScannerVersion(artifactVersion().toString());
     if (orchestrator.getServer().version().isGreaterThanOrEquals(25, 1)) {
       scannerCli.setProperty("sonar.token", orchestrator.getDefaultAdminToken());
