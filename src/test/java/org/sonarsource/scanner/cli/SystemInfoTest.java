@@ -74,7 +74,21 @@ class SystemInfoTest {
   }
 
   @Test
-  void should_print() {
+  void should_print_scanner_version_and_os_at_info() {
+    mockOs();
+    mockJava();
+
+    SystemInfo.print();
+
+    verify(mockSystem).getProperty("os.version");
+
+    assertThat(logTester.logs(Level.INFO))
+      .containsOnly("SonarScanner CLI " + ScannerVersion.version(), "linux 2.5 x64");
+  }
+
+  @Test
+  void should_print_jvm_version_and_opts_at_debug() {
+    logTester.setLevel(Level.DEBUG);
     mockOs();
     mockJava();
     when(mockSystem.getenv("SONAR_SCANNER_OPTS")).thenReturn("arg");
@@ -85,12 +99,13 @@ class SystemInfoTest {
     verify(mockSystem).getProperty("os.version");
     verify(mockSystem).getenv("SONAR_SCANNER_OPTS");
 
-    assertThat(logTester.logs(Level.INFO))
-      .containsOnly("SonarScanner CLI " + ScannerVersion.version(), "Java 1.9 oracle (64-bit)", "linux 2.5 x64", "SONAR_SCANNER_OPTS=arg");
+    assertThat(logTester.logs(Level.DEBUG))
+      .containsOnly("Java 1.9 oracle (64-bit)", "SONAR_SCANNER_OPTS=arg");
   }
 
   @Test
   void should_not_print_sensitive_data() {
+    logTester.setLevel(Level.DEBUG);
     mockOs();
     mockJava();
     when(mockSystem.getenv("SONAR_SCANNER_OPTS"))
@@ -98,6 +113,6 @@ class SystemInfoTest {
 
     SystemInfo.print();
 
-    assertThat(logTester.logs(Level.INFO)).contains("SONAR_SCANNER_OPTS=-Dsonar.login=* -Dsonar.whatever=whatever -Dsonar.password=* -Dsonar.whatever2=whatever2 -Dsonar.token=*");
+    assertThat(logTester.logs(Level.DEBUG)).contains("SONAR_SCANNER_OPTS=-Dsonar.login=* -Dsonar.whatever=whatever -Dsonar.password=* -Dsonar.whatever2=whatever2 -Dsonar.token=*");
   }
 }

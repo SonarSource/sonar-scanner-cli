@@ -44,11 +44,11 @@ class SystemInfo {
 
   static void print() {
     LOG.info("SonarScanner CLI {}", ScannerVersion.version());
-    LOG.atInfo().log(SystemInfo::java);
+    LOG.atDebug().log(SystemInfo::java);
     LOG.atInfo().log(SystemInfo::os);
     String scannerOpts = system.getenv("SONAR_SCANNER_OPTS");
     if (scannerOpts != null) {
-      LOG.atInfo().addArgument(() -> redactSensitiveArguments(scannerOpts)).log("SONAR_SCANNER_OPTS={}");
+      LOG.atDebug().addArgument(() -> redactSensitiveArguments(scannerOpts)).log("SONAR_SCANNER_OPTS={}");
     }
   }
 
