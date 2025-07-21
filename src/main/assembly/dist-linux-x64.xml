@@ -9,7 +9,7 @@
 
     <!-- jre basic, except bin/ -->
     <fileSet>
-      <directory>${unpack.dir}/linux-x64/${jre.dirname.linux}</directory>
+      <directory>${unpack.dir}/linux-x64/${jre.dirname.linux.x64}</directory>
       <outputDirectory>jre</outputDirectory>
       <excludes>
         <exclude>bin/**</exclude>
@@ -22,7 +22,7 @@
 
     <!-- jre bin/java -->
     <fileSet>
-      <directory>${unpack.dir}/linux-x64/${jre.dirname.linux}/bin</directory>
+      <directory>${unpack.dir}/linux-x64/${jre.dirname.linux.x64}/bin</directory>
       <outputDirectory>jre/bin</outputDirectory>
       <includes>
         <include>java</include>
@@ -32,7 +32,7 @@
 
     <!-- jre lib executable files -->
     <fileSet>
-      <directory>${unpack.dir}/linux-x64/${jre.dirname.linux}/lib</directory>
+      <directory>${unpack.dir}/linux-x64/${jre.dirname.linux.x64}/lib</directory>
       <outputDirectory>jre/lib</outputDirectory>
       <includes>
         <include>jspawnhelper</include>
