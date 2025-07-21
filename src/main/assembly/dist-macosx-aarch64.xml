@@ -9,7 +9,7 @@
 
     <!-- jre basic, except bin/ and misc -->
     <fileSet>
-      <directory>${unpack.dir}/macosx-aarch64/${jre.dirname.macosx}</directory>
+      <directory>${unpack.dir}/macosx-aarch64/${jre.dirname.macosx.aarch64}</directory>
       <outputDirectory>jre</outputDirectory>
       <excludes>
         <exclude>bin/**</exclude>
@@ -20,7 +20,7 @@
 
     <!-- jre bin/java -->
     <fileSet>
-      <directory>${unpack.dir}/macosx-aarch64/${jre.dirname.macosx}/bin</directory>
+      <directory>${unpack.dir}/macosx-aarch64/${jre.dirname.macosx.aarch64}/bin</directory>
       <outputDirectory>jre/bin</outputDirectory>
       <includes>
         <include>java</include>
@@ -30,7 +30,7 @@
 
     <!-- jre lib executable files -->
     <fileSet>
-      <directory>${unpack.dir}/macosx-aarch64/${jre.dirname.macosx}/lib</directory>
+      <directory>${unpack.dir}/macosx-aarch64/${jre.dirname.macosx.aarch64}/lib</directory>
       <outputDirectory>jre/lib</outputDirectory>
       <includes>
         <include>jspawnhelper</include>

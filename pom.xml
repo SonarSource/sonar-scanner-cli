@@ -55,9 +55,11 @@
     <!-- configuration for assembly of distributions -->
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
     <scanner.jar>${project.build.finalName}.jar</scanner.jar>
-    <jre.dirname.linux>jdk-17.0.13+11-jre</jre.dirname.linux>
+    <jre.dirname.linux.aarch64>jdk-17.0.13+11-jre</jre.dirname.linux.aarch64>
+    <jre.dirname.linux.x64>jdk-17.0.13+11-jre</jre.dirname.linux.x64>
+    <jre.dirname.macosx.aarch64>jdk-17.0.13+11-jre/Contents/Home</jre.dirname.macosx.aarch64>
+    <jre.dirname.macosx.x64>jdk-17.0.13+11-jre/Contents/Home</jre.dirname.macosx.x64>
     <jre.dirname.windows>jdk-17.0.13+11-jre</jre.dirname.windows>
-    <jre.dirname.macosx>jdk-17.0.13+11-jre/Contents/Home</jre.dirname.macosx>
 
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux-x64,${project.groupId}:${project.artifactId}:zip:linux-aarch64,${project.groupId}:${project.artifactId}:zip:windows-x64,${project.groupId}:${project.artifactId}:zip:macosx-x64,${project.groupId}:${project.artifactId}:zip:macosx-aarch64,${project.groupId}:${project.artifactId}:json:cyclonedx</artifactsToPublish>
@@ -319,6 +321,31 @@
               </execution>
             </executions>
           </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-linux-x64-distribution-size</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <phase>verify</phase>
+                <configuration>
+                  <rules>
+                    <requireFilesSize>
+                      <!-- Should be big enough to confirm the JRE was bundled -->
+                      <minsize>50000000</minsize>
+                      <maxsize>60000000</maxsize>
+                      <files>
+                        <file>${project.build.directory}/sonar-scanner-${project.version}-linux-x64.zip</file>
+                      </files>
+                    </requireFilesSize>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
     </profile>
@@ -363,6 +390,31 @@
                   <filters>
                     <filter>src/main/assembly/filter-dist.properties</filter>
                   </filters>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-linux-aarch64-distribution-size</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <phase>verify</phase>
+                <configuration>
+                  <rules>
+                    <requireFilesSize>
+                      <!-- Should be big enough to confirm the JRE was bundled -->
+                      <minsize>50000000</minsize>
+                      <maxsize>60000000</maxsize>
+                      <files>
+                        <file>${project.build.directory}/sonar-scanner-${project.version}-linux-aarch64.zip</file>
+                      </files>
+                    </requireFilesSize>
+                  </rules>
                 </configuration>
               </execution>
             </executions>
@@ -415,6 +467,31 @@
               </execution>
             </executions>
           </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-windows-x64-distribution-size</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <phase>verify</phase>
+                <configuration>
+                  <rules>
+                    <requireFilesSize>
+                      <!-- Should be big enough to confirm the JRE was bundled -->
+                      <minsize>50000000</minsize>
+                      <maxsize>60000000</maxsize>
+                      <files>
+                        <file>${project.build.directory}/sonar-scanner-${project.version}-windows-x64.zip</file>
+                      </files>
+                    </requireFilesSize>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
     </profile>
@@ -463,6 +540,31 @@
               </execution>
             </executions>
           </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-macosx-x64-distribution-size</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <phase>verify</phase>
+                <configuration>
+                  <rules>
+                    <requireFilesSize>
+                      <!-- Should be big enough to confirm the JRE was bundled -->
+                      <minsize>49000000</minsize>
+                      <maxsize>60000000</maxsize>
+                      <files>
+                        <file>${project.build.directory}/sonar-scanner-${project.version}-macosx-x64.zip</file>
+                      </files>
+                    </requireFilesSize>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
     </profile>
@@ -507,6 +609,31 @@
                   <filters>
                     <filter>src/main/assembly/filter-dist.properties</filter>
                   </filters>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-macosx-aarch64-distribution-size</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <phase>verify</phase>
+                <configuration>
+                  <rules>
+                    <requireFilesSize>
+                      <!-- Should be big enough to confirm the JRE was bundled -->
+                      <minsize>49000000</minsize>
+                      <maxsize>60000000</maxsize>
+                      <files>
+                        <file>${project.build.directory}/sonar-scanner-${project.version}-macosx-aarch64.zip</file>
+                      </files>
+                    </requireFilesSize>
+                  </rules>
                 </configuration>
               </execution>
             </executions>
