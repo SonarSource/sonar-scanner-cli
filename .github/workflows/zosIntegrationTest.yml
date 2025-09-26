@@ -1,0 +1,27 @@
+name: zOS Integration Tests
+
+on: workflow_dispatch
+
+jobs:
+
+  run-analysis-on-zos:
+    name: Run analysis on zOS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Vault
+        id: secrets
+        uses: SonarSource/vault-action-wrapper@v3
+        with:
+          secrets: |
+            development/kv/data/zena username | ZENA_USERNAME;
+            development/kv/data/zena password | ZENA_PASSWORD;
+            development/kv/data/zena token | ZENA_TOKEN;
+            development/kv/data/ibmcloud private_key | ZOS_PRIVATE_KEY;
+      - name: Verify Zena Token
+        env:
+          ZENA_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).ZENA_TOKEN }}
+        run: |
+          curl -X GET -H "Authorization: Bearer $ZENA_TOKEN" "https://zena.sonarsource.com/api/v2/analysis/version" -o output
+          grep "2025" output
