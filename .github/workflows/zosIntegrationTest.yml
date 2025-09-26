@@ -7,6 +7,8 @@ on:
 jobs:
 
   run-analysis-on-zos:
+    permissions:
+      id-token: write
     name: Run analysis on zOS
     runs-on: ubuntu-latest
     steps:
