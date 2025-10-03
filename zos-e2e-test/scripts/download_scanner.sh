@@ -4,10 +4,12 @@ source "$(dirname -- "$0")/utils.sh"
 
 check_env_variable "ZOS_USER_HOST"
 check_env_variable "JOB_TIMESTAMP"
+check_env_variable "GITHUB_TOKEN"
 
 ZOS_PRIVATE_KEY=$GITHUB_WORKSPACE/zos_key
 
 SONAR_SCANNER_VERSION=$(curl -sSL -H "Accept: application/vnd.github+json" \
+  -H "authorization: Bearer $GITHUB_TOKEN" \
   https://api.github.com/repos/SonarSource/sonar-scanner-cli/releases/latest | jq -r '.tag_name')
 check_status "Failed to fetch latest sonar-scanner version from GitHub API"
 
