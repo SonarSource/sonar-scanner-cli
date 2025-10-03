@@ -1,0 +1,71 @@
+name: z/OS end-to-end Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [ opened, synchronize, reopened, labeled ]
+
+jobs:
+
+  run-analysis-on-zos:
+    if: contains(github.event.pull_request.labels.*.name, 'run-zos-test') || github.event_name == 'push'
+    permissions:
+      id-token: write
+    name: Run analysis on zOS
+    runs-on: sonar-s-public
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Vault
+        id: secrets
+        uses: SonarSource/vault-action-wrapper@v3
+        with:
+          secrets: |
+            development/kv/data/zena token | SONAR_TOKEN;
+            development/kv/data/ibmcloud private_key | PRIVATE_KEY;
+            development/kv/data/ibmcloud user | ZOS_USER;
+            development/kv/data/ibmcloud host | ZOS_HOST;
+
+      - name: Write zOS private key to file
+        run: |
+          echo "${{ fromJSON(steps.secrets.outputs.vault).PRIVATE_KEY }}" | tr -d '\r' > $GITHUB_WORKSPACE/zos_key
+          chmod 600 $GITHUB_WORKSPACE/zos_key
+
+      - name: Export environment variables
+        run: |
+          echo "SONAR_TOKEN=${{ fromJSON(steps.secrets.outputs.vault).SONAR_TOKEN }}" >> $GITHUB_ENV
+          echo "ZOS_USER_HOST=${{ fromJSON(steps.secrets.outputs.vault).ZOS_USER }}@${{ fromJSON(steps.secrets.outputs.vault).ZOS_HOST }}" >> $GITHUB_ENV
+          echo "JOB_TIMESTAMP=$(date '+%s')" >> $GITHUB_ENV
+
+      - name: Check Zena Connection
+        run: |
+          curl -sSL -H "Authorization: Bearer $SONAR_TOKEN" "https://zena.sonarsource.com/api/v2/analysis/version"
+
+      - name: Add SSH informations
+        run: |
+          mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
+          ssh-keyscan ${{ fromJSON(steps.secrets.outputs.vault).ZOS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Check z/OS Connection
+        run: ssh -i $GITHUB_WORKSPACE/zos_key ${{ fromJSON(steps.secrets.outputs.vault).ZOS_USER }}@${{ fromJSON(steps.secrets.outputs.vault).ZOS_HOST }} "uname -a"
+
+      - name: Provision project on z/OS
+        run: ./zos-e2e-test/scripts/provision_project.sh zos-e2e-test/projects/sample_project
+
+      - name: Download Scanner on z/OS
+        run: ./zos-e2e-test/scripts/download_scanner.sh
+
+      - name: Run analysis on z/OS
+        run: ./zos-e2e-test/scripts/run_analysis.sh
+
+      - name: Check analysis results
+        run: ./zos-e2e-test/scripts/verify_analysis_results.sh
+
+      - name: Clean up Zena
+        run: ./zos-e2e-test/scripts/cleanup_zena.sh
+
+      - name: Clean up z/OS instance
+        run: ./zos-e2e-test/scripts/cleanup_zos.sh
