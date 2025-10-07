@@ -39,4 +39,4 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=antoine-vinot-sonarsource_sonar-scanner-cli_fb2f76f4-1f08-4a76-814c-394b1918c50d -Dsonar.projectName='sonar-scanner-cli'
+        run: mvn sonar:sonar -Dsonar.projectKey=antoine-vinot-sonarsource_sonar-scanner-cli_fb2f76f4-1f08-4a76-814c-394b1918c50d -Dsonar.projectName='sonar-scanner-cli'
