@@ -68,6 +68,30 @@ build_task:
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
+linux_x64_qa_mutation_task:
+  depends_on:
+    - build
+  <<: *ONLY_SONARSOURCE_QA
+  eks_container:
+    <<: *EKS_CONTAINER
+  env:
+    matrix:
+      - SQ_VERSION: LATEST_RELEASE[9.9]
+      - SQ_VERSION: LATEST_RELEASE
+      - SQ_VERSION: DEV
+  maven_cache:
+    folder: ${CIRRUS_WORKING_DIR}/.m2/repository
+  qa_script:
+    - source cirrus-env QA
+    - source set_maven_build_version $BUILD_NUMBER
+    - mvn test-compile org.pitest:pitest-maven:mutationCoverage
+  always:
+    pit_artifacts:
+      path: "**/pit-history.xml"
+      type: text/xml
+  cleanup_before_cache_script:
+    - cleanup_maven_repository
+
 linux_x64_qa_java11_task:
   depends_on:
     - build
