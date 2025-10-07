@@ -290,8 +290,6 @@
             <param>HTML</param>
             <param>XML</param>
           </outputFormats>
-          <historyInputFile>${project.build.directory}/pit-history.xml</historyInputFile>
-          <historyOutputFile>${project.build.directory}/pit-history.xml</historyOutputFile>
         </configuration>
       </plugin>
     </plugins>
