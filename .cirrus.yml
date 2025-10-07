@@ -84,7 +84,7 @@ linux_x64_qa_mutation_task:
   qa_script:
     - source cirrus-env QA
     - source set_maven_build_version $BUILD_NUMBER
-    - mvn -DhistoryInputFile=${CIRRUS_WORKING_DIR}/target/pit/pit-history.xml -DhistoryOuputFile=${CIRRUS_WORKING_DIR}/target/pit/pit-history.xml test-compile org.pitest:pitest-maven:mutationCoverage
+    - mvn -DhistoryInputFile=${CIRRUS_WORKING_DIR}/target/pit/pit-history.xml -DhistoryOutputFile=${CIRRUS_WORKING_DIR}/target/pit/pit-history.xml test-compile org.pitest:pitest-maven:mutationCoverage
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
