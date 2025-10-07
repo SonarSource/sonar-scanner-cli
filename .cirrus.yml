@@ -76,9 +76,7 @@ linux_x64_qa_mutation_task:
     <<: *EKS_CONTAINER
   env:
     matrix:
-      - SQ_VERSION: LATEST_RELEASE[9.9]
       - SQ_VERSION: LATEST_RELEASE
-      - SQ_VERSION: DEV
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   qa_script:
@@ -86,9 +84,12 @@ linux_x64_qa_mutation_task:
     - source set_maven_build_version $BUILD_NUMBER
     - mvn test-compile org.pitest:pitest-maven:mutationCoverage
   always:
-    pit_artifacts:
+    pit_history:
       path: "**/pit-history.xml"
       type: text/xml
+    pit_report:
+      path: "**/pit-report"
+      type: text/html
   cleanup_before_cache_script:
     - cleanup_maven_repository
 
