@@ -21,6 +21,12 @@ jobs:
         with:
           java-version: 17
           distribution: 'zulu' # Alternative distribution options are available.
+      - name: Cache PIT results
+        uses: actions/cache@v4
+        with:
+          path: target/pit
+          key: ${{ runner.os }}-pit
+          restore-keys: ${{ runner.os }}-pit
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
@@ -34,7 +40,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Run Pitest
-        run: mvn test-compile org.pitest:pitest-maven:mutationCoverage
+        run: mvn -DhistoryInputFile=target/pit/pit-history.xml -DhistoryOutputFile=target/pit/pit-history.xml test-compile org.pitest:pitest-maven:mutationCoverage
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
