@@ -42,7 +42,11 @@ jobs:
 
       - name: Check Zena Connection
         run: |
-          curl -sSL -H "Authorization: Bearer $SONAR_TOKEN" "https://zena.sonarsource.com/api/v2/analysis/version"
+          status=$(curl -sSL -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $SONAR_TOKEN" "https://zena.sonarsource.com/api/v2/analysis/version")
+          if [ "$status" -ne 200 ]; then
+            echo "Zena connection failed with status $status"
+            exit 1
+          fi
 
       - name: Add SSH informations
         run: |
