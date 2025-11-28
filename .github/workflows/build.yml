@@ -1,0 +1,117 @@
+name: Build
+on:
+  push:
+    branches:
+      - master
+      - branch-*
+      - dogfood-*
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: github-ubuntu-latest-s
+    name: Build
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@146a28175021df8ca24f8ee1828cc2a60f980bd5 # v3.5.1
+        with:
+          version: 2025.7.12
+      - uses: SonarSource/ci-github-actions/build-maven@v1
+        with:
+          deploy-pull-request: true
+          maven-args: -Pdist-linux-x64,dist-linux-aarch64,dist-windows-x64,dist-macosx-x64,dist-macosx-aarch64
+          artifactory-reader-role: private-reader
+          artifactory-deployer-role: qa-deployer
+
+
+  linux-qa:
+    needs: build
+    runs-on: github-ubuntu-latest-s
+    name: Linux QA
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        sq_version:
+          - LATEST_RELEASE[9.9]
+          - LATEST_RELEASE
+          - DEV
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: jdx/mise-action@146a28175021df8ca24f8ee1828cc2a60f980bd5 # v3.5.1
+        with:
+          version: 2025.7.12
+
+      - uses: SonarSource/ci-github-actions/config-maven@v1
+        with:
+          artifactory-reader-role: private-reader
+          cache-paths: |
+            ~/.m2/repository
+
+      - name: Run Integration Tests
+        env:
+          SQ_VERSION: ${{ matrix.sq_version }}
+        run: |
+          cd it
+          mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
+
+  windows-qa:
+    needs: build
+    runs-on: github-windows-latest-s
+    name: Windows QA
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        sq_version:
+          - LATEST_RELEASE[9.9]
+          - LATEST_RELEASE
+          - DEV
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: jdx/mise-action@146a28175021df8ca24f8ee1828cc2a60f980bd5 # v3.5.1
+        with:
+          version: 2025.7.12
+
+      - uses: SonarSource/ci-github-actions/config-maven@v1
+        with:
+          artifactory-reader-role: private-reader
+          cache-paths: |
+            ~/.m2/repository
+
+      - name: Run Integration Tests
+        shell: bash
+        env:
+          SQ_VERSION: ${{ matrix.sq_version }}
+        run: |
+          cd it
+          mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
+
+  promote:
+    needs:
+      - linux-qa
+      - windows-qa
+    runs-on: github-ubuntu-latest-s
+    name: Promote
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: SonarSource/ci-github-actions/promote@v1
+        with:
+          promote-pull-request: true
