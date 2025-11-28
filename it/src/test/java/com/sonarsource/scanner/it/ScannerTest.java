@@ -26,7 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -185,7 +185,7 @@ public class ScannerTest extends ScannerTestCase {
     SonarScanner build = newScannerWithToken(new File("projects/simple-sample"), analysisToken)
       .setEnvironmentVariable("SONAR_HOST_URL", "http://www.google.com/404");
 
-    BuildRunner runner = new BuildRunner(orchestrator.getConfiguration());
+    BuildRunner runner = new BuildRunner(orchestrator.getConfiguration(), orchestrator.getOrchestrator().getLocators());
     BuildResult buildResult = runner.runQuietly(null, build);
 
     assertThat(buildResult.isSuccess()).isFalse();
@@ -269,7 +269,7 @@ public class ScannerTest extends ScannerTestCase {
     File projectHome = new File("projects/override-project-settings-path");
     SonarScanner build = newScannerWithToken(projectHome, analysisToken)
       .setEnvironmentVariable("SONARQUBE_SCANNER_PARAMS", "{"
-        + "\"project.settings\" : \"" + StringEscapeUtils.escapeJavaScript(
+        + "\"project.settings\" : \"" + StringEscapeUtils.escapeEcmaScript(
         new File(projectHome, "conf/sq-project.properties").getAbsolutePath())
         + "\"}");
     orchestrator.executeBuild(build);
