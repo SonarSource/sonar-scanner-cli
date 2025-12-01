@@ -2,10 +2,10 @@
 
 The official scanner used to run code analysis on SonarQube (Server, Cloud). Project configuration is read from file `sonar-project.properties` or passed on the command line.
 
-Sonar's [Clean Code solution](https://www.sonarsource.com/solutions/clean-code/) helps developers deliver high-quality, efficient code standards that benefit the entire team or organization. 
+Sonar's [Clean Code solution](https://www.sonarsource.com/solutions/clean-code/) helps developers deliver high-quality, efficient code standards that benefit the entire team or organization.
 
-[![Build Status](https://api.cirrus-ci.com/github/SonarSource/sonar-scanner-cli.svg)](https://cirrus-ci.com/github/SonarSource/sonar-scanner-cli)
-[![Build status](https://ci.appveyor.com/api/projects/status/s3sg3fhui556v02o/branch/master?svg=true)](https://ci.appveyor.com/project/henryju/sonar-scanner-cli/branch/master) [![Quality Gate Status](https://next.sonarqube.com/sonarqube/api/project_badges/measure?project=org.sonarsource.scanner.cli%3Asonar-scanner-cli&metric=alert_status)](https://next.sonarqube.com/sonarqube/dashboard?id=org.sonarsource.scanner.cli%3Asonar-scanner-cli)
+[![Build](https://github.com/SonarSource/sonar-scanner-cli/actions/workflows/build.yml/badge.svg)](https://github.com/SonarSource/sonar-scanner-cli/actions/workflows/build.yml)
+[![Quality Gate Status](https://next.sonarqube.com/sonarqube/api/project_badges/measure?project=org.sonarsource.scanner.cli%3Asonar-scanner-cli&metric=alert_status)](https://next.sonarqube.com/sonarqube/dashboard?id=org.sonarsource.scanner.cli%3Asonar-scanner-cli)
 
 ## Documentation
 
