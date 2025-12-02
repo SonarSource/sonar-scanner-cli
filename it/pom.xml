@@ -39,12 +39,6 @@
     </dependency>
     <dependency>
       <groupId>org.sonarsource.orchestrator</groupId>
-      <artifactId>sonar-orchestrator</artifactId>
-      <version>${orchestrator.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.sonarsource.orchestrator</groupId>
       <artifactId>sonar-orchestrator-junit4</artifactId>
       <version>${orchestrator.version}</version>
       <scope>test</scope>
@@ -63,7 +57,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.27.3</version>
+      <version>3.27.6</version>
     </dependency>
   </dependencies>
 
