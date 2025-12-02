@@ -68,16 +68,16 @@
   </properties>
 
   <dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.junit</groupId>
-				<artifactId>junit-bom</artifactId>
-				<version>5.13.3</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.14.1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -111,13 +111,13 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.27.3</version>
+      <version>3.27.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.18.0</version>
+      <version>5.20.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -257,7 +257,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-      	  <source>17</source>
+          <source>17</source>
         </configuration>
       </plugin>
       <plugin>
@@ -282,7 +282,7 @@
         <plugins>
           <plugin>
             <groupId>com.googlecode.maven-download-plugin</groupId>
-	          <artifactId>download-maven-plugin</artifactId>
+            <artifactId>download-maven-plugin</artifactId>
             <executions>
               <execution>
                 <id>unpack-linux-x64</id>
@@ -355,7 +355,7 @@
         <plugins>
           <plugin>
             <groupId>com.googlecode.maven-download-plugin</groupId>
-	          <artifactId>download-maven-plugin</artifactId>
+            <artifactId>download-maven-plugin</artifactId>
             <executions>
               <execution>
                 <id>unpack-linux-aarch64</id>
