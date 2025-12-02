@@ -83,7 +83,7 @@
     <dependency>
       <groupId>org.sonarsource.scanner.lib</groupId>
       <artifactId>sonar-scanner-java-library</artifactId>
-      <version>3.5.0.539</version>
+      <version>4.0.0.1577</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -242,8 +242,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>11600000</minsize>
-                  <maxsize>11700000</maxsize>
+                  <minsize>8800000</minsize>
+                  <maxsize>8900000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonar-scanner-${project.version}.zip</file>
                   </files>
@@ -554,8 +554,8 @@
                   <rules>
                     <requireFilesSize>
                       <!-- Should be big enough to confirm the JRE was bundled -->
-                      <minsize>49000000</minsize>
-                      <maxsize>60000000</maxsize>
+                      <minsize>40000000</minsize>
+                      <maxsize>50000000</maxsize>
                       <files>
                         <file>${project.build.directory}/sonar-scanner-${project.version}-macosx-x64.zip</file>
                       </files>
