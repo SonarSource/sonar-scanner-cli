@@ -55,11 +55,11 @@
     <!-- configuration for assembly of distributions -->
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
     <scanner.jar>${project.build.finalName}.jar</scanner.jar>
-    <jre.dirname.linux.aarch64>jdk-17.0.15+6-jre</jre.dirname.linux.aarch64>
-    <jre.dirname.linux.x64>jdk-17.0.15+6-jre</jre.dirname.linux.x64>
-    <jre.dirname.macosx.aarch64>jdk-17.0.15+6-jre/Contents/Home</jre.dirname.macosx.aarch64>
-    <jre.dirname.macosx.x64>jdk-17.0.15+6-jre/Contents/Home</jre.dirname.macosx.x64>
-    <jre.dirname.windows>jdk-17.0.15+6-jre</jre.dirname.windows>
+    <jre.dirname.linux.aarch64>jdk-21.0.9+10-jre</jre.dirname.linux.aarch64>
+    <jre.dirname.linux.x64>jdk-21.0.9+10-jre</jre.dirname.linux.x64>
+    <jre.dirname.macosx.aarch64>jdk-21.0.9+10-jre/Contents/Home</jre.dirname.macosx.aarch64>
+    <jre.dirname.macosx.x64>jdk-21.0.9+10-jre/Contents/Home</jre.dirname.macosx.x64>
+    <jre.dirname.windows>jdk-21.0.9+10-jre</jre.dirname.windows>
 
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux-x64,${project.groupId}:${project.artifactId}:zip:linux-aarch64,${project.groupId}:${project.artifactId}:zip:windows-x64,${project.groupId}:${project.artifactId}:zip:macosx-x64,${project.groupId}:${project.artifactId}:zip:macosx-aarch64,${project.groupId}:${project.artifactId}:json:cyclonedx</artifactsToPublish>
@@ -291,10 +291,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.15%2B6/OpenJDK17U-jre_x64_linux_hotspot_17.0.15_6.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jre_x64_linux_hotspot_21.0.9_10.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/linux-x64</outputDirectory>
-                  <sha256>aaed740c38ff1e87a4b920f9deb165d419d9fdf23f423740d2ecb280eeab9647</sha256>
+                  <sha256>aeab55d064a1a27a3744b0880b9b414077b4ed2b1790817eea3df60aec946431</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -336,7 +336,7 @@
                     <requireFilesSize>
                       <!-- Should be big enough to confirm the JRE was bundled -->
                       <minsize>50000000</minsize>
-                      <maxsize>60000000</maxsize>
+                      <maxsize>70000000</maxsize>
                       <files>
                         <file>${project.build.directory}/sonar-scanner-${project.version}-linux-x64.zip</file>
                       </files>
@@ -364,10 +364,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.15%2B6/OpenJDK17U-jre_aarch64_linux_hotspot_17.0.15_6.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jre_aarch64_linux_hotspot_21.0.9_10.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/linux-aarch64</outputDirectory>
-                  <sha256>c89467f543bd434b71f3b748adeeeb1b2692f90242824b78205be1ae72ba385f</sha256>
+                  <sha256>1d041073c65e834bdb4da732485a54ff829859dcd1549e7992f15bd73341be29</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -409,7 +409,7 @@
                     <requireFilesSize>
                       <!-- Should be big enough to confirm the JRE was bundled -->
                       <minsize>50000000</minsize>
-                      <maxsize>60000000</maxsize>
+                      <maxsize>70000000</maxsize>
                       <files>
                         <file>${project.build.directory}/sonar-scanner-${project.version}-linux-aarch64.zip</file>
                       </files>
@@ -437,10 +437,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.15%2B6/OpenJDK17U-jre_x64_windows_hotspot_17.0.15_6.zip</url>
+                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jre_x64_windows_hotspot_21.0.9_10.zip</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/windows-x64</outputDirectory>
-                  <sha256>4380136495b1aebf10593a94c98babd632155e5ace3fa5b1a1a3b79d6fbe2e99</sha256>
+                  <sha256>39c5e23f3ce4d420663afba8ffde28034b72e2b3e240943dc2321bc1f912eef9</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -482,7 +482,7 @@
                     <requireFilesSize>
                       <!-- Should be big enough to confirm the JRE was bundled -->
                       <minsize>50000000</minsize>
-                      <maxsize>60000000</maxsize>
+                      <maxsize>70000000</maxsize>
                       <files>
                         <file>${project.build.directory}/sonar-scanner-${project.version}-windows-x64.zip</file>
                       </files>
@@ -510,10 +510,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.15%2B6/OpenJDK17U-jre_x64_mac_hotspot_17.0.15_6.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jre_x64_mac_hotspot_21.0.9_10.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/macosx-x64</outputDirectory>
-                  <sha256>38f7bb3faaa3aec90290e6dd912a050cc895ee2aa8fb9d8ea6aac86822bb108b</sha256>
+                  <sha256>945abc49249f1e89a2a6a008d70d63dc42b25bbe5e1711ff97aeec70063008d2</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -554,8 +554,8 @@
                   <rules>
                     <requireFilesSize>
                       <!-- Should be big enough to confirm the JRE was bundled -->
-                      <minsize>40000000</minsize>
-                      <maxsize>50000000</maxsize>
+                      <minsize>50000000</minsize>
+                      <maxsize>70000000</maxsize>
                       <files>
                         <file>${project.build.directory}/sonar-scanner-${project.version}-macosx-x64.zip</file>
                       </files>
@@ -583,10 +583,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.15%2B6/OpenJDK17U-jre_aarch64_mac_hotspot_17.0.15_6.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jre_aarch64_mac_hotspot_21.0.9_10.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/macosx-aarch64</outputDirectory>
-                  <sha256>2eb9548fbed1031355ca11a35b5a297e9872edd1dafacb40294f0c1a6677bbfb</sha256>
+                  <sha256>1f7f6506b598e85d7d8ff8b36563d98657d2d81b16bfca3cd242d7906cfbd11b</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -627,8 +627,8 @@
                   <rules>
                     <requireFilesSize>
                       <!-- Should be big enough to confirm the JRE was bundled -->
-                      <minsize>49000000</minsize>
-                      <maxsize>60000000</maxsize>
+                      <minsize>50000000</minsize>
+                      <maxsize>70000000</maxsize>
                       <files>
                         <file>${project.build.directory}/sonar-scanner-${project.version}-macosx-aarch64.zip</file>
                       </files>

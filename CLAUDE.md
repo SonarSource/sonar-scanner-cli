@@ -2,7 +2,7 @@
 
 ## Update JREs
 
-Help updating all bundled JREs to the latest available JRE 17 version, or to a specific version, by automatically querying the Adoptium API.
+Help updating all bundled JREs to the latest available JRE 21 version, or to a specific version, by automatically querying the Adoptium API.
 
 **Command:** `/update-jres`
 
@@ -10,7 +10,7 @@ Help updating all bundled JREs to the latest available JRE 17 version, or to a s
 ```
 /update-jres           # Uses latest version (default)
 /update-jres latest    # Same as above
-/update-jres 17.0.15+6 # Uses specific version
+/update-jres 21.0.5+11 # Uses specific version
 ```
 
 **What it does:**
