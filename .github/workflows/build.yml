@@ -27,6 +27,10 @@ jobs:
       - uses: jdx/mise-action@146a28175021df8ca24f8ee1828cc2a60f980bd5 # v3.5.1
         with:
           version: 2025.7.12
+          tool_versions: |
+            java 21
+            maven 3.9
+            node 18.17.0
       - uses: SonarSource/ci-github-actions/build-maven@v1
         with:
           deploy-pull-request: true
@@ -38,22 +42,37 @@ jobs:
   linux-qa:
     needs: build
     runs-on: github-ubuntu-latest-s
-    name: Linux QA
+    name: Linux QA - SQ ${{ matrix.sq_version }}
     permissions:
       id-token: write
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        sq_version:
-          - LATEST_RELEASE[9.9]
-          - LATEST_RELEASE
-          - DEV
+        include:
+          - sq_version: LATEST_RELEASE[2025.1]
+            java_version: "17"
+          - sq_version: LATEST_RELEASE[2026.1]
+            java_version: "21"
+          - sq_version: LATEST_RELEASE
+            java_version: "21"
+          - sq_version: DEV
+            java_version: "21"
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: jdx/mise-action@146a28175021df8ca24f8ee1828cc2a60f980bd5 # v3.5.1
         with:
           version: 2025.7.12
+          tool_versions: |
+            java ${{ matrix.java_version }}
+            maven 3.9
+
+      - name: Vault
+        id: secrets
+        uses: SonarSource/vault-action-wrapper@v3
+        with:
+          secrets: |
+            development/github/token/licenses-ro token | GITHUB_TOKEN;
 
       - uses: SonarSource/ci-github-actions/config-maven@v1
         with:
@@ -64,6 +83,7 @@ jobs:
       - name: Run Integration Tests
         env:
           SQ_VERSION: ${{ matrix.sq_version }}
+          GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         run: |
           cd it
           mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
@@ -71,22 +91,37 @@ jobs:
   windows-qa:
     needs: build
     runs-on: github-windows-latest-s
-    name: Windows QA
+    name: Windows QA - SQ ${{ matrix.sq_version }}
     permissions:
       id-token: write
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        sq_version:
-          - LATEST_RELEASE[9.9]
-          - LATEST_RELEASE
-          - DEV
+        include:
+          - sq_version: LATEST_RELEASE[2025.1]
+            java_version: "17"
+          - sq_version: LATEST_RELEASE[2026.1]
+            java_version: "21"
+          - sq_version: LATEST_RELEASE
+            java_version: "21"
+          - sq_version: DEV
+            java_version: "21"
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: jdx/mise-action@146a28175021df8ca24f8ee1828cc2a60f980bd5 # v3.5.1
         with:
           version: 2025.7.12
+          tool_versions: |
+            java ${{ matrix.java_version }}
+            maven 3.9
+
+      - name: Vault
+        id: secrets
+        uses: SonarSource/vault-action-wrapper@v3
+        with:
+          secrets: |
+            development/github/token/licenses-ro token | GITHUB_TOKEN;
 
       - uses: SonarSource/ci-github-actions/config-maven@v1
         with:
@@ -98,6 +133,7 @@ jobs:
         shell: bash
         env:
           SQ_VERSION: ${{ matrix.sq_version }}
+          GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         run: |
           cd it
           mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify

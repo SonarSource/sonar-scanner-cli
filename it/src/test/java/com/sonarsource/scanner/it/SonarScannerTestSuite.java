@@ -19,10 +19,11 @@
  */
 package com.sonarsource.scanner.it;
 
-import com.sonar.orchestrator.Orchestrator;
-import com.sonar.orchestrator.OrchestratorBuilder;
+import com.sonar.orchestrator.container.Edition;
 import com.sonar.orchestrator.junit4.OrchestratorRule;
 import com.sonar.orchestrator.locator.MavenLocation;
+import java.util.List;
+import java.util.Map;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -33,18 +34,31 @@ import org.junit.runners.Suite.SuiteClasses;
                 DistributionTest.class})
 public class SonarScannerTestSuite {
 
+  // Mapping from SonarQube Server versions to Community Build versions for the xoo plugin.
+  // The xoo plugin is only published with Community Build releases, not Server releases.
+  private static final Map<String, String> SERVER_TO_COMMUNITY_VERSION = Map.of(
+    "LATEST_RELEASE[2025.1]", "LATEST_RELEASE[25.1.0]",
+    "LATEST_RELEASE[2026.1]", "LATEST_RELEASE[26.1.0]"
+  );
+
   @ClassRule
   public static final OrchestratorRule ORCHESTRATOR = createOrchestrator();
 
   private static OrchestratorRule createOrchestrator() {
     String sonarVersion = System
       .getProperty("sonar.runtimeVersion", "DEV");
-    return OrchestratorRule.builderEnv()
+    boolean isCommunity = List.of("LATEST_RELEASE", "DEV").contains(sonarVersion);
+    var builder = OrchestratorRule.builderEnv()
       .defaultForceAuthentication()
       .setSonarVersion(sonarVersion)
+      .setEdition(isCommunity ? Edition.COMMUNITY : Edition.DEVELOPER)
       .addBundledPluginToKeep("sonar-javascript")
-      .addPlugin(MavenLocation.of("org.sonarsource.sonarqube", "sonar-xoo-plugin", sonarVersion))
-      .build();
+      .addPlugin(MavenLocation.of("org.sonarsource.sonarqube", "sonar-xoo-plugin",
+        SERVER_TO_COMMUNITY_VERSION.getOrDefault(sonarVersion, sonarVersion)));
+    if (!isCommunity) {
+      builder.activateLicense();
+    }
+    return builder.build();
   }
 
 }
