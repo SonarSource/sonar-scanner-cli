@@ -28,6 +28,7 @@
 
     <maven.compiler.release>17</maven.compiler.release>
     <orchestrator.version>6.0.1.3892</orchestrator.version>
+    <jetty.version>10.0.26</jetty.version>
   </properties>
 
   <dependencies>
@@ -58,6 +59,24 @@
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>3.27.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>${jetty.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+      <version>${jetty.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-proxy</artifactId>
+      <version>${jetty.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

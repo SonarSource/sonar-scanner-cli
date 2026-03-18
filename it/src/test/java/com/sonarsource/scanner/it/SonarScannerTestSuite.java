@@ -31,7 +31,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({ScannerTest.class, MultimoduleTest.class,
-                DistributionTest.class})
+                DistributionTest.class, ProxyTest.class})
 public class SonarScannerTestSuite {
 
   // Mapping from SonarQube Server versions to Community Build versions for the xoo plugin.
