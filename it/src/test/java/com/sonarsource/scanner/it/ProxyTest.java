@@ -19,54 +19,17 @@
  */
 package com.sonarsource.scanner.it;
 
-import com.sonar.orchestrator.build.BuildResult;
-import com.sonar.orchestrator.build.SonarScanner;
-import com.sonar.orchestrator.util.NetworkUtils;
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Base64;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.http.HttpHeader;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import org.eclipse.jetty.proxy.ConnectHandler;
-import org.eclipse.jetty.proxy.ProxyServlet;
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.HashLoginService;
-import org.eclipse.jetty.security.SecurityHandler;
-import org.eclipse.jetty.security.ServerAuthException;
-import org.eclipse.jetty.security.UserAuthentication;
-import org.eclipse.jetty.security.UserStore;
-import org.eclipse.jetty.security.authentication.DeferredAuthentication;
-import org.eclipse.jetty.security.authentication.LoginAuthenticator;
-import org.eclipse.jetty.server.Authentication;
-import org.eclipse.jetty.server.Authentication.User;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.UserIdentity;
-import org.eclipse.jetty.server.handler.DefaultHandler;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.security.Constraint;
-import org.eclipse.jetty.util.security.Credential;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import com.sonar.orchestrator.build.BuildResult;
+import com.sonar.orchestrator.build.SonarScanner;
+import java.io.File;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,292 +44,103 @@ public class ProxyTest extends ScannerTestCase {
   private static final String KEYSTORE_CLIENT_WITH_CA = "/ProxyTest/client-with-ca-keytool.p12";
   private static final String KEYSTORE_CLIENT_WITH_CA_PASSWORD = "pwdClientCAP12";
 
-  private static Server proxyServer;
-  private static int httpProxyPort;
-  // HTTPS reverse-proxy target, used for the HTTPS CONNECT tests
-  private static WireMockServer httpsTargetServer;
-  private static int httpsTargetPort;
-
-  private static final ConcurrentLinkedDeque<String> requestsSeenByProxy = new ConcurrentLinkedDeque<>();
-  private static final ConcurrentLinkedDeque<String> connectRequestsSeenByProxy = new ConcurrentLinkedDeque<>();
-
-  @After
-  public void stopProxy() throws Exception {
-    if (proxyServer != null && proxyServer.isStarted()) {
-      proxyServer.stop();
-    }
-    if (httpsTargetServer != null && httpsTargetServer.isRunning()) {
-      httpsTargetServer.stop();
-    }
-    requestsSeenByProxy.clear();
-    connectRequestsSeenByProxy.clear();
-  }
-
-  private static void startProxy(boolean needProxyAuth) throws Exception {
-    httpProxyPort = NetworkUtils.getNextAvailablePort(InetAddress.getLocalHost());
-
-    QueuedThreadPool threadPool = new QueuedThreadPool();
-    threadPool.setMaxThreads(500);
-
-    proxyServer = new Server(threadPool);
-
-    HttpConfiguration httpConfig = new HttpConfiguration();
-    httpConfig.setSecureScheme("https");
-    httpConfig.setSendServerVersion(true);
-    httpConfig.setSendDateHeader(false);
-
-    // Wrap the ProxyServlet handler with a ConnectHandler so HTTPS CONNECT
-    // tunnels are also handled (and authenticated) by the same proxy.
-    TrackingConnectHandler connectHandler = new TrackingConnectHandler(needProxyAuth);
-    connectHandler.setHandler(proxyHandler(needProxyAuth));
-
-    HandlerCollection handlers = new HandlerCollection();
-    handlers.setHandlers(new Handler[] {connectHandler, new DefaultHandler()});
-    proxyServer.setHandler(handlers);
-
-    ServerConnector http = new ServerConnector(proxyServer, new HttpConnectionFactory(httpConfig));
-    http.setPort(httpProxyPort);
-    proxyServer.addConnector(http);
-
-    proxyServer.start();
-  }
+  private ProxyServer proxyServer;
+  private static final WireMockServer httpsReverseProxy = new WireMockServer(WireMockConfiguration.wireMockConfig()
+    .dynamicHttpsPort()
+    .keystorePath(getResourcePath(SERVER_KEYSTORE).toString())
+    .keystorePassword(SERVER_KEYSTORE_PASSWORD)
+    .keyManagerPassword(SERVER_KEYSTORE_PASSWORD)
+    .keystoreType("PKCS12"));
 
   /**
    * Starts a WireMock HTTPS server that transparently forwards all traffic to the Orchestrator
    * SonarQube instance. Used as the HTTPS target in proxy-CONNECT tests.
    */
-  private static void startHttpsTargetServer() throws Exception {
-    httpsTargetPort = NetworkUtils.getNextAvailablePort(InetAddress.getLocalHost());
+  @BeforeClass
+  public static void startHttpsReverseProxy() {
+    httpsReverseProxy.start();
 
-    Path serverKeyStore = Paths.get(ProxyTest.class.getResource(SERVER_KEYSTORE).toURI()).toAbsolutePath();
-    assertThat(serverKeyStore).exists();
-
-    httpsTargetServer = new WireMockServer(WireMockConfiguration.wireMockConfig()
-      .httpsPort(httpsTargetPort)
-      .keystorePath(serverKeyStore.toString())
-      .keystorePassword(SERVER_KEYSTORE_PASSWORD)
-      .keyManagerPassword(SERVER_KEYSTORE_PASSWORD)
-      .keystoreType("PKCS12"));
-    httpsTargetServer.start();
-
-    httpsTargetServer.stubFor(com.github.tomakehurst.wiremock.client.WireMock.any(
+    httpsReverseProxy.stubFor(com.github.tomakehurst.wiremock.client.WireMock.any(
       com.github.tomakehurst.wiremock.client.WireMock.anyUrl())
       .willReturn(com.github.tomakehurst.wiremock.client.WireMock.aResponse()
         .proxiedFrom(orchestrator.getServer().getUrl())));
   }
 
-  private static ServletContextHandler proxyHandler(boolean needProxyAuth) {
-    ServletContextHandler contextHandler = new ServletContextHandler();
-    if (needProxyAuth) {
-      contextHandler.setSecurityHandler(basicAuth(PROXY_USER, PROXY_PASSWORD, "Private!"));
-    }
-    contextHandler.setServletHandler(newServletHandler());
-    return contextHandler;
+  @AfterClass
+  public static void stopHttpsReverseProxy() {
+    httpsReverseProxy.stop();
   }
 
-  private static SecurityHandler basicAuth(String username, String password, String realm) {
-    HashLoginService l = new HashLoginService(realm);
-
-    UserStore userStore = new UserStore();
-    userStore.addUser(username, Credential.getCredential(password), new String[] {"user"});
-    l.setUserStore(userStore);
-
-    Constraint constraint = new Constraint();
-    constraint.setName(Constraint.__BASIC_AUTH);
-    constraint.setRoles(new String[] {"user"});
-    constraint.setAuthenticate(true);
-
-    ConstraintMapping cm = new ConstraintMapping();
-    cm.setConstraint(constraint);
-    cm.setPathSpec("/*");
-
-    ConstraintSecurityHandler csh = new ConstraintSecurityHandler();
-    csh.setAuthenticator(new ProxyAuthenticator());
-    csh.setRealmName("myrealm");
-    csh.addConstraintMapping(cm);
-    csh.setLoginService(l);
-
-    return csh;
-  }
-
-  private static ServletHandler newServletHandler() {
-    ServletHandler handler = new ServletHandler();
-    handler.addServletWithMapping(TrackingProxyServlet.class, "/*");
-    return handler;
-  }
-
-  /**
-   * ConnectHandler subclass that:
-   * <ul>
-   *   <li>Optionally requires {@code Proxy-Authorization} on CONNECT requests</li>
-   *   <li>Records the host:port of every successfully-authenticated CONNECT</li>
-   * </ul>
-   * <p>
-   * When authentication is required and credentials are missing, the handler sends a well-formed
-   * {@code 407} response. This allows the JDK {@link java.net.Authenticator} to read the challenge,
-   * supply credentials, and retry the CONNECT on a new connection.
-   */
-  private static class TrackingConnectHandler extends ConnectHandler {
-
-    private final boolean requireAuth;
-
-    TrackingConnectHandler(boolean requireAuth) {
-      this.requireAuth = requireAuth;
-    }
-
-    @Override
-    protected void handleConnect(org.eclipse.jetty.server.Request baseRequest, HttpServletRequest request,
-      HttpServletResponse response, String serverAddress) {
-      if (requireAuth && !hasValidCredentials(request)) {
-        response.setStatus(HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED);
-        response.setHeader("Proxy-Authenticate", "Basic realm=\"proxy\"");
-        response.setContentLength(0);
-        baseRequest.setHandled(true);
-        return;
-      }
-      connectRequestsSeenByProxy.add(serverAddress);
-      super.handleConnect(baseRequest, request, response, serverAddress);
-    }
-
-    private static boolean hasValidCredentials(HttpServletRequest request) {
-      String credentials = request.getHeader("Proxy-Authorization");
-      if (credentials != null && credentials.startsWith("Basic ")) {
-        String decoded = new String(Base64.getDecoder().decode(credentials.substring(6)), StandardCharsets.ISO_8859_1);
-        int colon = decoded.indexOf(':');
-        if (colon > 0) {
-          String user = decoded.substring(0, colon);
-          String pass = decoded.substring(colon + 1);
-          return PROXY_USER.equals(user) && PROXY_PASSWORD.equals(pass);
-        }
-      }
-      return false;
-    }
-  }
-
-  public static class TrackingProxyServlet extends ProxyServlet {
-
-    @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      requestsSeenByProxy.add(request.getRequestURI());
-      super.service(request, response);
-    }
-
-    @Override
-    protected void sendProxyRequest(HttpServletRequest clientRequest, HttpServletResponse proxyResponse, Request proxyRequest) {
-      super.sendProxyRequest(clientRequest, proxyResponse, proxyRequest);
-    }
-  }
-
-  /**
-   * Authenticator for HTTP forward proxy that reads {@code Proxy-Authorization} instead of the
-   * standard {@code Authorization} header.
-   * Inspired from Jetty's {@code BasicAuthenticator} but adapted for proxy auth.
-   */
-  private static class ProxyAuthenticator extends LoginAuthenticator {
-
-    @Override
-    public String getAuthMethod() {
-      return Constraint.__BASIC_AUTH;
-    }
-
-    @Override
-    public Authentication validateRequest(ServletRequest req, ServletResponse res, boolean mandatory) throws ServerAuthException {
-      HttpServletRequest request = (HttpServletRequest) req;
-      HttpServletResponse response = (HttpServletResponse) res;
-      String credentials = request.getHeader(HttpHeader.PROXY_AUTHORIZATION.asString());
-
-      try {
-        if (!mandatory) {
-          return new DeferredAuthentication(this);
-        }
-
-        if (credentials != null) {
-          int space = credentials.indexOf(' ');
-          if (space > 0) {
-            String method = credentials.substring(0, space);
-            if ("basic".equalsIgnoreCase(method)) {
-              credentials = credentials.substring(space + 1);
-              credentials = new String(Base64.getDecoder().decode(credentials), StandardCharsets.ISO_8859_1);
-              int i = credentials.indexOf(':');
-              if (i > 0) {
-                String username = credentials.substring(0, i);
-                String password = credentials.substring(i + 1);
-                UserIdentity user = login(username, password, request);
-                if (user != null) {
-                  return new UserAuthentication(getAuthMethod(), user);
-                }
-              }
-            }
-          }
-        }
-
-        if (DeferredAuthentication.isDeferred(response)) {
-          return Authentication.UNAUTHENTICATED;
-        }
-
-        response.setHeader(HttpHeader.PROXY_AUTHENTICATE.asString(), "basic realm=\"" + _loginService.getName() + '"');
-        response.sendError(HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED);
-        return Authentication.SEND_CONTINUE;
-      } catch (IOException e) {
-        throw new ServerAuthException(e);
-      }
-    }
-
-    @Override
-    public boolean secureResponse(ServletRequest req, ServletResponse res, boolean mandatory, User validatedUser) throws ServerAuthException {
-      return true;
+  @After
+  public void stopProxy() throws Exception {
+    if (proxyServer != null) {
+      proxyServer.stop();
     }
   }
 
   @Test
-  public void simple_analysis_with_proxy_no_auth() throws Exception {
-    startProxy(false);
+  public void analysis_without_proxy_configured_should_not_hit_proxy() throws Exception {
+    proxyServer = ProxyServer.start();
 
-    // Scan without proxy — the proxy should not intercept any traffic
     SonarScanner build = newScannerWithAdminCredentials(new File("projects/simple-js"))
-      .setProjectKey("proxy-no-auth-test");
+      .setProjectKey("no-proxy-test");
     BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getLastStatus()).isZero();
-    assertThat(requestsSeenByProxy).isEmpty();
+    assertThat(proxyServer.getRequestsSeenByProxy()).isEmpty();
+  }
+
+  @Test
+  public void analysis_with_proxy_not_requesting_authentication_should_succeed() throws Exception {
+    proxyServer = ProxyServer.start();
 
     // Scan with old-style JVM proxy properties passed via SONAR_SCANNER_OPTS
     // (http.nonProxyHosts is cleared so that localhost is routed through the proxy)
-    build = newScannerWithAdminCredentials(new File("projects/simple-js"))
+    SonarScanner build = newScannerWithAdminCredentials(new File("projects/simple-js"))
       .setProjectKey("proxy-no-auth-test")
       .setEnvironmentVariable("SONAR_SCANNER_OPTS",
-        "-Dhttp.nonProxyHosts= -Dhttp.proxyHost=localhost -Dhttp.proxyPort=" + httpProxyPort);
-    result = orchestrator.executeBuildQuietly(build);
+        "-Dhttp.nonProxyHosts= -Dhttp.proxyHost=localhost -Dhttp.proxyPort=" + proxyServer.getPort());
+    BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getLastStatus()).isZero();
-    assertThat(requestsSeenByProxy).isNotEmpty();
+    assertThat(proxyServer.getRequestsSeenByProxy()).isNotEmpty();
   }
 
   @Test
-  public void simple_analysis_with_proxy_auth() throws Exception {
-    startProxy(true);
+  public void analysis_with_proxy_requesting_authentication_should_fail_if_no_credentials_provided() throws Exception {
+    proxyServer = ProxyServer.start(PROXY_USER, PROXY_PASSWORD);
 
-    // Without credentials, the proxy returns 407
-    SonarScanner build = newScannerWithAdminCredentials(new File("projects/simple-js"))
-      .setProjectKey("proxy-auth-test")
-      .setEnvironmentVariable("SONAR_SCANNER_OPTS", "-Dhttp.nonProxyHosts=")
-      .setProperty("sonar.scanner.proxyHost", "localhost")
-      .setProperty("sonar.scanner.proxyPort", "" + httpProxyPort);
+    SonarScanner build = newScan("proxy-http-auth-fail-test", false);
     BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getLastStatus()).isNotZero();
     assertThat(result.getLogs()).containsPattern(
       "Failed to query server version: GET http://(.*)/api/server/version failed with HTTP 407 Proxy Authentication Required.");
-    assertThat(requestsSeenByProxy).isEmpty();
+    assertThat(proxyServer.getRequestsSeenByProxy()).isEmpty();
+  }
 
-    // With credentials, the analysis succeeds
-    build = newScannerWithAdminCredentials(new File("projects/simple-js"))
-      .setProjectKey("proxy-auth-test")
-      .setEnvironmentVariable("SONAR_SCANNER_OPTS", "-Dhttp.nonProxyHosts=")
-      .setProperty("sonar.scanner.proxyHost", "localhost")
-      .setProperty("sonar.scanner.proxyPort", "" + httpProxyPort)
+  @Test
+  public void analysis_with_proxy_requesting_authentication_should_succeed_if_credentials_provided() throws Exception {
+    proxyServer = ProxyServer.start(PROXY_USER, PROXY_PASSWORD);
+
+    SonarScanner build = newScan("proxy-http-auth-success-test", false)
       .setProperty("sonar.scanner.proxyUser", PROXY_USER)
       .setProperty("sonar.scanner.proxyPassword", PROXY_PASSWORD);
-    result = orchestrator.executeBuildQuietly(build);
+    BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getLastStatus()).isZero();
-    assertThat(requestsSeenByProxy).isNotEmpty();
+    assertThat(proxyServer.getRequestsSeenByProxy()).isNotEmpty();
+  }
+
+  @Test
+  public void analysis_with_proxy_requesting_authentication_and_https_server_should_fail_if_no_credentials_provided() throws Exception {
+    proxyServer = ProxyServer.start(PROXY_USER, PROXY_PASSWORD);
+
+    Path clientTruststore = getResourcePath(KEYSTORE_CLIENT_WITH_CA);
+    assertThat(clientTruststore).exists();
+
+    SonarScanner build = newScan("proxy-https-auth-fail-test", true);
+
+    BuildResult result = orchestrator.executeBuildQuietly(build);
+    assertThat(result.getLastStatus()).isNotZero();
+    assertThat(result.getLogs()).containsIgnoringCase("Failed to query server version");
+    assertThat(proxyServer.getConnectRequestsSeenByProxy()).isEmpty();
   }
 
   /**
@@ -380,45 +154,45 @@ public class ProxyTest extends ScannerTestCase {
    * <p>
    * The fix requires two parts: the scanner library sending {@code Proxy-Authorization} preemptively,
    * and the launcher script setting {@code -Djdk.http.auth.tunneling.disabledSchemes=} so the JDK
-   * honours Basic auth on CONNECT tunnels. This test verifies the end-to-end behaviour of the CLI.
+   * honours Basic auth on CONNECT tunnel requests. This test verifies the end-to-end behaviour of the CLI.
    */
   @Test
-  public void simple_analysis_with_https_proxy_auth() throws Exception {
-    startProxy(true);
-    startHttpsTargetServer();
-
-    Path clientTruststore = Paths.get(ProxyTest.class.getResource(KEYSTORE_CLIENT_WITH_CA).toURI()).toAbsolutePath();
-    assertThat(clientTruststore).exists();
-
-    // Without proxy credentials the CONNECT tunnel is rejected (407)
-    SonarScanner build = newScannerWithAdminCredentials(new File("projects/simple-js"))
-      .setProjectKey("proxy-https-auth-test")
-      .setProperty("sonar.host.url", "https://localhost:" + httpsTargetPort)
-      .setEnvironmentVariable("SONAR_SCANNER_OPTS", "-Dhttp.nonProxyHosts=")
-      .setProperty("sonar.scanner.proxyHost", "localhost")
-      .setProperty("sonar.scanner.proxyPort", "" + httpProxyPort)
-      .setProperty("sonar.scanner.truststorePath", clientTruststore.toString())
-      .setProperty("sonar.scanner.truststorePassword", KEYSTORE_CLIENT_WITH_CA_PASSWORD);
-    BuildResult result = orchestrator.executeBuildQuietly(build);
-    assertThat(result.getLastStatus()).isNotZero();
-    assertThat(result.getLogs()).containsIgnoringCase("Failed to query server version");
-    assertThat(connectRequestsSeenByProxy).isEmpty();
+  public void analysis_with_proxy_auth_and_https_server_should_succeed() throws Exception {
+    proxyServer = ProxyServer.start(PROXY_USER, PROXY_PASSWORD);
 
     // With proxy credentials the CONNECT tunnel must succeed and the full analysis must pass.
     // This relies on the launcher script having set -Djdk.http.auth.tunneling.disabledSchemes=
     // so that the JDK HttpClient performs Basic auth on CONNECT tunnel requests.
-    build = newScannerWithAdminCredentials(new File("projects/simple-js"))
-      .setProjectKey("proxy-https-auth-test")
-      .setProperty("sonar.host.url", "https://localhost:" + httpsTargetPort)
+    SonarScanner build = newScan("proxy-https-auth-success-test", true)
+      .setProperty("sonar.scanner.proxyUser", PROXY_USER)
+      .setProperty("sonar.scanner.proxyPassword", PROXY_PASSWORD);
+    BuildResult result = orchestrator.executeBuildQuietly(build);
+    assertThat(result.getLastStatus()).isZero();
+    assertThat(proxyServer.getConnectRequestsSeenByProxy()).isNotEmpty();
+  }
+
+  private SonarScanner newScan(String projectKey, boolean useHttps) {
+    Path clientTruststore = getResourcePath(KEYSTORE_CLIENT_WITH_CA);
+    assertThat(clientTruststore).exists();
+
+    SonarScanner scan =  newScannerWithAdminCredentials(new File("projects/simple-js"))
+      .setProjectKey(projectKey)
       .setEnvironmentVariable("SONAR_SCANNER_OPTS", "-Dhttp.nonProxyHosts=")
       .setProperty("sonar.scanner.proxyHost", "localhost")
-      .setProperty("sonar.scanner.proxyPort", "" + httpProxyPort)
-      .setProperty("sonar.scanner.proxyUser", PROXY_USER)
-      .setProperty("sonar.scanner.proxyPassword", PROXY_PASSWORD)
+      .setProperty("sonar.scanner.proxyPort", "" + proxyServer.getPort())
       .setProperty("sonar.scanner.truststorePath", clientTruststore.toString())
       .setProperty("sonar.scanner.truststorePassword", KEYSTORE_CLIENT_WITH_CA_PASSWORD);
-    result = orchestrator.executeBuildQuietly(build);
-    assertThat(result.getLastStatus()).isZero();
-    assertThat(connectRequestsSeenByProxy).isNotEmpty();
+    if (useHttps) {
+      scan.setProperty("sonar.host.url", "https://localhost:" + httpsReverseProxy.httpsPort());
+    }
+    return scan;
+  }
+
+  private static Path getResourcePath(String resourceName) {
+    try {
+      return Paths.get(ProxyTest.class.getResource(resourceName).toURI()).toAbsolutePath();
+    } catch (URISyntaxException e) {
+      throw new IllegalStateException(e);
+    }
   }
 }
