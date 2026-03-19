@@ -37,7 +37,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.http.HttpVersion;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import org.eclipse.jetty.proxy.ConnectHandler;
 import org.eclipse.jetty.proxy.ProxyServlet;
 import org.eclipse.jetty.security.ConstraintMapping;
@@ -56,7 +57,6 @@ import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -65,7 +65,6 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.security.Credential;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.junit.After;
 import org.junit.Test;
@@ -85,22 +84,22 @@ public class ProxyTest extends ScannerTestCase {
   private static Server proxyServer;
   private static int httpProxyPort;
   // HTTPS reverse-proxy target, used for the HTTPS CONNECT tests
-  private static Server httpsTargetServer;
+  private static WireMockServer httpsTargetServer;
   private static int httpsTargetPort;
 
-  private static final ConcurrentLinkedDeque<String> seenByProxy = new ConcurrentLinkedDeque<>();
-  private static final ConcurrentLinkedDeque<String> seenConnectByProxy = new ConcurrentLinkedDeque<>();
+  private static final ConcurrentLinkedDeque<String> requestsSeenByProxy = new ConcurrentLinkedDeque<>();
+  private static final ConcurrentLinkedDeque<String> connectRequestsSeenByProxy = new ConcurrentLinkedDeque<>();
 
   @After
   public void stopProxy() throws Exception {
     if (proxyServer != null && proxyServer.isStarted()) {
       proxyServer.stop();
     }
-    if (httpsTargetServer != null && httpsTargetServer.isStarted()) {
+    if (httpsTargetServer != null && httpsTargetServer.isRunning()) {
       httpsTargetServer.stop();
     }
-    seenByProxy.clear();
-    seenConnectByProxy.clear();
+    requestsSeenByProxy.clear();
+    connectRequestsSeenByProxy.clear();
   }
 
   private static void startProxy(boolean needProxyAuth) throws Exception {
@@ -133,47 +132,27 @@ public class ProxyTest extends ScannerTestCase {
   }
 
   /**
-   * Starts a simple HTTPS reverse-proxy that forwards all traffic to the Orchestrator SonarQube
-   * instance. Used as the HTTPS target in proxy-CONNECT tests.
+   * Starts a WireMock HTTPS server that transparently forwards all traffic to the Orchestrator
+   * SonarQube instance. Used as the HTTPS target in proxy-CONNECT tests.
    */
   private static void startHttpsTargetServer() throws Exception {
     httpsTargetPort = NetworkUtils.getNextAvailablePort(InetAddress.getLocalHost());
 
-    QueuedThreadPool threadPool = new QueuedThreadPool();
-    threadPool.setMaxThreads(500);
-
-    httpsTargetServer = new Server(threadPool);
-
-    HttpConfiguration httpConfig = new HttpConfiguration();
-    httpConfig.setSecureScheme("https");
-    httpConfig.setSecurePort(httpsTargetPort);
-    httpConfig.setSendServerVersion(true);
-    httpConfig.setSendDateHeader(false);
-
     Path serverKeyStore = Paths.get(ProxyTest.class.getResource(SERVER_KEYSTORE).toURI()).toAbsolutePath();
     assertThat(serverKeyStore).exists();
 
-    SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
-    sslContextFactory.setKeyStorePath(serverKeyStore.toString());
-    sslContextFactory.setKeyStorePassword(SERVER_KEYSTORE_PASSWORD);
-    sslContextFactory.setKeyManagerPassword(SERVER_KEYSTORE_PASSWORD);
-
-    HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
-    ServerConnector sslConnector = new ServerConnector(httpsTargetServer,
-      new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
-      new HttpConnectionFactory(httpsConfig));
-    sslConnector.setPort(httpsTargetPort);
-    httpsTargetServer.addConnector(sslConnector);
-
-    // Transparently forward all requests to the Orchestrator instance
-    ServletContextHandler context = new ServletContextHandler();
-    ServletHandler servletHandler = new ServletHandler();
-    ServletHolder holder = servletHandler.addServletWithMapping(ProxyServlet.Transparent.class, "/*");
-    holder.setInitParameter("proxyTo", orchestrator.getServer().getUrl());
-    context.setServletHandler(servletHandler);
-    httpsTargetServer.setHandler(context);
-
+    httpsTargetServer = new WireMockServer(WireMockConfiguration.wireMockConfig()
+      .httpsPort(httpsTargetPort)
+      .keystorePath(serverKeyStore.toString())
+      .keystorePassword(SERVER_KEYSTORE_PASSWORD)
+      .keyManagerPassword(SERVER_KEYSTORE_PASSWORD)
+      .keystoreType("PKCS12"));
     httpsTargetServer.start();
+
+    httpsTargetServer.stubFor(com.github.tomakehurst.wiremock.client.WireMock.any(
+      com.github.tomakehurst.wiremock.client.WireMock.anyUrl())
+      .willReturn(com.github.tomakehurst.wiremock.client.WireMock.aResponse()
+        .proxiedFrom(orchestrator.getServer().getUrl())));
   }
 
   private static ServletContextHandler proxyHandler(boolean needProxyAuth) {
@@ -245,7 +224,7 @@ public class ProxyTest extends ScannerTestCase {
         baseRequest.setHandled(true);
         return;
       }
-      seenConnectByProxy.add(serverAddress);
+      connectRequestsSeenByProxy.add(serverAddress);
       super.handleConnect(baseRequest, request, response, serverAddress);
     }
 
@@ -268,7 +247,7 @@ public class ProxyTest extends ScannerTestCase {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      seenByProxy.add(request.getRequestURI());
+      requestsSeenByProxy.add(request.getRequestURI());
       super.service(request, response);
     }
 
@@ -348,7 +327,7 @@ public class ProxyTest extends ScannerTestCase {
       .setProjectKey("proxy-no-auth-test");
     BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getLastStatus()).isZero();
-    assertThat(seenByProxy).isEmpty();
+    assertThat(requestsSeenByProxy).isEmpty();
 
     // Scan with old-style JVM proxy properties passed via SONAR_SCANNER_OPTS
     // (http.nonProxyHosts is cleared so that localhost is routed through the proxy)
@@ -358,7 +337,7 @@ public class ProxyTest extends ScannerTestCase {
         "-Dhttp.nonProxyHosts= -Dhttp.proxyHost=localhost -Dhttp.proxyPort=" + httpProxyPort);
     result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getLastStatus()).isZero();
-    assertThat(seenByProxy).isNotEmpty();
+    assertThat(requestsSeenByProxy).isNotEmpty();
   }
 
   @Test
@@ -375,7 +354,7 @@ public class ProxyTest extends ScannerTestCase {
     assertThat(result.getLastStatus()).isNotZero();
     assertThat(result.getLogs()).containsPattern(
       "Failed to query server version: GET http://(.*)/api/server/version failed with HTTP 407 Proxy Authentication Required.");
-    assertThat(seenByProxy).isEmpty();
+    assertThat(requestsSeenByProxy).isEmpty();
 
     // With credentials, the analysis succeeds
     build = newScannerWithAdminCredentials(new File("projects/simple-js"))
@@ -387,7 +366,7 @@ public class ProxyTest extends ScannerTestCase {
       .setProperty("sonar.scanner.proxyPassword", PROXY_PASSWORD);
     result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getLastStatus()).isZero();
-    assertThat(seenByProxy).isNotEmpty();
+    assertThat(requestsSeenByProxy).isNotEmpty();
   }
 
   /**
@@ -423,7 +402,7 @@ public class ProxyTest extends ScannerTestCase {
     BuildResult result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getLastStatus()).isNotZero();
     assertThat(result.getLogs()).containsIgnoringCase("Failed to query server version");
-    assertThat(seenConnectByProxy).isEmpty();
+    assertThat(connectRequestsSeenByProxy).isEmpty();
 
     // With proxy credentials the CONNECT tunnel must succeed and the full analysis must pass.
     // This relies on the launcher script having set -Djdk.http.auth.tunneling.disabledSchemes=
@@ -440,6 +419,6 @@ public class ProxyTest extends ScannerTestCase {
       .setProperty("sonar.scanner.truststorePassword", KEYSTORE_CLIENT_WITH_CA_PASSWORD);
     result = orchestrator.executeBuildQuietly(build);
     assertThat(result.getLastStatus()).isZero();
-    assertThat(seenConnectByProxy).isNotEmpty();
+    assertThat(connectRequestsSeenByProxy).isNotEmpty();
   }
 }
