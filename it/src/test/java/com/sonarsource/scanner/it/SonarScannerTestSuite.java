@@ -30,16 +30,18 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ScannerTest.class, MultimoduleTest.class,
-                DistributionTest.class})
+@SuiteClasses({
+  ScannerTest.class,
+  MultimoduleTest.class,
+  DistributionTest.class,
+  ProxyTest.class})
 public class SonarScannerTestSuite {
 
   // Mapping from SonarQube Server versions to Community Build versions for the xoo plugin.
   // The xoo plugin is only published with Community Build releases, not Server releases.
   private static final Map<String, String> SERVER_TO_COMMUNITY_VERSION = Map.of(
     "LATEST_RELEASE[2025.1]", "LATEST_RELEASE[25.1.0]",
-    "LATEST_RELEASE[2026.1]", "LATEST_RELEASE[26.1.0]"
-  );
+    "LATEST_RELEASE[2026.1]", "LATEST_RELEASE[26.1.0]");
 
   @ClassRule
   public static final OrchestratorRule ORCHESTRATOR = createOrchestrator();
