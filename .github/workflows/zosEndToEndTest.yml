@@ -50,8 +50,9 @@ jobs:
 
       - name: Add SSH informations
         run: |
+          set -x
           mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
-          ssh-keyscan ${{ fromJSON(steps.secrets.outputs.vault).ZOS_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -v ${{ fromJSON(steps.secrets.outputs.vault).ZOS_HOST }} >> ~/.ssh/known_hosts
 
       - name: Check z/OS Connection
         run: ssh -i $GITHUB_WORKSPACE/zos_key ${{ fromJSON(steps.secrets.outputs.vault).ZOS_USER }}@${{ fromJSON(steps.secrets.outputs.vault).ZOS_HOST }} "uname -a"
