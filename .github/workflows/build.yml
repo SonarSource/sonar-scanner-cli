@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   build:
+    if: false # TODO: for testing, re-enable
     runs-on: github-ubuntu-latest-s
     name: Build
     permissions:

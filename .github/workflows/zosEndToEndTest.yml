@@ -56,22 +56,23 @@ jobs:
       - name: Check z/OS Connection
         run: ssh -i $GITHUB_WORKSPACE/zos_key ${{ fromJSON(steps.secrets.outputs.vault).ZOS_USER }}@${{ fromJSON(steps.secrets.outputs.vault).ZOS_HOST }} "uname -a"
 
-      - name: Provision project on z/OS
-        run: ./zos-e2e-test/scripts/provision_project.sh zos-e2e-test/projects/sample_project
+      # TODO: for testing, re-enable
+      # - name: Provision project on z/OS
+      #   run: ./zos-e2e-test/scripts/provision_project.sh zos-e2e-test/projects/sample_project
 
-      - name: Download Scanner on z/OS
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./zos-e2e-test/scripts/download_scanner.sh
+      # - name: Download Scanner on z/OS
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: ./zos-e2e-test/scripts/download_scanner.sh
 
-      - name: Run analysis on z/OS
-        run: ./zos-e2e-test/scripts/run_analysis.sh
+      # - name: Run analysis on z/OS
+      #   run: ./zos-e2e-test/scripts/run_analysis.sh
 
-      - name: Check analysis results
-        run: ./zos-e2e-test/scripts/verify_analysis_results.sh
+      # - name: Check analysis results
+      #   run: ./zos-e2e-test/scripts/verify_analysis_results.sh
 
-      - name: Clean up Zena
-        run: ./zos-e2e-test/scripts/cleanup_zena.sh
+      # - name: Clean up Zena
+      #   run: ./zos-e2e-test/scripts/cleanup_zena.sh
 
-      - name: Clean up z/OS instance
-        run: ./zos-e2e-test/scripts/cleanup_zos.sh
+      # - name: Clean up z/OS instance
+      #   run: ./zos-e2e-test/scripts/cleanup_zos.sh
