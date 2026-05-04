@@ -1,4 +1,4 @@
-name: z/OS end-to-end Tests
+name: z/OS Reverse Tunnel Test
 
 on:
   push:
@@ -9,22 +9,28 @@ on:
 
 jobs:
 
-  run-analysis-on-zos:
+  test-reverse-tunnel:
     if: contains(github.event.pull_request.labels.*.name, 'run-zos-test') || github.event_name == 'push'
     permissions:
       id-token: write
-    name: Run analysis on zOS
+    name: Test reverse SSH tunnel to z/OS
     runs-on: sonar-s-public
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+
+      - name: Start HTTP server on port 9000
+        run: |
+          python3 -m http.server 9000 &
+          sleep 1
+          curl -s -o /dev/null -w "%{http_code}" http://localhost:9000
+          echo "Local HTTP server running on port 9000"
 
       - name: Vault
         id: secrets
         uses: SonarSource/vault-action-wrapper@v3
         with:
           secrets: |
-            development/kv/data/zena token | SONAR_TOKEN;
             development/kv/data/ibmcloud private_key | PRIVATE_KEY;
             development/kv/data/ibmcloud user | ZOS_USER;
             development/kv/data/ibmcloud host | ZOS_HOST;
@@ -36,43 +42,49 @@ jobs:
 
       - name: Export environment variables
         run: |
-          echo "SONAR_TOKEN=${{ fromJSON(steps.secrets.outputs.vault).SONAR_TOKEN }}" >> $GITHUB_ENV
           echo "ZOS_USER_HOST=${{ fromJSON(steps.secrets.outputs.vault).ZOS_USER }}@${{ fromJSON(steps.secrets.outputs.vault).ZOS_HOST }}" >> $GITHUB_ENV
-          echo "JOB_TIMESTAMP=$(date '+%s')" >> $GITHUB_ENV
 
-      - name: Check Zena Connection
-        run: |
-          status=$(curl -sSL -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $SONAR_TOKEN" "https://zena.sonarsource.com/api/v2/analysis/version")
-          if [ "$status" -ne 200 ]; then
-            echo "Zena connection failed with status $status"
-            exit 1
-          fi
-
-      - name: Add SSH informations
+      - name: Add SSH information
         run: |
           mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
           ssh-keyscan ${{ fromJSON(steps.secrets.outputs.vault).ZOS_HOST }} >> ~/.ssh/known_hosts
 
       - name: Check z/OS Connection
-        run: ssh -i $GITHUB_WORKSPACE/zos_key ${{ fromJSON(steps.secrets.outputs.vault).ZOS_USER }}@${{ fromJSON(steps.secrets.outputs.vault).ZOS_HOST }} "uname -a"
+        run: ssh -i $GITHUB_WORKSPACE/zos_key $ZOS_USER_HOST "uname -a"
 
-      # TODO: for testing, re-enable
-      # - name: Provision project on z/OS
-      #   run: ./zos-e2e-test/scripts/provision_project.sh zos-e2e-test/projects/sample_project
+      - name: Check what is using port 9000 on z/OS
+        run: |
+          ssh -i $GITHUB_WORKSPACE/zos_key $ZOS_USER_HOST '
+            echo "=== netstat for port 9000 ==="
+            netstat -an 2>/dev/null | grep 9000 || echo "(netstat not found or no results)"
+            echo "=== try alternate port 19000 ==="
+          '
 
-      # - name: Download Scanner on z/OS
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: ./zos-e2e-test/scripts/download_scanner.sh
+      - name: Establish Reverse SSH Tunnel on port 19000 (verbose)
+        run: |
+          ssh -v -N -R 19000:localhost:9000 -i $GITHUB_WORKSPACE/zos_key $ZOS_USER_HOST 2>&1 &
+          sleep 5
+          echo "--- Checking tunnel on port 19000 ---"
 
-      # - name: Run analysis on z/OS
-      #   run: ./zos-e2e-test/scripts/run_analysis.sh
+      - name: Verify tunnel from z/OS on port 19000
+        run: |
+          ssh -i $GITHUB_WORKSPACE/zos_key $ZOS_USER_HOST 'export JAVA_HOME=/usr/lpp/java/java21/J21.0_64 && $JAVA_HOME/bin/jshell --execution local << "EOF"
+          try {
+              var url = new java.net.URL("http://localhost:19000");
+              var conn = (java.net.HttpURLConnection) url.openConnection();
+              conn.setConnectTimeout(5000);
+              int code = conn.getResponseCode();
+              System.out.println("HTTP status: " + code);
+              System.out.println("SUCCESS: Reverse tunnel works on port 19000!");
+          } catch (Exception e) {
+              System.out.println("Connection failed: " + e.getMessage());
+              System.exit(1);
+          }
+          /exit
+          EOF'
 
-      # - name: Check analysis results
-      #   run: ./zos-e2e-test/scripts/verify_analysis_results.sh
-
-      # - name: Clean up Zena
-      #   run: ./zos-e2e-test/scripts/cleanup_zena.sh
-
-      # - name: Clean up z/OS instance
-      #   run: ./zos-e2e-test/scripts/cleanup_zos.sh
+      - name: Cleanup
+        if: always()
+        run: |
+          pkill -f "ssh -fN" || true
+          pkill -f "python3 -m http.server" || true
