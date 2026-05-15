@@ -12,7 +12,7 @@ on:
 
 jobs:
   update_releasability_status:
-    runs-on: github-ubuntu-latest-s
+    runs-on: warp-custom-ubuntu-24-04
     name: Releasability status
     permissions:
       id-token: write
