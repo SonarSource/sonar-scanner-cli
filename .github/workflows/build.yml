@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: github-ubuntu-latest-s
+    runs-on: warp-custom-ubuntu-24-04
     name: Build
     permissions:
       id-token: write
@@ -41,7 +41,7 @@ jobs:
 
   linux-qa:
     needs: build
-    runs-on: github-ubuntu-latest-s
+    runs-on: warp-custom-ubuntu-24-04
     name: Linux QA - SQ ${{ matrix.sq_version }}
     permissions:
       id-token: write
@@ -142,7 +142,7 @@ jobs:
     needs:
       - linux-qa
       - windows-qa
-    runs-on: github-ubuntu-latest-s
+    runs-on: warp-custom-ubuntu-24-04
     name: Promote
     permissions:
       id-token: write
