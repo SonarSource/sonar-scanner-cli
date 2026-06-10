@@ -19,6 +19,8 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,6 +69,8 @@ class MainTest {
     when(bootstrapper.bootstrap()).thenReturn(result);
     when(engine.analyze(any())).thenReturn(true);
     when(conf.properties()).thenReturn(properties);
+    // force the direct engine path so existing tests are unaffected by auto-detection
+    when(properties.getProperty(Main.PROPERTY_PROJECT_TYPE)).thenReturn("generic");
   }
 
   @Test
@@ -211,6 +215,7 @@ class MainTest {
   @Test
   void should_only_display_version() {
     Properties p = new Properties();
+    p.setProperty(Main.PROPERTY_PROJECT_TYPE, "generic");
     when(cli.isDisplayVersionOnly()).thenReturn(true);
     when(cli.getInvokedFrom()).thenReturn("");
     when(conf.properties()).thenReturn(p);
@@ -229,6 +234,7 @@ class MainTest {
   void should_skip() {
     Properties p = new Properties();
     p.setProperty(ScannerProperties.SKIP, "true");
+    p.setProperty(Main.PROPERTY_PROJECT_TYPE, "generic");
     when(conf.properties()).thenReturn(p);
     when(cli.getInvokedFrom()).thenReturn("");
 
@@ -278,6 +284,7 @@ class MainTest {
   private Properties execute(String propKey, String propValue) {
     Properties p = new Properties();
     p.put(propKey, propValue);
+    p.setProperty(Main.PROPERTY_PROJECT_TYPE, "generic");
 
     when(conf.properties()).thenReturn(p);
     when(cli.getInvokedFrom()).thenReturn("");
@@ -289,6 +296,45 @@ class MainTest {
     verify(engine).analyze((Map) propertiesCapture.capture());
 
     return propertiesCapture.getValue();
+  }
+
+  @Test
+  void should_delegate_and_not_bootstrap_engine_when_build_tool_detected() {
+    Properties p = new Properties();
+    when(conf.properties()).thenReturn(p);
+
+    ProjectClassifier alwaysMaven = mock();
+    when(alwaysMaven.classify(any(), any())).thenReturn(ProjectType.MAVEN);
+
+    RecordingCommandRunner runner = new RecordingCommandRunner();
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, alwaysMaven, runner);
+    main.analyze();
+
+    verify(scannerEngineBootstrapperFactory, never()).create(any(), any());
+    verify(exit).exit(Exit.SUCCESS);
+  }
+
+  @Test
+  void should_use_direct_path_when_override_is_generic() {
+    Properties p = new Properties();
+    p.setProperty(Main.PROPERTY_PROJECT_TYPE, "generic");
+    when(conf.properties()).thenReturn(p);
+    when(cli.getInvokedFrom()).thenReturn("");
+
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory);
+    main.analyze();
+
+    verify(scannerEngineBootstrapperFactory).create(any(), any());
+  }
+
+  static class RecordingCommandRunner implements CommandRunner {
+    List<String> lastCommand;
+
+    @Override
+    public int run(List<String> command, Path workingDir) {
+      this.lastCommand = command;
+      return 0;
+    }
   }
 
 }

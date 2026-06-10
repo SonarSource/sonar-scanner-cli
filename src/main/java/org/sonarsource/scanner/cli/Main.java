@@ -20,8 +20,11 @@
 package org.sonarsource.scanner.cli;
 
 import ch.qos.logback.classic.Level;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Properties;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarsource.scanner.lib.ScannerEngineBootstrapper;
@@ -44,17 +47,29 @@ public class Main {
   private static final String FAILURE = "FAILURE";
   private static final String SUCCESS = "SUCCESS";
 
+  static final String PROPERTY_PROJECT_TYPE = "sonar.scanner.projectType";
+  static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
+
   private final Exit exit;
   private final Cli cli;
   private final Conf conf;
   private ScannerEngineBootstrapper scannerEngineBootstrapper;
   private final ScannerEngineBootstrapperFactory bootstrapperFactory;
+  private final ProjectClassifier projectClassifier;
+  private final CommandRunner commandRunner;
 
   Main(Exit exit, Cli cli, Conf conf, ScannerEngineBootstrapperFactory bootstrapperFactory) {
+    this(exit, cli, conf, bootstrapperFactory, new ProjectClassifier(), new ProcessCommandRunner());
+  }
+
+  Main(Exit exit, Cli cli, Conf conf, ScannerEngineBootstrapperFactory bootstrapperFactory,
+    ProjectClassifier projectClassifier, CommandRunner commandRunner) {
     this.exit = exit;
     this.cli = cli;
     this.conf = conf;
     this.bootstrapperFactory = bootstrapperFactory;
+    this.projectClassifier = projectClassifier;
+    this.commandRunner = commandRunner;
   }
 
   public static void main(String[] args) {
@@ -72,6 +87,13 @@ public class Main {
       Properties p = conf.properties();
       checkSkip(p);
       configureLogging(p);
+
+      ProjectType projectType = projectClassifier.classify(resolveBaseDir(p), p.getProperty(PROPERTY_PROJECT_TYPE));
+      if (projectType != ProjectType.GENERIC) {
+        status = delegate(projectType, p);
+        return;
+      }
+
       init(p);
       try (var result = scannerEngineBootstrapper.bootstrap()) {
         if (result.isSuccessful()) {
@@ -97,6 +119,30 @@ public class Main {
     } finally {
       exit.exit(status);
     }
+  }
+
+  private int delegate(ProjectType projectType, Properties props) {
+    LOG.info("Detected {} project, delegating to build tool", projectType.name().toLowerCase());
+    DelegatingStrategy strategy;
+    if (projectType == ProjectType.MAVEN) {
+      strategy = new MavenStrategy(commandRunner);
+    } else if (projectType == ProjectType.GRADLE) {
+      strategy = new GradleStrategy(commandRunner);
+    } else {
+      throw new IllegalStateException("Unexpected delegated type: " + projectType);
+    }
+    int exitCode = strategy.execute(resolveBaseDir(props), props);
+    return exitCode == 0 ? Exit.SUCCESS : Exit.SCANNER_ENGINE_ERROR;
+  }
+
+  private static Path resolveBaseDir(Properties props) {
+    Path base = props.containsKey("project.home")
+      ? Paths.get(props.getProperty("project.home")).toAbsolutePath()
+      : Paths.get("").toAbsolutePath();
+    if (props.containsKey(PROPERTY_PROJECT_BASEDIR)) {
+      return base.resolve(props.getProperty(PROPERTY_PROJECT_BASEDIR)).normalize();
+    }
+    return base;
   }
 
   private void checkSkip(Properties properties) {
