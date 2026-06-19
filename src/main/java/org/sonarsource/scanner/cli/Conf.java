@@ -134,6 +134,14 @@ class Conf {
     return projectProps;
   }
 
+  Path rootProjectBaseDir() {
+    Properties knownPropsAtThatPoint = new Properties();
+    knownPropsAtThatPoint.putAll(System.getProperties());
+    knownPropsAtThatPoint.putAll(loadEnvironmentProperties());
+    knownPropsAtThatPoint.putAll(cli.properties());
+    return getRootProjectBaseDir(knownPropsAtThatPoint);
+  }
+
   private static Path getRootProjectBaseDir(Properties cliProps) {
     Path absoluteProjectHome;
     if (cliProps.containsKey(PROJECT_HOME)) {

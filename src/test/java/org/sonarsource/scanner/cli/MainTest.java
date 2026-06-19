@@ -19,6 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +44,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class MainTest {
@@ -58,6 +60,7 @@ class MainTest {
   private final ScannerEngineBootstrapper bootstrapper = mock();
   private final ScannerEngineFacade engine = mock();
   private final ScannerEngineBootstrapResult result = mock();
+  private final GradleJavaPropertiesDumper gradleJavaPropertiesDumper = mock();
 
   @BeforeEach
   void setUp() {
@@ -240,6 +243,22 @@ class MainTest {
 
     inOrder.verify(exit, times(1)).exit(Exit.SUCCESS);
     inOrder.verify(scannerEngineBootstrapperFactory, times(1)).create(p, "");
+  }
+
+  @Test
+  void should_dump_gradle_java_properties_and_exit() {
+    Path projectRoot = Path.of("/tmp/project");
+    when(conf.rootProjectBaseDir()).thenReturn(projectRoot);
+    when(cli.isDumpGradleJavaProperties()).thenReturn(true);
+    when(cli.properties()).thenReturn(new Properties());
+
+    Main main = new Main(exit, cli, conf, scannerEngineBootstrapperFactory, gradleJavaPropertiesDumper);
+    main.analyze();
+
+    verify(conf, never()).properties();
+    verify(gradleJavaPropertiesDumper).dump(projectRoot);
+    verifyNoInteractions(scannerEngineBootstrapperFactory, bootstrapper, engine);
+    verify(exit).exit(Exit.SUCCESS);
   }
 
   @Test

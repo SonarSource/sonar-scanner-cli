@@ -32,6 +32,7 @@ class Cli {
 
   private boolean debugEnabled = false;
   private boolean displayVersionOnly = false;
+  private boolean dumpGradleJavaProperties = false;
   private boolean embedded = false;
   private String invokedFrom = "";
   private final Properties props = new Properties();
@@ -47,6 +48,10 @@ class Cli {
 
   boolean isDisplayVersionOnly() {
     return displayVersionOnly;
+  }
+
+  boolean isDumpGradleJavaProperties() {
+    return dumpGradleJavaProperties;
   }
 
   boolean isEmbedded() {
@@ -81,6 +86,9 @@ class Cli {
 
     } else if (asList("-v", "--version").contains(arg)) {
       displayVersionOnly = true;
+
+    } else if ("--dump-gradle-java-properties".equals(arg)) {
+      dumpGradleJavaProperties = true;
 
     } else if (asList("-e", "--errors").contains(arg)) {
       LOG
@@ -129,6 +137,7 @@ class Cli {
     props.clear();
     debugEnabled = false;
     displayVersionOnly = false;
+    dumpGradleJavaProperties = false;
   }
 
   private static void appendPropertyTo(String arg, Properties props) {
@@ -160,6 +169,8 @@ class Cli {
     System.out.println();
     System.out.println("Options:");
     System.out.println(" -D,--define <arg>     Define property");
+    System.out.println(" --dump-gradle-java-properties");
+    System.out.println("                       Generate a sonar-project.properties file from a Gradle build and exit");
     System.out.println(" -h,--help             Display help information");
     System.out.println(" -v,--version          Display version information");
     System.out.println(" -X,--debug            Produce execution debug output");

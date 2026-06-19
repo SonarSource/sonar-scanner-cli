@@ -19,6 +19,7 @@
  */
 package org.sonarsource.scanner.cli;
 
+import java.nio.file.Path;
 import ch.qos.logback.classic.Level;
 import java.util.Map;
 import java.util.Properties;
@@ -47,14 +48,21 @@ public class Main {
   private final Exit exit;
   private final Cli cli;
   private final Conf conf;
+  private final GradleJavaPropertiesDumper gradleJavaPropertiesDumper;
   private ScannerEngineBootstrapper scannerEngineBootstrapper;
   private final ScannerEngineBootstrapperFactory bootstrapperFactory;
 
   Main(Exit exit, Cli cli, Conf conf, ScannerEngineBootstrapperFactory bootstrapperFactory) {
+    this(exit, cli, conf, bootstrapperFactory, new GradleJavaPropertiesDumper());
+  }
+
+  Main(Exit exit, Cli cli, Conf conf, ScannerEngineBootstrapperFactory bootstrapperFactory,
+    GradleJavaPropertiesDumper gradleJavaPropertiesDumper) {
     this.exit = exit;
     this.cli = cli;
     this.conf = conf;
     this.bootstrapperFactory = bootstrapperFactory;
+    this.gradleJavaPropertiesDumper = gradleJavaPropertiesDumper;
   }
 
   public static void main(String[] args) {
@@ -69,6 +77,14 @@ public class Main {
 
     int status = Exit.INTERNAL_ERROR;
     try {
+      if (cli.isDumpGradleJavaProperties()) {
+        configureLogging(cli.properties());
+        dumpGradleJavaProperties();
+        displayExecutionResult(stats, SUCCESS);
+        status = Exit.SUCCESS;
+        return;
+      }
+
       Properties p = conf.properties();
       checkSkip(p);
       configureLogging(p);
@@ -104,6 +120,11 @@ public class Main {
       LOG.info("SonarScanner CLI analysis skipped");
       exit.exit(Exit.SUCCESS);
     }
+  }
+
+  private void dumpGradleJavaProperties() {
+    Path projectRoot = conf.rootProjectBaseDir();
+    gradleJavaPropertiesDumper.dump(projectRoot);
   }
 
   private void init(Properties p) {

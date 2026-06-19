@@ -107,6 +107,12 @@ class CliTest {
   }
 
   @Test
+  void should_enable_gradle_java_properties_dump_mode() {
+    cli.parse(new String[]{"--dump-gradle-java-properties"});
+    assertThat(cli.isDumpGradleJavaProperties()).isTrue();
+  }
+
+  @Test
   void should_enable_stacktrace_log() {
     cli.parse(new String[]{"-e"});
     assertThat(cli.isDebugEnabled()).isFalse();
@@ -145,6 +151,7 @@ class CliTest {
   void should_show_usage(String arg) {
     var baos = parseAndCaptureStdOut(arg);
     assertThat(baos.toString()).contains("usage: sonar-scanner [options]");
+    assertThat(baos.toString()).contains("--dump-gradle-java-properties");
     verify(exit).exit(Exit.SUCCESS);
   }
 
