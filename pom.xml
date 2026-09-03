@@ -83,7 +83,7 @@
     <dependency>
       <groupId>org.sonarsource.scanner.lib</groupId>
       <artifactId>sonar-scanner-java-library</artifactId>
-      <version>4.1.2.1663</version>
+      <version>4.2.0.1670</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
