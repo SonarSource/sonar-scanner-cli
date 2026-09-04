@@ -23,7 +23,7 @@ import com.sonar.orchestrator.build.SonarScanner;
 import com.sonar.orchestrator.container.Server;
 import com.sonar.orchestrator.http.HttpMethod;
 import com.sonar.orchestrator.junit4.OrchestratorRule;
-import com.sonar.orchestrator.version.Version;
+import com.sonar.orchestrator.util.Version;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
