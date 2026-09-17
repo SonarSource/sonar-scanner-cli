@@ -42,6 +42,17 @@ fi
 use_embedded_jre=${use_embedded_jre}
 if [ "$use_embedded_jre" = true ]; then
   java_cmd="$sonar_scanner_home/jre/bin/java"
+  if [ ! -x "$java_cmd" ]; then
+    echo "ERROR: Embedded JRE not found at '$sonar_scanner_home/jre'. The distribution may be corrupted."
+    exit 1
+  fi
+  if [ -z "$JAVA_HOME" ]; then
+    # No JAVA_HOME provided by the caller: fall back to the embedded JRE so the forked
+    # scanner-engine process still has a usable Java runtime (e.g. air-gapped machines
+    # with no system Java). A JAVA_HOME already set by the caller is left untouched so
+    # it keeps flowing unmodified to the forked scanner-engine process.
+    export JAVA_HOME="$sonar_scanner_home/jre"
+  fi
 elif [ -n "$JAVA_HOME" ]; then
   java_cmd="$JAVA_HOME/bin/java"
 else

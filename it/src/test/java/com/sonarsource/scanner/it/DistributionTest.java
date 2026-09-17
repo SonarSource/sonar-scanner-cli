@@ -53,6 +53,25 @@ public class DistributionTest extends ScannerTestCase {
   }
 
   @Test
+  public void should_fall_back_to_embedded_jre_for_scanner_engine_when_java_home_not_set()
+    throws IOException, InterruptedException {
+    String projectKey = "basedir-with-source";
+
+    File projectDir = new File("projects/basedir-with-source");
+    SonarScanner build = newScannerWithAdminCredentials(projectDir, "sonar.projectKey", projectKey)
+      .setProperty("sonar.scanner.skipJreProvisioning", "true")
+      .setEnvironmentVariable("JAVA_HOME", "")
+      .useNative();
+
+    orchestrator.executeBuild(build, true);
+
+    // Even without JRE auto-provisioning and without any JAVA_HOME, the forked scanner-engine
+    // process must still find a usable Java runtime through the embedded JRE fallback.
+    Map<String, Measure> projectMeasures = getMeasures(projectKey, "files", "ncloc");
+    assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(1);
+  }
+
+  @Test
   public void should_succeed_with_self_contained_jre_despite_rubbish_java_home()
     throws IOException, InterruptedException {
     String projectKey = "basedir-with-source";
