@@ -53,20 +53,22 @@ public class DistributionTest extends ScannerTestCase {
   }
 
   @Test
-  public void should_fall_back_to_embedded_jre_for_scanner_engine_when_java_home_not_set()
+  public void should_succeed_with_explicit_java_exe_path_when_java_home_not_set()
     throws IOException, InterruptedException {
     String projectKey = "basedir-with-source";
+    String javaExePath = Paths.get(System.getProperty("java.home"), "bin", "java").toString();
 
     File projectDir = new File("projects/basedir-with-source");
     SonarScanner build = newScannerWithAdminCredentials(projectDir, "sonar.projectKey", projectKey)
       .setProperty("sonar.scanner.skipJreProvisioning", "true")
+      .setProperty("sonar.scanner.javaExePath", javaExePath)
       .setEnvironmentVariable("JAVA_HOME", "")
       .useNative();
 
     orchestrator.executeBuild(build, true);
 
-    // Even without JRE auto-provisioning and without any JAVA_HOME, the forked scanner-engine
-    // process must still find a usable Java runtime through the embedded JRE fallback.
+    // With JRE auto-provisioning skipped and no JAVA_HOME, sonar.scanner.javaExePath is the
+    // documented way to give the forked scanner-engine process a usable Java runtime.
     Map<String, Measure> projectMeasures = getMeasures(projectKey, "files", "ncloc");
     assertThat(parseInt(projectMeasures.get("files").getValue())).isEqualTo(1);
   }

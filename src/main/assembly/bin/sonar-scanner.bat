@@ -25,11 +25,6 @@ set use_embedded_jre=${use_embedded_jre}
 if "%use_embedded_jre%" == "true" (
   if EXIST "%SONAR_SCANNER_HOME%\jre\bin\java.exe" (
     set JAVA_EXEC="%SONAR_SCANNER_HOME%\jre\bin\java.exe"
-    @REM No JAVA_HOME provided by the caller: fall back to the embedded JRE so the forked
-    @REM scanner-engine process still has a usable Java runtime (e.g. air-gapped machines
-    @REM with no system Java). A JAVA_HOME already set by the caller is left untouched so
-    @REM it keeps flowing unmodified to the forked scanner-engine process.
-    if "%JAVA_HOME%" == "" set "JAVA_HOME=%SONAR_SCANNER_HOME%\jre"
     goto OkJava
   )
   echo.
