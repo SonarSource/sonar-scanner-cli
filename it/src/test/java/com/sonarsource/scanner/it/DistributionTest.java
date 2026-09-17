@@ -23,6 +23,7 @@ import com.sonar.orchestrator.build.BuildFailureException;
 import com.sonar.orchestrator.build.SonarScanner;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Map;
 import org.junit.Test;
 import org.sonarqube.ws.Measures.Measure;
@@ -31,6 +32,25 @@ import static java.lang.Integer.parseInt;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DistributionTest extends ScannerTestCase {
+
+  @Test
+  public void should_not_override_java_home_when_using_self_contained_jre()
+    throws IOException, InterruptedException {
+    String projectKey = "basedir-with-source";
+    String realJavaHome = System.getProperty("java.home");
+
+    File projectDir = new File("projects/basedir-with-source");
+    SonarScanner build = newScannerWithAdminCredentials(projectDir, "sonar.projectKey", projectKey)
+      .setProperty("sonar.scanner.skipJreProvisioning", "true")
+      .setEnvironmentVariable("JAVA_HOME", realJavaHome)
+      .useNative();
+
+    String logs = orchestrator.executeBuild(build, true).getLogs();
+
+    // The forked scanner-engine JVM must see the JAVA_HOME set by the caller, not the scanner's own embedded JRE.
+    String expectedJavaExecutable = Paths.get(realJavaHome, "bin", "java").toString();
+    assertThat(logs).contains("Using the java executable '" + expectedJavaExecutable);
+  }
 
   @Test
   public void should_succeed_with_self_contained_jre_despite_rubbish_java_home()
