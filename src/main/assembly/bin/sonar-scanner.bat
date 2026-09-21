@@ -23,7 +23,14 @@ set "SONAR_SCANNER_HOME=%scriptdir%\.."
 
 set use_embedded_jre=${use_embedded_jre}
 if "%use_embedded_jre%" == "true" (
-  set "JAVA_HOME=%SONAR_SCANNER_HOME%\jre"
+  if EXIST "%SONAR_SCANNER_HOME%\jre\bin\java.exe" (
+    set JAVA_EXEC="%SONAR_SCANNER_HOME%\jre\bin\java.exe"
+    goto OkJava
+  )
+  echo.
+  echo ERROR: Embedded JRE not found at "%SONAR_SCANNER_HOME%\jre". The distribution may be corrupted.
+  echo.
+  goto error
 )
 
 if not "%JAVA_HOME%" == "" goto foundJavaHome
