@@ -1,11 +1,30 @@
-# Scanner CLI for SonarQube (Server, Cloud)
-
-The official scanner used to run code analysis on SonarQube (Server, Cloud). Project configuration is read from file `sonar-project.properties` or passed on the command line.
-
-Sonar's [Clean Code solution](https://www.sonarsource.com/solutions/clean-code/) helps developers deliver high-quality, efficient code standards that benefit the entire team or organization.
+<!-- Sonar Marketing hosts these approved brand assets on its Kentico Kontent CDN (assets-eu-01.kc-usercontent.com). Shared URLs are intentional; consult Marketing before replacing them. -->
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://assets-eu-01.kc-usercontent.com/ef593040-b591-0198-9506-ed88b30bc023/a23fc7ba-23f0-489a-829d-ed88c0748521/Sonar_Logo_Dark%20Backgrounds.svg">
+    <img src="https://assets-eu-01.kc-usercontent.com/ef593040-b591-0198-9506-ed88b30bc023/82c13eba-d95c-4bb8-8007-7ce77c14e043/Sonar_Logo_Light%20Backgrounds.svg" alt="Sonar logo" width="400">
+  </picture>
+</p>
 
 [![Build](https://github.com/SonarSource/sonar-scanner-cli/actions/workflows/build.yml/badge.svg)](https://github.com/SonarSource/sonar-scanner-cli/actions/workflows/build.yml)
 [![Quality Gate Status](https://next.sonarqube.com/sonarqube/api/project_badges/measure?project=org.sonarsource.scanner.cli%3Asonar-scanner-cli&metric=alert_status)](https://next.sonarqube.com/sonarqube/dashboard?id=org.sonarsource.scanner.cli%3Asonar-scanner-cli)
+
+<!-- sonar-marketing:start -->
+<!-- Marketing maintains this section. For wording changes, consult the relevant Product Marketing Manager (PMM). Repository CODEOWNERS review accuracy and merge changes. -->
+
+# SonarScanner CLI
+
+SonarScanner CLI is the official scanner for projects that do not use a scanner integrated with their build system. It runs code analysis and sends the results to SonarQube Server or SonarQube Cloud.
+
+Read the [SonarScanner CLI documentation](https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner) to install and run the scanner.
+
+To learn more about the products this scanner works with, visit the [SonarQube product page](https://www.sonarsource.com/products/sonarqube/).
+
+<!-- sonar-marketing:end -->
+
+## Configuration
+
+Project configuration is read from file `sonar-project.properties` or passed on the command line.
 
 ## Documentation
 
