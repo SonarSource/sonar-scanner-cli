@@ -22,13 +22,14 @@ To learn more about the products this scanner works with, visit the [SonarQube p
 
 <!-- sonar-marketing:end -->
 
-## Configuration
-
-Project configuration is read from file `sonar-project.properties` or passed on the command line.
-
 ## Documentation
 
 https://redirect.sonarsource.com/doc/install-configure-scanner.html
+
+### Configuration
+
+Project configuration is read from file `sonar-project.properties` or passed on the command line.
+For more details on configuring your project, please refer to the [official documentation](https://redirect.sonarsource.com/doc/install-configure-scanner.html).
 
 ## Have Questions or Feedback?
 
