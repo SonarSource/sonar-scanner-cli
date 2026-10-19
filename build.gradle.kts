@@ -95,6 +95,7 @@ tasks.jar {
 
 val shadeMinimization = tasks.register<ShadeMinimization>("shadeMinimization") {
   description = "Computes the classes of the dependencies to remove from the fat JAR."
+  group = BasePlugin.BUILD_GROUP
   projectJar.from(tasks.jar)
   dependencies.from(configurations.runtimeClasspath)
   // Loaded by reflection
@@ -142,6 +143,7 @@ val jres = Jre.readAll(jresMetadataFile.asFile)
 
 tasks.register<UpdateJresMetadata>("updateJresMetadata") {
   description = "Updates the metadata of the embedded JREs from the Adoptium API, for the release set by the jreReleaseName property."
+  group = BasePlugin.BUILD_GROUP
   releaseName = jreReleaseName
   metadataFile = jresMetadataFile
 }
@@ -217,12 +219,14 @@ val jreDistZips = jres.map { jre ->
   val jreArchive = layout.buildDirectory.file("jres/${jre.filename}")
   val downloadJre = tasks.register<Download>("downloadJre${jre.taskSuffix}") {
     description = "Downloads the JRE for ${jre.classifier}."
+    group = BasePlugin.BUILD_GROUP
     src("https://api.adoptium.net/v3/binary/version/${URLEncoder.encode(jreReleaseName, StandardCharsets.UTF_8)}/${jre.os}/${jre.arch}/jre/hotspot/normal/eclipse?project=jdk")
     dest(jreArchive)
     overwrite(false)
   }
   val verifyJre = tasks.register<Verify>("verifyJre${jre.taskSuffix}") {
     description = "Verifies the checksum of the JRE for ${jre.classifier}."
+    group = BasePlugin.BUILD_GROUP
     dependsOn(downloadJre)
     src(jreArchive)
     algorithm("SHA-256")
@@ -230,6 +234,7 @@ val jreDistZips = jres.map { jre ->
   }
   val unpackJre = tasks.register<Sync>("unpackJre${jre.taskSuffix}") {
     description = "Unpacks the JRE for ${jre.classifier}."
+    group = BasePlugin.BUILD_GROUP
     dependsOn(verifyJre)
     from(if (jre.isWindows) zipTree(jreArchive) else tarTree(jreArchive))
     into(layout.buildDirectory.dir("jres-unpacked/${jre.classifier}"))
@@ -358,6 +363,7 @@ val integrationTestScannerVersion = deployedScannerVersion.getOrElse(version.toS
 val integrationTestMavenRepository = layout.buildDirectory.dir("integrationTest/maven-repo")
 val prepareIntegrationTestScanner = tasks.register<Sync>("prepareIntegrationTestScanner") {
   description = "Prepares the distributions tested by the integration tests."
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
   into(integrationTestMavenRepository)
   if (!deployedScannerVersion.isPresent) {
     into("${project.group.toString().replace('.', '/')}/${project.name}/$version") {
@@ -371,6 +377,7 @@ val prepareIntegrationTestScanner = tasks.register<Sync>("prepareIntegrationTest
 // the scanner creates in them: a fresh copy keeps src/ clean, and the results of previous runs out of the assertions
 val prepareIntegrationTestProjects = tasks.register<Sync>("prepareIntegrationTestProjects") {
   description = "Prepares the projects analyzed by the integration tests."
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
   from("src/integrationTest/projects")
   into(layout.buildDirectory.dir("integrationTest/work/projects"))
 }
