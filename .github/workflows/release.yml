@@ -13,5 +13,4 @@ jobs:
     uses: SonarSource/gh-action_release/.github/workflows/main.yaml@v6
     with:
       publishToBinaries: true
-      mavenCentralSync: true
       slackChannel: ops-ci-experience
