@@ -349,26 +349,9 @@ artifactoryConfiguration {
 // Integration tests
 // ---------------------------------------------------------------------------------------------------------------------
 
-// Set on CI, where the integration tests run against the distributions deployed to Artifactory by the build job
+// Set on CI, where the integration tests run against the distributions deployed to Artifactory by the build job:
+// Orchestrator downloads them, as they are not in its Maven local repository
 val deployedScannerVersion = providers.environmentVariable("PROJECT_VERSION")
-
-val deployedScannerDistributions = configurations.dependencyScope("deployedScannerDistributions") {
-  isTransitive = false
-}
-val deployedScannerDistributionFiles = configurations.resolvable("deployedScannerDistributionFiles") {
-  extendsFrom(deployedScannerDistributions.get())
-  isTransitive = false
-}
-
-if (deployedScannerVersion.isPresent) {
-  dependencies {
-    listOf("", ":linux-x64", ":windows-x64").forEach {
-      // See the deployedScannerDistributions repository of the settings
-      add(deployedScannerDistributions.name, "${project.group}.deployed:${project.name}:${deployedScannerVersion.get()}$it@zip")
-    }
-  }
-}
-
 val integrationTestScannerVersion = deployedScannerVersion.getOrElse(version.toString())
 
 // A Maven local repository with the distributions, where Orchestrator looks for them first
@@ -376,10 +359,8 @@ val integrationTestMavenRepository = layout.buildDirectory.dir("integrationTest/
 val prepareIntegrationTestScanner = tasks.register<Sync>("prepareIntegrationTestScanner") {
   description = "Prepares the distributions tested by the integration tests."
   into(integrationTestMavenRepository)
-  into("${project.group.toString().replace('.', '/')}/${project.name}/$integrationTestScannerVersion") {
-    if (deployedScannerVersion.isPresent) {
-      from(deployedScannerDistributionFiles)
-    } else {
+  if (!deployedScannerVersion.isPresent) {
+    into("${project.group.toString().replace('.', '/')}/${project.name}/$version") {
       from(distZip, jreDistZips)
       rename("sonar-scanner-(.*)", "${project.name}-$1")
     }

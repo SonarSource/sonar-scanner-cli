@@ -22,35 +22,3 @@ pluginManagement {
 rootProject.name = "sonar-scanner-cli"
 
 apply(from = "./buildSrc/repositories.settings.gradle.kts")
-
-dependencyResolutionManagement {
-  val artifactoryUsername = System.getenv("ARTIFACTORY_USERNAME") ?: providers.gradleProperty("artifactoryUsername").orNull
-  val artifactoryPassword = System.getenv("ARTIFACTORY_PASSWORD") ?: providers.gradleProperty("artifactoryPassword").orNull
-  repositories {
-    // The distributions deployed by the build job, tested by the integration tests on CI. They have their own group, as
-    // Gradle would resolve this project instead of the artifacts with its own coordinates.
-    exclusiveContent {
-      forRepository {
-        ivy {
-          name = "deployedScannerDistributions"
-          url = uri("https://repox.jfrog.io/repox/sonarsource/")
-          patternLayout {
-            artifact("org/sonarsource/scanner/cli/[module]/[revision]/[module]-[revision](-[classifier]).[ext]")
-          }
-          metadataSources {
-            artifact()
-          }
-          if (!artifactoryUsername.isNullOrEmpty() && !artifactoryPassword.isNullOrEmpty()) {
-            credentials {
-              username = artifactoryUsername
-              password = artifactoryPassword
-            }
-          }
-        }
-      }
-      filter {
-        includeGroup("org.sonarsource.scanner.cli.deployed")
-      }
-    }
-  }
-}
