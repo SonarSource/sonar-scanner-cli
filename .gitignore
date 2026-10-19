@@ -1,6 +1,7 @@
-# ---- Maven
-target/
-dependency-reduced-pom.xml
+# ---- Gradle
+build/
+.gradle/
+.kotlin/
 
 # ---- IntellijIDEA
 *.iws

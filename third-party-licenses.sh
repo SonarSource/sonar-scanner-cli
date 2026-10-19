@@ -1,4 +1,4 @@
 #!/bin/sh
-mvn org.codehaus.mojo:license-maven-plugin:aggregate-add-third-party -Dlicense.includedScopes=compile
+./gradlew generateLicenseReport
 
-cat target/generated-sources/license/THIRD-PARTY.txt
+cat build/reports/dependency-license/THIRD-PARTY-NOTICES.txt
