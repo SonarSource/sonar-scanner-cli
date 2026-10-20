@@ -26,6 +26,8 @@ plugins {
   alias(libs.plugins.license.report.gradle.plugin)
   alias(libs.plugins.sonar.gradle.plugin)
   id("scanner.artifactory-conventions")
+  // The SonarQube Scan GitHub Action and the Docker image verify the signatures of the distributions
+  id("scanner.signing-conventions")
 }
 
 dependencies {
