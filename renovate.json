@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>SonarSource/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["maven", "github-actions"],
+      "groupName": null,
+      "groupSlug": null
+    }
+  ]
+}
