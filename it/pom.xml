@@ -23,7 +23,7 @@
 
   <properties>
     <license.name>GNU LGPL v3</license.name>
-    <sonar.buildVersion>25.12.0.117093</sonar.buildVersion>
+    <sonar.buildVersion>26.10.0.133078</sonar.buildVersion>
     <!-- following properties must be set in command-line : sonar.runtimeVersion and sonarRunner.version -->
 
     <maven.compiler.release>17</maven.compiler.release>
