@@ -55,10 +55,10 @@
     <!-- configuration for assembly of distributions -->
     <unpack.dir>${project.build.directory}/unpack</unpack.dir>
     <scanner.jar>${project.build.finalName}.jar</scanner.jar>
-    <jre.dirname.linux.aarch64>jdk-21.0.12.1+1-jre</jre.dirname.linux.aarch64>
-    <jre.dirname.linux.x64>jdk-21.0.12.1+1-jre</jre.dirname.linux.x64>
-    <jre.dirname.macosx.aarch64>jdk-21.0.12.1+1-jre/Contents/Home</jre.dirname.macosx.aarch64>
-    <jre.dirname.macosx.x64>jdk-21.0.12.1+1-jre/Contents/Home</jre.dirname.macosx.x64>
+    <jre.dirname.linux.aarch64>jdk-21.0.13+9-jre</jre.dirname.linux.aarch64>
+    <jre.dirname.linux.x64>jdk-21.0.13+9-jre</jre.dirname.linux.x64>
+    <jre.dirname.macosx.aarch64>jdk-21.0.13+9-jre/Contents/Home</jre.dirname.macosx.aarch64>
+    <jre.dirname.macosx.x64>jdk-21.0.13+9-jre/Contents/Home</jre.dirname.macosx.x64>
     <jre.dirname.windows>jdk-21.0.12.1+1-jre</jre.dirname.windows>
 
     <!-- Release: enable publication to Bintray -->
@@ -291,10 +291,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jre_x64_linux_hotspot_21.0.12.1_1.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jre_x64_linux_hotspot_21.0.13_9.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/linux-x64</outputDirectory>
-                  <sha256>2413149700df0f7d440500a84a8f764c535f21e5a5e87d38328b64eec2c5b500</sha256>
+                  <sha256>a535a1df9c6284d9618872984e026ae0352d1f7e9e0605425c0e6114f47351dd</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -364,10 +364,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jre_aarch64_linux_hotspot_21.0.12.1_1.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jre_aarch64_linux_hotspot_21.0.13_9.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/linux-aarch64</outputDirectory>
-                  <sha256>14be1f35ebdbd1f6e8d57eb911a3ffb74d6d9aa255abc5daf2b1302002cf2cf2</sha256>
+                  <sha256>b1734db7ade49c3f6acc6ae06233b8c2dd90e3e2f00f67000ae1c972aaa64d8c</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -510,10 +510,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jre_x64_mac_hotspot_21.0.12.1_1.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jre_x64_mac_hotspot_21.0.13_9.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/macosx-x64</outputDirectory>
-                  <sha256>6717ec641fd9ce0bb209ca083ee23b42202ac68cb6fcc5753496e0e4a0f41989</sha256>
+                  <sha256>c909674b1c10c261b9a3fb7e9c0efebd303e33f88a4fe84be7135b5e2d711f89</sha256>
                 </configuration>
               </execution>
             </executions>
@@ -583,10 +583,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jre_aarch64_mac_hotspot_21.0.12.1_1.tar.gz</url>
+                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jre_aarch64_mac_hotspot_21.0.13_9.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/macosx-aarch64</outputDirectory>
-                  <sha256>dec50fc6f9fcd4fe3ae8cabf5a5fa68f6afc48841f7698e468e9aa5d54beed84</sha256>
+                  <sha256>225bab0a09491ef06835488cd942f5d2befa9a0410a2484f0c8bbcf7506ec09a</sha256>
                 </configuration>
               </execution>
             </executions>
