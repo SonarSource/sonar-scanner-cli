@@ -21,12 +21,12 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
         with:
-          version: 2026.5.12
+          version: 2026.10.13
           tool_versions: |
             java temurin-21
             maven 3.9
@@ -59,10 +59,10 @@ jobs:
           - sq_version: DEV
             java_version: "21"
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
         with:
-          version: 2026.5.12
+          version: 2026.10.13
           tool_versions: |
             java temurin-${{ matrix.java_version }}
             maven 3.9
@@ -108,10 +108,10 @@ jobs:
           - sq_version: DEV
             java_version: "21"
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
         with:
-          version: 2026.5.12
+          version: 2026.10.13
           tool_versions: |
             java ${{ matrix.java_version }}
             maven 3.9
