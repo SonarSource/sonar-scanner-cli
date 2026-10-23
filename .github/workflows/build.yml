@@ -20,6 +20,9 @@ jobs:
     permissions:
       id-token: write
       contents: write
+    outputs:
+      BUILD_NUMBER: ${{ steps.build.outputs.BUILD_NUMBER }}
+      project-version: ${{ steps.build.outputs.project-version }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -29,12 +32,13 @@ jobs:
           version: 2026.10.13
           tool_versions: |
             java temurin-21
-            maven 3.9
             node 18.17.0
-      - uses: SonarSource/ci-github-actions/build-maven@v1
+      - uses: SonarSource/ci-github-actions/build-gradle@v2
+        id: build
+        env:
+          BUILD_NAME: ${{ github.event.repository.name }}
         with:
           deploy-pull-request: true
-          maven-args: -Pdist-linux-x64,dist-linux-aarch64,dist-windows-x64,dist-macosx-x64,dist-macosx-aarch64
           artifactory-reader-role: private-reader
           artifactory-deployer-role: qa-deployer
 
@@ -65,7 +69,6 @@ jobs:
           version: 2026.10.13
           tool_versions: |
             java temurin-${{ matrix.java_version }}
-            maven 3.9
 
       - name: Vault
         id: secrets
@@ -74,19 +77,25 @@ jobs:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
 
-      - uses: SonarSource/ci-github-actions/config-maven@v1
+      - name: Set project version of the build job
+        shell: bash
+        env:
+          PROJECT_VERSION: ${{ needs.build.outputs.project-version }}
+        run: |
+          # The integration tests run against the distributions deployed by the build job. Setting the version also
+          # skips config-gradle's replacement of the version in gradle.properties.
+          echo "CURRENT_VERSION=$(grep '^version=' gradle.properties | cut -d= -f2)" >> "$GITHUB_ENV"
+          echo "PROJECT_VERSION=$PROJECT_VERSION" >> "$GITHUB_ENV"
+
+      - uses: SonarSource/ci-github-actions/config-gradle@v2
         with:
           artifactory-reader-role: private-reader
-          cache-paths: |
-            ~/.m2/repository
 
       - name: Run Integration Tests
         env:
           SQ_VERSION: ${{ matrix.sq_version }}
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
-        run: |
-          cd it
-          mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
+        run: ./gradlew integrationTest -Dsonar.runtimeVersion="${SQ_VERSION}"
 
   windows-qa:
     needs: build
@@ -114,7 +123,6 @@ jobs:
           version: 2026.10.13
           tool_versions: |
             java ${{ matrix.java_version }}
-            maven 3.9
 
       - name: Vault
         id: secrets
@@ -123,23 +131,36 @@ jobs:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
 
-      - uses: SonarSource/ci-github-actions/config-maven@v1
+      - name: Set project version of the build job
+        shell: bash
+        env:
+          PROJECT_VERSION: ${{ needs.build.outputs.project-version }}
+        run: |
+          # The integration tests run against the distributions deployed by the build job. Setting the version also
+          # skips config-gradle's replacement of the version in gradle.properties.
+          echo "CURRENT_VERSION=$(grep '^version=' gradle.properties | cut -d= -f2)" >> "$GITHUB_ENV"
+          echo "PROJECT_VERSION=$PROJECT_VERSION" >> "$GITHUB_ENV"
+
+      - uses: SonarSource/ci-github-actions/config-gradle@v2
         with:
           artifactory-reader-role: private-reader
-          cache-paths: |
-            ~/.m2/repository
 
       - name: Run Integration Tests
         shell: bash
         env:
           SQ_VERSION: ${{ matrix.sq_version }}
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
-        run: |
-          cd it
-          mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
+        run: ./gradlew integrationTest -Dsonar.runtimeVersion="${SQ_VERSION}"
+
+      - name: Stop Gradle daemon
+        if: always()
+        shell: bash
+        # The post-job step saves the Gradle cache with tar, which fails on the lock files held by the daemon
+        run: ./gradlew --stop
 
   promote:
     needs:
+      - build
       - linux-qa
       - windows-qa
     runs-on: github-ubuntu-latest-s
@@ -147,7 +168,9 @@ jobs:
     permissions:
       id-token: write
       contents: write
+    env:
+      BUILD_NUMBER: ${{ needs.build.outputs.BUILD_NUMBER }}
     steps:
-      - uses: SonarSource/ci-github-actions/promote@v1
+      - uses: SonarSource/ci-github-actions/promote@v2
         with:
           promote-pull-request: true

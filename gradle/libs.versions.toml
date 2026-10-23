@@ -1,0 +1,35 @@
+[versions]
+jetty = "10.0.26"
+junit = "5.14.1"
+junit4 = "4.13.2"
+
+[libraries]
+sonar-scanner-java-library = { module = "org.sonarsource.scanner.lib:sonar-scanner-java-library", version = "4.1.2.1663" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version = "1.5.27" }
+jsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
+
+assertj-core = { module = "org.assertj:assertj-core", version = "3.27.6" }
+mockito-core = { module = "org.mockito:mockito-core", version = "5.20.0" }
+
+# Integration tests
+orchestrator-junit4 = { module = "org.sonarsource.orchestrator:sonar-orchestrator-junit4", version = "6.4.3.4676" }
+sonar-ws = { module = "org.sonarsource.sonarqube:sonar-ws", version = "25.5.0.107428" }
+jetty-server = { module = "org.eclipse.jetty:jetty-server", version.ref = "jetty" }
+jetty-servlet = { module = "org.eclipse.jetty:jetty-servlet", version.ref = "jetty" }
+jetty-proxy = { module = "org.eclipse.jetty:jetty-proxy", version.ref = "jetty" }
+wiremock-standalone = { module = "org.wiremock:wiremock-standalone", version = "3.10.0" }
+
+# Build logic
+commons-compress = { module = "org.apache.commons:commons-compress", version = "1.28.0" }
+# Same version as Shadow
+jdependency = { module = "org.vafer:jdependency", version = "2.16" }
+
+[plugins]
+artifactory-gradle-plugin = { id = "com.jfrog.artifactory", version = "6.0.4" }
+cyclonedx-gradle-plugin = { id = "org.cyclonedx.bom", version = "3.5.1" }
+download-gradle-plugin = { id = "de.undercouch.download", version = "5.7.0" }
+license-gradle-plugin = { id = "com.github.hierynomus.license", version = "0.16.1" }
+license-report-gradle-plugin = { id = "com.github.jk1.dependency-license-report", version = "3.1.4" }
+shadow-gradle-plugin = { id = "com.gradleup.shadow", version = "9.6.1" }
+sonar-gradle-plugin = { id = "org.sonarqube", version = "7.5.0.8588" }
