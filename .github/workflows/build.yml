@@ -8,6 +8,8 @@ on:
   pull_request:
   merge_group:
   workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -46,20 +48,16 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    strategy:
+    strategy: &qa-strategy
       fail-fast: false
       matrix:
-        include:
-          - sq_version: LATEST_RELEASE[2025.1]
-            java_version: "17"
-            # Keep the Java 17 compatibility leg on a Java 17-compatible WS client.
-            maven_args: -Dsonar.buildVersion=25.12.0.117093 -Dmaven.compiler.release=17
-          - sq_version: LATEST_RELEASE[2026.1]
-            java_version: "21"
-          - sq_version: LATEST_RELEASE
-            java_version: "21"
-          - sq_version: DEV
-            java_version: "21"
+        # Development builds are tested nightly; PRs and pushes test released servers.
+        # Keep the Java 17 compatibility leg on a Java 17-compatible WS client.
+        include: ${{ fromJSON(github.event_name == 'schedule' &&
+          '[{"sq_version":"DEV","java_version":"21"}]' ||
+          '[{"sq_version":"LATEST_RELEASE[2025.1]","java_version":"17","maven_args":"-Dsonar.buildVersion=25.12.0.117093 -Dmaven.compiler.release=17"},
+          {"sq_version":"LATEST_RELEASE[2026.1]","java_version":"21"},
+          {"sq_version":"LATEST_RELEASE","java_version":"21"}]') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
@@ -113,20 +111,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - sq_version: LATEST_RELEASE[2025.1]
-            java_version: "17"
-            # Keep the Java 17 compatibility leg on a Java 17-compatible WS client.
-            maven_args: -Dsonar.buildVersion=25.12.0.117093 -Dmaven.compiler.release=17
-          - sq_version: LATEST_RELEASE[2026.1]
-            java_version: "21"
-          - sq_version: LATEST_RELEASE
-            java_version: "21"
-          - sq_version: DEV
-            java_version: "21"
+    strategy: *qa-strategy
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
