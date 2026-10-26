@@ -16,6 +16,53 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  qa-matrix:
+    name: Select QA matrix
+    runs-on: github-ubuntu-latest-s
+    permissions: {}
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Select SonarQube versions
+        id: matrix
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          NIGHTLY_MATRIX: |
+            {
+              "include": [
+                {
+                  "sq_version": "DEV",
+                  "java_version": "21"
+                }
+              ]
+            }
+          RELEASE_MATRIX: |
+            {
+              "include": [
+                {
+                  "sq_version": "LATEST_RELEASE[2025.1]",
+                  "java_version": "17",
+                  "maven_args": "-Dsonar.buildVersion=25.12.0.117093 -Dmaven.compiler.release=17"
+                },
+                {
+                  "sq_version": "LATEST_RELEASE[2026.1]",
+                  "java_version": "21"
+                },
+                {
+                  "sq_version": "LATEST_RELEASE",
+                  "java_version": "21"
+                }
+              ]
+            }
+        # Keep the Java 17 compatibility leg on a Java 17-compatible WS client.
+        run: |
+          if [[ "$EVENT_NAME" == "schedule" ]]; then
+            matrix=$(jq -c . <<< "$NIGHTLY_MATRIX")
+          else
+            matrix=$(jq -c . <<< "$RELEASE_MATRIX")
+          fi
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
   build:
     runs-on: github-ubuntu-latest-s
     name: Build
@@ -42,22 +89,17 @@ jobs:
 
 
   linux-qa:
-    needs: build
+    needs:
+      - build
+      - qa-matrix
     runs-on: github-ubuntu-latest-s
     name: Linux QA - SQ ${{ matrix.sq_version }}
     permissions:
       id-token: write
       contents: read
-    strategy: &qa-strategy
+    strategy:
       fail-fast: false
-      matrix:
-        # Development builds are tested nightly; PRs and pushes test released servers.
-        # Keep the Java 17 compatibility leg on a Java 17-compatible WS client.
-        include: ${{ fromJSON(github.event_name == 'schedule' &&
-          '[{"sq_version":"DEV","java_version":"21"}]' ||
-          '[{"sq_version":"LATEST_RELEASE[2025.1]","java_version":"17","maven_args":"-Dsonar.buildVersion=25.12.0.117093 -Dmaven.compiler.release=17"},
-          {"sq_version":"LATEST_RELEASE[2026.1]","java_version":"21"},
-          {"sq_version":"LATEST_RELEASE","java_version":"21"}]') }}
+      matrix: ${{ fromJSON(needs.qa-matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
@@ -105,13 +147,17 @@ jobs:
           mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
 
   windows-qa:
-    needs: build
+    needs:
+      - build
+      - qa-matrix
     runs-on: github-windows-latest-s
     name: Windows QA - SQ ${{ matrix.sq_version }}
     permissions:
       id-token: write
       contents: read
-    strategy: *qa-strategy
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.qa-matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
