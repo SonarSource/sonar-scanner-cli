@@ -67,6 +67,12 @@ jobs:
             java temurin-${{ matrix.java_version }}
             maven 3.9
 
+      - name: Install Java 11 for CLI compatibility test
+        if: matrix.sq_version == 'LATEST_RELEASE'
+        run: |
+          mise install java@temurin-11
+          echo "CLI_JAVA_11_HOME=$(mise where java@temurin-11)" >> "$GITHUB_ENV"
+
       - name: Vault
         id: secrets
         uses: SonarSource/vault-action-wrapper@v3
