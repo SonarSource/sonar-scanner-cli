@@ -88,6 +88,15 @@ jobs:
           cache-paths: |
             ~/.m2/repository
 
+      # Orchestrator downloads server distributions outside the Maven repository.
+      # Save a new snapshot after each run so DEV and release updates are retained.
+      - uses: SonarSource/gh-action_cache@v1
+        name: Cache Orchestrator downloads
+        with:
+          path: ~/.sonar/orchestrator/cache
+          key: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-
+
       - name: Run Integration Tests
         env:
           MAVEN_ARGS: ${{ matrix.maven_args }}
@@ -139,6 +148,13 @@ jobs:
           artifactory-reader-role: private-reader
           cache-paths: |
             ~/.m2/repository
+
+      - uses: SonarSource/gh-action_cache@v1
+        name: Cache Orchestrator downloads
+        with:
+          path: ~/.sonar/orchestrator/cache
+          key: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-
 
       - name: Run Integration Tests
         shell: bash
