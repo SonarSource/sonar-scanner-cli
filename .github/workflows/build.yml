@@ -52,6 +52,8 @@ jobs:
         include:
           - sq_version: LATEST_RELEASE[2025.1]
             java_version: "17"
+            # Keep the Java 17 compatibility leg on a Java 17-compatible WS client.
+            maven_args: -Dsonar.buildVersion=25.12.0.117093 -Dmaven.compiler.release=17
           - sq_version: LATEST_RELEASE[2026.1]
             java_version: "21"
           - sq_version: LATEST_RELEASE
@@ -82,6 +84,7 @@ jobs:
 
       - name: Run Integration Tests
         env:
+          MAVEN_ARGS: ${{ matrix.maven_args }}
           SQ_VERSION: ${{ matrix.sq_version }}
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         run: |
@@ -101,6 +104,8 @@ jobs:
         include:
           - sq_version: LATEST_RELEASE[2025.1]
             java_version: "17"
+            # Keep the Java 17 compatibility leg on a Java 17-compatible WS client.
+            maven_args: -Dsonar.buildVersion=25.12.0.117093 -Dmaven.compiler.release=17
           - sq_version: LATEST_RELEASE[2026.1]
             java_version: "21"
           - sq_version: LATEST_RELEASE
@@ -132,6 +137,7 @@ jobs:
       - name: Run Integration Tests
         shell: bash
         env:
+          MAVEN_ARGS: ${{ matrix.maven_args }}
           SQ_VERSION: ${{ matrix.sq_version }}
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         run: |
