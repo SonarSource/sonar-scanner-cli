@@ -94,7 +94,7 @@ jobs:
         name: Cache Orchestrator downloads
         with:
           path: ~/.sonar/orchestrator/cache
-          key: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-${{ github.run_id }}
           restore-keys: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-
 
       - name: Run Integration Tests
@@ -153,7 +153,7 @@ jobs:
         name: Cache Orchestrator downloads
         with:
           path: ~/.sonar/orchestrator/cache
-          key: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-${{ github.run_id }}
           restore-keys: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-
 
       - name: Run Integration Tests
