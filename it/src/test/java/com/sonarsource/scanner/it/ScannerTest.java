@@ -38,6 +38,7 @@ import org.sonarqube.ws.client.usertokens.RevokeRequest;
 
 import static java.lang.Integer.parseInt;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 public class ScannerTest extends ScannerTestCase {
 
@@ -68,6 +69,21 @@ public class ScannerTest extends ScannerTestCase {
       "java:basedir-with-source", "files", "ncloc");
 
     verifyProjectMeasures(projectMeasures, 1);
+  }
+
+  @Test
+  public void should_analyze_with_java_11_and_provisioned_jre() {
+    String java11Home = System.getenv("CLI_JAVA_11_HOME");
+    assumeTrue("CLI_JAVA_11_HOME must point to a Java 11 installation", java11Home != null && !java11Home.isBlank());
+
+    SonarScanner build = newScannerWithToken(new File("projects/basedir-with-source"), analysisToken)
+      .setEnvironmentVariable("JAVA_HOME", java11Home)
+      .setProperty("sonar.scanner.skipJreProvisioning", "false")
+      .addArguments("-X");
+
+    BuildResult result = orchestrator.executeBuild(build);
+    assertThat(result.getLogs()).contains("Java 11.", "JRE provisioning:");
+    verifyProjectMeasures(getMeasures("java:basedir-with-source", "files", "ncloc"), 1);
   }
 
   /**
