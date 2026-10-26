@@ -51,7 +51,7 @@ jobs:
       matrix:
         include:
           - sq_version: LATEST_RELEASE[2025.1]
-            java_version: "17"
+            java_version: "21"
           - sq_version: LATEST_RELEASE[2026.1]
             java_version: "21"
           - sq_version: LATEST_RELEASE
@@ -100,7 +100,7 @@ jobs:
       matrix:
         include:
           - sq_version: LATEST_RELEASE[2025.1]
-            java_version: "17"
+            java_version: "21"
           - sq_version: LATEST_RELEASE[2026.1]
             java_version: "21"
           - sq_version: LATEST_RELEASE
