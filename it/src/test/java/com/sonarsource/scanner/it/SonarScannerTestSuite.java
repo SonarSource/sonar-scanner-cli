@@ -34,7 +34,8 @@ import org.junit.runners.Suite.SuiteClasses;
   ScannerTest.class,
   MultimoduleTest.class,
   DistributionTest.class,
-  ProxyTest.class})
+  ProxyTest.class,
+  ProxyServerTest.class})
 public class SonarScannerTestSuite {
 
   // Mapping from SonarQube Server versions to Community Build versions for the xoo plugin.
