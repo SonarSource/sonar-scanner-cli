@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-s
     name: Build
     permissions:
       id-token: write
@@ -41,7 +41,7 @@ jobs:
 
   linux-qa:
     needs: build
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-m
     name: Linux QA - SQ ${{ matrix.sq_version }}
     permissions:
       id-token: write
@@ -95,7 +95,7 @@ jobs:
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         run: |
           cd it
-          mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
+          mvn -B -e -Dorchestrator.artifactory.url="${ARTIFACTORY_URL}" -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
 
   windows-qa:
     needs: build
@@ -148,7 +148,7 @@ jobs:
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         run: |
           cd it
-          mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
+          mvn -B -e -Dorchestrator.artifactory.url="${ARTIFACTORY_URL}" -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
 
   promote:
     needs:
