@@ -8,6 +8,8 @@ on:
   pull_request:
   merge_group:
   workflow_dispatch:
+  schedule:
+    - cron: '10 1 * * 1-5' # Run the build and SonarQube analysis Monday-Friday (UTC).
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
