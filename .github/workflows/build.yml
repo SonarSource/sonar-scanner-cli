@@ -12,16 +12,17 @@ on:
     - cron: '0 4 * * *'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'schedule' && 'schedule' || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   qa-matrix:
     name: Select QA matrix
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-s
     permissions: {}
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
+      cache-month: ${{ steps.matrix.outputs.cache-month }}
     steps:
       - name: Select SonarQube versions
         id: matrix
@@ -40,7 +41,7 @@ jobs:
             {
               "include": [
                 {
-                  "sq_version": "LATEST_RELEASE[2025.1]",
+                  "sq_version": "LATEST_RELEASE[2025.4]",
                   "java_version": "17",
                   "maven_args": "-Dsonar.buildVersion=25.12.0.117093 -Dmaven.compiler.release=17"
                 },
@@ -57,14 +58,15 @@ jobs:
         # Keep the Java 17 compatibility leg on a Java 17-compatible WS client.
         run: |
           if [[ "$EVENT_NAME" == "schedule" ]]; then
-            matrix=$(jq -c . <<< "$NIGHTLY_MATRIX")
+            matrix=$(jq --compact-output . <<< "$NIGHTLY_MATRIX")
           else
-            matrix=$(jq -c . <<< "$RELEASE_MATRIX")
+            matrix=$(jq --compact-output . <<< "$RELEASE_MATRIX")
           fi
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "cache-month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
 
   build:
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-s
     name: Build
     permissions:
       id-token: write
@@ -73,7 +75,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+      - uses: jdx/mise-action@8418fedb1110381a0d3ba51a7a415d7c1b884550 # v5.2.2
         with:
           version: 2026.10.17
           tool_versions: |
@@ -92,7 +94,7 @@ jobs:
     needs:
       - build
       - qa-matrix
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-m
     name: Linux QA - SQ ${{ matrix.sq_version }}
     permissions:
       id-token: write
@@ -102,7 +104,7 @@ jobs:
       matrix: ${{ fromJSON(needs.qa-matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+      - uses: jdx/mise-action@8418fedb1110381a0d3ba51a7a415d7c1b884550 # v5.2.2
         with:
           version: 2026.10.17
           tool_versions: |
@@ -129,13 +131,13 @@ jobs:
             ~/.m2/repository
 
       # Orchestrator downloads server distributions outside the Maven repository.
-      # Save a new snapshot after each run so DEV and release updates are retained.
+      # Renew snapshots within the current UTC month; start fresh each month.
       - uses: SonarSource/gh-action_cache@v1
         name: Cache Orchestrator downloads
         with:
           path: ~/.sonar/orchestrator/cache
-          key: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-${{ github.run_id }}
-          restore-keys: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-
+          key: orchestrator-v1-${{ needs.qa-matrix.outputs.cache-month }}-${{ runner.os }}-${{ matrix.sq_version }}-${{ github.run_id }}
+          restore-keys: orchestrator-v1-${{ needs.qa-matrix.outputs.cache-month }}-${{ runner.os }}-${{ matrix.sq_version }}-
 
       - name: Run Integration Tests
         env:
@@ -144,7 +146,7 @@ jobs:
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         run: |
           cd it
-          mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
+          mvn -B -e -Dorchestrator.artifactory.url="${ARTIFACTORY_URL}" -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
 
   windows-qa:
     needs:
@@ -160,7 +162,7 @@ jobs:
       matrix: ${{ fromJSON(needs.qa-matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+      - uses: jdx/mise-action@8418fedb1110381a0d3ba51a7a415d7c1b884550 # v5.2.2
         with:
           version: 2026.10.17
           tool_versions: |
@@ -184,8 +186,8 @@ jobs:
         name: Cache Orchestrator downloads
         with:
           path: ~/.sonar/orchestrator/cache
-          key: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-${{ github.run_id }}
-          restore-keys: orchestrator-v1-${{ runner.os }}-${{ matrix.sq_version }}-
+          key: orchestrator-v1-${{ needs.qa-matrix.outputs.cache-month }}-${{ runner.os }}-${{ matrix.sq_version }}-${{ github.run_id }}
+          restore-keys: orchestrator-v1-${{ needs.qa-matrix.outputs.cache-month }}-${{ runner.os }}-${{ matrix.sq_version }}-
 
       - name: Run Integration Tests
         shell: bash
@@ -195,9 +197,11 @@ jobs:
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         run: |
           cd it
-          mvn -B -e -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
+          mvn -B -e -Dorchestrator.artifactory.url="${ARTIFACTORY_URL}" -Dsonar.runtimeVersion="${SQ_VERSION}" -Dmaven.test.redirectTestOutputToFile=false verify
 
   promote:
+    # Nightly DEV-only builds must not be promoted without released-server QA.
+    if: github.event_name != 'schedule'
     needs:
       - linux-qa
       - windows-qa
