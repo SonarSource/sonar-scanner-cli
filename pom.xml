@@ -59,7 +59,7 @@
     <jre.dirname.linux.x64>jdk-21.0.13+9-jre</jre.dirname.linux.x64>
     <jre.dirname.macosx.aarch64>jdk-21.0.13+9-jre/Contents/Home</jre.dirname.macosx.aarch64>
     <jre.dirname.macosx.x64>jdk-21.0.13+9-jre/Contents/Home</jre.dirname.macosx.x64>
-    <jre.dirname.windows>jdk-21.0.12.1+1-jre</jre.dirname.windows>
+    <jre.dirname.windows>jdk-21.0.13+9-jre</jre.dirname.windows>
 
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:zip,${project.groupId}:${project.artifactId}:zip:linux-x64,${project.groupId}:${project.artifactId}:zip:linux-aarch64,${project.groupId}:${project.artifactId}:zip:windows-x64,${project.groupId}:${project.artifactId}:zip:macosx-x64,${project.groupId}:${project.artifactId}:zip:macosx-aarch64,${project.groupId}:${project.artifactId}:json:cyclonedx</artifactsToPublish>
@@ -440,10 +440,10 @@
                   <goal>wget</goal>
                 </goals>
                 <configuration>
-                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jre_x64_windows_hotspot_21.0.12.1_1.zip</url>
+                  <url>https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jre_x64_windows_hotspot_21.0.13_9.zip</url>
                   <unpack>true</unpack>
                   <outputDirectory>${unpack.dir}/windows-x64</outputDirectory>
-                  <sha256>d35f31e712f0fcf6ac5a093edc90204fbff22f720ba3950bd09d331d5e621636</sha256>
+                  <sha256>2332c0b4cff6bed722da3567c91d5e47568bcba863fa4945d0a8d6fc76158628</sha256>
                 </configuration>
               </execution>
             </executions>
