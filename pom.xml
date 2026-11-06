@@ -86,7 +86,7 @@
     <dependency>
       <groupId>org.sonarsource.scanner.lib</groupId>
       <artifactId>sonar-scanner-java-library</artifactId>
-      <version>4.2.1.1698</version>
+      <version>4.3.0.11766</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -245,8 +245,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>10200000</minsize>
-                  <maxsize>11000000</maxsize>
+                  <minsize>7600000</minsize>
+                  <maxsize>7800000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonar-scanner-${project.version}.zip</file>
                   </files>
