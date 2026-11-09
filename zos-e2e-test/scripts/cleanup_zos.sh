@@ -3,8 +3,9 @@
 source "$(dirname -- "$0")/utils.sh"
 
 check_env_variable "ZOS_USER_HOST"
+check_env_variable "JOB_TIMESTAMP"
 
 ZOS_PRIVATE_KEY=$GITHUB_WORKSPACE/zos_key
 
 echo "Cleaning up files on z/OS system:"
-ssh -i "$ZOS_PRIVATE_KEY" "$ZOS_USER_HOST" "rm -rfvP tmp"
+ssh -i "$ZOS_PRIVATE_KEY" "$ZOS_USER_HOST" "rm -rfvP tmp/$JOB_TIMESTAMP"

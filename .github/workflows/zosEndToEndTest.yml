@@ -74,4 +74,5 @@ jobs:
         run: ./zos-e2e-test/scripts/cleanup_zena.sh
 
       - name: Clean up z/OS instance
+        if: always()
         run: ./zos-e2e-test/scripts/cleanup_zos.sh
