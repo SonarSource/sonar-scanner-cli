@@ -6,6 +6,11 @@ on:
         type: string
         description: Full version including build number, e.g. 1.2.3.456
         required: true
+      commitSha:
+        type: string
+        description: Commit targeted by the release. Overrides the VCS lookup on Repox.
+        default: ''
+        required: false
       dryRun:
         type: boolean
         description: Flag to enable the dry-run execution
@@ -19,6 +24,7 @@ jobs:
     uses: SonarSource/gh-action_release/.github/workflows/main.yaml@v7
     with:
       version: ${{ inputs.version }}
+      commitSha: ${{ inputs.commitSha }}
       dryRun: ${{ inputs.dryRun }}
       publishToBinaries: true
       mavenCentralSync: true
